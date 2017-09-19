@@ -11,20 +11,35 @@ void drawBasicPerf()
   TFile* inf[10];
   TH3D* hresp[10];
   TH3D* htruth[10];
+  TH3D* hgmt[10]; // Truth match to reco
   TH1D* hEvtCnt[10];
   double nEvent[10];
   double jzCs[10];
   double jzFiltEff[10];
   double jzWgt[10];
-  TH1D* hRatioEtaPtJz[20][10][10];   // rapidity bins.  16 pt bins and 2 rapidity bins and X jz bins
+  double ptBin[20];
+  double etaBin[20];
+
+  
+  // eta binning : 
+  int etaPosL[6] = {0, 51, 54, 59, 63, 72};   // 0 - 0.3 - 0.8 - 1.2 - 2.1 - 2.8
+  int etaPosH[6] = {0, 53, 58, 62, 71, 78};
+  int etaNegL[6] = {0, 48, 43, 39, 30, 23};   // 0 - 0.3 - 0.8 - 1.2 - 2.1 - 2.8
+  int etaNegH[6] = {0, 50, 47, 42, 38, 29};
+  
+  TH1D* hRatioPtEtaJz[20][10][10];   // rapidity bins.  16 pt bins and 2 rapidity bins and X jz bins
   TH1D* hScale[10]; // in rapidity bins
   TH1D* hRes[10]; // in rapidity bins
-  double ptBin[20];
   
   TH1D* hPt_EtaJz[10][10];
   TH1D* hPtGen[10];  // jz bin.   Phi rapidity integrated
-  TH1D* hPtGenCum[6];  // jz bin.   Phi rapidity integrated
 
+  TH1D* hPtGenEtaJz[20][10];  // eta, jz bin.   gen matched to reco 
+  TH1D* hPtGmtEtaJz[20][10];  // jz bin.   gen matched to reco 
+  TH1D* hPtEffEtaJz[20][10];  // jz bin.   gen matched to reco 
+  
+  TH1D* hPtGenCum[6];  // jz bin.   Phi rapidity integrated
+  
   for ( int i=2 ; i<=4 ; i++) {    // jz
     
     TString infName="";
@@ -37,34 +52,42 @@ void drawBasicPerf()
     nEvent[i] = hEvtCnt[i]->GetBinContent(1);
     
     jzWgt[i] = jzCs[i] * jzFiltEff[i] / nEvent[i];
+    
     cout << "For JZ" << i<<" sample: "<< endl;
     cout << "MC crossSec = " << jzCs[i]<<endl;
     cout << "Filter eff. = " << jzFiltEff[i]<<endl;
     cout << "event count = " << nEvent[i]<<endl;
     cout << "Weight = CS. * Filter Eff.  / event Count = " << jzWgt[i] << endl;
-    
+
 
     hresp[i] = (TH3D*)inf[i]->Get("h_resp_cent1");
     
     // GEN pT spectra 
     htruth[i] = (TH3D*)inf[i]->Get("h_truth_jet_cent1");
     hPtGen[i] = (TH1D*)htruth[i]->ProjectionX(Form("hPtGen_ijz%d",i));
+    hgmt[i]   = (TH3D*)inf[i]->Get("h_truth_jet_cent1_matched");
     
-    // Energy scale
-    for ( int ipt = 1; ipt<=16 ; ipt++) { 
-    // 0 - 0.3  0.8 1.2 .2.1, 2.8
-      hRatioEtaPtJz[ipt][1][i] = (TH1D*)hresp[i]->ProjectionY(Form("hRatioEtaPtJz_ipt%d_iy1_ijz%d",ipt,i),ipt,ipt,47,52);
-      hRatioEtaPtJz[ipt][2][i] = (TH1D*)hresp[i]->ProjectionY(Form("hRatioEtaPtJz_ipt%d_iy2_ijz%d",ipt,i),ipt,ipt,53,57);
-      hRatioEtaPtJz[ipt][3][i] = (TH1D*)hresp[i]->ProjectionY(Form("hRatioEtaPtJz_ipt%d_iy3_ijz%d",ipt,i),ipt,ipt,58,61);
-      hRatioEtaPtJz[ipt][4][i] = (TH1D*)hresp[i]->ProjectionY(Form("hRatioEtaPtJz_ipt%d_iy4_ijz%d",ipt,i),ipt,ipt,62,70);
-      hRatioEtaPtJz[ipt][5][i] = (TH1D*)hresp[i]->ProjectionY(Form("hRatioEtaPtJz_ipt%d_iy5_ijz%d",ipt,i),ipt,ipt,71,77);
-
-      hRatioEtaPtJz[ipt][2][i]->Add( (TH1D*)hresp[i]->ProjectionY(Form("hRatioEtaPtJz_ipt%d_iy2-y_ijz%d",ipt,i),ipt,ipt,42,46) );
-      hRatioEtaPtJz[ipt][3][i]->Add( (TH1D*)hresp[i]->ProjectionY(Form("hRatioEtaPtJz_ipt%d_iy3-y_ijz%d",ipt,i),ipt,ipt,38,41) );
-      hRatioEtaPtJz[ipt][4][i]->Add( (TH1D*)hresp[i]->ProjectionY(Form("hRatioEtaPtJz_ipt%d_iy4-y_ijz%d",ipt,i),ipt,ipt,29,37) );
-      hRatioEtaPtJz[ipt][5][i]->Add( (TH1D*)hresp[i]->ProjectionY(Form("hRatioEtaPtJz_ipt%d_iy5-y_ijz%d",ipt,i),ipt,ipt,22,28) );
+    
+    for ( int ieta = 1 ; ieta <= 5 ; ieta++) { 
+      for ( int ipt = 1; ipt<=16 ; ipt++) { 
+ 	hRatioPtEtaJz[ipt][ieta][i] =     (TH1D*)hresp[i]->ProjectionY(Form("hRatioPtEtaJz_ipt%d_ieta%dp_ijz%d",ipt,ieta,i),ipt,ipt,etaPosL[ieta], etaPosH[ieta]);
+	hRatioPtEtaJz[ipt][ieta][i]->Add( (TH1D*)hresp[i]->ProjectionY(Form("hRatioPtEtaJz_ipt%d_ieat%dm_ijz%d",ipt,ieta,i),ipt,ipt,etaNegL[ieta], etaNegH[ieta]) );
+      }
+      
+      hPtGenEtaJz[ieta][i] =     (TH1D*)htruth[i]->ProjectionX(Form("hPtGen_ieta%dp_ijz%d",ieta,i), etaPosL[ieta], etaPosH[ieta] );
+      hPtGenEtaJz[ieta][i]->Add( (TH1D*)htruth[i]->ProjectionX(Form("hPtGen_ieta%dm_ijz%d",ieta,i), etaNegL[ieta], etaNegH[ieta] ) ) ;
+      hPtGmtEtaJz[ieta][i] =       (TH1D*)hgmt[i]->ProjectionX(Form("hPtGmt_ieta%dp_ijz%d",ieta,i), etaPosL[ieta], etaPosH[ieta] );
+      hPtGmtEtaJz[ieta][i]->Add(   (TH1D*)hgmt[i]->ProjectionX(Form("hPtGmt_ieta%dm_ijz%d",ieta,i), etaNegL[ieta], etaNegH[ieta] ) ) ;
     }
+    
   }
+  
+  TH1D* hTempEta = (TH1D*)htruth[2]->ProjectionY("tempForEtaBin");
+  for ( int ieta = 1; ieta<= hTempEta->GetNbinsX() + 1 ; ieta++) { 
+    etaBin[ieta] = (double)hTempEta->GetBinLowEdge(ieta);    cout <<" "<< etaBin[ieta];
+  }
+  
+  
 
   // hPtGen 
   bool flag1 = true;
@@ -72,16 +95,30 @@ void drawBasicPerf()
     if ( flag1==1) {
       hPtGen[0] = (TH1D*)hPtGen[ijz]->Clone("hPtGen_intJz");  
       hPtGen[0]->Reset();
+      
+      for ( int ieta=1; ieta<=5; ieta++) { 
+	hPtGenEtaJz[ieta][0] = (TH1D*)hPtGenEtaJz[ieta][ijz]->Clone("hPtGenEta_intJz");
+	hPtGenEtaJz[ieta][0]->Reset();
+	hPtGmtEtaJz[ieta][0] = (TH1D*)hPtGmtEtaJz[ieta][ijz]->Clone("hPtGmtEta_intJz");
+	hPtGmtEtaJz[ieta][0]->Reset();
+      }
+      
       flag1=0;
     }
     hPtGen[0]->Add(hPtGen[ijz],jzWgt[ijz]);
     hPtGenCum[ijz] = (TH1D*)hPtGen[0]->Clone(Form("hPtGenCum_ijz%d",ijz));
+
+    for ( int ieta=1; ieta<=5; ieta++) {
+      hPtGenEtaJz[ieta][0]->Add(   hPtGenEtaJz[ieta][ijz], jzWgt[ijz] );
+      hPtGmtEtaJz[ieta][0]->Add(   hPtGmtEtaJz[ieta][ijz], jzWgt[ijz] );
+    }
   }
   
+
   TCanvas* c100 = new TCanvas("c100","",500,500);
   hPtGen[0]->SetXTitle("p_{T}^{Truth}");
   hPtGen[0]->SetYTitle("dN/dp_{T}");
-  hPtGen[0]->SetAxisRange(10E-6,10E4,"Y");
+  hPtGen[0]->SetAxisRange(1E-6,1E4,"Y");
   handsomeTH1(hPtGen[0],1);
   hPtGen[0]->Draw();
   for ( int ijz = 4 ; ijz>=2; ijz--) {
@@ -99,22 +136,72 @@ void drawBasicPerf()
   }
   leg100->Draw();
   
-  // Fill hRatioEtaPtJz histograms
-  TH1D* hTempPt = (TH1D*)hresp[2]->ProjectionX("tempForPtBin");
-  for ( int ipt = 1; ipt<=17 ; ipt++) { 
-    ptBin[ipt] = hTempPt->GetBinLowEdge(ipt);
+  TCanvas* c101 = new TCanvas("c101","",800,500);
+  c101->Divide(3,2);
+  for ( int ieta = 1 ; ieta<=5 ; ieta++) {
+    c101->cd(ieta+1);
+    handsomeTH1(hPtGmtEtaJz[ieta][0],1);
+    hPtGmtEtaJz[ieta][0]->SetYTitle("dN/dp_{T}");
+    hPtGmtEtaJz[ieta][0]->SetXTitle("p_{T} (GeV");
+    hPtGmtEtaJz[ieta][0]->SetAxisRange(1E-6,1E4,"Y");
+    hPtGmtEtaJz[ieta][0]->Draw();
+    hPtGenEtaJz[ieta][0]->Draw("hist same");
+    gPad->SetLogy();
+    
+    float etaL = hTempEta->GetBinLowEdge(etaPosL[ieta]+0.0001);
+    float etaH = hTempEta->GetBinLowEdge(etaPosH[ieta]+1.0001);
+    drawText(Form("%.1f < |#eta| < %.1f",etaL,etaH), 0.5,0.8);
   }
+  c101->cd(1) ;
+  TLegend *leg101= new TLegend(0.0,0.3115789,1,0.6031579,NULL,"brNDC");
+  easyLeg(leg101,"p_{T} spectra of truth jets (R=1.0)");
+  leg101->AddEntry(hPtGenEtaJz[1][0],"All","pl");
+  leg101->AddEntry(hPtGenEtaJz[1][0],"matched to Reco","l");
+  leg101->Draw();
+  
+  
+  TCanvas* c102 = new TCanvas("c102","",500,500);
+  TH1D* hPtEffEta[10];
+  TLegend *leg102= new TLegend(0.373494,0.2831579,0.8453815,0.5421053,NULL,"brNDC");
+  easyLeg(leg102,"Jet Reco. Eff. (R=1.0)");
+  for ( int ieta = 1 ; ieta<=5 ; ieta++) {
+    hPtEffEta[ieta] = (TH1D*)hPtGmtEtaJz[ieta][0]->Clone(Form("hptetaeta_ieta%d",ieta));
+    hPtEffEta[ieta]->Divide(hPtGenEtaJz[ieta][0]);
+    handsomeTH1(hPtEffEta[ieta],kRed+ieta-1);
+    hPtEffEta[ieta]->SetYTitle("dN/dp_{T}");
+    hPtEffEta[ieta]->SetXTitle("p_{T} (GeV");
+    hPtEffEta[ieta]->SetAxisRange(0,1.5,"Y");
+    if ( ieta ==1 ) hPtEffEta[ieta]->Draw();
+    else hPtEffEta[ieta]->Draw("same");
+    jumSun(0,1,900,1);
+
+    float etaL = hTempEta->GetBinLowEdge(etaPosL[ieta]+0.0001);
+    float etaH = hTempEta->GetBinLowEdge(etaPosH[ieta]+1.0001);
+    leg102->AddEntry(hPtEffEta[ieta], Form("%.1f < |#eta| < %.1f",etaL,etaH) );
+    
+  }
+  leg102->Draw();
+  gPad->SetLogx();
+  
+  // Fill hRatioPtEtaJz histograms
+  TH1D* hTempPt = (TH1D*)hresp[2]->ProjectionX("tempForPtBin");
+  cout <<" pt bin: ";
+  for ( int ipt = 1; ipt<= hTempPt->GetNbinsX() + 1 ; ipt++) { 
+    ptBin[ipt] = (double)hTempPt->GetBinLowEdge(ipt);     cout <<" "<< ptBin[ipt]  ; ptBin[ipt];
+  }
+
+
   
   for ( int ieta = 1 ; ieta <=5 ; ieta++) { 
     for ( int ipt = 1; ipt<=16 ; ipt++) {
-      hRatioEtaPtJz[ipt][ieta][0] = (TH1D*)hRatioEtaPtJz[ipt][ieta][2]->Clone(Form("hRatioEtaPtJz_ipt%d_iy1_IntJz",ipt));
-      hRatioEtaPtJz[ipt][ieta][0]->Reset();
-      for ( int i=2 ; i<=4 ; i++) {
-	hRatioEtaPtJz[ipt][ieta][0]->Add(hRatioEtaPtJz[ipt][ieta][i], jzWgt[i]);
+      hRatioPtEtaJz[ipt][ieta][0] = (TH1D*)hRatioPtEtaJz[ipt][ieta][2]->Clone(Form("hRatioPtEtaJz_ipt%d_iy1_IntJz",ipt));
+      hRatioPtEtaJz[ipt][ieta][0]->Reset();
+      for ( int ijz=2 ; ijz<=4 ; ijz++) {
+	hRatioPtEtaJz[ipt][ieta][0]->Add(hRatioPtEtaJz[ipt][ieta][ijz], jzWgt[ijz]);
       }
     }
   }
-  
+
   
   
   
@@ -124,10 +211,10 @@ void drawBasicPerf()
     hRes[ieta] = (TH1D*)hTempPt->Clone(Form("hRes_ieta%d",ieta));
     hRes[ieta]->Reset();
     for ( int ipt = 1; ipt<=16 ; ipt++) { 
-      hScale[ieta]->SetBinContent(ipt,  hRatioEtaPtJz[ipt][ieta][0]->GetMean() ) ;
-      hScale[ieta]->SetBinError  (ipt,  hRatioEtaPtJz[ipt][ieta][0]->GetMeanError() ) ;
-      hRes[ieta]->SetBinContent  (ipt,  hRatioEtaPtJz[ipt][ieta][0]->GetRMS() ) ;
-      hRes[ieta]->SetBinError    (ipt,  hRatioEtaPtJz[ipt][ieta][0]->GetRMSError() ) ;
+      hScale[ieta]->SetBinContent(ipt,  hRatioPtEtaJz[ipt][ieta][0]->GetMean() ) ;
+      hScale[ieta]->SetBinError  (ipt,  hRatioPtEtaJz[ipt][ieta][0]->GetMeanError() ) ;
+      hRes[ieta]->SetBinContent  (ipt,  hRatioPtEtaJz[ipt][ieta][0]->GetRMS() ) ;
+      hRes[ieta]->SetBinError    (ipt,  hRatioPtEtaJz[ipt][ieta][0]->GetRMSError() ) ;
     }
   }
   
@@ -178,9 +265,9 @@ void drawBasicPerf()
   c1->Divide(4,4);
   for ( int ipt = 1 ; ipt<=16 ; ipt++) {
     c1->cd(ipt);
-    cleverRange(hRatioEtaPtJz[ipt][1][0],1.5,0);
-    hRatioEtaPtJz[ipt][1][0]->Draw();
-    float theMean =     hRatioEtaPtJz[ipt][1][0]->GetMean();
+    cleverRange(hRatioPtEtaJz[ipt][1][0],1.5,0);
+    hRatioPtEtaJz[ipt][1][0]->Draw();
+    float theMean =     hRatioPtEtaJz[ipt][1][0]->GetMean();
     drawText(Form("%d < p_{T} < %d GeV",  (int)ptBin[ipt], (int)ptBin[ipt+1]),0.2,0.8,1,18);
     drawText(Form("Mean = %.2f", theMean),0.2, 0.7,4,18);
   }
@@ -191,9 +278,9 @@ void drawBasicPerf()
   c2->Divide(4,4);
   for ( int ipt = 1 ; ipt<=16 ; ipt++) {
     c2->cd(ipt);
-    cleverRange(hRatioEtaPtJz[ipt][2][0],1.5,0);
-    hRatioEtaPtJz[ipt][2][0]->Draw();
-    float theMean =     hRatioEtaPtJz[ipt][2][0]->GetMean();
+    cleverRange(hRatioPtEtaJz[ipt][2][0],1.5,0);
+    hRatioPtEtaJz[ipt][2][0]->Draw();
+    float theMean =     hRatioPtEtaJz[ipt][2][0]->GetMean();
     drawText(Form("%d < p_{T} < %d GeV",  (int)ptBin[ipt], (int)ptBin[ipt+1]),0.2,0.8,1,18);
     drawText(Form("Mean = %.2f", theMean),0.2, 0.7,4,18);
   }
@@ -204,9 +291,9 @@ void drawBasicPerf()
   c3->Divide(4,4);
   for ( int ipt = 1 ; ipt<=16 ; ipt++) {
     c3->cd(ipt);
-    cleverRange(hRatioEtaPtJz[ipt][3][0],1.5,0);
-    hRatioEtaPtJz[ipt][3][0]->Draw();
-    float theMean =     hRatioEtaPtJz[ipt][3][0]->GetMean();
+    cleverRange(hRatioPtEtaJz[ipt][3][0],1.5,0);
+    hRatioPtEtaJz[ipt][3][0]->Draw();
+    float theMean =     hRatioPtEtaJz[ipt][3][0]->GetMean();
     drawText(Form("%d < p_{T} < %d GeV",  (int)ptBin[ipt], (int)ptBin[ipt+1]),0.2,0.8,1,18);
     drawText(Form("Mean = %.2f", theMean),0.2, 0.7,4,18);
   }
@@ -219,9 +306,9 @@ void drawBasicPerf()
   c4->Divide(4,4);
   for ( int ipt = 1 ; ipt<=16 ; ipt++) {
     c4->cd(ipt);
-    cleverRange(hRatioEtaPtJz[ipt][4][0],1.5,0);
-    hRatioEtaPtJz[ipt][4][0]->Draw();
-    float theMean =     hRatioEtaPtJz[ipt][4][0]->GetMean();
+    cleverRange(hRatioPtEtaJz[ipt][4][0],1.5,0);
+    hRatioPtEtaJz[ipt][4][0]->Draw();
+    float theMean =     hRatioPtEtaJz[ipt][4][0]->GetMean();
     drawText(Form("%d < p_{T} < %d GeV",  (int)ptBin[ipt], (int)ptBin[ipt+1]),0.2,0.8,1,18);
     drawText(Form("Mean = %.2f", theMean),0.2, 0.7,4,18);
   }
@@ -234,9 +321,9 @@ void drawBasicPerf()
   c5->Divide(4,4);
   for ( int ipt = 1 ; ipt<=16 ; ipt++) {
     c5->cd(ipt);
-    cleverRange(hRatioEtaPtJz[ipt][5][0],1.5,0);
-    hRatioEtaPtJz[ipt][5][0]->Draw();
-    float theMean =     hRatioEtaPtJz[ipt][5][0]->GetMean();
+    cleverRange(hRatioPtEtaJz[ipt][5][0],1.5,0);
+    hRatioPtEtaJz[ipt][5][0]->Draw();
+    float theMean =     hRatioPtEtaJz[ipt][5][0]->GetMean();
     drawText(Form("%d < p_{T} < %d GeV",  (int)ptBin[ipt], (int)ptBin[ipt+1]),0.2,0.8,1,18);
     drawText(Form("Mean = %.2f", theMean),0.2, 0.7,4,18);
   }
@@ -246,7 +333,7 @@ void drawBasicPerf()
   TFile* fout = new TFile("fout.root","recreate");
 
   for ( int ipt = 1 ; ipt<=16 ; ipt++) {
-    hRatioEtaPtJz[ipt][1][0]->Write() ; 
+    hRatioPtEtaJz[ipt][1][0]->Write() ; 
   }
   fout->Close();
     
