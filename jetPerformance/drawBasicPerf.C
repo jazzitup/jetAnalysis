@@ -260,76 +260,24 @@ void drawBasicPerf()
 
   /////////////////////////////////////////////////    /////////////////////////////////////////////////    /////////////////////////////////////////////////  
   
-  
-  TCanvas* c1 = new TCanvas("c1","",1200,1200);
-  c1->Divide(4,4);
-  for ( int ipt = 1 ; ipt<=16 ; ipt++) {
-    c1->cd(ipt);
-    cleverRange(hRatioPtEtaJz[ipt][1][0],1.5,0);
-    hRatioPtEtaJz[ipt][1][0]->Draw();
-    float theMean =     hRatioPtEtaJz[ipt][1][0]->GetMean();
-    drawText(Form("%d < p_{T} < %d GeV",  (int)ptBin[ipt], (int)ptBin[ipt+1]),0.2,0.8,1,18);
-    drawText(Form("Mean = %.2f", theMean),0.2, 0.7,4,18);
+  for ( int ieta = 1 ; ieta<=5 ; ieta++) { 
+    TCanvas* c1 = new TCanvas(Form("c1_ieta%d",ieta),"",1200,1200);
+    c1->Divide(4,4);
+    for ( int ipt = 1 ; ipt<=16 ; ipt++) {
+      c1->cd(ipt);
+      cleverRange(hRatioPtEtaJz[ipt][ieta][0],1.5,0.0001);
+      hRatioPtEtaJz[ipt][ieta][0]->Draw();
+      hRatioPtEtaJz[ipt][ieta][0]->Fit("gaus");
+      float theMean =     hRatioPtEtaJz[ipt][ieta][0]->GetMean();
+      drawText(Form("%d < p_{T} < %d GeV",  (int)ptBin[ipt], (int)ptBin[ipt+1]),0.2,0.8,1,18);
+      drawText(Form("Mean = %.2f", theMean),0.2, 0.7,4,18);
+      gPad->SetLogy();
+    }
+    c1->cd(1);
+    float etaL = hTempEta->GetBinLowEdge(etaPosL[ieta]+0.0001);
+    float etaH = hTempEta->GetBinLowEdge(etaPosH[ieta]+1.0001);
+    drawText(Form("%.1f < |#eta| < %.1f",etaL,etaH), 0.2,0.5,2,20);
   }
-  c1->cd(1);
-  drawText("|#eta|<0.3", 0.2, 0.5,2,30);
-
-  TCanvas* c2 = new TCanvas("c2","",1200,1200);
-  c2->Divide(4,4);
-  for ( int ipt = 1 ; ipt<=16 ; ipt++) {
-    c2->cd(ipt);
-    cleverRange(hRatioPtEtaJz[ipt][2][0],1.5,0);
-    hRatioPtEtaJz[ipt][2][0]->Draw();
-    float theMean =     hRatioPtEtaJz[ipt][2][0]->GetMean();
-    drawText(Form("%d < p_{T} < %d GeV",  (int)ptBin[ipt], (int)ptBin[ipt+1]),0.2,0.8,1,18);
-    drawText(Form("Mean = %.2f", theMean),0.2, 0.7,4,18);
-  }
-  c2->cd(1);
-  drawText("0.3<|#eta|<0.8", 0.2, 0.5,2,30);
-
-  TCanvas* c3 = new TCanvas("c3","",1200,1200);
-  c3->Divide(4,4);
-  for ( int ipt = 1 ; ipt<=16 ; ipt++) {
-    c3->cd(ipt);
-    cleverRange(hRatioPtEtaJz[ipt][3][0],1.5,0);
-    hRatioPtEtaJz[ipt][3][0]->Draw();
-    float theMean =     hRatioPtEtaJz[ipt][3][0]->GetMean();
-    drawText(Form("%d < p_{T} < %d GeV",  (int)ptBin[ipt], (int)ptBin[ipt+1]),0.2,0.8,1,18);
-    drawText(Form("Mean = %.2f", theMean),0.2, 0.7,4,18);
-  }
-  c3->cd(1);
-  drawText("0.8<|#eta|<1.2", 0.2, 0.5,2,30);
-
-
- 
-  TCanvas* c4 = new TCanvas("c4","",1200,1200);
-  c4->Divide(4,4);
-  for ( int ipt = 1 ; ipt<=16 ; ipt++) {
-    c4->cd(ipt);
-    cleverRange(hRatioPtEtaJz[ipt][4][0],1.5,0);
-    hRatioPtEtaJz[ipt][4][0]->Draw();
-    float theMean =     hRatioPtEtaJz[ipt][4][0]->GetMean();
-    drawText(Form("%d < p_{T} < %d GeV",  (int)ptBin[ipt], (int)ptBin[ipt+1]),0.2,0.8,1,18);
-    drawText(Form("Mean = %.2f", theMean),0.2, 0.7,4,18);
-  }
-  c4->cd(1);
-  drawText("1.2<|#eta|<2.1", 0.2, 0.5,2,30);
-
-
-
-  TCanvas* c5 = new TCanvas("c5","",1200,1200);
-  c5->Divide(4,4);
-  for ( int ipt = 1 ; ipt<=16 ; ipt++) {
-    c5->cd(ipt);
-    cleverRange(hRatioPtEtaJz[ipt][5][0],1.5,0);
-    hRatioPtEtaJz[ipt][5][0]->Draw();
-    float theMean =     hRatioPtEtaJz[ipt][5][0]->GetMean();
-    drawText(Form("%d < p_{T} < %d GeV",  (int)ptBin[ipt], (int)ptBin[ipt+1]),0.2,0.8,1,18);
-    drawText(Form("Mean = %.2f", theMean),0.2, 0.7,4,18);
-  }
-  c5->cd(1);
-  drawText("2.1<|#eta|<2.8", 0.2, 0.5,2,30);
-  
   TFile* fout = new TFile("fout.root","recreate");
 
   for ( int ipt = 1 ; ipt<=16 ; ipt++) {
