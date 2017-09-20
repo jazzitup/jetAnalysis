@@ -43,15 +43,20 @@ void drawBasicPerf()
   for ( int i=2 ; i<=4 ; i++) {    // jz
     
     TString infName="";
-    if (i==2)        {  infName ="histograms/jz2.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
-    else if (i==3)   {  infName ="histograms/jz3.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
-    else if (i==4)   {  infName ="histograms/jz4.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
+    if (i==2)        {  infName ="histograms/jz2poweg.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
+    else if (i==3)   {  infName ="histograms/jz3poweg.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
+    else if (i==4)   {  infName ="histograms/jz4poweg.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
+    //    if (i==2)        {  infName ="histograms/jz2.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
+    //    else if (i==3)   {  infName ="histograms/jz3.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
+    //    else if (i==4)   {  infName ="histograms/jz4.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
     
     inf[i] = new TFile(infName.Data());
     hEvtCnt[i] = (TH1D*)inf[i]->Get("EventLoop_EventCount");
     nEvent[i] = hEvtCnt[i]->GetBinContent(1);
     
-    jzWgt[i] = jzCs[i] * jzFiltEff[i] / nEvent[i];
+    //    jzWgt[i] = jzCs[i] * jzFiltEff[i] / nEvent[i];
+    jzWgt[i] = jzFiltEff[i] / nEvent[i];
+    //jzWgt[i] = 1 / nEvent[i];
     
     cout << "For JZ" << i<<" sample: "<< endl;
     cout << "MC crossSec = " << jzCs[i]<<endl;
@@ -142,7 +147,7 @@ void drawBasicPerf()
     c101->cd(ieta+1);
     handsomeTH1(hPtGmtEtaJz[ieta][0],1);
     hPtGmtEtaJz[ieta][0]->SetYTitle("dN/dp_{T}");
-    hPtGmtEtaJz[ieta][0]->SetXTitle("p_{T} (GeV");
+    hPtGmtEtaJz[ieta][0]->SetXTitle("p_{T} (GeV)");
     hPtGmtEtaJz[ieta][0]->SetAxisRange(1E-6,1E4,"Y");
     hPtGmtEtaJz[ieta][0]->Draw();
     hPtGenEtaJz[ieta][0]->Draw("hist same");
