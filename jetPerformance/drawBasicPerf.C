@@ -62,8 +62,8 @@ void drawBasicPerf(int radius=10)
     nEvent[i] = hEvtCnt[i]->GetBinContent(1);
     
     //jzWgt[i] = jzCs[i] * jzFiltEff[i] / nEvent[i];
-    //   jzWgt[i] = jzFiltEff[i] / nEvent[i];
-    jzWgt[i] = 1 / nEvent[i];
+    jzWgt[i] = jzFiltEff[i] / nEvent[i];
+    //jzWgt[i] = 1 / nEvent[i];
     
     cout << "For JZ" << i<<" sample: "<< endl;
     cout << "MC crossSec = " << jzCs[i]<<endl;
@@ -185,12 +185,12 @@ void drawBasicPerf(int radius=10)
     hPtEffEta[ieta]->Divide(hPtGenEtaJz[ieta][0]);
     handsomeTH1(hPtEffEta[ieta],kRed+ieta-1);
     hPtEffEta[ieta]->SetYTitle("dN/dp_{T}");
-    hPtEffEta[ieta]->SetXTitle("p_{T} (GeV");
+    hPtEffEta[ieta]->SetXTitle("p_{T} (GeV)");
     hPtEffEta[ieta]->SetTitle("");
     hPtEffEta[ieta]->SetAxisRange(0,1.5,"Y");
     if ( ieta ==1 ) hPtEffEta[ieta]->Draw();
     else hPtEffEta[ieta]->Draw("same");
-    jumSun(0,1,900,1);
+    jumSun(0,1,500,1);
 
     float etaL = hTempEta->GetBinLowEdge(etaPosL[ieta]+0.0001);
     float etaH = hTempEta->GetBinLowEdge(etaPosH[ieta]+1.0001);
@@ -227,28 +227,56 @@ void drawBasicPerf(int radius=10)
     hScale[ieta]->Reset();
     hRes[ieta] = (TH1D*)hTempPt->Clone(Form("hRes_ieta%d",ieta));
     hRes[ieta]->Reset();
-    for ( int ipt = 1; ipt<=16 ; ipt++) { 
-      hScale[ieta]->SetBinContent(ipt,  hRatioPtEtaJz[ipt][ieta][0]->GetMean() ) ;
-      hScale[ieta]->SetBinError  (ipt,  hRatioPtEtaJz[ipt][ieta][0]->GetMeanError() ) ;
-      hRes[ieta]->SetBinContent  (ipt,  hRatioPtEtaJz[ipt][ieta][0]->GetRMS() ) ;
-      hRes[ieta]->SetBinError    (ipt,  hRatioPtEtaJz[ipt][ieta][0]->GetRMSError() ) ;
-    }
   }
   
   int colorList[6] = {0,1,2,4,7,8};
+
+  
+  for ( int ieta = 1 ; ieta<=5 ; ieta++) { 
+    TCanvas* c1 = new TCanvas(Form("c1_ieta%d",ieta),"",1200,800);
+    c1->Divide(4,3);
+    for ( int ipt = 3 ; ipt<=13 ; ipt++) {
+      c1->cd(ipt-1);
+      scaleInt(hRatioPtEtaJz[ipt][ieta][0]);
+      cleverRange(hRatioPtEtaJz[ipt][ieta][0],1.5,0.0001);
+      //      hRatioPtEtaJz[ipt][ieta][0]->SetAxisRange(0.00001,1,"Y");
+      hRatioPtEtaJz[ipt][ieta][0]->SetAxisRange(-.5,.5,"X");
+      hRatioPtEtaJz[ipt][ieta][0]->Draw();
+      float mm = hRatioPtEtaJz[ipt][ieta][0]->GetMean();
+      float rr = hRatioPtEtaJz[ipt][ieta][0]->GetRMS();
+      TF1 *g = new TF1("g","gaus",-1,1);
+      hRatioPtEtaJz[ipt][ieta][0]->Fit(g,"","", mm-rr*3, mm+rr*3);
+      drawText(Form("%d < p_{T} < %d GeV",  (int)ptBin[ipt], (int)ptBin[ipt+1]),0.2,0.8,1,18);
+
+      
+      hScale[ieta]->SetBinContent(ipt,  g->GetParameter(1));
+      hScale[ieta]->SetBinError(ipt,  g->GetParError(1));
+      hRes[ieta]->SetBinContent(ipt,  g->GetParameter(2));
+      hRes[ieta]->SetBinError(ipt,  g->GetParError(2));
+
+      //      gPad->SetLogy();
+    }
+    c1->cd(1);
+    float etaL = hTempEta->GetBinLowEdge(etaPosL[ieta]+0.0001);
+    float etaH = hTempEta->GetBinLowEdge(etaPosH[ieta]+1.0001);
+    drawText(Form("%.1f < |#eta| < %.1f",etaL,etaH), 0.2,0.5,2,30);
+    c1->SaveAs(Form("energyScale_ieta%d_R%d.png",ieta,radius));
+    //    jumSun(0.01,100,
+  }
+
   
   TCanvas* c0 = new TCanvas("c0","",1200,600);
   c0->Divide(2,1);
   c0->cd(1);
   
   TLegend *leg= new TLegend(0.45, 0.523, 0.85, 0.893);
-  leg->SetHeader("pT scale");
+  easyLeg(leg,"p_{T} scale");
   for ( int ieta = 1 ; ieta <=5 ; ieta++) {
     handsomeTH1(hScale[ieta],kRed+ieta-1);
     hScale[ieta]->SetXTitle("Truth p_{T} of jet (GeV)");
     hScale[ieta]->SetYTitle("Energy Scale");
     hScale[ieta]->SetTitle("");
-    hScale[ieta]->SetAxisRange(-0.5,1,"Y");
+    hScale[ieta]->SetAxisRange(-0.15,0.15,"Y");
     if ( ieta ==1 ) hScale[ieta]->Draw();
     else hScale[ieta]->Draw("same");
     if ( ieta==1)    leg->AddEntry(hScale[ieta], "|eta|< 0.3");
@@ -256,16 +284,17 @@ void drawBasicPerf(int radius=10)
     if ( ieta==3)    leg->AddEntry(hScale[ieta], "0.8 <|eta|< 1.2");
     if ( ieta==4)    leg->AddEntry(hScale[ieta], "1.2 <|eta|< 2.1");
     if ( ieta==5)    leg->AddEntry(hScale[ieta], "2.1 <|eta|< 2.8");
+
   }
   leg->Draw();
   jumSun(0,0,ptBin[17],0);
-  jumSun(150,-.5,150,1);
+  jumSun(150,-.15,150,.15);
   gPad->SetLogx();
 
   c0->cd(2);
   
   TLegend *leg1= (TLegend*)leg->Clone("leg1");
-  leg1->SetHeader("pT resolution");
+  easyLeg(leg1,"p_{T} resolution");
   for ( int ieta = 1 ; ieta <=5 ; ieta++) {
     handsomeTH1(hRes[ieta],kRed+ieta-1);
     hRes[ieta]->SetXTitle("Truth p_{T} of jet (GeV)");
@@ -274,6 +303,9 @@ void drawBasicPerf(int radius=10)
     hRes[ieta]->SetAxisRange(0,0.4,"Y");
     if ( ieta ==1 ) hRes[ieta]->Draw();
     else hRes[ieta]->Draw("same");
+
+    TF1 *f1 = new TF1("f1","[0] + [1]/sqrt(x) + [2]/x",50,500);
+    //    hRes[ieta]->Fit(f1);
   }
   leg1->Draw();
   gPad->SetLogx();
@@ -282,28 +314,6 @@ void drawBasicPerf(int radius=10)
   
 
   /////////////////////////////////////////////////    /////////////////////////////////////////////////    /////////////////////////////////////////////////  
-  
-  for ( int ieta = 1 ; ieta<=5 ; ieta++) { 
-    TCanvas* c1 = new TCanvas(Form("c1_ieta%d",ieta),"",1200,1200);
-    c1->Divide(4,4);
-    for ( int ipt = 1 ; ipt<=16 ; ipt++) {
-      c1->cd(ipt);
-      cleverRange(hRatioPtEtaJz[ipt][ieta][0],1.5,0.0001);
-      scaleInt(hRatioPtEtaJz[ipt][ieta][0]);
-      hRatioPtEtaJz[ipt][ieta][0]->SetAxisRange(0.00001,1,"Y");
-      hRatioPtEtaJz[ipt][ieta][0]->Draw();
-      hRatioPtEtaJz[ipt][ieta][0]->Fit("gaus");
-      float theMean =     hRatioPtEtaJz[ipt][ieta][0]->GetMean();
-      drawText(Form("%d < p_{T} < %d GeV",  (int)ptBin[ipt], (int)ptBin[ipt+1]),0.2,0.8,1,18);
-      drawText(Form("Mean = %.2f", theMean),0.2, 0.7,4,18);
-      gPad->SetLogy();
-    }
-    c1->cd(1);
-    float etaL = hTempEta->GetBinLowEdge(etaPosL[ieta]+0.0001);
-    float etaH = hTempEta->GetBinLowEdge(etaPosH[ieta]+1.0001);
-    drawText(Form("%.1f < |#eta| < %.1f",etaL,etaH), 0.2,0.5,2,20);
-    //    jumSun(0.01,100,
-  }
   TFile* fout = new TFile("fout.root","recreate");
 
   for ( int ipt = 1 ; ipt<=16 ; ipt++) {
