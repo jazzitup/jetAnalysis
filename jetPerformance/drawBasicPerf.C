@@ -5,7 +5,7 @@
 #include "commonUtility.h"
 #include <vector>
 
-void drawBasicPerf()
+void drawBasicPerf(int radius=10)
 {
   TH1::SetDefaultSumw2();
   TFile* inf[10];
@@ -43,20 +43,27 @@ void drawBasicPerf()
   for ( int i=2 ; i<=4 ; i++) {    // jz
     
     TString infName="";
-    if (i==2)        {  infName ="histograms/jz2poweg.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
-    else if (i==3)   {  infName ="histograms/jz3poweg.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
-    else if (i==4)   {  infName ="histograms/jz4poweg.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
-    //    if (i==2)        {  infName ="histograms/jz2.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
-    //    else if (i==3)   {  infName ="histograms/jz3.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
-    //    else if (i==4)   {  infName ="histograms/jz4.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
+    if ( radius == 10 ) {  
+      if (i==2)        {  infName ="histograms/R10_indexCali1_noRecGen_jz2.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
+      else if (i==3)   {  infName ="histograms/R10_indexCali1_noRecGen_jz3.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
+      else if (i==4)   {  infName ="histograms/R10_indexCali1_noRecGen_jz4.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
+    }
+    else if ( radius == 4 ) {  
+      if (i==2)        {  infName ="histograms/R4_indexCali1_noRecGen_jz2.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
+      else if (i==3)   {  infName ="histograms/R4_indexCali1_noRecGen_jz3.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
+      else if (i==4)   {  infName ="histograms/R4_indexCali1_noRecGen_jz4.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
+    }
+
+
+
     
     inf[i] = new TFile(infName.Data());
     hEvtCnt[i] = (TH1D*)inf[i]->Get("EventLoop_EventCount");
     nEvent[i] = hEvtCnt[i]->GetBinContent(1);
     
-    //    jzWgt[i] = jzCs[i] * jzFiltEff[i] / nEvent[i];
-    jzWgt[i] = jzFiltEff[i] / nEvent[i];
-    //jzWgt[i] = 1 / nEvent[i];
+    //jzWgt[i] = jzCs[i] * jzFiltEff[i] / nEvent[i];
+    //   jzWgt[i] = jzFiltEff[i] / nEvent[i];
+    jzWgt[i] = 1 / nEvent[i];
     
     cout << "For JZ" << i<<" sample: "<< endl;
     cout << "MC crossSec = " << jzCs[i]<<endl;
@@ -125,6 +132,7 @@ void drawBasicPerf()
   hPtGen[0]->SetYTitle("dN/dp_{T}");
   hPtGen[0]->SetAxisRange(1E-6,1E4,"Y");
   handsomeTH1(hPtGen[0],1);
+  hPtGen[0]->SetTitle("");
   hPtGen[0]->Draw();
   for ( int ijz = 4 ; ijz>=2; ijz--) {
     handsomeTH1(hPtGenCum[ijz],ijz);
@@ -149,6 +157,7 @@ void drawBasicPerf()
     hPtGmtEtaJz[ieta][0]->SetYTitle("dN/dp_{T}");
     hPtGmtEtaJz[ieta][0]->SetXTitle("p_{T} (GeV)");
     hPtGmtEtaJz[ieta][0]->SetAxisRange(1E-6,1E4,"Y");
+    hPtGmtEtaJz[ieta][0]->SetTitle("");
     hPtGmtEtaJz[ieta][0]->Draw();
     hPtGenEtaJz[ieta][0]->Draw("hist same");
     gPad->SetLogy();
@@ -164,6 +173,8 @@ void drawBasicPerf()
   leg101->AddEntry(hPtGenEtaJz[1][0],"matched to Reco","l");
   leg101->Draw();
   
+
+  //  return;
   
   TCanvas* c102 = new TCanvas("c102","",500,500);
   TH1D* hPtEffEta[10];
@@ -175,6 +186,7 @@ void drawBasicPerf()
     handsomeTH1(hPtEffEta[ieta],kRed+ieta-1);
     hPtEffEta[ieta]->SetYTitle("dN/dp_{T}");
     hPtEffEta[ieta]->SetXTitle("p_{T} (GeV");
+    hPtEffEta[ieta]->SetTitle("");
     hPtEffEta[ieta]->SetAxisRange(0,1.5,"Y");
     if ( ieta ==1 ) hPtEffEta[ieta]->Draw();
     else hPtEffEta[ieta]->Draw("same");
@@ -187,7 +199,7 @@ void drawBasicPerf()
   }
   leg102->Draw();
   gPad->SetLogx();
-  
+  jumSun(150,0,150,1.5);
   // Fill hRatioPtEtaJz histograms
   TH1D* hTempPt = (TH1D*)hresp[2]->ProjectionX("tempForPtBin");
   cout <<" pt bin: ";
@@ -235,6 +247,7 @@ void drawBasicPerf()
     handsomeTH1(hScale[ieta],kRed+ieta-1);
     hScale[ieta]->SetXTitle("Truth p_{T} of jet (GeV)");
     hScale[ieta]->SetYTitle("Energy Scale");
+    hScale[ieta]->SetTitle("");
     hScale[ieta]->SetAxisRange(-0.5,1,"Y");
     if ( ieta ==1 ) hScale[ieta]->Draw();
     else hScale[ieta]->Draw("same");
@@ -246,6 +259,8 @@ void drawBasicPerf()
   }
   leg->Draw();
   jumSun(0,0,ptBin[17],0);
+  jumSun(150,-.5,150,1);
+  gPad->SetLogx();
 
   c0->cd(2);
   
@@ -255,12 +270,15 @@ void drawBasicPerf()
     handsomeTH1(hRes[ieta],kRed+ieta-1);
     hRes[ieta]->SetXTitle("Truth p_{T} of jet (GeV)");
     hRes[ieta]->SetYTitle("Resolution");
+    hRes[ieta]->SetTitle("");
     hRes[ieta]->SetAxisRange(0,0.4,"Y");
     if ( ieta ==1 ) hRes[ieta]->Draw();
     else hRes[ieta]->Draw("same");
   }
   leg1->Draw();
+  gPad->SetLogx();
   jumSun(0,0,ptBin[17],0);
+  jumSun(150,0,150,0.4);
   
 
   /////////////////////////////////////////////////    /////////////////////////////////////////////////    /////////////////////////////////////////////////  
@@ -271,6 +289,8 @@ void drawBasicPerf()
     for ( int ipt = 1 ; ipt<=16 ; ipt++) {
       c1->cd(ipt);
       cleverRange(hRatioPtEtaJz[ipt][ieta][0],1.5,0.0001);
+      scaleInt(hRatioPtEtaJz[ipt][ieta][0]);
+      hRatioPtEtaJz[ipt][ieta][0]->SetAxisRange(0.00001,1,"Y");
       hRatioPtEtaJz[ipt][ieta][0]->Draw();
       hRatioPtEtaJz[ipt][ieta][0]->Fit("gaus");
       float theMean =     hRatioPtEtaJz[ipt][ieta][0]->GetMean();
@@ -282,6 +302,7 @@ void drawBasicPerf()
     float etaL = hTempEta->GetBinLowEdge(etaPosL[ieta]+0.0001);
     float etaH = hTempEta->GetBinLowEdge(etaPosH[ieta]+1.0001);
     drawText(Form("%.1f < |#eta| < %.1f",etaL,etaH), 0.2,0.5,2,20);
+    //    jumSun(0.01,100,
   }
   TFile* fout = new TFile("fout.root","recreate");
 
