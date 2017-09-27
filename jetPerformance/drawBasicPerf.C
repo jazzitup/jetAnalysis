@@ -5,7 +5,13 @@
 #include "commonUtility.h"
 #include <vector>
 
-void drawBasicPerf(int radius=10)
+struct Jes {
+  TH1D* hScale[10];
+  TH1D* hRes[10];
+} ;
+
+
+Jes drawBasicPerf(int radius=10, int cent=0)
 {
   TH1::SetDefaultSumw2();
   TFile* inf[10];
@@ -20,6 +26,7 @@ void drawBasicPerf(int radius=10)
   double ptBin[20];
   double etaBin[20];
 
+  Jes ret;
   
   // eta binning : 
   int etaPosL[6] = {0, 51, 54, 59, 63, 72};   // 0 - 0.3 - 0.8 - 1.2 - 2.1 - 2.8
@@ -72,12 +79,12 @@ void drawBasicPerf(int radius=10)
     cout << "Weight = CS. * Filter Eff.  / event Count = " << jzWgt[i] << endl;
 
 
-    hresp[i] = (TH3D*)inf[i]->Get("h_resp_cent1");
+    hresp[i] = (TH3D*)inf[i]->Get(Form("h_resp_cent%d",cent));
     
     // GEN pT spectra 
-    htruth[i] = (TH3D*)inf[i]->Get("h_truth_jet_cent1");
+    htruth[i] = (TH3D*)inf[i]->Get(Form("h_truth_jet_cent%d",cent));
     hPtGen[i] = (TH1D*)htruth[i]->ProjectionX(Form("hPtGen_ijz%d",i));
-    hgmt[i]   = (TH3D*)inf[i]->Get("h_truth_jet_cent1_matched");
+    hgmt[i]   = (TH3D*)inf[i]->Get(Form("h_truth_jet_cent%d_matched",cent));
     
     
     for ( int ieta = 1 ; ieta <= 5 ; ieta++) { 
@@ -320,6 +327,12 @@ void drawBasicPerf(int radius=10)
     hRatioPtEtaJz[ipt][1][0]->Write() ; 
   }
   fout->Close();
-    
+
+  for ( int ieta = 1 ; ieta <= 5 ; ieta++) {
+    ret.hScale[ieta] = hScale[ieta];
+    ret.hRes[ieta] = hRes[ieta];
+  }
+
+  return ret;
   
 }
