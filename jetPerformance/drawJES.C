@@ -32,7 +32,7 @@ void drawJES() {
   for ( int icent = 0 ; icent <=6 ; icent++) {
     handsomeTH1(pbpbJes[icent].hRes[0], color[icent]);
 
-    TF1* f = new TF1(Form("f_%d",icent),"[0] + [1]/sqrt(x) + [2]/x");
+    TF1* f = new TF1(Form("f_%d",icent),"sqrt([0]*[0] + [1]*[1]/x + [2]*[2]/(x*x))");
     pbpbJes[icent].hRes[0]->Fit(f);
     pbpbJes[icent].hRes[0]->GetFunction(Form("f_%d",icent))->SetLineColor(color[icent]);
     pbpbJes[icent].hRes[0]->GetFunction(Form("f_%d",icent))->SetLineStyle(2);
