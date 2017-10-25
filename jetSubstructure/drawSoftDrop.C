@@ -3,20 +3,24 @@
   TH1D* hEffDphi[10];
   TH1D* hEffDrap[10];
 */
-void drawSoftDrop(int ptLow=150, int ptHigh=250) { 
-
+void drawSoftDrop(int ptLow=250, int ptHigh=400) { 
+  
+  TString fnamePP = "ntuples/jetSubTree_pythia_r1.0_jz3_v1.6.root";
+  TString fnameAA = "ntuples/jetSubTree_himix_r1.0_jz3_v1.6.root";
+  
   TString ptCut = Form("genPt>%d && genPt<%d",ptLow, ptHigh) ; 
   TString recoPtCut = Form("pt>%d && pt<%d",ptLow, ptHigh) ; 
-  sdVariable pp = getSdHists("pp","ntuples/jetSubstructure_output_user.mphipps.12075082.EXT0._000128.DAOD_HION9.AOD.pool.root", 0, ptCut );
-  sdVariable ppLA = getSdHists("pp","ntuples/jetSubstructure_output_user.mphipps.12075082.EXT0._000128.DAOD_HION9.AOD.pool.root", 0, ptCut + " && chTheta>0.1"); // large angle
+  sdVariable pp = getSdHists("pp", fnamePP, 0, ptCut );
+  sdVariable ppLA = getSdHists("pp",fnamePP, 0, ptCut + " && chTheta>0.1"); // large angle
+  
   sdVariable aa[7];
   sdVariable aaLA[7];
   sdVariable aaR[7];  // reco pt cut is applied
   
   for ( int icent = 0 ; icent<=6 ; icent++) {
-    aa[icent] = getSdHists(Form("pbpb%d",icent),"ntuples/jetSubstructure_output_DAOD_HION9.11573635._000058.pool.root.1", icent, ptCut ) ;
-    aaR[icent] = getSdHists(Form("pbpbR%d",icent),"ntuples/jetSubstructure_output_DAOD_HION9.11573635._000058.pool.root.1", icent, recoPtCut ) ;
-    aaLA[icent] = getSdHists(Form("pbpbLA%d",icent),"ntuples/jetSubstructure_output_DAOD_HION9.11573635._000058.pool.root.1", icent, ptCut + " && chTheta>0.1") ;
+    aa[icent] = getSdHists(Form("pbpb%d",icent),fnameAA , icent, ptCut ) ;
+    aaR[icent] = getSdHists(Form("pbpbR%d",icent),fnameAA , icent, recoPtCut ) ;
+    aaLA[icent] = getSdHists(Form("pbpbLA%d",icent),fnameAA, icent, ptCut + " && chTheta>0.1") ;
   }
   TCanvas* c1=  new TCanvas("c1","",1000,500);
   c1->Divide(2,1);
@@ -257,8 +261,59 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250) {
   rat->DrawCopy();
   jumSun(0,1,1,1);
 
-
   // z_{g}
 
+  // theta vs charged theta
+  TCanvas* c6ppLA=  new TCanvas("c6ppLA","",400,400);
+  handsomeTH1(ppLA.hGenChZg,1);
+  handsomeTH1(ppLA.hRecoChZg,1);
+  ppLA.hGenChZg->SetXTitle("z_{g} = min(p_{T}^{1},p_{T}^{2})/(p_{T}^{1}+p_{T}^{2})");
+  cleverRange(ppLA.hGenChZg,1.6);
+  ppLA.hGenChZg->SetNdivisions(505);
+  ppLA.hGenChZg->DrawCopy("hist");
+  ppLA.hRecoChZg->DrawCopy("e same");
+
+  TLegend *leg6 = new TLegend(0.419598,0.5073333,0.9572864,0.7033333,NULL,"brNDC");
+  easyLeg(leg6,"Charged sub-jet");
+  leg6->AddEntry(ppLA.hGenChZg,"Truth chg'd particle","l");
+  leg6->AddEntry(ppLA.hRecoChZg,"Reco track","pl");
+  leg6->Draw();
+  drawText(Form("p_{T}^{jet}: %d - %d GeV,   |#eta^{jet}| < 1.2",ptLow,ptHigh),0.25,0.87,1,15);
+  drawText("p_{T}^{track} > 4 GeV/c",0.25,0.83,1,15);
+  drawText("Subjet #theta > 0.1",0.25,0.74,2,20);
+
+  TCanvas* c6=  new TCanvas("c6","",1200,400);
+  c6->Divide(3,1);
+  c6->cd(1);
+  handsomeTH1(aaLA[6].hGenChZg,1);
+  handsomeTH1(aaLA[6].hRecoChZg,1);
+  aaLA[6].hGenChZg->SetXTitle("z_{g} = min(p_{T}^{1},p_{T}^{2})/(p_{T}^{1}+p_{T}^{2})");
+  cleverRange(aaLA[6].hGenChZg,1.6);
+  aaLA[6].hGenChZg->SetNdivisions(505);
+  aaLA[6].hGenChZg->DrawCopy("hist");
+  aaLA[6].hRecoChZg->DrawCopy("e same");
+  drawText("60-80%", 0.6, 0.8,1,25);
+
+  c6->cd(2);
+  handsomeTH1(aaLA[3].hGenChZg,1);
+  handsomeTH1(aaLA[3].hRecoChZg,1);
+  aaLA[3].hGenChZg->SetXTitle("z_{g} = min(p_{T}^{1},p_{T}^{2})/(p_{T}^{1}+p_{T}^{2})");
+  cleverRange(aaLA[3].hGenChZg,1.6);
+  aaLA[3].hGenChZg->SetNdivisions(505);
+  aaLA[3].hGenChZg->DrawCopy("hist");
+  aaLA[3].hRecoChZg->DrawCopy("e same");
+  drawText("30-40%", 0.6, 0.8,1,25);
+
+  c6->cd(3);
+  handsomeTH1(aaLA[0].hGenChZg,1);
+  handsomeTH1(aaLA[0].hRecoChZg,1);
+  aaLA[0].hGenChZg->SetXTitle("z_{g} = min(p_{T}^{1},p_{T}^{2})/(p_{T}^{1}+p_{T}^{2})");
+  cleverRange(aaLA[0].hGenChZg,1.6);
+  aaLA[0].hGenChZg->SetNdivisions(505);
+  aaLA[0].hGenChZg->DrawCopy("hist");
+  aaLA[0].hRecoChZg->DrawCopy("e same");
+  drawText("0-10%", 0.6, 0.8,1,25);
   
 }
+
+

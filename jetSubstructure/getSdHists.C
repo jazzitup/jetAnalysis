@@ -18,7 +18,7 @@ struct sdVariable {
 sdVariable getSdHists (TString prefix = "pbpb",
 		       TString fname = "ntuples/jetSubstructure_output_DAOD_HION9.11573635._000058.pool.root.1",
 		       int centBin = 0,
-		       TString theCut = "genPt>150 && genPt<250") {
+		       TString theCut = "genPt>250 && genPt<400") {
   
   TH1::SetDefaultSumw2();
   TFile* inf = new TFile(fname.Data());
@@ -52,21 +52,22 @@ sdVariable getSdHists (TString prefix = "pbpb",
   TH1D* _hRecoTheta = (TH1D*)_hGenTheta->Clone(Form("_hRecoTheta_cent%d_%s",centBin,prefix.Data()));
   TH1D* _hRecoChTheta = (TH1D*)_hGenTheta->Clone(Form("_hRecoChTheta_cent%d_%s",centBin,prefix.Data()));
   
-  TH1D* _hRecoChZg = new TH1D(Form("_hRecoChZg_cent%d_%s",centBin,prefix.Data()), "; z_{g};",10,0,0.5);
+  TH1D* _hRecoChZg = new TH1D(Form("_hRecoChZg_cent%d_%s",centBin,prefix.Data()), "; z_{g};",12,0,0.6);
   TH1D* _hGenChZg = (TH1D*)_hRecoChZg->Clone(Form("_hGenChZg_cent%d_%s",centBin,prefix.Data()));
   TH1D* _hGenZg = (TH1D*)_hRecoChZg->Clone(Form("_hGenZg_cent%d_%s",centBin,prefix.Data()));
   TH1D* _hRecoZg = (TH1D*)_hRecoChZg->Clone(Form("_hRecoZg_cent%d_%s",centBin,prefix.Data()));
-
   
-  tree->Draw( Form("theta>>%s",     _hRecoTheta->GetName()), cutWeight );
-  tree->Draw( Form("chTheta>>%s",   _hRecoChTheta->GetName()), cutWeight );
-  tree->Draw( Form("genTheta>>%s",  _hGenTheta->GetName()), cutWeight );
-  tree->Draw( Form("genChTheta>>%s",_hGenChTheta->GetName()), cutWeight );
+  int nNumbers = 500000;
+  
+  tree->Draw( Form("theta>>%s",     _hRecoTheta->GetName()), cutWeight ,"", nNumbers);
+  tree->Draw( Form("chTheta>>%s",   _hRecoChTheta->GetName()), cutWeight,"", nNumbers );
+  tree->Draw( Form("genTheta>>%s",  _hGenTheta->GetName()), cutWeight,"", nNumbers );
+  tree->Draw( Form("genChTheta>>%s",_hGenChTheta->GetName()), cutWeight, "",nNumbers );
 
-  tree->Draw( Form("zg>>%s",     _hRecoZg->GetName()), cutWeight );
-  tree->Draw( Form("genZg>>%s",     _hGenZg->GetName()), cutWeight );
-  tree->Draw( Form("chZg>>%s",     _hRecoChZg->GetName()), cutWeight );
-  tree->Draw( Form("genChZg>>%s",     _hGenChZg->GetName()), cutWeight );
+  tree->Draw( Form("zg>>%s",     _hRecoZg->GetName()), cutWeight, "",nNumbers );
+  tree->Draw( Form("genZg>>%s",     _hGenZg->GetName()), cutWeight, "",nNumbers );
+  tree->Draw( Form("chZg>>%s",     _hRecoChZg->GetName()), cutWeight, "",nNumbers );
+  tree->Draw( Form("genChZg>>%s",     _hGenChZg->GetName()), cutWeight, "",nNumbers );
 
   sdVariable ret;
   //  TCanvas* c0 = new TCanvas("c0","",500,500);
