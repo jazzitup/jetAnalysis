@@ -3,7 +3,7 @@
   TH1D* hEffDphi[10];
   TH1D* hEffDrap[10];
 */
-void drawSoftDrop(int ptLow=250, int ptHigh=400) { 
+void drawSoftDrop(int ptLow=150, int ptHigh=250) { 
   
   TString fnamePP = "ntuples/jetSubTree_pythia_r1.0_jz3_v1.6.root";
   TString fnameAA = "ntuples/jetSubTree_himix_r1.0_jz3_v1.6.root";
@@ -63,12 +63,12 @@ void drawSoftDrop(int ptLow=250, int ptHigh=400) {
 
   TLegend *leg2= new TLegend(0.336546,0.3894737,1,0.6347368,NULL,"brNDC");
   easyLeg(leg2,"Full subjets (PYTHIA)");
-  leg2->AddEntry(pp.hGenTheta,"Truth chg'd particle","l");
-  leg2->AddEntry(pp.hRecoTheta,"Reco track","pl");
+  leg2->AddEntry(pp.hGenTheta,"Truth sub-jet","l");
+  leg2->AddEntry(pp.hRecoTheta,"Calo sub-jet","pl");
   leg2->Draw();
   
   drawText(Form("p_{T}^{jet}: %d - %d GeV,   |#eta^{jet}| < 1.2",ptLow,ptHigh),0.35,0.8,1,15);
-  drawText("p_{T}^{track} > 4 GeV/c",0.35,0.7,1,15);
+  //  drawText("p_{T}^{track} > 4 GeV/c",0.35,0.7,1,15);
   
   TCanvas* c2=  new TCanvas("c2","",1200,400);
   c2->Divide(3,1);
@@ -191,17 +191,17 @@ void drawSoftDrop(int ptLow=250, int ptHigh=400) {
 
   TLegend* leg5 = new TLegend(0.3036546,0.3894737,0.9,0.6347368,NULL,"brNDC");
   easyLeg(leg5,"PYTHIA MC");
-  leg5->AddEntry(pp.hGenTheta, "Full particle subjets","l");
-  leg5->AddEntry(pp.hGenChTheta, "Chg'd particle subjets");
+  leg5->AddEntry(pp.hGenTheta, "Ntrl + Cha'd particles","l");
+  leg5->AddEntry(pp.hGenChTheta, "Chg'd only");
   leg5->Draw();
   drawText(Form("p_{T}^{jet}: %d - %d GeV,   |#eta^{jet}| < 1.2",ptLow,ptHigh),0.35,0.8,1,15);
-  drawText("p_{T}^{track} > 4 GeV/c",0.35,0.7,1,15);
+  drawText("constituent p_{T} > 4 GeV/c",0.35,0.7,1,15);
 
   c4pp->cd(2);
   ppRatio = (TH1D*)pp.hGenChTheta->Clone("ppRatio");
   ppRatio->Divide(pp.hGenTheta);
   ppRatio->SetAxisRange(0,2,"Y");
-  ppRatio->SetYTitle("Track/Calo");
+  ppRatio->SetYTitle("Charge/Full");
   ppRatio->DrawCopy();
   jumSun(0,1,1,1);  
   
@@ -211,26 +211,32 @@ void drawSoftDrop(int ptLow=250, int ptHigh=400) {
   TCanvas* c5=  new TCanvas("c5","",1200,800);
   c5->Divide(3,2);
   c5->cd(1);
-  handsomeTH1(aaR[6].hRecoChTheta,4,1,24);
+  handsomeTH1(aa[6].hRecoChTheta,2);
+  handsomeTH1(aaR[6].hRecoChTheta,2,1,24);
   aa[6].hRecoChTheta->SetXTitle("#theta between subjets");
   scaleInt(aa[6].hRecoChTheta);
   scaleInt(aaR[6].hRecoChTheta);
   aa[6].hRecoChTheta->DrawCopy();
   aaR[6].hRecoChTheta->DrawCopy("same");
   drawText("60-80%", 0.3, 0.8,1,25);
-  leg3->Draw();
-  
+  TLegend *leg30= new TLegend(0.3062558,0.452381,0.9990587,0.7163265,NULL,"brNDC");
+  easyLeg(leg30,Form("PbPb MC, %d < p_{T}^{jet} < %d GeV/c",ptLow, ptHigh));
+  leg30->AddEntry(aa[6].hRecoChTheta,"p_{T}^{truth Jet}");
+  leg30->AddEntry(aaR[6].hRecoChTheta,"p_{T}^{Reco Jet}");
+  leg30->Draw();
+
   c5->cd(4);
   rat = (TH1D*)aaR[6].hRecoChTheta->Clone("rat");
   rat->Divide(aa[6].hRecoChTheta);
   rat->SetAxisRange(0,5,"Y");
-  rat->SetYTitle("[Reco cut] / [Truth cut]");
+  rat->SetYTitle("[Reco p_{T} cut] / [Truth p_{T} cut]");
   rat->DrawCopy();
 
   jumSun(0,1,1,1);
 
   c5->cd(2);
-  handsomeTH1(aaR[3].hRecoChTheta,4,1,24);
+  handsomeTH1(aa[3].hRecoChTheta,2);
+  handsomeTH1(aaR[3].hRecoChTheta,2,1,24);
   aa[3].hRecoChTheta->SetXTitle("#theta between subjets");
   scaleInt(aa[3].hRecoChTheta);
   scaleInt(aaR[3].hRecoChTheta);
@@ -246,7 +252,8 @@ void drawSoftDrop(int ptLow=250, int ptHigh=400) {
   jumSun(0,1,1,1);
 
   c5->cd(3);
-  handsomeTH1(aaR[0].hRecoChTheta,4,1,24);
+  handsomeTH1(aa[0].hRecoChTheta,2);
+  handsomeTH1(aaR[0].hRecoChTheta,2,1,24);
   aa[0].hRecoChTheta->SetXTitle("#theta between subjets");
   scaleInt(aa[0].hRecoChTheta);
   scaleInt(aaR[0].hRecoChTheta);
@@ -260,7 +267,8 @@ void drawSoftDrop(int ptLow=250, int ptHigh=400) {
   rat->SetYTitle("[Reco cut] / [Truth cut]");
   rat->DrawCopy();
   jumSun(0,1,1,1);
-
+  
+  c5->SaveAs("jet_pt_bin_migration.gif");
   // z_{g}
 
   // theta vs charged theta
