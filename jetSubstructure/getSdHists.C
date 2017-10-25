@@ -8,6 +8,11 @@ struct sdVariable {
   TH1D* hGenChTheta;
   TH1D* hRecoTheta;
   TH1D* hRecoChTheta;
+  TH1D* hRecoZg;
+  TH1D* hGenZg;
+  TH1D* hRecoChZg;
+  TH1D* hGenChZg;
+
 } ;
 
 sdVariable getSdHists (TString prefix = "pbpb",
@@ -46,10 +51,23 @@ sdVariable getSdHists (TString prefix = "pbpb",
   TH1D* _hGenChTheta = (TH1D*)_hGenTheta->Clone(Form("_hGenChTheta_cent%d_%s",centBin,prefix.Data()));
   TH1D* _hRecoTheta = (TH1D*)_hGenTheta->Clone(Form("_hRecoTheta_cent%d_%s",centBin,prefix.Data()));
   TH1D* _hRecoChTheta = (TH1D*)_hGenTheta->Clone(Form("_hRecoChTheta_cent%d_%s",centBin,prefix.Data()));
+  
+  TH1D* _hRecoChZg = new TH1D(Form("_hRecoChZg_cent%d_%s",centBin,prefix.Data()), "; z_{g};",10,0,0.5);
+  TH1D* _hGenChZg = (TH1D*)_hRecoChZg->Clone(Form("_hGenChZg_cent%d_%s",centBin,prefix.Data()));
+  TH1D* _hGenZg = (TH1D*)_hRecoChZg->Clone(Form("_hGenZg_cent%d_%s",centBin,prefix.Data()));
+  TH1D* _hRecoZg = (TH1D*)_hRecoChZg->Clone(Form("_hRecoZg_cent%d_%s",centBin,prefix.Data()));
+
+  
   tree->Draw( Form("theta>>%s",     _hRecoTheta->GetName()), cutWeight );
   tree->Draw( Form("chTheta>>%s",   _hRecoChTheta->GetName()), cutWeight );
   tree->Draw( Form("genTheta>>%s",  _hGenTheta->GetName()), cutWeight );
   tree->Draw( Form("genChTheta>>%s",_hGenChTheta->GetName()), cutWeight );
+
+  tree->Draw( Form("zg>>%s",     _hRecoZg->GetName()), cutWeight );
+  tree->Draw( Form("genZg>>%s",     _hGenZg->GetName()), cutWeight );
+  tree->Draw( Form("chZg>>%s",     _hRecoChZg->GetName()), cutWeight );
+  tree->Draw( Form("genChZg>>%s",     _hGenChZg->GetName()), cutWeight );
+
   sdVariable ret;
   //  TCanvas* c0 = new TCanvas("c0","",500,500);
   //  _hRecoTheta->Draw();
@@ -60,6 +78,10 @@ sdVariable getSdHists (TString prefix = "pbpb",
   ret.hGenChTheta = _hGenChTheta;
   ret.hRecoTheta = _hRecoTheta;
   ret.hRecoChTheta = _hRecoChTheta;
-
+  ret.hRecoZg = _hRecoZg;
+  ret.hRecoChZg = _hRecoChZg;
+  ret.hGenZg = _hGenZg;
+  ret.hGenChZg = _hGenChZg;
+  
   return ret;
 }
