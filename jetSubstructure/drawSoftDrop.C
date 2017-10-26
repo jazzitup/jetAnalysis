@@ -3,26 +3,26 @@
   TH1D* hEffDphi[10];
   TH1D* hEffDrap[10];
 */
-void drawSoftDrop(int ptLow=150, int ptHigh=250) { 
+void drawSoftDrop(int totalEvents=10000, int ptLow=150, int ptHigh=250) { 
   
-  TString fnamePP = "ntuples/jetSubTree_pythia_r1.0_jz3_v1.6.root";
-  TString fnameAA = "ntuples/jetSubTree_himix_r1.0_jz3_v1.6.root";
+  TString fnamePP = "ntuples/jetSubstructure_pythia_r1.0_ptCut6_jz3.root";
+  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_ptCut8_jz3.root";
   
   TString ptCut = Form("genPt>%d && genPt<%d",ptLow, ptHigh) ; 
   TString recoPtCut = Form("pt>%d && pt<%d",ptLow, ptHigh) ; 
-  sdVariable pp = getSdHists("pp", fnamePP, 0, ptCut );
-  sdVariable ppLA = getSdHists("pp",fnamePP, 0, ptCut + " && chTheta>0.1"); // large angle
+  sdVariable pp = getSdHists("pp", fnamePP, 0, ptCut,totalEvents );
+  sdVariable ppLA = getSdHists("pp",fnamePP, 0, ptCut + " && chTheta>0.1", totalEvents); // large angle
   
   sdVariable aa[7];
   sdVariable aaLA[7];
   sdVariable aaR[7];  // reco pt cut is applied
   
   for ( int icent = 0 ; icent<=6 ; icent++) {
-    aa[icent] = getSdHists(Form("pbpb%d",icent),fnameAA , icent, ptCut ) ;
-    aaR[icent] = getSdHists(Form("pbpbR%d",icent),fnameAA , icent, recoPtCut ) ;
-    aaLA[icent] = getSdHists(Form("pbpbLA%d",icent),fnameAA, icent, ptCut + " && chTheta>0.1") ;
+    aa[icent] = getSdHists(Form("pbpb%d",icent),fnameAA , icent, ptCut, totalEvents ) ;
+    aaR[icent] = getSdHists(Form("pbpbR%d",icent),fnameAA , icent, recoPtCut, totalEvents ) ;
+    aaLA[icent] = getSdHists(Form("pbpbLA%d",icent),fnameAA, icent, ptCut + " && chTheta>0.1", totalEvents) ;
   }
-  TCanvas* c1=  new TCanvas("c1","",1000,500);
+  TCanvas* c1=  new TCanvas("c100","",1000,500);
   c1->Divide(2,1);
   c1->cd(1);
   handsomeTH1(pp.hEffDphi,1);
@@ -81,8 +81,8 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250) {
   drawText("60-80%", 0.3, 0.8,1,25);
   TLegend *leg3= new TLegend(0.3062558,0.452381,0.9990587,0.7163265,NULL,"brNDC");
   easyLeg(leg3,"PbPb MC");
-  leg3->AddEntry(aa[6].hGenTheta,"Truth chg'd particles","l");
-  leg3->AddEntry(aa[6].hRecoTheta,"Reco","pl");
+  leg3->AddEntry(aa[6].hGenTheta,"Truth particles","l");
+  leg3->AddEntry(aa[6].hRecoTheta,"Reco tower","pl");
   leg3->Draw();
 
   c2->cd(2);
