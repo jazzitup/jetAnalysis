@@ -278,6 +278,16 @@ void drawText2(const char *text, float xp, float yp, int textSize=18){
    tex->Draw();
 }
 
+void drawText3(const char *text, float xp, float yp, int textColor = kBlack, int textSize=18){
+  TLatex *tex = new TLatex(xp,yp,text);
+  tex->SetTextFont(43);
+  tex->SetTextSize(textSize);
+  tex->SetTextColor(textColor);
+  tex->SetLineWidth(1);
+  tex->Draw();
+}
+
+
 void jumSun(double x1=0,double y1=0,double x2=1,double y2=1,int color=1, double width=1)
 {
    TLine* t1 = new TLine(x1,y1,x2,y2);

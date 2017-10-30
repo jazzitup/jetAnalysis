@@ -12,6 +12,10 @@ struct sdVariable {
   TH1D* hGenZg;
   TH1D* hRecoChZg;
   TH1D* hGenChZg;
+  TH1D* hRecoSdM;
+  TH1D* hGenSdM;
+  TH1D* hRecoChSdM;
+  TH1D* hGenChSdM;
 
 } ;
 
@@ -49,7 +53,9 @@ sdVariable getSdHists (TString prefix = "pbpb",
 
   // SD variables
   TString cutWeight = Form("((cent==%d)&&(%s))*weight", centBin, theCut.Data() );
-  TH1D* _hGenTheta = new TH1D(Form("_hGenTheta_cent%d_%s",centBin,prefix.Data()), "; #theta;",20,0,1);
+  const int nThetaBins = 10;
+  double thetaBin[nThetaBins+1] = {0,0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.7,1.0};
+  TH1D* _hGenTheta = new TH1D(Form("_hGenTheta_cent%d_%s",centBin,prefix.Data()), "; #theta;",nThetaBins, thetaBin);
   TH1D* _hGenChTheta = (TH1D*)_hGenTheta->Clone(Form("_hGenChTheta_cent%d_%s",centBin,prefix.Data()));
   TH1D* _hRecoTheta = (TH1D*)_hGenTheta->Clone(Form("_hRecoTheta_cent%d_%s",centBin,prefix.Data()));
   TH1D* _hRecoChTheta = (TH1D*)_hGenTheta->Clone(Form("_hRecoChTheta_cent%d_%s",centBin,prefix.Data()));
@@ -59,6 +65,10 @@ sdVariable getSdHists (TString prefix = "pbpb",
   TH1D* _hGenZg = (TH1D*)_hRecoChZg->Clone(Form("_hGenZg_cent%d_%s",centBin,prefix.Data()));
   TH1D* _hRecoZg = (TH1D*)_hRecoChZg->Clone(Form("_hRecoZg_cent%d_%s",centBin,prefix.Data()));
   
+  TH1D* _hRecoSdM = new TH1D(Form("_hRecoSdM_cent%d_%s",centBin,prefix.Data()), ";Mass;",10,0,100);
+  TH1D* _hGenSdM = (TH1D*)_hRecoSdM->Clone(Form("_hGenSdM_cent%d_%s",centBin,prefix.Data()) );
+  TH1D* _hRecoChSdM = (TH1D*)_hRecoSdM->Clone(Form("_hRecoChSdM_cent%d_%s",centBin,prefix.Data()) );
+  TH1D* _hGenChSdM = (TH1D*)_hGenSdM->Clone(Form("_hGenChSdM_cent%d_%s",centBin,prefix.Data()) );
   
   tree->Draw( Form("theta>>%s",     _hRecoTheta->GetName()), cutWeight ,"", totalEvents);
   tree->Draw( Form("chTheta>>%s",   _hRecoChTheta->GetName()), cutWeight,"", totalEvents );
@@ -69,6 +79,11 @@ sdVariable getSdHists (TString prefix = "pbpb",
   tree->Draw( Form("genZg>>%s",     _hGenZg->GetName()), cutWeight, "",totalEvents );
   tree->Draw( Form("chZg>>%s",     _hRecoChZg->GetName()), cutWeight, "",totalEvents );
   tree->Draw( Form("genChZg>>%s",     _hGenChZg->GetName()), cutWeight, "",totalEvents );
+
+  tree->Draw( Form("sdMass>>%s",     _hRecoSdM->GetName()), cutWeight, "",totalEvents );
+  tree->Draw( Form("genSdMass>>%s",  _hGenSdM->GetName()), cutWeight, "",totalEvents );
+  tree->Draw( Form("chSdMass>>%s",   _hRecoChSdM->GetName()), cutWeight, "",totalEvents );
+  tree->Draw( Form("genChSdMass>>%s",_hGenChSdM->GetName()), cutWeight, "",totalEvents );
 
   sdVariable ret;
   //  TCanvas* c0 = new TCanvas("c0","",500,500);
@@ -84,6 +99,12 @@ sdVariable getSdHists (TString prefix = "pbpb",
   ret.hRecoChZg = _hRecoChZg;
   ret.hGenZg = _hGenZg;
   ret.hGenChZg = _hGenChZg;
-  
+
+  ret.hRecoSdM = _hRecoSdM;
+  ret.hGenSdM = _hGenSdM;
+  ret.hRecoChSdM = _hRecoChSdM;
+  ret.hGenChSdM = _hGenChSdM;
+
+
   return ret;
 }
