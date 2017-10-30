@@ -11,7 +11,7 @@ struct Jes {
 } ;
 
 
-Jes drawBasicPerf(int radius=10, int cent=0)
+Jes drawBasicPerf(int radius=10, int cent=0, int sampleID=0)  // sampleID 0 = pp, 1=pbpb
 {
   TH1::SetDefaultSumw2();
   TFile* inf[10];
@@ -29,10 +29,10 @@ Jes drawBasicPerf(int radius=10, int cent=0)
   Jes ret;
   
   // eta binning : 
-  int etaPosL[6] = {0, 51, 54, 59, 63, 72};   // 0 - 0.3 - 0.8 - 1.2 - 2.1 - 2.8
-  int etaPosH[6] = {0, 53, 58, 62, 71, 78};
-  int etaNegL[6] = {0, 48, 43, 39, 30, 23};   // 0 - 0.3 - 0.8 - 1.2 - 2.1 - 2.8
-  int etaNegH[6] = {0, 50, 47, 42, 38, 29};
+  int etaPosL[6] = {51, 51, 54, 59, 63, 72};   // 0 - 0.3 - 0.8 - 1.2 - 2.1 - 2.8
+  int etaPosH[6] = {78, 53, 58, 62, 71, 78};
+  int etaNegL[6] = {23, 48, 43, 39, 30, 23};   // 0 - 0.3 - 0.8 - 1.2 - 2.1 - 2.8
+  int etaNegH[6] = {50, 50, 47, 42, 38, 29};
   
   TH1D* hRatioPtEtaJz[20][10][10];   // rapidity bins.  16 pt bins and 2 rapidity bins and X jz bins
   TH1D* hScale[10]; // in rapidity bins
@@ -50,15 +50,24 @@ Jes drawBasicPerf(int radius=10, int cent=0)
   for ( int i=2 ; i<=4 ; i++) {    // jz
     
     TString infName="";
-    if ( radius == 10 ) {  
-      if (i==2)        {  infName ="histograms/R10_indexCali1_noRecGen_jz2.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
-      else if (i==3)   {  infName ="histograms/R10_indexCali1_noRecGen_jz3.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
-      else if (i==4)   {  infName ="histograms/R10_indexCali1_noRecGen_jz4.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
+    if ( sampleID == 0 ) { 
+      if ( radius == 10 ) {  
+	if (i==2)        {  infName ="histograms/R10_indexCali1_noRecGen_jz2.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
+	else if (i==3)   {  infName ="histograms/R10_indexCali1_noRecGen_jz3.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
+	else if (i==4)   {  infName ="histograms/R10_indexCali1_noRecGen_jz4.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
+      }
+      else if ( radius == 4 ) {  
+	if (i==2)        {  infName ="histograms/R4_indexCali1_noRecGen_jz2.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
+	else if (i==3)   {  infName ="histograms/R4_indexCali1_noRecGen_jz3.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
+	else if (i==4)   {  infName ="histograms/R4_indexCali1_noRecGen_jz4.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
+      }
     }
-    else if ( radius == 4 ) {  
-      if (i==2)        {  infName ="histograms/R4_indexCali1_noRecGen_jz2.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
-      else if (i==3)   {  infName ="histograms/R4_indexCali1_noRecGen_jz3.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
-      else if (i==4)   {  infName ="histograms/R4_indexCali1_noRecGen_jz4.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
+    else if ( sampleID == 1 ) { 
+      if ( radius == 10 ) { 
+	if (i==2)        {  infName ="histograms/pbpbMC/pbpbMC_R10_jz2.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
+        else if (i==3)   {  infName ="histograms/pbpbMC/pbpbMC_R10_jz3.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
+        else if (i==4)   {  infName ="histograms/pbpbMC/pbpbMC_R10_jz4.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
+      }
     }
 
 
@@ -87,7 +96,7 @@ Jes drawBasicPerf(int radius=10, int cent=0)
     hgmt[i]   = (TH3D*)inf[i]->Get(Form("h_truth_jet_cent%d_matched",cent));
     
     
-    for ( int ieta = 1 ; ieta <= 5 ; ieta++) { 
+    for ( int ieta = 0 ; ieta <= 5 ; ieta++) {    // ieta =0, integrated bin
       for ( int ipt = 1; ipt<=16 ; ipt++) { 
  	hRatioPtEtaJz[ipt][ieta][i] =     (TH1D*)hresp[i]->ProjectionY(Form("hRatioPtEtaJz_ipt%d_ieta%dp_ijz%d",ipt,ieta,i),ipt,ipt,etaPosL[ieta], etaPosH[ieta]);
 	hRatioPtEtaJz[ipt][ieta][i]->Add( (TH1D*)hresp[i]->ProjectionY(Form("hRatioPtEtaJz_ipt%d_ieat%dm_ijz%d",ipt,ieta,i),ipt,ipt,etaNegL[ieta], etaNegH[ieta]) );
@@ -216,7 +225,7 @@ Jes drawBasicPerf(int radius=10, int cent=0)
 
 
   
-  for ( int ieta = 1 ; ieta <=5 ; ieta++) { 
+  for ( int ieta = 0 ; ieta <=5 ; ieta++) { 
     for ( int ipt = 1; ipt<=16 ; ipt++) {
       hRatioPtEtaJz[ipt][ieta][0] = (TH1D*)hRatioPtEtaJz[ipt][ieta][2]->Clone(Form("hRatioPtEtaJz_ipt%d_iy1_IntJz",ipt));
       hRatioPtEtaJz[ipt][ieta][0]->Reset();
@@ -229,7 +238,7 @@ Jes drawBasicPerf(int radius=10, int cent=0)
   
   
   
-  for ( int ieta = 1 ; ieta <=5 ; ieta++) {
+  for ( int ieta = 0 ; ieta <=5 ; ieta++) {
     hScale[ieta] = (TH1D*)hTempPt->Clone(Form("hScale_ieta%d",ieta));
     hScale[ieta]->Reset();
     hRes[ieta] = (TH1D*)hTempPt->Clone(Form("hRes_ieta%d",ieta));
@@ -239,7 +248,7 @@ Jes drawBasicPerf(int radius=10, int cent=0)
   int colorList[6] = {0,1,2,4,7,8};
 
   
-  for ( int ieta = 1 ; ieta<=5 ; ieta++) { 
+  for ( int ieta = 0 ; ieta<=5 ; ieta++) { 
     TCanvas* c1 = new TCanvas(Form("c1_ieta%d",ieta),"",1200,800);
     c1->Divide(4,3);
     for ( int ipt = 3 ; ipt<=13 ; ipt++) {
@@ -328,7 +337,7 @@ Jes drawBasicPerf(int radius=10, int cent=0)
   }
   fout->Close();
 
-  for ( int ieta = 1 ; ieta <= 5 ; ieta++) {
+  for ( int ieta = 0 ; ieta <= 5 ; ieta++) {
     ret.hScale[ieta] = hScale[ieta];
     ret.hRes[ieta] = hRes[ieta];
   }
