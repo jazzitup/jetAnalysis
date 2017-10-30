@@ -6,11 +6,11 @@
 void drawSoftDrop(int totalEvents=10000, int ptLow=150, int ptHigh=250) { 
   
   TString fnamePP = "ntuples/jetSubTree_pythia_r1.0_jz3_v1.6.root";
-  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_bkgKill0_jz3.root";
-  //  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_ptCut8_jz3.root";
+  //TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_bkgKill0_jz3.root";
+  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_ptCut8_jz3.root";
   
-  TString ptCut = Form("genPt>%d && genPt<%d",ptLow, ptHigh) ; 
-  TString recoPtCut = Form("pt>%d && pt<%d",ptLow, ptHigh) ; 
+  TString ptCut = Form("genPt>%d && genPt<%d && genChTheta>0.2 ",ptLow, ptHigh) ; 
+  TString recoPtCut = Form("pt>%d && pt<%d && chTheta>0.2 ",ptLow, ptHigh) ; 
   sdVariable pp = getSdHists("pp", fnamePP, 0, ptCut,totalEvents );
   sdVariable ppLA = getSdHists("pp",fnamePP, 0, ptCut + " && chTheta>0.1", totalEvents); // large angle
   
@@ -326,7 +326,172 @@ void drawSoftDrop(int totalEvents=10000, int ptLow=150, int ptHigh=250) {
   aaLA[0].hGenChZg->DrawCopy("hist");
   aaLA[0].hRecoChZg->DrawCopy("e same");
   drawText("0-10%", 0.6, 0.8,1,25);
+
+  ///////////////////////  
+  // Mass distribution //
+  ///////////////////////
+  TCanvas* c7pp=  new TCanvas("c7pp","",400,800);
+  c7pp->Divide(1,2); 
+  c7pp->cd(1);
+  handsomeTH1(pp.hGenChSdM,1);
+  handsomeTH1(pp.hRecoChSdM,1);
+  pp.hGenChSdM->SetXTitle("SoftDrop Ch'd Mass (GeV)");
+  pp.hGenChSdM->DrawCopy("hist");
+  pp.hRecoChSdM->DrawCopy("e same");
+
+  TLegend* leg7 = (TLegend*)leg2->Clone("leg7");
+  leg7->SetHeader("Charged sub-jet");
+  leg7->Draw();
+  drawText(Form("p_{T}^{jet}: %d - %d GeV,   |#eta^{jet}| < 1.2",ptLow,ptHigh),0.35,0.8,1,15);
+  drawText("p_{T}^{track} > 4 GeV/c",0.35,0.7,1,15);
+
+  c7pp->cd(2);
+  TH1D* ppRatioChM = (TH1D*)pp.hRecoChSdM->Clone("ppRatioChM");
+  ppRatioChM->Divide(pp.hGenChSdM);
+  ppRatioChM->SetAxisRange(0,2,"Y");
+  ppRatioChM->SetYTitle("Reco/Truth");
+  ppRatioChM->DrawCopy();
+  jumSun(0,1,1,1);
   
+  TCanvas* c7=  new TCanvas("c7","",1200,800);
+  c7->Divide(3,2);
+  c7->cd(1);
+  handsomeTH1(aa[6].hGenChSdM,2,1,24);
+  handsomeTH1(aa[6].hRecoChSdM,2,1,24);
+  aa[6].hGenChSdM->SetXTitle("SoftDrop Ch'ed Mass (GeV)");
+  cleverRange(aa[6].hGenChSdM);
+  aa[6].hGenChSdM->DrawCopy("hist");
+  aa[6].hRecoChSdM->DrawCopy("e same");
+  drawText("60-80%", 0.3, 0.8,1,25);
+  TLegend *leg71= new TLegend(0.3062558,0.452381,0.9990587,0.7163265,NULL,"brNDC");
+  easyLeg(leg71,"PbPb MC, p_{T}^{constituent} > 4 GeV/c");
+  leg71->AddEntry(aa[6].hGenChSdM, "Truth Charged Subjet");
+  leg71->AddEntry(aa[6].hRecoChSdM, "Reco Charged Subjet");
+  leg71->Draw();
+  
+  c7->cd(4);
+  TH1D* ratChM = (TH1D*)aa[6].hRecoChSdM->Clone("ratChM");
+  ratChM->Divide(aa[6].hGenChSdM);
+  ratChM->SetAxisRange(0,5,"Y");
+  ratChM->SetYTitle("Reco/Truth");
+  ratChM->DrawCopy();
+  jumSun(0,1,1,1);
+
+  c7->cd(2);
+  handsomeTH1(aa[3].hGenChSdM,2,1,20);
+  handsomeTH1(aa[3].hRecoChSdM,2,1,20);
+  aa[3].hGenChSdM->SetXTitle("SoftDrop Mass (GeV)");
+  cleverRange(aa[3].hGenChSdM);
+  aa[3].hGenChSdM->DrawCopy("hist");
+  aa[3].hRecoChSdM->DrawCopy("e same");
+  drawText("30-40%", 0.3, 0.8,1,25);
+  c7->cd(5);
+  ratChM = (TH1D*)aa[3].hRecoChSdM->Clone("ratChM");
+  ratChM->Divide(aa[3].hGenChSdM);
+  ratChM->SetAxisRange(0,5,"Y");
+  ratChM->SetYTitle("Reco/Truth");
+  ratChM->DrawCopy();
+  jumSun(0,1,1,1);
+
+  c7->cd(3);
+  handsomeTH1(aa[0].hGenChSdM,2);
+  handsomeTH1(aa[0].hRecoChSdM,2);
+  aa[0].hGenChSdM->SetXTitle("SoftDrop Mass (GeV)");
+  cleverRange(aa[0].hGenChSdM);
+  aa[0].hGenChSdM->DrawCopy("hist");
+  aa[0].hRecoChSdM->DrawCopy("e same");
+  drawText("0-10%", 0.3, 0.8,1,25);
+  c7->cd(6);
+  ratChM = (TH1D*)aa[0].hRecoChSdM->Clone("ratChM");
+  ratChM->Divide(aa[0].hGenChSdM);
+  ratChM->SetAxisRange(0,5,"Y");
+  ratChM->SetYTitle("Reco/Truth");
+  ratChM->DrawCopy();
+  jumSun(0,1,1,1);
+  
+  TCanvas* c8pp=  new TCanvas("c8pp","",400,800);
+  c8pp->Divide(1,2); 
+  c8pp->cd(1);
+  handsomeTH1(pp.hGenSdM,1);
+  handsomeTH1(pp.hRecoSdM,1);
+  pp.hGenSdM->SetXTitle("SoftDrop Mass (GeV)");
+  pp.hGenSdM->DrawCopy("hist");
+  pp.hRecoSdM->DrawCopy("e same");
+
+  TLegend* leg8 = (TLegend*)leg2->Clone("leg8");
+  leg8->SetHeader("Charged sub-jet");
+  leg8->Draw();
+  drawText(Form("p_{T}^{jet}: %d - %d GeV,   |#eta^{jet}| < 1.2",ptLow,ptHigh),0.35,0.8,1,15);
+  drawText("p_{T}^{track} > 4 GeV/c",0.35,0.7,1,15);
+
+  c8pp->cd(2);
+  TH1D* ppRatioM = (TH1D*)pp.hRecoSdM->Clone("ppRatioM");
+  ppRatioM->Divide(pp.hGenSdM);
+  ppRatioM->SetAxisRange(0,2,"Y");
+  ppRatioM->SetYTitle("Reco/Truth");
+  ppRatioM->DrawCopy();
+  jumSun(0,1,1,1);
+  
+  TCanvas* c8=  new TCanvas("c8","",1200,800);
+  c8->Divide(3,2);
+  c8->cd(1);
+  handsomeTH1(aa[6].hGenSdM,2,1,24);
+  handsomeTH1(aa[6].hRecoSdM,2,1,24);
+  aa[6].hGenSdM->SetXTitle("SoftDrop Mass (GeV)");
+  cleverRange(aa[6].hGenSdM);
+  aa[6].hGenSdM->DrawCopy("hist");
+  aa[6].hRecoSdM->DrawCopy("e same");
+  drawText("60-80%", 0.3, 0.8,1,25);
+  TLegend *leg81= new TLegend(0.3062558,0.452381,0.9990587,0.7163265,NULL,"brNDC");
+  easyLeg(leg81,"PbPb MC, p_{T}^{constituent} > 4 GeV/c");
+  leg81->AddEntry(aa[6].hGenSdM, "Truth Charged Subjet");
+  leg81->AddEntry(aa[6].hRecoSdM, "Reco Charged Subjet");
+  leg81->Draw();
+  
+  c8->cd(4);
+  TH1D* ratM = (TH1D*)aa[6].hRecoSdM->Clone("ratM");
+  ratM->Divide(aa[6].hGenSdM);
+  ratM->SetAxisRange(0,5,"Y");
+  ratM->SetYTitle("Reco/Truth");
+  ratM->DrawCopy();
+  jumSun(0,1,1,1);
+
+  c8->cd(2);
+  handsomeTH1(aa[3].hGenSdM,2,1,20);
+  handsomeTH1(aa[3].hRecoSdM,2,1,20);
+  aa[3].hGenSdM->SetXTitle("SoftDrop Mass (GeV)");
+  cleverRange(aa[3].hGenSdM);
+  aa[3].hGenSdM->DrawCopy("hist");
+  aa[3].hRecoSdM->DrawCopy("e same");
+  drawText("30-40%", 0.3, 0.8,1,25);
+  c8->cd(5);
+  ratM = (TH1D*)aa[3].hRecoSdM->Clone("ratM");
+  ratM->Divide(aa[3].hGenSdM);
+  ratM->SetAxisRange(0,5,"Y");
+  ratM->SetYTitle("Reco/Truth");
+  ratM->DrawCopy();
+  jumSun(0,1,1,1);
+  
+  c8->cd(3);
+  handsomeTH1(aa[0].hGenSdM,2);
+  handsomeTH1(aa[0].hRecoSdM,2);
+  aa[0].hGenSdM->SetXTitle("SoftDrop Mass (GeV)");
+  cleverRange(aa[0].hGenSdM);
+  aa[0].hGenSdM->DrawCopy("hist");
+  aa[0].hRecoSdM->DrawCopy("e same");
+  drawText("0-10%", 0.3, 0.8,1,25);
+  c8->cd(6);
+  ratM = (TH1D*)aa[0].hRecoSdM->Clone("ratM");
+  ratM->Divide(aa[0].hGenSdM);
+  ratM->SetAxisRange(0,5,"Y");
+  ratM->SetYTitle("Reco/Truth");
+  ratM->DrawCopy();
+  jumSun(0,1,1,1);
+  
+
 }
+
+
+
 
 
