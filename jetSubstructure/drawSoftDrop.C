@@ -5,8 +5,9 @@
 */
 void drawSoftDrop(int totalEvents=10000, int ptLow=150, int ptHigh=250) { 
   
-  TString fnamePP = "ntuples/jetSubstructure_pythia_r1.0_ptCut6_jz3.root";
-  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_ptCut8_jz3.root";
+  TString fnamePP = "ntuples/jetSubTree_pythia_r1.0_jz3_v1.6.root";
+  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_bkgKill0_jz3.root";
+  //  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_ptCut8_jz3.root";
   
   TString ptCut = Form("genPt>%d && genPt<%d",ptLow, ptHigh) ; 
   TString recoPtCut = Form("pt>%d && pt<%d",ptLow, ptHigh) ; 
@@ -136,7 +137,11 @@ void drawSoftDrop(int totalEvents=10000, int ptLow=150, int ptHigh=250) {
   aa[6].hGenChTheta->DrawCopy("hist");
   aa[6].hRecoChTheta->DrawCopy("e same");
   drawText("60-80%", 0.3, 0.8,1,25);
-  leg3->Draw();
+  TLegend *leg31= new TLegend(0.3062558,0.452381,0.9990587,0.7163265,NULL,"brNDC");
+  easyLeg(leg31,"PbPb MC, p_{T}^{constituent} > 4 GeV/c");
+  leg31->AddEntry(aa[6].hGenChTheta, "Truth Charged Subjet");
+  leg31->AddEntry(aa[6].hRecoChTheta, "Reco Charged Subjet");
+  leg31->Draw();
   
   c3->cd(4);
   TH1D* rat = (TH1D*)aa[6].hRecoChTheta->Clone("rat");
@@ -213,7 +218,7 @@ void drawSoftDrop(int totalEvents=10000, int ptLow=150, int ptHigh=250) {
   c5->cd(1);
   handsomeTH1(aa[6].hRecoChTheta,2);
   handsomeTH1(aaR[6].hRecoChTheta,2,1,24);
-  aa[6].hRecoChTheta->SetXTitle("#theta between subjets");
+  aa[6].hRecoChTheta->SetXTitle("#theta of Reco'ed Ch. subjets");
   scaleInt(aa[6].hRecoChTheta);
   scaleInt(aaR[6].hRecoChTheta);
   aa[6].hRecoChTheta->DrawCopy();
