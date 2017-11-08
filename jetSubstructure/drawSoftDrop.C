@@ -3,13 +3,12 @@
   TH1D* hEffDphi[10];
   TH1D* hEffDrap[10];
 */
-void drawSoftDrop(float coneR=1.0, int  trkPtCut=0, float thetaCut =0., int numEvents =  1000000, int ptLow=150, int ptHigh=250) {
-  float version = 3.0;
+void drawSoftDrop(float coneR=1.0, int  trkPtCut=0, float thetaCut =0., int numEvents =  1000000, int ptLow=150, int ptHigh=250, float version = 3.0) {
   TString fnamePP = "ntuples/jetSubstructure_pythia_r1.0_trim_ptCut6_jz3_v2.0.root";
   //  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_ptCut6_jz3_v1.9.root";
   TString fnameAA = Form("ntuples/jetSubstructure_himix_r%.1f_cs_ptCut%d_jz3_v%.1f.root",coneR, trkPtCut, version) ;
   //  TString prefix = Form("6GeVCut_theta%.1f",thetaCut);
-  TString prefix = Form("trkPtCut%d_theta%.1f_v%.1f",trkPtCut,thetaCut,version);
+  TString prefix = Form("r%.1f_trkPtCut%d_theta%.1f_v%.2f",coneR,trkPtCut,thetaCut,version);
   cout <<" prefix = " << prefix << endl;
   TString ptCut = Form("genPt>%d && genPt<%d  ",ptLow, ptHigh) ; 
   TString recoPtCut = Form("pt>%d && pt<%d ",ptLow, ptHigh) ; 
