@@ -3,11 +3,14 @@
   TH1D* hEffDphi[10];
   TH1D* hEffDrap[10];
 */
-void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEvents = 10000 ){
-  
-  TString fnamePP = "ntuples/jetSubstructure_pythia_r1.0_ptCut6_jz3_v1.9.root";
-  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_ptCut6_jz3_v1.9.root";
-  
+void drawSoftDrop(float coneR=1.0, int  trkPtCut=0, float thetaCut =0., int numEvents =  1000000, int ptLow=150, int ptHigh=250) {
+  float version = 3.0;
+  TString fnamePP = "ntuples/jetSubstructure_pythia_r1.0_trim_ptCut6_jz3_v2.0.root";
+  //  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_ptCut6_jz3_v1.9.root";
+  TString fnameAA = Form("ntuples/jetSubstructure_himix_r%.1f_cs_ptCut%d_jz3_v%.1f.root",coneR, trkPtCut, version) ;
+  //  TString prefix = Form("6GeVCut_theta%.1f",thetaCut);
+  TString prefix = Form("trkPtCut%d_theta%.1f_v%.1f",trkPtCut,thetaCut,version);
+  cout <<" prefix = " << prefix << endl;
   TString ptCut = Form("genPt>%d && genPt<%d  ",ptLow, ptHigh) ; 
   TString recoPtCut = Form("pt>%d && pt<%d ",ptLow, ptHigh) ; 
 
@@ -34,8 +37,8 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   aa[6].hEffDphi->DrawCopy("same e"); 
   aa[0].hEffDphi->DrawCopy("same e"); 
   TLegend *leg1= new TLegend(0.2672428,0.2089151,0.9999582,0.4709989,NULL,"brNDC");
-  easyLeg(leg1,"Tracks in #DeltaR <1.0 cone");
-  leg1->AddEntry( pp.hEffDphi, "PYTHIA","l");
+  easyLeg(leg1,Form("Tracks in #DeltaR <%.1f cone",coneR));
+  leg1->AddEntry( pp.hEffDphi, "PYTHIA (ptCut:6GeV, trimmed)","l");
   leg1->AddEntry( aa[6].hEffDphi, "+ PbPb 60-80%","p");
   leg1->AddEntry( aa[0].hEffDphi, "+ PbPb 0-10%","p");
   leg1->Draw();
@@ -50,7 +53,6 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   pp.hEffDrap->DrawCopy("hist");
   aa[6].hEffDrap->DrawCopy("same e"); 
   aa[0].hEffDrap->DrawCopy("same e"); 
-  c1->SaveAs("figures/c1.pdf");
   
   // Calorimeter subjets
   TCanvas* c2=  new TCanvas("c2","",1200,450);
@@ -161,7 +163,6 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   grRatio->DrawCopy();
   jumSun(0,1,1,1);
 
-  c2->SaveAs("figures/c2.pdf");
 
   // theta vs charged theta
   TCanvas* c3=  new TCanvas("c3","",1200,450);
@@ -170,11 +171,14 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   handsomeTH1(pp.hGenChTheta,1);
   handsomeTH1(pp.hRecoChTheta,1);
   pp.hGenChTheta->SetXTitle("#theta between subjets");
+  scaleInt(pp.hGenChTheta);
+  scaleInt(pp.hRecoChTheta);
+  cleverRange(pp.hGenChTheta,100,0.0001);
   pp.hGenChTheta->DrawCopy("hist");
   pp.hRecoChTheta->DrawCopy("e same");
   gPad->SetLogy();
 
-  TLegend *leg4= new TLegend(0.556546,0.3894737,1,0.6347368,NULL,"brNDC");
+  TLegend *leg4= new TLegend(0.5555711,0.05819241,0.9992266,0.3022251,NULL,"brNDC");
   easyLeg(leg4,"Charged sub-jet");
   leg4->AddEntry(pp.hGenChTheta,"Truth","l");
   leg4->AddEntry(pp.hGenChTheta,"Reco");
@@ -200,6 +204,9 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   handsomeTH1(aa[6].hRecoChTheta,2,1,24);
   aa[6].hGenChTheta->SetXTitle("#theta between subjets");
   //  cleverRange(aa[6].hGenChTheta);
+  scaleInt(aa[6].hGenChTheta);
+  scaleInt(aa[6].hRecoChTheta);
+  cleverRange(aa[6].hGenChTheta,100,0.0001);
   aa[6].hGenChTheta->DrawCopy("hist");
   aa[6].hRecoChTheta->DrawCopy("e same");
   drawText("PbPb MC 60-80%", 0.3, 0.8,1,20);
@@ -226,6 +233,9 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   handsomeTH1(aa[3].hRecoChTheta,2,1,20);
   aa[3].hGenChTheta->SetXTitle("#theta between subjets");
   //  cleverRange(aa[3].hGenChTheta);
+  scaleInt(aa[3].hGenChTheta);
+  scaleInt(aa[3].hRecoChTheta);
+  cleverRange(aa[3].hGenChTheta,100,0.0001);
   aa[3].hGenChTheta->DrawCopy("hist");
   aa[3].hRecoChTheta->DrawCopy("e same");
   drawText("30-40%", 0.3, 0.8,1,20);
@@ -246,6 +256,9 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   handsomeTH1(aa[0].hRecoChTheta,2);
   aa[0].hGenChTheta->SetXTitle("#theta between subjets");
   //  cleverRange(aa[0].hGenChTheta);
+  scaleInt(aa[0].hGenChTheta);
+  scaleInt(aa[0].hRecoChTheta);
+  cleverRange(aa[0].hGenChTheta,100,0.0001);
   aa[0].hGenChTheta->DrawCopy("hist");
   aa[0].hRecoChTheta->DrawCopy("e same");
   drawText("0-10%", 0.3, 0.8,1,20);
@@ -261,7 +274,6 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   rat->SetNdivisions(505,"Y");
   rat->DrawCopy();
   jumSun(0,1,1,1);
-  c3->SaveAs("figures/c3.pdf");
 
   
   // theta vs ch theta
@@ -276,18 +288,21 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   pad1->Draw();
   pad2->Draw();
   pad1->cd();*/
+  scaleInt(pp.hGenChTheta);
+  scaleInt(pp.hGenTheta);
+  cleverRange(pp.hGenChTheta,100,0.0001);
   handsomeTH1(pp.hGenChTheta,1);
   handsomeTH1(pp.hGenTheta,1);
   pp.hGenTheta->DrawCopy("hist");
   pp.hGenChTheta->DrawCopy("e same");
   gPad->SetLogy();
   TLegend* leg5 = new TLegend(0.5036546,0.3894737,0.9,0.6347368,NULL,"brNDC");
-  easyLeg(leg5,"pp MC Truth");
-  leg5->AddEntry(pp.hGenTheta, "Ntrl + Cha'd particles","l");
-  leg5->AddEntry(pp.hGenChTheta, "Chg'd only");
+  easyLeg(leg5,"pp (pT>6GeV, trimmed)");
+  leg5->AddEntry(pp.hGenTheta, "Ntrl + Cha'd particles, w/o p_{T} cut","l");
+  leg5->AddEntry(pp.hGenChTheta, "Charged only, w/ p_{T} cut");
   leg5->Draw();
   drawText(Form("p_{T}^{jet}: %d - %d GeV,   |#eta^{jet}| < 1.2",ptLow,ptHigh),0.5,0.8,1,15);
-  drawText("constituent p_{T} > 4 GeV/c",0.5,0.7,1,15);
+  //  drawText("constituent p_{T} > 4 GeV/c",0.5,0.7,1,15);
 
   c4->cd(2);
   ppRatio = (TH1D*)pp.hGenChTheta->Clone("ppRatio");
@@ -300,7 +315,6 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   ppRatio->DrawCopy();
   jumSun(0,1,1,1);  
   
-  c4->SaveAs("figures/c4.pdf");
   
   // Bin migration effect?
 
@@ -387,11 +401,9 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   rat->DrawCopy();
   jumSun(0,1,1,1);
   
-  c5->SaveAs("figures/c5.pdf");
 
 
   // z_{g}
-  // theta vs charged theta
   TCanvas* c6=  new TCanvas("c6","",1200,450);
   makeEfficiencyCanvas(c6,4);
   c6->cd(1);
@@ -403,13 +415,13 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   pp.hGenChZg->DrawCopy("hist");
   pp.hRecoChZg->DrawCopy("e same");
 
-  TLegend *leg6 = new TLegend(0.559598,0.4073333,0.9572864,0.7033333,NULL,"brNDC");
+  TLegend *leg6 = new TLegend(0.400721,0.04639532,0.8472388,0.2716563,NULL,"brNDC");
   easyLeg(leg6,"Charged subjets");
   leg6->AddEntry(pp.hGenChZg,"Truth Tracks","l");
   leg6->AddEntry(pp.hRecoChZg,"Reco Tracks","pl");
   leg6->Draw();
   drawText(Form("p_{T}^{jet}: %d - %d GeV,   |#eta^{jet}| < 1.2",ptLow,ptHigh),0.35,0.87,1,15);
-  drawText("p_{T}^{track} > 8 GeV",0.35,0.83,1,15);
+  //  drawText("p_{T}^{track} > 8 GeV",0.35,0.83,1,15);
   drawText(Form("#Delta#theta > %.1f",(float)thetaCut),0.35,0.74,2,20);
   
   c6->cd(5);
@@ -489,7 +501,8 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   ratioChZg->DrawCopy();
   jumSun(0,1,0.6,1);
 
-  c6->SaveAs("figures/c6.pdf");
+
+
 
   ///////////////////////  
   // Mass distribution //
@@ -500,15 +513,18 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   handsomeTH1(pp.hGenChSdM,1);
   handsomeTH1(pp.hRecoChSdM,1);
   pp.hGenChSdM->SetXTitle("SoftDrop Ch'd Mass (GeV)");
+  scaleInt(pp.hGenChSdM);
+  scaleInt(pp.hRecoChSdM);
+  cleverRange(pp.hGenChSdM,10,0.0001);
   pp.hGenChSdM->DrawCopy("hist");
   pp.hRecoChSdM->DrawCopy("e same");
 
-  TLegend *leg7= new TLegend(0.556546,0.3894737,1,0.6347368,NULL,"brNDC");
+  TLegend *leg7= new TLegend(0.556546,0.3894737,1,0.7347368,NULL,"brNDC");
   easyLeg(leg7,"Chg'd sub-jet");
   leg7->AddEntry(pp.hGenChSdM, "Truth chg'd particles","l");
   leg7->AddEntry(pp.hRecoChSdM, "Reco tracks");
   leg7->Draw();
-  drawText("pp MC", 0.35, 0.9, 15);
+  drawText("pp (pT>6GeV, trimmed)", 0.35, 0.9, 1, 20);
   drawText(Form("p_{T}^{jet}: %d - %d GeV,   |#eta^{jet}| < 1.2",ptLow,ptHigh),0.35,0.8,1,15);
   //  drawText("p_{T}^{track} > 4 GeV/c",0.35,0.7,1,15);
   gPad->SetLogy();
@@ -531,15 +547,18 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   handsomeTH1(aa[6].hRecoChSdM,2,1,24);
   aa[6].hGenChSdM->SetXTitle("SoftDrop Ch'ed Mass (GeV)");
   cleverRange(aa[6].hGenChSdM,100,1000);
+  scaleInt(aa[6].hGenChSdM);
+  scaleInt(aa[6].hRecoChSdM);
+  cleverRange(aa[6].hGenChSdM,10,0.0001);
   aa[6].hGenChSdM->DrawCopy("hist");
   aa[6].hRecoChSdM->DrawCopy("e same");
   drawText("PbPb MC 60-80%", 0.3, 0.8,1,20);
-  TLegend *leg71= new TLegend(0.3062558,0.452381,0.9990587,0.7163265,NULL,"brNDC");
-  easyLeg(leg71,"PbPb MC, p_{T}^{constituent} > 4 GeV/c");
-  leg71->AddEntry(aa[6].hGenChSdM, "Truth chg'd particles","l");
-  leg71->AddEntry(aa[6].hRecoChSdM, "Reco tracks");
-  leg71->Draw();
-  gPad->SetLogy();
+  //  TLegend *leg71= new TLegend(0.3062558,0.452381,0.9990587,0.7163265,NULL,"brNDC");
+  //  easyLeg(leg71,"PbPb MC, p_{T}^{constituent} > 4 GeV/c");
+  //  leg71->AddEntry(aa[6].hGenChSdM, "Truth chg'd particles","l");
+  //  leg71->AddEntry(aa[6].hRecoChSdM, "Reco tracks");
+  //  leg71->Draw();
+    gPad->SetLogy();
   
   c7->cd(6);
   TH1D* ratChM = (TH1D*)aa[6].hRecoChSdM->Clone("ratChM");
@@ -557,6 +576,9 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   handsomeTH1(aa[3].hRecoChSdM,2,1,20);
   aa[3].hGenChSdM->SetXTitle("SoftDrop Mass (GeV)");
   cleverRange(aa[3].hGenChSdM,100,1000);
+  scaleInt(aa[3].hGenChSdM);
+  scaleInt(aa[3].hRecoChSdM);
+  cleverRange(aa[3].hGenChSdM,10,0.0001);
   aa[3].hGenChSdM->DrawCopy("hist");
   aa[3].hRecoChSdM->DrawCopy("e same");
   drawText("30-40%", 0.3, 0.8,1,20);
@@ -579,10 +601,13 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   handsomeTH1(aa[0].hRecoChSdM,2);
   aa[0].hGenChSdM->SetXTitle("SoftDrop Mass (GeV)");
   cleverRange(aa[0].hGenChSdM,100,1000);
-
+  scaleInt(aa[0].hGenChSdM);
+  scaleInt(aa[0].hRecoChSdM);
+  cleverRange(aa[0].hGenChSdM,10,0.0001);
   aa[0].hGenChSdM->DrawCopy("hist");
   aa[0].hRecoChSdM->DrawCopy("e same");
   drawText("0-10%", 0.3, 0.8,1,20);
+  drawText(Form("#Delta#theta > %.1f",(float)thetaCut),0.35,0.65,2,20);
   gPad->SetLogy();
 
   c7->cd(8);
@@ -596,15 +621,16 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   ratChM->DrawCopy();
   jumSun(0,1,100,1);
   
-  c7->SaveAs("figures/c7.pdf");
 
   TCanvas* c8=  new TCanvas("c8","",1200,450);
   makeEfficiencyCanvas(c8,4);
   c8->cd(1);
   handsomeTH1(pp.hGenSdM,1);
   handsomeTH1(pp.hRecoSdM,1);
-  cleverRange(pp.hGenSdM,100,10000);
   pp.hGenSdM->SetXTitle("SoftDrop Mass (GeV)");
+  scaleInt(pp.hGenSdM);
+  scaleInt(pp.hRecoSdM);
+  cleverRange(pp.hGenSdM,100,0.0001);
   pp.hGenSdM->DrawCopy("hist");
   pp.hRecoSdM->DrawCopy("e same");
   gPad->SetLogy();
@@ -634,6 +660,9 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   handsomeTH1(aa[6].hRecoSdM,2,1,24);
   aa[6].hGenSdM->SetXTitle("SoftDrop Mass (GeV)");
   cleverRange(aa[6].hGenSdM,100,10000);
+  scaleInt(aa[6].hGenSdM);
+  scaleInt(aa[6].hRecoSdM);
+  cleverRange(aa[6].hGenSdM,100,0.0001);
   aa[6].hGenSdM->DrawCopy("hist");
   aa[6].hRecoSdM->DrawCopy("e same");
   gPad->SetLogy();
@@ -656,6 +685,9 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   handsomeTH1(aa[3].hRecoSdM,2,1,20);
   aa[3].hGenSdM->SetXTitle("SoftDrop Mass (GeV)");
   cleverRange(aa[3].hGenSdM,100,10000);
+  scaleInt(aa[3].hGenSdM);
+  scaleInt(aa[3].hRecoSdM);
+  cleverRange(aa[3].hGenSdM,100,0.0001);
   aa[3].hGenSdM->DrawCopy("hist");
   aa[3].hRecoSdM->DrawCopy("e same");
   drawText("30-40%", 0.3, 0.8,1,25);
@@ -678,6 +710,9 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   handsomeTH1(aa[0].hRecoSdM,2);
   aa[0].hGenSdM->SetXTitle("SoftDrop Mass (GeV)");
   cleverRange(aa[0].hGenSdM,100,10000);
+  scaleInt(aa[0].hGenSdM);
+  scaleInt(aa[0].hRecoSdM);
+  cleverRange(aa[0].hGenSdM,100,0.0001);
   aa[0].hGenSdM->DrawCopy("hist");
   aa[0].hRecoSdM->DrawCopy("e same");
   gPad->SetLogy();
@@ -694,8 +729,125 @@ void drawSoftDrop(int ptLow=150, int ptHigh=250, float thetaCut = 0., int numEve
   ratM->DrawCopy();
   jumSun(0,1,100,1);
 
-  c8->SaveAs("figures/c8.pdf");
   
+
+  TCanvas* c9=  new TCanvas("c9","",1200,450);
+  makeEfficiencyCanvas(c9,4);
+  c9->cd(1);
+  handsomeTH1(pp.hGenZg,1);
+  handsomeTH1(pp.hRecoZg,1);
+  pp.hGenZg->SetXTitle("z_{g} = min(p_{T}^{1},p_{T}^{2})/(p_{T}^{1}+p_{T}^{2})");
+  cleverRange(pp.hGenZg,1.8);
+  pp.hGenZg->SetNdivisions(505);
+  pp.hGenZg->DrawCopy("hist");
+  pp.hRecoZg->DrawCopy("e same");
+
+  TLegend *leg9 = new TLegend(0.5011875,0.4481107,0.9992266,0.6733716,NULL,"brNDC");
+  easyLeg(leg9,"Full subjets");
+  leg9->AddEntry(pp.hGenZg,"Truth Jet","l");
+  leg9->AddEntry(pp.hRecoZg,"Calo Jet","pl");
+  leg9->Draw();
+  drawText(Form("p_{T}^{jet}: %d - %d GeV,   |#eta^{jet}| < 1.2",ptLow,ptHigh),0.35,0.87,1,15);
+  //  drawText("p_{T}^{track} > 8 GeV",0.35,0.83,1,15);
+  drawText(Form("#Delta#theta > %.1f",(float)thetaCut),0.35,0.74,2,20);
+  
+  c9->cd(5);
+  TH1D* ratioZg = (TH1D*)pp.hRecoZg->Clone("ratioZg");
+  ratioZg->Divide(pp.hGenZg);
+  ratioZg->SetAxisRange(0,2.3,"Y");
+  ratioZg->SetXTitle("z_{g}");
+  ratioZg->SetYTitle("Reco/Truth");
+  fixedFontHist(ratioZg,2.5,1.5);
+  ratioZg->SetNdivisions(505,"X");
+  ratioZg->SetNdivisions(505,"Y");
+  ratioZg->DrawCopy();
+  jumSun(0,1,0.6,1);
+  
+
+  c9->cd(2);
+  handsomeTH1(aa[6].hGenZg,2);
+  handsomeTH1(aa[6].hRecoZg,2);
+  aa[6].hGenZg->SetXTitle("z_{g} = min(p_{T}^{1},p_{T}^{2})/(p_{T}^{1}+p_{T}^{2})");
+  cleverRange(aa[6].hGenZg,1.8);
+  aa[6].hGenZg->SetNdivisions(505);
+  aa[6].hGenZg->DrawCopy("hist");
+  aa[6].hRecoZg->DrawCopy("e same");
+  drawText("60-80%", 0.6, 0.8,1,25);
+  //  leg9->Draw();
+
+  c9->cd(6);
+  ratioZg = (TH1D*)aa[6].hRecoZg->Clone("ratioZg");
+  ratioZg->Divide(aa[6].hGenZg);
+  ratioZg->SetAxisRange(0,2.3,"Y");
+  ratioZg->SetXTitle("z_{g}");
+  fixedFontHist(ratioZg,2.5,1.5);
+  ratioZg->SetNdivisions(505,"X");
+  ratioZg->SetNdivisions(505,"Y");
+  ratioZg->DrawCopy();
+  jumSun(0,1,0.6,1);
+
+  c9->cd(3);
+  handsomeTH1(aa[3].hGenZg,2);
+  handsomeTH1(aa[3].hRecoZg,2);
+  aa[3].hGenZg->SetXTitle("z_{g} = min(p_{T}^{1},p_{T}^{2})/(p_{T}^{1}+p_{T}^{2})");
+  cleverRange(aa[3].hGenZg,1.8);
+  aa[3].hGenZg->SetNdivisions(505);
+  aa[3].hGenZg->DrawCopy("hist");
+  aa[3].hRecoZg->DrawCopy("e same");
+  drawText("30-40%", 0.6, 0.8,1,25);
+
+  c9->cd(7);
+  ratioZg = (TH1D*)aa[3].hRecoZg->Clone("ratioZg");
+  ratioZg->Divide(aa[3].hGenZg);
+  ratioZg->SetAxisRange(0,2.3,"Y");
+  ratioZg->SetXTitle("z_{g}");
+  fixedFontHist(ratioZg,2.5,1.5);
+  ratioZg->SetNdivisions(505,"X");
+  ratioZg->SetNdivisions(505,"Y");
+  ratioZg->DrawCopy();
+  jumSun(0,1,0.6,1);
+
+  c9->cd(4);
+  handsomeTH1(aa[0].hGenZg,2);
+  handsomeTH1(aa[0].hRecoZg,2);
+  aa[0].hGenZg->SetXTitle("z_{g} = min(p_{T}^{1},p_{T}^{2})/(p_{T}^{1}+p_{T}^{2})");
+  cleverRange(aa[0].hGenZg,1.8);
+  aa[0].hGenZg->SetNdivisions(505);
+  aa[0].hGenZg->DrawCopy("hist");
+  aa[0].hRecoZg->DrawCopy("e same");
+  drawText("0-10%", 0.6, 0.8,1,25);
+
+  c9->cd(8);
+  ratioZg = (TH1D*)aa[0].hRecoZg->Clone("ratioZg");
+  ratioZg->Divide(aa[0].hGenZg);
+  ratioZg->SetAxisRange(0,2.3,"Y");
+  ratioZg->SetXTitle("z_{g}");
+  fixedFontHist(ratioZg,2.5,1.5);
+  ratioZg->SetNdivisions(505,"X");
+  ratioZg->SetNdivisions(505,"Y");
+  ratioZg->DrawCopy();
+  jumSun(0,1,0.6,1);
+
+
+  c1->SaveAs(prefix+"/tracking_efficiency.pdf");
+  c4->SaveAs(prefix+"/validation1.pdf");
+  c5->SaveAs(prefix+"/validation2.pdf");
+  c2->SaveAs(prefix+"/theta_full.pdf");
+  c3->SaveAs(prefix+"/theta_ch.pdf");
+  c9->SaveAs(prefix+"/zg_full.pdf");
+  c6->SaveAs(prefix+"/zg_ch.pdf");
+  c7->SaveAs(prefix+"/sdmass_ch.pdf");
+  c8->SaveAs(prefix+"/sdmass_full.pdf");
+
+  c1->SaveAs(prefix+"/tracking_efficiency.gif");
+  c4->SaveAs(prefix+"/validation1.gif");
+  c5->SaveAs(prefix+"/validation2.gif");
+  c2->SaveAs(prefix+"/theta_full.gif");
+  c3->SaveAs(prefix+"/theta_ch.gif");
+  c9->SaveAs(prefix+"/zg_full.gif");
+  c6->SaveAs(prefix+"/zg_ch.gif");
+  c7->SaveAs(prefix+"/sdmass_ch.gif");
+  c8->SaveAs(prefix+"/sdmass_full.gif");
 
 }
 
