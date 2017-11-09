@@ -3,10 +3,10 @@
   TH1D* hEffDphi[10];
   TH1D* hEffDrap[10];
 */
-void drawSoftDrop(float coneR=1.0, int  trkPtCut=0, float thetaCut =0., int numEvents =  1000000, int ptLow=150, int ptHigh=250, float version = 3.0) {
-  TString fnamePP = "ntuples/jetSubstructure_pythia_r1.0_trim_ptCut6_jz3_v2.0.root";
+void drawSoftDrop(float coneR=1.0, int  trkPtCut=1, float thetaCut =0., int numEvents =  1000, int ptLow=150, int ptHigh=250, float version = 3.1) {
+  TString fnamePP = "ntuples/jetSubstructure_pythia_r1.0_cs_ptCut1_jz3_v3.1.root"; // pp is fixed at the moment 
   TString fnameAA = Form("ntuples/jetSubstructure_himix_r%.1f_cs_ptCut%d_jz3_v%.1f.root",coneR, trkPtCut, version) ;
-
+  
   // TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_cs_ptCut1_jz3_v3.1.root";
 
   TString prefix = Form("r%.1f_trkPtCut%d_theta%.1f_v%.2f",coneR,trkPtCut,thetaCut,version);
@@ -267,7 +267,7 @@ void drawSoftDrop(float coneR=1.0, int  trkPtCut=0, float thetaCut =0., int numE
   pp.hGenChTheta->DrawCopy("e same");
   gPad->SetLogy();
   TLegend* leg5 = new TLegend(0.5036546,0.3894737,0.9,0.6347368,NULL,"brNDC");
-  easyLeg(leg5,"pp (pT>6GeV, trimmed)");
+  easyLeg(leg5,"pp (pT > 1 GeV)");
   leg5->AddEntry(pp.hGenTheta, "Ntrl + Cha'd particles, w/o p_{T} cut","l");
   leg5->AddEntry(pp.hGenChTheta, "Charged only, w/ p_{T} cut");
   leg5->Draw();
@@ -494,7 +494,7 @@ void drawSoftDrop(float coneR=1.0, int  trkPtCut=0, float thetaCut =0., int numE
   leg7->AddEntry(pp.hGenChSdM, "Truth chg'd particles","l");
   leg7->AddEntry(pp.hRecoChSdM, "Reco tracks");
   leg7->Draw();
-  drawText("pp (pT>6GeV, trimmed)", 0.35, 0.9, 1, 20);
+  drawText("pp (pT>1 GeV )", 0.35, 0.9, 1, 20);
   drawText(Form("p_{T}^{jet}: %d - %d GeV,   |#eta^{jet}| < 1.2",ptLow,ptHigh),0.35,0.8,1,15);
   //  drawText("p_{T}^{track} > 4 GeV/c",0.35,0.7,1,15);
   gPad->SetLogy();
