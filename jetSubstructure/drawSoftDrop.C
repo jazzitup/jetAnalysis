@@ -5,9 +5,9 @@
 */
 void drawSoftDrop(float coneR=1.0, int  trkPtCut=0, float thetaCut =0., int numEvents =  1000000, int ptLow=150, int ptHigh=250, float version = 3.0) {
   TString fnamePP = "ntuples/jetSubstructure_pythia_r1.0_trim_ptCut6_jz3_v2.0.root";
-  //  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_ptCut6_jz3_v1.9.root";
   TString fnameAA = Form("ntuples/jetSubstructure_himix_r%.1f_cs_ptCut%d_jz3_v%.1f.root",coneR, trkPtCut, version) ;
-  //  TString prefix = Form("6GeVCut_theta%.1f",thetaCut);
+  //  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_cs_ptCut1_jz3_v3.1.root";
+
   TString prefix = Form("r%.1f_trkPtCut%d_theta%.1f_v%.2f",coneR,trkPtCut,thetaCut,version);
   cout <<" prefix = " << prefix << endl;
   TString ptCut = Form("genPt>%d && genPt<%d  ",ptLow, ptHigh) ; 
@@ -22,36 +22,6 @@ void drawSoftDrop(float coneR=1.0, int  trkPtCut=0, float thetaCut =0., int numE
     aa[icent] = getSdHists(Form("pbpb%d",icent),fnameAA , icent, ptCut, thetaCut, numEvents ) ;
     aaR[icent] = getSdHists(Form("pbpbR%d",icent),fnameAA , icent, recoPtCut, thetaCut, numEvents ) ;
   }
-  TCanvas* c1=  new TCanvas("c100","",1000,500);
-  c1->Divide(2,1);
-  c1->cd(1);
-  handsomeTH1(pp.hEffDphi,1);
-  handsomeTH1(aa[6].hEffDphi,2,1,24);
-  handsomeTH1(aa[0].hEffDphi,2);
-  pp.hEffDphi->SetXTitle("#Delta#phi of track-jet");
-  pp.hEffDphi->SetYTitle("Efficiency");
-  pp.hEffDphi->SetAxisRange(0,1.2,"Y");
-  pp.hEffDphi->SetNdivisions(505);
-  pp.hEffDphi->DrawCopy("hist");
-  aa[6].hEffDphi->DrawCopy("same e"); 
-  aa[0].hEffDphi->DrawCopy("same e"); 
-  TLegend *leg1= new TLegend(0.2672428,0.2089151,0.9999582,0.4709989,NULL,"brNDC");
-  easyLeg(leg1,Form("Tracks in #DeltaR <%.1f cone",coneR));
-  leg1->AddEntry( pp.hEffDphi, "PYTHIA (ptCut:6GeV, trimmed)","l");
-  leg1->AddEntry( aa[6].hEffDphi, "+ PbPb 60-80%","p");
-  leg1->AddEntry( aa[0].hEffDphi, "+ PbPb 0-10%","p");
-  leg1->Draw();
-  c1->cd(2);
-  handsomeTH1(pp.hEffDrap,1);
-  handsomeTH1(aa[6].hEffDrap,2,1,24);
-  handsomeTH1(aa[0].hEffDrap,2);
-  pp.hEffDrap->SetXTitle("#Deltay of track-jet");
-  pp.hEffDrap->SetYTitle("Efficiency");
-  pp.hEffDrap->SetAxisRange(0,1.2,"Y");
-  pp.hEffDrap->SetNdivisions(505);
-  pp.hEffDrap->DrawCopy("hist");
-  aa[6].hEffDrap->DrawCopy("same e"); 
-  aa[0].hEffDrap->DrawCopy("same e"); 
   
   // Calorimeter subjets
   TCanvas* c2=  new TCanvas("c2","",1200,450);
@@ -828,7 +798,6 @@ void drawSoftDrop(float coneR=1.0, int  trkPtCut=0, float thetaCut =0., int numE
   jumSun(0,1,0.6,1);
 
 
-  c1->SaveAs(prefix+"/tracking_efficiency.pdf");
   c4->SaveAs(prefix+"/validation1.pdf");
   c5->SaveAs(prefix+"/validation2.pdf");
   c2->SaveAs(prefix+"/theta_full.pdf");
@@ -838,7 +807,6 @@ void drawSoftDrop(float coneR=1.0, int  trkPtCut=0, float thetaCut =0., int numE
   c7->SaveAs(prefix+"/sdmass_ch.pdf");
   c8->SaveAs(prefix+"/sdmass_full.pdf");
 
-  c1->SaveAs(prefix+"/tracking_efficiency.gif");
   c4->SaveAs(prefix+"/validation1.gif");
   c5->SaveAs(prefix+"/validation2.gif");
   c2->SaveAs(prefix+"/theta_full.gif");

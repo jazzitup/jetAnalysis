@@ -2,8 +2,6 @@
 #include <vector>
 
 struct sdVariable {
-  TH1D* hEffDphi;
-  TH1D* hEffDrap;
   TH1D* hGenTheta;
   TH1D* hGenChTheta;
   TH1D* hRecoTheta;
@@ -30,27 +28,7 @@ sdVariable getSdHists (TString prefix = "pbpb",
   TH1::SetDefaultSumw2();
   TFile* inf = new TFile(fname.Data());
   TTree* tree = (TTree*) inf->Get("tr");
-  TH2D* h_allGen_pt_dphi_cent;
-  TH2D* h_trkGen_pt_dphi_cent;
-  TH2D* h_allGen_pt_drap_cent;
-  TH2D* h_trkGen_pt_drap_cent;
-  
-  TH1D* hpt ; 
-  h_allGen_pt_dphi_cent = (TH2D*)inf->Get(Form("h_allGen_pt_dphi_cent%d",centBin));
-  h_trkGen_pt_dphi_cent = (TH2D*)inf->Get(Form("h_trkGen_pt_dphi_cent%d",centBin));
-  h_allGen_pt_drap_cent = (TH2D*)inf->Get(Form("h_allGen_pt_drap_cent%d",centBin));
-  h_trkGen_pt_drap_cent = (TH2D*)inf->Get(Form("h_trkGen_pt_drap_cent%d",centBin));
-    
-  hpt = (TH1D*)h_allGen_pt_dphi_cent->ProjectionX();
-  int bin150 = hpt->FindBin(150.0001);
-  int bin400 = hpt->FindBin(399.9999);
-  TH1D* hden_dphi_cent = h_allGen_pt_dphi_cent->ProjectionY(Form("hden_dphi_cent%d_%s",centBin,prefix.Data()), bin150, bin400);
-  TH1D* heff_dphi_cent = h_trkGen_pt_dphi_cent->ProjectionY(Form("heff_dphi_cent%d_%s",centBin,prefix.Data()), bin150, bin400);
-  TH1D* hden_drap_cent = h_allGen_pt_drap_cent->ProjectionY(Form("hden_drap_cent%d_%s",centBin,prefix.Data()), bin150, bin400);
-  TH1D* heff_drap_cent = h_trkGen_pt_drap_cent->ProjectionY(Form("heff_drap_cent%d_%s",centBin,prefix.Data()), bin150, bin400);
-  
-  heff_dphi_cent->Divide(hden_dphi_cent);
-  heff_drap_cent->Divide(hden_drap_cent);
+
 
   // SD variables
   TString cutWeight = Form("((cent==%d)&&(%s))*weight", centBin, theCut.Data() );
@@ -95,8 +73,6 @@ sdVariable getSdHists (TString prefix = "pbpb",
   //  TCanvas* c0 = new TCanvas("c0","",500,500);
   //  _hRecoTheta->Draw();
   
-  ret.hEffDphi = heff_dphi_cent ; 
-  ret.hEffDrap = heff_drap_cent ; 
   ret.hGenTheta = _hGenTheta;
   ret.hGenChTheta = _hGenChTheta;
   ret.hRecoTheta = _hRecoTheta;
