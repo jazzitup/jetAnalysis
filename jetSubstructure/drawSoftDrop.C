@@ -3,13 +3,13 @@
   TH1D* hEffDphi[10];
   TH1D* hEffDrap[10];
 */
-void drawSoftDrop(float coneR=1.0, int  trkPtCut=1, float thetaCut =0., int numEvents =  1000, int ptLow=150, int ptHigh=250, float version = 3.1) {
-  TString fnamePP = "ntuples/jetSubstructure_pythia_r1.0_cs_ptCut1_jz3_v3.1.root"; // pp is fixed at the moment 
-  TString fnameAA = Form("ntuples/jetSubstructure_himix_r%.1f_cs_ptCut%d_jz3_v%.1f.root",coneR, trkPtCut, version) ;
-  
-  // TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_cs_ptCut1_jz3_v3.1.root";
-
-  TString prefix = Form("r%.1f_trkPtCut%d_theta%.1f_v%.2f",coneR,trkPtCut,thetaCut,version);
+void drawSoftDrop(float coneR=0.4, flaot trkPtCut=1, float sdPtCut=1, float thetaCut =0., int numEvents =  1000000, int ptLow=150, int ptHigh=250, float version = 3.1) {
+  //  TString fnamePP = "ntuples/jetSubstructure_pythia_r1.0_cs_ptCut1_sdPtCut2_jz3_v3.1.root"; // 
+  //  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_cs_ptCut1_sdPtCut2_jz3_v3.1.root"; //
+  //  TString prefix = "testDir";
+  TString fnamePP = Form("ntuples/jetSubstructure_pythia_r%.1f_cs_ptCut%.1f_sdPtCut%.1f_jz3_v3.1.root",coneR, trkPtCut, sdPtCut, version) ;
+  TString fnameAA = Form("ntuples/jetSubstructure_pythia_r%.1f_cs_ptCut%.1f_sdPtCut%.1f_jz3_v3.1.root",coneR, trkPtCut, sdPtCut, version) ;
+  TString prefix = Form("r%.1f_trkPtCut%d_sdPtCut%.1f_theta%.1f_v%.2f",coneR,trkPtCut,sdPtCut, thetaCut,version);
   cout <<" prefix = " << prefix << endl;
   TString ptCut = Form("genPt>%d && genPt<%d  ",ptLow, ptHigh) ; 
   TString recoPtCut = Form("pt>%d && pt<%d ",ptLow, ptHigh) ; 
@@ -385,7 +385,7 @@ void drawSoftDrop(float coneR=1.0, int  trkPtCut=1, float thetaCut =0., int numE
   pp.hGenChZg->DrawCopy("hist");
   pp.hRecoChZg->DrawCopy("e same");
 
-  TLegend *leg6 = new TLegend(0.400721,0.04639532,0.8472388,0.2716563,NULL,"brNDC");
+  TLegend *leg6 = new TLegend(0.600721,0.44639532,0.9972388,0.9716563,NULL,"brNDC");
   easyLeg(leg6,"Charged subjets");
   leg6->AddEntry(pp.hGenChZg,"Truth Tracks","l");
   leg6->AddEntry(pp.hRecoChZg,"Reco Tracks","pl");
@@ -799,7 +799,7 @@ void drawSoftDrop(float coneR=1.0, int  trkPtCut=1, float thetaCut =0., int numE
   jumSun(0,1,0.6,1);
 
 
-  c4->SaveAs(prefix+"/validation1.pdf");
+  /*  c4->SaveAs(prefix+"/validation1.pdf");
   c5->SaveAs(prefix+"/validation2.pdf");
   c2->SaveAs(prefix+"/theta_full.pdf");
   c3->SaveAs(prefix+"/theta_ch.pdf");
@@ -811,11 +811,13 @@ void drawSoftDrop(float coneR=1.0, int  trkPtCut=1, float thetaCut =0., int numE
   c4->SaveAs(prefix+"/validation1.gif");
   c5->SaveAs(prefix+"/validation2.gif");
   c2->SaveAs(prefix+"/theta_full.gif");
-  c3->SaveAs(prefix+"/theta_ch.gif");
   c9->SaveAs(prefix+"/zg_full.gif");
+  c8->SaveAs(prefix+"/sdmass_full.gif");
+  */
+
+  c3->SaveAs(prefix+"/theta_ch.gif");
   c6->SaveAs(prefix+"/zg_ch.gif");
   c7->SaveAs(prefix+"/sdmass_ch.gif");
-  c8->SaveAs(prefix+"/sdmass_full.gif");
 
 }
 

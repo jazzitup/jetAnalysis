@@ -46,12 +46,13 @@ void getEfficiency (TString prefix = "pbpb",
   c1->Divide(6,2);
   for ( int i=1; i<= 6; i++) {
     c1->cd(i);
-    handsomeTH1(hEffDrap[i+7],1);
-    hEffDrap[i+7]->SetAxisRange(0,1.3,"Y");
-    hEffDrap[i+7]->Draw();
+    handsomeTH1(hEffDrap[i+9],1);
+    hEffDrap[i+9]->SetAxisRange(0,1.3,"Y");
+    hEffDrap[i+9]->Draw();
+    drawText(Form("%.1f < p_{T} < %.1f GeV/c",(float)trkPtBinForEff[i+9 - 1], (float)trkPtBinForEff[i+9]),0.25,0.8,1,15);
     c1->cd(i+ 6);
-    handsomeTH1(hEffDphi[i+7],1);
-    hEffDphi[i+7]->SetAxisRange(0,1.3,"Y");
-    hEffDphi[i+7]->Draw();
+    handsomeTH1(hEffDphi[i+9],1);
+    hEffDphi[i+9]->SetAxisRange(0,1.3,"Y");
+    hEffDphi[i+9]->Draw();
   }
 }
