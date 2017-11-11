@@ -3,7 +3,7 @@
   TH1D* hEffDphi[10];
   TH1D* hEffDrap[10];
 */
-void drawSoftDrop(float coneR=0.4, flaot trkPtCut=1, float sdPtCut=1, float thetaCut =0., int numEvents =  1000000, int ptLow=150, int ptHigh=250, float version = 3.1) {
+void drawSoftDrop(float coneR=0.4, float trkPtCut=1, float sdPtCut=1, float thetaCut =0., int numEvents =  1000000, int ptLow=150, int ptHigh=250, float version = 3.1) {
   //  TString fnamePP = "ntuples/jetSubstructure_pythia_r1.0_cs_ptCut1_sdPtCut2_jz3_v3.1.root"; // 
   //  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_cs_ptCut1_sdPtCut2_jz3_v3.1.root"; //
   //  TString prefix = "testDir";
