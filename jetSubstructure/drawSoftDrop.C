@@ -9,7 +9,7 @@ void drawSoftDrop(float coneR=0.4, float trkPtCut=1, float sdPtCut=1, float thet
   //  TString prefix = "testDir";
   TString fnamePP = Form("ntuples/jetSubstructure_pythia_r%.1f_cs_ptCut%.1f_sdPtCut%.1f_jz3_v3.1.root",coneR, trkPtCut, sdPtCut, version) ;
   TString fnameAA = Form("ntuples/jetSubstructure_pythia_r%.1f_cs_ptCut%.1f_sdPtCut%.1f_jz3_v3.1.root",coneR, trkPtCut, sdPtCut, version) ;
-  TString prefix = Form("r%.1f_trkPtCut%d_sdPtCut%.1f_theta%.1f_v%.2f",coneR,trkPtCut,sdPtCut, thetaCut,version);
+  TString prefix = Form("r%.1f_trkPtCut%.1f_sdPtCut%.1f_theta%.1f_v%.2f",coneR,trkPtCut,sdPtCut, thetaCut,version);
   cout <<" prefix = " << prefix << endl;
   TString ptCut = Form("genPt>%d && genPt<%d  ",ptLow, ptHigh) ; 
   TString recoPtCut = Form("pt>%d && pt<%d ",ptLow, ptHigh) ; 
