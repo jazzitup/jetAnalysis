@@ -8,7 +8,7 @@ void drawSoftDrop(float coneR=0.4, float trkPtCut=1, float sdPtCut=1, float thet
   //  TString fnameAA = "ntuples/jetSubstructure_himix_r1.0_cs_ptCut1_sdPtCut2_jz3_v3.1.root"; //
   //  TString prefix = "testDir";
   TString fnamePP = Form("ntuples/jetSubstructure_pythia_r%.1f_cs_ptCut%.1f_sdPtCut%.1f_jz3_v3.1.root",coneR, trkPtCut, sdPtCut, version) ;
-  TString fnameAA = Form("ntuples/jetSubstructure_pythia_r%.1f_cs_ptCut%.1f_sdPtCut%.1f_jz3_v3.1.root",coneR, trkPtCut, sdPtCut, version) ;
+  TString fnameAA = Form("ntuples/jetSubstructure_himix_r%.1f_cs_ptCut%.1f_sdPtCut%.1f_jz3_v3.1.root",coneR, trkPtCut, sdPtCut, version) ;
   TString prefix = Form("r%.1f_trkPtCut%.1f_sdPtCut%.1f_theta%.1f_v%.2f",coneR,trkPtCut,sdPtCut, thetaCut,version);
   cout <<" prefix = " << prefix << endl;
   TString ptCut = Form("genPt>%d && genPt<%d  ",ptLow, ptHigh) ; 
@@ -818,6 +818,8 @@ void drawSoftDrop(float coneR=0.4, float trkPtCut=1, float sdPtCut=1, float thet
   c3->SaveAs(prefix+"/theta_ch.gif");
   c6->SaveAs(prefix+"/zg_ch.gif");
   c7->SaveAs(prefix+"/sdmass_ch.gif");
+
+  c3->SaveAs("theta_ch.gif");
 
 }
 
