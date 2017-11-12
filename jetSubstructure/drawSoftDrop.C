@@ -11,8 +11,8 @@ void drawSoftDrop(float coneR=0.4, float trkPtCut=1, float sdPtCut=1, float thet
   TString fnameAA = Form("ntuples/jetSubstructure_himix_r%.1f_cs_ptCut%.1f_sdPtCut%.1f_jz3_v3.1.root",coneR, trkPtCut, sdPtCut, version) ;
   TString prefix = Form("r%.1f_trkPtCut%.1f_sdPtCut%.1f_theta%.1f_v%.2f",coneR,trkPtCut,sdPtCut, thetaCut,version);
   cout <<" prefix = " << prefix << endl;
-  TString ptCut = Form("genPt>%d && genPt<%d  ",ptLow, ptHigh) ; 
-  TString recoPtCut = Form("pt>%d && pt<%d ",ptLow, ptHigh) ; 
+  TString ptCut = Form("dr>0 && genPt>%d && genPt<%d  ",ptLow, ptHigh) ;     // dr>0  : Gen Matching
+  TString recoPtCut = Form("dr>0 && pt>%d && pt<%d ",ptLow, ptHigh) ; 
 
   sdVariable pp = getSdHists("pp", fnamePP, 0, ptCut,thetaCut, numEvents );
   
@@ -799,27 +799,27 @@ void drawSoftDrop(float coneR=0.4, float trkPtCut=1, float sdPtCut=1, float thet
   jumSun(0,1,0.6,1);
 
 
-  /*  c4->SaveAs(prefix+"/validation1.pdf");
+  c4->SaveAs(prefix+"/validation1.pdf");
   c5->SaveAs(prefix+"/validation2.pdf");
-  c2->SaveAs(prefix+"/theta_full.pdf");
   c3->SaveAs(prefix+"/theta_ch.pdf");
-  c9->SaveAs(prefix+"/zg_full.pdf");
   c6->SaveAs(prefix+"/zg_ch.pdf");
   c7->SaveAs(prefix+"/sdmass_ch.pdf");
-  c8->SaveAs(prefix+"/sdmass_full.pdf");
 
-  c4->SaveAs(prefix+"/validation1.gif");
-  c5->SaveAs(prefix+"/validation2.gif");
-  c2->SaveAs(prefix+"/theta_full.gif");
-  c9->SaveAs(prefix+"/zg_full.gif");
-  c8->SaveAs(prefix+"/sdmass_full.gif");
+  /*
+    c2->SaveAs(prefix+"/theta_full.pdf");
+    c3->SaveAs(prefix+"/theta_ch.pdf");
+    c9->SaveAs(prefix+"/zg_full.pdf");
+    c6->SaveAs(prefix+"/zg_ch.pdf");
+    c7->SaveAs(prefix+"/sdmass_ch.pdf");
+    c8->SaveAs(prefix+"/sdmass_full.pdf");
+    
+    c4->SaveAs(prefix+"/validation1.png");
+    c5->SaveAs(prefix+"/validation2.png");
+    c2->SaveAs(prefix+"/theta_full.png");
+    c9->SaveAs(prefix+"/zg_full.png");
+    c8->SaveAs(prefix+"/sdmass_full.png");
   */
 
-  c3->SaveAs(prefix+"/theta_ch.gif");
-  c6->SaveAs(prefix+"/zg_ch.gif");
-  c7->SaveAs(prefix+"/sdmass_ch.gif");
-
-  c3->SaveAs("theta_ch.gif");
 
 }
 
