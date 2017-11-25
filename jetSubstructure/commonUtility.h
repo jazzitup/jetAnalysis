@@ -541,7 +541,7 @@ void fixedFontHist(TH1 * h, Float_t xoffset=1.3, Float_t yoffset=1.2)
 {
    h->SetLabelFont(43,"X");
    h->SetLabelFont(43,"Y");
-   //h->SetLabelOffset(0.01);
+   h->SetLabelOffset(0.01);
    h->SetLabelSize(22);
    h->SetTitleFont(43);
    h->SetTitleSize(16);
