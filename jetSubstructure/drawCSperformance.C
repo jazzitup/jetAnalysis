@@ -1,8 +1,8 @@
 #include "commonUtility.h"
 #include "TCut.h"
-void drawCSperformance(bool jetCone=false) {
+void drawCSperformance(int n=1, bool jetCone=true) {
   TH1::SetDefaultSumw2();
-  TFile* f = new TFile("ntuples/testCondor_v3.5.root");
+  TFile* f = new TFile(Form("ntuples/substructure_output_%d.root",n));
 
   TH2D* hPrePtPostPt[10]; // in centrality bin
   TH2D* hDptPt[10]; // in centrality bin
@@ -81,7 +81,7 @@ void drawCSperformance(bool jetCone=false) {
     //    gPad->SetLogy();
     
   }
-  c2->SaveAs(Form("Ratio_of_removed_tracks_by_CS_isJetCone%d.png",jetCone));
+  c2->SaveAs(Form("Ratio_of_removed_tracks_by_CS_isJetCone%d_n%d.png",jetCone,n));
 
 
   TCanvas* c3 = new TCanvas("c30","",900,300);
@@ -105,7 +105,7 @@ void drawCSperformance(bool jetCone=false) {
     }
     drawText(centText.Data(), 0.2,0.8);
   }
-  c3->SaveAs(Form("pT_before_after_CS_isJetCone%d.png",jetCone));
+  c3->SaveAs(Form("pT_before_after_CS_isJetCone%d_n%d.png",jetCone,n));
 
 
   TCanvas* c4 = new TCanvas("c40","",900,300);
@@ -133,6 +133,6 @@ void drawCSperformance(bool jetCone=false) {
     if (jetCone) drawText("Jet cone, (pT > 150 GeV)",0.3,0.7,1,13);
     else         drawText("|#eta|<2.4",0.3,0.7);
   }
-  c4->SaveAs(Form("deltaPt_by_CS_isJetCone%d.png",jetCone));
+  c4->SaveAs(Form("deltaPt_by_CS_isJetCone%d_n%d.png",jetCone,n));
 
 }
