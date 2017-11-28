@@ -1,8 +1,9 @@
 #include "commonUtility.h"
 #include "TCut.h"
-void drawCSperformance(int n=1, bool jetCone=true) {
+void drawCSperformance(int n=60, bool jetCone=true) {
   TH1::SetDefaultSumw2();
-  TFile* f = new TFile(Form("ntuples/substructure_output_%d.root",n));
+  //  TFile* f = new TFile(Form("ntuples/substructure_output_%d.root",n));
+  TFile* f = new TFile(Form("ntuples/jetSubstructure_himix_scan_v3.5_ptCutJetConeExc%d.root",n));
 
   TH2D* hPrePtPostPt[10]; // in centrality bin
   TH2D* hDptPt[10]; // in centrality bin

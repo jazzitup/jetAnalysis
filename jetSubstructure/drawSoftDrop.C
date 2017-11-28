@@ -804,11 +804,11 @@ void drawSoftDrop(float coneR=1.0, float trkPtCut=1, float sdPtCut=1, float thet
   c3->SaveAs(prefix+"/theta_ch.pdf");
   c6->SaveAs(prefix+"/zg_ch.pdf");
   c7->SaveAs(prefix+"/sdmass_ch.pdf");
+  c9->SaveAs(prefix+"/zg_full.pdf");
 
   /*
     c2->SaveAs(prefix+"/theta_full.pdf");
     c3->SaveAs(prefix+"/theta_ch.pdf");
-    c9->SaveAs(prefix+"/zg_full.pdf");
     c6->SaveAs(prefix+"/zg_ch.pdf");
     c7->SaveAs(prefix+"/sdmass_ch.pdf");
     c8->SaveAs(prefix+"/sdmass_full.pdf");
