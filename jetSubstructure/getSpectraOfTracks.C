@@ -4,6 +4,7 @@
 struct trkSpectra {
   TH1D* pre;
   TH1D* post;
+  TH1D* gen;
 } ; 
 
 trkSpectra getSpectraOfTracks ( int centBin = 0,
@@ -15,9 +16,11 @@ trkSpectra getSpectraOfTracks ( int centBin = 0,
   TFile* inf = new TFile(fname.Data());
   TH2D* hTrkPtEta_preCS;
   TH2D* hTrkPtEta_postCS;
-  
+  TH2D* hTrkPtEta_gen;
   hTrkPtEta_preCS = (TH2D*)inf->Get(Form("hTrkPtEta_preCS_cent%d",centBin));
   hTrkPtEta_postCS = (TH2D*)inf->Get(Form("hTrkPtEta_postCS_cent%d",centBin));
+  hTrkPtEta_gen = (TH2D*)inf->Get(Form("hTrkPtEta_genMatch_cent%d",centBin));
+
   TH1D* htemp = (TH1D*)hTrkPtEta_preCS->ProjectionY("hTrkPtEta_preCS_centProjected");
   int binLow = htemp->FindBin( -2.39999);
   int binHigh = htemp->FindBin( 2.3999999);
@@ -25,8 +28,10 @@ trkSpectra getSpectraOfTracks ( int centBin = 0,
 
   ret.pre = (TH1D*)hTrkPtEta_preCS->ProjectionX("hPt_pre",binLow,binHigh);
   ret.post = (TH1D*)hTrkPtEta_postCS->ProjectionX("hPt_post",binLow,binHigh);
+  ret.gen = (TH1D*)hTrkPtEta_gen->ProjectionX("hPt_gen",binLow,binHigh);
   handsomeTH1(ret.pre,1);
   handsomeTH1(ret.post,2);
+  handsomeTH1(ret.gen,4);
 
   return ret; 
   /*

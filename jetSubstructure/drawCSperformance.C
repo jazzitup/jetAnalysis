@@ -9,14 +9,16 @@ void drawCSperformance(TString name ="scan2_v3.5_alphaSubtr0_csMaxR0.60", bool j
   trkSpectra tracks[10]; // centrality bins
   for ( int i = 0; i<=6 ; i++) {
     tracks[i] = getSpectraOfTracks(i,fname.Data());
-    handsomeTH1(tracks[i].post,40+i);
-    handsomeTH1(tracks[i].pre,40+i);
+    handsomeTH1(tracks[i].post,46-i);
+    handsomeTH1(tracks[i].pre,46-i);
     int bin10GeV = tracks[i].post->FindBin(10.001);
-    float integral = tracks[i].post->Integral(bin10GeV,-1);
+    float integral = tracks[i].gen->Integral(1,-1);
     tracks[i].post->Scale(1./integral);
     tracks[i].pre->Scale(1./integral);
+    tracks[i].gen->Scale(1./integral);
     tracks[i].pre->SetMarkerSize(0.7);
     tracks[i].post->SetMarkerSize(0.7);
+    tracks[i].gen->SetMarkerSize(0.7);
   }
   
   TCanvas* cTrackSpec = new TCanvas("cTrackSpec","",1193,619);
@@ -24,51 +26,58 @@ void drawCSperformance(TString name ="scan2_v3.5_alphaSubtr0_csMaxR0.60", bool j
   cTrackSpec->cd(1);
   for ( int i = 0; i<=6 ; i++) {
     cleverRange(tracks[i].pre,100,1.e-8);
-    tracks[i].pre->SetAxisRange(0.0005,1000,"Y");
+    tracks[i].pre->SetAxisRange(0.007,100,"Y");
+    tracks[i].pre->SetAxisRange(0,9.5,"X");
     tracks[i].pre->SetXTitle("p_{T} (GeV)");
     tracks[i].pre->SetYTitle("Integrated by post-CS entries");
     if ( i == 0 )  tracks[i].pre->Draw(" ");
     else  tracks[i].pre->Draw("same");
+    if ( i == 0 )  tracks[i].gen->Draw("same hist ");
     gPad->SetLogy();
-    gPad->SetLogx();
+    //    gPad->SetLogx();
   }
 
   TLegend *legSpec = new TLegend(0.5371711,0.4484642,0.998968,0.9191576,NULL,"brNDC");
   easyLeg(legSpec,"Before CS");
-  legSpec->AddEntry( tracks[0].pre, "0-10 %","l");
-  legSpec->AddEntry( tracks[1].pre, "10-20 %","l");
-  legSpec->AddEntry( tracks[2].pre, "20-30 %","l");
-  legSpec->AddEntry( tracks[3].pre, "30-40 %","l");
-  legSpec->AddEntry( tracks[4].pre, "40-50 %","l");
-  legSpec->AddEntry( tracks[5].pre, "50-60 %","l");
-  legSpec->AddEntry( tracks[6].pre, "60-80 %","l");
+  legSpec->AddEntry( tracks[0].pre, "0-10 %","p");
+  legSpec->AddEntry( tracks[1].pre, "10-20 %","p");
+  legSpec->AddEntry( tracks[2].pre, "20-30 %","p");
+  legSpec->AddEntry( tracks[3].pre, "30-40 %","p");
+  legSpec->AddEntry( tracks[4].pre, "40-50 %","p");
+  legSpec->AddEntry( tracks[5].pre, "50-60 %","p");
+  legSpec->AddEntry( tracks[6].pre, "60-80 %","p");
+  legSpec->AddEntry( tracks[0].gen, "MC Truth","l");
   legSpec->Draw();
   jumSun(10,0.0005,10,0.1);
 
   cTrackSpec->cd(2);
   for ( int i = 0; i<=6 ; i++) {
     cleverRange(tracks[i].post,100,1.e-8);
-    tracks[i].post->SetAxisRange(0.0005,1000,"Y");
+    tracks[i].post->SetAxisRange(0.007,100,"Y");
+    tracks[i].post->SetAxisRange(0,9.5,"X");
     tracks[i].post->SetXTitle("p_{T} (GeV)");
     tracks[i].post->SetYTitle("Integrated by post-CS entries");
     if ( i == 0 )  tracks[i].post->Draw(" ");
     else  tracks[i].post->Draw("same");
+    if ( i == 0 )  tracks[i].gen->Draw("same hist ");
     gPad->SetLogy();
-    gPad->SetLogx();
+    //    gPad->SetLogx();
   }
-  legSpec = new TLegend(0.5371711,0.7484642,0.998968,0.9191576,NULL,"brNDC");
-
+  legSpec = new TLegend(0.5362965,0.4398749,0.9980933,0.9191576,NULL,"brNDC");
   easyLeg(legSpec,"After CS");
-  //  legSpec->AddEntry( tracks[0].post, "0-10 %","lp");
-  //  legSpec->AddEntry( tracks[1].post, "10-20 %","lp");
-  //  legSpec->AddEntry( tracks[2].post, "20-30 %","lp");
-  //  legSpec->AddEntry( tracks[3].post, "30-40 %","lp");
-  //  legSpec->AddEntry( tracks[4].post, "40-50 %","lp");
-  //  legSpec->AddEntry( tracks[5].post, "50-60 %","lp");
-  //  legSpec->AddEntry( tracks[6].post, "60-80 %","lp");
+  legSpec->AddEntry( tracks[0].pre, "0-10 %","p");
+  legSpec->AddEntry( tracks[1].pre, "10-20 %","p");
+  legSpec->AddEntry( tracks[2].pre, "20-30 %","p");
+  legSpec->AddEntry( tracks[3].pre, "30-40 %","p");
+  legSpec->AddEntry( tracks[4].pre, "40-50 %","p");
+  legSpec->AddEntry( tracks[5].pre, "50-60 %","p");
+  legSpec->AddEntry( tracks[6].pre, "60-80 %","p");
+  legSpec->AddEntry( tracks[0].gen, "MC Truth","l");
   legSpec->Draw();
 
   cTrackSpec->SaveAs(Form("%s_trackSpectra.pdf",name.Data()));
+
+  TCanvas* c1 = new TCanvas("c10","",1000,600);
 
   TH2D* hPrePtPostPt[10]; // in centrality bin
   TH2D* hDptPt[10]; // in centrality bin
@@ -99,7 +108,6 @@ void drawCSperformance(TString name ="scan2_v3.5_alphaSubtr0_csMaxR0.60", bool j
 
   
 
-  TCanvas* c1 = new TCanvas("c10","",1000,600);
   c1->Divide(nCent,2);
   for ( int icent = 0 ; icent < nCent ; icent++) {
     c1->cd(icent+1);
