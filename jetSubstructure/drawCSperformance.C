@@ -1,14 +1,79 @@
+#include "getSpectraOfTracks.C"
 #include "commonUtility.h"
 #include "TCut.h"
 void drawCSperformance(int n=60, bool jetCone=true) {
   TH1::SetDefaultSumw2();
-  //  TFile* f = new TFile(Form("ntuples/substructure_output_%d.root",n));
-  TFile* f = new TFile(Form("ntuples/jetSubstructure_himix_scan_v3.5_ptCutJetConeExc%d.root",n));
+  TString fname = "ntuples/jetSubstructure_himix_scan2_v3.5_alphaSubtr0_csMaxR0.60.root";
+  TFile* f = new TFile(fname.Data());
+  
+  trkSpectra tracks[10]; // centrality bins
+  for ( int i = 0; i<=6 ; i++) {
+    tracks[i] = getSpectraOfTracks(i,fname.Data());
+    handsomeTH1(tracks[i].post,40+i);
+    handsomeTH1(tracks[i].pre,40+i);
+    int bin10GeV = tracks[i].post->FindBin(10.001);
+    float integral = tracks[i].post->Integral(bin10GeV,-1);
+    tracks[i].post->Scale(1./integral);
+    tracks[i].pre->Scale(1./integral);
+    tracks[i].pre->SetMarkerSize(0.7);
+    tracks[i].post->SetMarkerSize(0.7);
+  }
+  
+  TCanvas* cTrackSpec = new TCanvas("cTrackSpec","",1193,619);
+  cTrackSpec->Divide(2,1);
+  cTrackSpec->cd(1);
+  for ( int i = 0; i<=6 ; i++) {
+    cleverRange(tracks[i].pre,100,1.e-8);
+    tracks[i].pre->SetAxisRange(0.0005,1000,"Y");
+    tracks[i].pre->SetXTitle("p_{T} (GeV)");
+    tracks[i].pre->SetYTitle("Integrated by post-CS entries");
+    if ( i == 0 )  tracks[i].pre->Draw(" ");
+    else  tracks[i].pre->Draw("same");
+    gPad->SetLogy();
+    gPad->SetLogx();
+  }
+
+  TLegend *legSpec = new TLegend(0.5371711,0.4484642,0.998968,0.9191576,NULL,"brNDC");
+  easyLeg(legSpec,"Before CS");
+  legSpec->AddEntry( tracks[0].pre, "0-10 %","l");
+  legSpec->AddEntry( tracks[1].pre, "10-20 %","l");
+  legSpec->AddEntry( tracks[2].pre, "20-30 %","l");
+  legSpec->AddEntry( tracks[3].pre, "30-40 %","l");
+  legSpec->AddEntry( tracks[4].pre, "40-50 %","l");
+  legSpec->AddEntry( tracks[5].pre, "50-60 %","l");
+  legSpec->AddEntry( tracks[6].pre, "60-80 %","l");
+  legSpec->Draw();
+  jumSun(10,0.0005,10,0.1);
+
+  cTrackSpec->cd(2);
+  for ( int i = 0; i<=6 ; i++) {
+    cleverRange(tracks[i].post,100,1.e-8);
+    tracks[i].post->SetAxisRange(0.0005,1000,"Y");
+    tracks[i].post->SetXTitle("p_{T} (GeV)");
+    tracks[i].post->SetYTitle("Integrated by post-CS entries");
+    if ( i == 0 )  tracks[i].post->Draw(" ");
+    else  tracks[i].post->Draw("same");
+    gPad->SetLogy();
+    gPad->SetLogx();
+  }
+  legSpec = new TLegend(0.5371711,0.7484642,0.998968,0.9191576,NULL,"brNDC");
+
+  easyLeg(legSpec,"After CS");
+  //  legSpec->AddEntry( tracks[0].post, "0-10 %","lp");
+  //  legSpec->AddEntry( tracks[1].post, "10-20 %","lp");
+  //  legSpec->AddEntry( tracks[2].post, "20-30 %","lp");
+  //  legSpec->AddEntry( tracks[3].post, "30-40 %","lp");
+  //  legSpec->AddEntry( tracks[4].post, "40-50 %","lp");
+  //  legSpec->AddEntry( tracks[5].post, "50-60 %","lp");
+  //  legSpec->AddEntry( tracks[6].post, "60-80 %","lp");
+  legSpec->Draw();
+
+  cTrackSpec->SaveAs("trackSpectra.png");
 
   TH2D* hPrePtPostPt[10]; // in centrality bin
   TH2D* hDptPt[10]; // in centrality bin
   TH2D* hDr[10];
-
+  
   TH1D* hPtTrk[10];
   TH1D* hPtTrkWiped[10];
 
@@ -31,6 +96,9 @@ void drawCSperformance(int n=60, bool jetCone=true) {
     handsomeTH1(hPtTrkWiped[icent],2);
     mcStyle1(hPtTrkWiped[icent]);
   }
+
+  
+
   TCanvas* c1 = new TCanvas("c10","",1000,600);
   c1->Divide(nCent,2);
   for ( int icent = 0 ; icent < nCent ; icent++) {
