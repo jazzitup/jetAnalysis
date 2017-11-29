@@ -1,9 +1,9 @@
 #include "getSpectraOfTracks.C"
 #include "commonUtility.h"
 #include "TCut.h"
-void drawCSperformance(int n=60, bool jetCone=true) {
+void drawCSperformance(TString name ="scan2_v3.5_alphaSubtr0_csMaxR0.60", bool jetCone=true) {
   TH1::SetDefaultSumw2();
-  TString fname = "ntuples/jetSubstructure_himix_scan2_v3.5_alphaSubtr0_csMaxR0.60.root";
+  TString fname = Form("ntuples/jetSubstructure_himix_%s.root",name.Data());
   TFile* f = new TFile(fname.Data());
   
   trkSpectra tracks[10]; // centrality bins
@@ -68,7 +68,7 @@ void drawCSperformance(int n=60, bool jetCone=true) {
   //  legSpec->AddEntry( tracks[6].post, "60-80 %","lp");
   legSpec->Draw();
 
-  cTrackSpec->SaveAs("trackSpectra.png");
+  cTrackSpec->SaveAs(Form("%s_trackSpectra.pdf",name.Data()));
 
   TH2D* hPrePtPostPt[10]; // in centrality bin
   TH2D* hDptPt[10]; // in centrality bin
@@ -150,7 +150,7 @@ void drawCSperformance(int n=60, bool jetCone=true) {
     //    gPad->SetLogy();
     
   }
-  c2->SaveAs(Form("Ratio_of_removed_tracks_by_CS_isJetCone%d_n%d.png",jetCone,n));
+  c2->SaveAs(Form("%s_Ratio_of_removed_tracks_by_CS_isJetCone%d.pdf",name.Data(),jetCone));
 
 
   TCanvas* c3 = new TCanvas("c30","",900,300);
@@ -174,7 +174,7 @@ void drawCSperformance(int n=60, bool jetCone=true) {
     }
     drawText(centText.Data(), 0.2,0.8);
   }
-  c3->SaveAs(Form("pT_before_after_CS_isJetCone%d_n%d.png",jetCone,n));
+  c3->SaveAs(Form("%s_pT_before_after_CS_isJetCone%d.pdf",name.Data(),jetCone));
 
 
   TCanvas* c4 = new TCanvas("c40","",900,300);
@@ -202,6 +202,6 @@ void drawCSperformance(int n=60, bool jetCone=true) {
     if (jetCone) drawText("Jet cone, (pT > 150 GeV)",0.3,0.7,1,13);
     else         drawText("|#eta|<2.4",0.3,0.7);
   }
-  c4->SaveAs(Form("deltaPt_by_CS_isJetCone%d_n%d.png",jetCone,n));
+  c4->SaveAs(Form("%s_deltaPt_by_CS_isJetCone%d.pdf",name.Data(),jetCone));
 
 }
