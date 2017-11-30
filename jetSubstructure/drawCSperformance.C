@@ -126,6 +126,7 @@ void drawCSperformance(TString name ="scan2_v3.5_alphaSubtr0_csMaxR0.60", bool j
     TString centText = Form("%d%% - %d%%",(int)centBin[icent],(int)centBin[icent+1]);
     hPtTrk[icent]->SetAxisRange(0.5,23,"X");
     hPtTrk[icent]->SetYTitle("Entries");
+    hPtTrk[icent]->GetYaxis()->SetTitleOffset(1.8);
     hPtTrk[icent]->DrawCopy();
     hPtTrkWiped[icent]->DrawCopy("same hist");
     gPad->SetLogy();
@@ -150,6 +151,7 @@ void drawCSperformance(TString name ="scan2_v3.5_alphaSubtr0_csMaxR0.60", bool j
     fixedFontHist(hPtTrkWiped[icent],3);
     hPtTrkWiped[icent]->SetYTitle("Removed/all");
     hPtTrkWiped[icent]->SetXTitle("Track p_{T} (GeV/c)");
+    hPtTrkWiped[icent]->GetYaxis()->SetTitleOffset(1.8);
     hPtTrkWiped[icent]->SetNdivisions(505,"X");
     hPtTrkWiped[icent]->SetNdivisions(505,"Y");
     hPtTrkWiped[icent]->Draw("hist");

@@ -3,7 +3,7 @@
   TH1D* hEffDphi[10];
   TH1D* hEffDrap[10];
 */
-void drawSoftDrop_scan3(TString name = "", float thetaCut =0., int numEvents =  1000000, int ptLow=150, int ptHigh=250) {
+void drawSoftDrop_scan3(TString name = "scan_v3.5_beta1.0_z0.1", float thetaCut =0., int numEvents =  1000, int ptLow=150, int ptHigh=250) {
 
   TString fnamePP = Form("ntuples_jetSubstructure/jetSubstructure_pythia_%s.root",name.Data());
   TString fnameAA = Form("ntuples_jetSubstructure/jetSubstructure_himix_%s.root",name.Data());
@@ -243,6 +243,33 @@ void drawSoftDrop_scan3(TString name = "", float thetaCut =0., int numEvents =  
   rat->DrawCopy();
   jumSun(0,1,1,1);
 
+
+  TCanvas* c3_2=  new TCanvas("c3_2","",600,450);
+  makeEfficiencyCanvas(c3_2,2);
+  c3_2->cd(1);
+  pp.hGenChTheta->DrawCopy("hist");
+  pp.hRecoChTheta->DrawCopy("e same");
+  gPad->SetLogy();
+  leg4->Draw();
+  drawText(Form("p_{T}^{jet}: %d - %d GeV,   |#eta^{jet}| < 1.2",ptLow,ptHigh),0.35,0.8,1,15);
+  drawText("pp MC",0.35,0.7,1,15);  
+  c3_2->cd(3);
+  ppRatio->DrawCopy();
+  jumSun(0,1,1,1);
+
+  c3_2->cd(2);
+  aa[0].hGenChTheta->DrawCopy("hist");
+  aa[0].hRecoChTheta->DrawCopy("e same");
+  drawText("0-10%", 0.3, 0.8,1,20);
+  gPad->SetLogy();
+
+  c3_2->cd(4);
+  rat->DrawCopy();
+  jumSun(0,1,1,1);
+
+
+
+
   
   // theta vs ch theta
   // theta vs charged theta
@@ -383,7 +410,7 @@ void drawSoftDrop_scan3(TString name = "", float thetaCut =0., int numEvents =  
   pp.hGenChZg->DrawCopy("hist");
   pp.hRecoChZg->DrawCopy("e same");
 
-  TLegend *leg6 = new TLegend(0.600721,0.44639532,0.9972388,0.9716563,NULL,"brNDC");
+  TLegend *leg6 = new TLegend(0.5169705,0.3805324,0.9996,0.7071608,NULL,"brNDC");
   easyLeg(leg6,"Charged subjets");
   leg6->AddEntry(pp.hGenChZg,"Truth Tracks","l");
   leg6->AddEntry(pp.hRecoChZg,"Reco Tracks","pl");
@@ -469,6 +496,27 @@ void drawSoftDrop_scan3(TString name = "", float thetaCut =0., int numEvents =  
   ratioChZg->DrawCopy();
   jumSun(0,1,0.6,1);
 
+  TCanvas* c6_2=  new TCanvas("c6_2","",600,450);
+  makeEfficiencyCanvas(c6_2,2);
+  c6_2->cd(1);
+  pp.hGenChZg->DrawCopy("hist");
+  pp.hRecoChZg->DrawCopy("e same");
+  leg6->Draw();
+  drawText(Form("p_{T}^{jet}: %d - %d GeV,   |#eta^{jet}| < 1.2",ptLow,ptHigh),0.35,0.87,1,15);
+  drawText(Form("#Delta#theta > %.1f",(float)thetaCut),0.35,0.74,2,20);
+  
+  c6_2->cd(3);
+  ratioChZg->DrawCopy();
+  jumSun(0,1,0.6,1);
+
+  c6_2->cd(2);
+  aa[0].hGenChZg->DrawCopy("hist");
+  aa[0].hRecoChZg->DrawCopy("e same");
+  drawText("0-10%", 0.6, 0.8,1,25);
+
+  c6_2->cd(4);
+  ratioChZg->DrawCopy();
+  jumSun(0,1,0.6,1);
 
 
 
@@ -800,7 +848,9 @@ void drawSoftDrop_scan3(TString name = "", float thetaCut =0., int numEvents =  
   c4->SaveAs(prefix+"_validation1.pdf");
   c5->SaveAs(prefix+"_validation2.pdf");
   c3->SaveAs(prefix+"_theta_ch.pdf");
+  c3_2->SaveAs(prefix+"_theta_ch_2.pdf");
   c6->SaveAs(prefix+"_zg_ch.pdf");
+  c6_2->SaveAs(prefix+"_zg_ch_2.pdf");
   c7->SaveAs(prefix+"_sdmass_ch.pdf");
 
   /*
