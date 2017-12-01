@@ -420,15 +420,15 @@ void drawSoftDrop_scan3(TString name = "scan_v3.5_beta1.0_z0.1", float thetaCut 
   drawText(Form("#Delta#theta > %.1f",(float)thetaCut),0.35,0.74,2,20);
   
   c6->cd(5);
-  TH1D* ratioChZg = (TH1D*)pp.hRecoChZg->Clone("ratioChZg");
-  ratioChZg->Divide(pp.hGenChZg);
-  ratioChZg->SetAxisRange(0,2.3,"Y");
-  ratioChZg->SetXTitle("Charged z_{g}");
-  ratioChZg->SetYTitle("Reco/Truth");
-  fixedFontHist(ratioChZg,2.5,1.5);
-  ratioChZg->SetNdivisions(505,"X");
-  ratioChZg->SetNdivisions(505,"Y");
-  ratioChZg->DrawCopy();
+  TH1D* ppRatioChZg = (TH1D*)pp.hRecoChZg->Clone("ppRatioChZg");
+  ppRatioChZg->Divide(pp.hGenChZg);
+  ppRatioChZg->SetAxisRange(0,2.3,"Y");
+  ppRatioChZg->SetXTitle("Charged z_{g}");
+  ppRatioChZg->SetYTitle("Reco/Truth");
+  fixedFontHist(ppRatioChZg,2.5,1.5);
+  ppRatioChZg->SetNdivisions(505,"X");
+  ppRatioChZg->SetNdivisions(505,"Y");
+  ppRatioChZg->DrawCopy();
   jumSun(0,1,0.6,1);
   
 
@@ -444,7 +444,7 @@ void drawSoftDrop_scan3(TString name = "scan_v3.5_beta1.0_z0.1", float thetaCut 
   //  leg6->Draw();
 
   c6->cd(6);
-  ratioChZg = (TH1D*)aa[6].hRecoChZg->Clone("ratioChZg");
+  TH1D* ratioChZg = (TH1D*)aa[6].hRecoChZg->Clone("ratioChZg");
   ratioChZg->Divide(aa[6].hGenChZg);
   ratioChZg->SetAxisRange(0,2.3,"Y");
   ratioChZg->SetXTitle("Charged z_{g}");
@@ -506,7 +506,7 @@ void drawSoftDrop_scan3(TString name = "scan_v3.5_beta1.0_z0.1", float thetaCut 
   drawText(Form("#Delta#theta > %.1f",(float)thetaCut),0.35,0.74,2,20);
   
   c6_2->cd(3);
-  ratioChZg->DrawCopy();
+  ppRatioChZg->DrawCopy();
   jumSun(0,1,0.6,1);
 
   c6_2->cd(2);
@@ -845,14 +845,14 @@ void drawSoftDrop_scan3(TString name = "scan_v3.5_beta1.0_z0.1", float thetaCut 
   jumSun(0,1,0.6,1);
 
 
-  c4->SaveAs(prefix+"_validation1.pdf");
-  c5->SaveAs(prefix+"_validation2.pdf");
-  c3->SaveAs(prefix+"_theta_ch.pdf");
-  c3_2->SaveAs(prefix+"_theta_ch_2.pdf");
-  c6->SaveAs(prefix+"_zg_ch.pdf");
-  c6_2->SaveAs(prefix+"_zg_ch_2.pdf");
-  c7->SaveAs(prefix+"_sdmass_ch.pdf");
-
+  //  c4->SaveAs("figuresScan3/"+prefix+"_validation1.pdf");
+  //  c5->SaveAs("figuresScan3/"+prefix+"_validation2.pdf");
+  c3->SaveAs("figuresScan3/"+prefix+"_theta_ch.pdf");
+  c3_2->SaveAs("figuresScan3/"+prefix+"_theta_ch_2.pdf");
+  c6->SaveAs("figuresScan3/"+prefix+"_zg_ch.pdf");
+  c6_2->SaveAs("figuresScan3/"+prefix+"_zg_ch_2.pdf");
+  c7->SaveAs("figuresScan3/"+prefix+"_sdmass_ch.pdf");
+  
   /*
     c2->SaveAs(prefix+"/theta_full.pdf");
     c3->SaveAs(prefix+"/theta_ch.pdf");
