@@ -799,8 +799,8 @@ void drawSoftDrop(float coneR=1.0, float trkPtCut=1, float sdPtCut=1, float thet
   jumSun(0,1,0.6,1);
 
 
-  c4->SaveAs(prefix+"/validation1.pdf");
-  c5->SaveAs(prefix+"/validation2.pdf");
+  //  c4->SaveAs(prefix+"/validation1.pdf");
+  //  c5->SaveAs(prefix+"/validation2.pdf");
   c3->SaveAs(prefix+"/theta_ch.pdf");
   c6->SaveAs(prefix+"/zg_ch.pdf");
   c7->SaveAs(prefix+"/sdmass_ch.pdf");
