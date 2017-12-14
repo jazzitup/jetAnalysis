@@ -1,0 +1,10 @@
+Library.RooUnfold:                          libRooUnfold.so
+Library.RooUnfoldBayes:                     libRooUnfold.so
+Library.RooUnfoldBinByBin:                  libRooUnfold.so
+Library.RooUnfoldErrors:                    libRooUnfold.so
+Library.RooUnfoldInvert:                    libRooUnfold.so
+Library.RooUnfoldParms:                     libRooUnfold.so
+Library.RooUnfoldResponse:                  libRooUnfold.so
+Library.RooUnfoldSvd:                       libRooUnfold.so
+Library.RooUnfoldTUnfold:                   libRooUnfold.so
+Library.TSVDUnfold_130729:                  libRooUnfold.so
