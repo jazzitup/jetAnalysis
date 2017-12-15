@@ -1,7 +1,7 @@
 #include "getSpectraOfTracks.C"
 #include "commonUtility.h"
 #include "TCut.h"
-void drawCSperformance(TString name ="scan2_v3.5_alphaSubtr0_csMaxR0.60", bool jetCone=true) {
+void drawCSperformance(TString name ="test_v4.0_reco_track_pT_cut_postCS0_alphaSubtr2_csMaxR3.00", bool jetCone=true) {
   TH1::SetDefaultSumw2();
   TString fname = Form("ntuples/jetSubstructure_himix_%s.root",name.Data());
   TFile* f = new TFile(fname.Data());
@@ -48,7 +48,7 @@ void drawCSperformance(TString name ="scan2_v3.5_alphaSubtr0_csMaxR0.60", bool j
   legSpec->AddEntry( tracks[6].pre, "60-80 %","p");
   legSpec->AddEntry( tracks[0].gen, "MC Truth","l");
   legSpec->Draw();
-  jumSun(10,0.0005,10,0.1);
+  //  jumSun(10,0.0005,10,0.1);
 
   cTrackSpec->cd(2);
   for ( int i = 0; i<=6 ; i++) {
@@ -77,6 +77,30 @@ void drawCSperformance(TString name ="scan2_v3.5_alphaSubtr0_csMaxR0.60", bool j
 
   cTrackSpec->SaveAs(Form("%s_trackSpectra.pdf",name.Data()));
 
+  TCanvas* cInt = new TCanvas("cIntegral","",500,500);
+  TH1D* hIntPost = new TH1D("hIntPost",";Centrality (%); Energy ratio",7,0,70);
+  TH1D* hIntPre = (TH1D*)hIntPost->Clone("hIntPre");
+  float intTruth = tracks[0].gen->Integral("width");
+  for ( int i = 0; i<=6 ; i++) {
+    float intgrlPost = tracks[i].post->Integral("width") / intTruth;
+    float intgrlPre = tracks[i].pre->Integral("width") / intTruth;
+    hIntPost->SetBinContent(i+1,intgrlPost);
+    hIntPre->SetBinContent(i+1,intgrlPre);
+    handsomeTH1(hIntPre,1);
+    handsomeTH1(hIntPost,2);
+  }
+  hIntPre->SetAxisRange(0.1,800,"Y");
+  hIntPre->Draw();
+  hIntPost->Draw("same");
+  gPad->SetLogy();
+  TLegend *legInt = new TLegend(0.4795181,0.6505263,0.9795181,0.9010526,NULL,"brNDC");
+  easyLeg(legInt,"[Total] / [Hard scattering]");
+  legInt->AddEntry(hIntPre,"Before Const. Subtr.");
+  legInt->AddEntry(hIntPost,"After Const. Subtr.");
+  legInt->Draw();
+  jumSun(0,1,70,1,2);
+  
+  cInt->SaveAs(Form("%s_integralPt.pdf",name.Data()));
   TCanvas* c1 = new TCanvas("c10","",1000,600);
 
   TH2D* hPrePtPostPt[10]; // in centrality bin

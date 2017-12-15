@@ -3,7 +3,7 @@
   TH1D* hEffDphi[10];
   TH1D* hEffDrap[10];
 */
-void drawSoftDrop_scan3(TString name = "scan_v3.5_beta1.0_z0.1", float thetaCut =0., int numEvents =  1000, int ptLow=150, int ptHigh=250) {
+void drawSoftDrop_scan3(TString name = "scan_v3.5_beta1.0_z0.1", float thetaCut =0., int numEvents =  100000, int ptLow=150, int ptHigh=250) {
 
   TString fnamePP = Form("ntuples_jetSubstructure/jetSubstructure_pythia_%s.root",name.Data());
   TString fnameAA = Form("ntuples_jetSubstructure/jetSubstructure_himix_%s.root",name.Data());
