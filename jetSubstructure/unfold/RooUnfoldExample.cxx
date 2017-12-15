@@ -76,6 +76,7 @@ void RooUnfoldExample()
 
   for (Int_t i= 0; i<tr->GetEntries() ; i++) {
     tr->GetEntry(i);
+    if ( myJet.cent !=2 ) continue; 
     if ( myJet.recoPt < 150 ) continue;
     if ( myJet.genPt < 100 ) continue;
 
@@ -83,9 +84,13 @@ void RooUnfoldExample()
     double recoM2 = myJet.recoMass * myJet.recoMass;  
     if ( myJet.recoMass < 0 ) recoM2 = - recoM2;
     //    res->Fill( myJet.genPt, genM2 , myJet.recoPt, recoM2, myJet.weight );
-    res->Fill(  myJet.recoPt, recoM2,    myJet.genPt, genM2, myJet.weight);
-    hTrue->Fill( myJet.genPt, genM2, myJet.weight);
-    hRaw->Fill( myJet.recoPt, recoM2, myJet.weight);
+    if ( i<tr->GetEntries()/2)  { 
+      res->Fill(  myJet.recoPt, recoM2,    myJet.genPt, genM2, myJet.weight);
+    }
+    else  {
+      hTrue->Fill( myJet.genPt, genM2, myJet.weight);
+      hRaw->Fill( myJet.recoPt, recoM2, myJet.weight);
+    }
   }
   
   cout << "==================================== UNFOLD ===================================" << endl;
