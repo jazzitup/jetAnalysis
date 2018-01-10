@@ -10,8 +10,9 @@ void macro1(TString name="file",
                          );
 
 void drawMassCorrelation() {
-  TString name="jetSubstructure_himix_test_v4.6_r4_Trimming_rSub0.15_fCut0.05.root";
-  if ( 0==1 ){  
+  //  TString name="jetSubstructure_himix_test_v4.6_r4_Trimming_rSub0.15_fCut0.05.root";
+  TString name="jetSubstructure_himix_test_v4.6_r4_Trimming_rSub0.10_fCut0.05.root";
+  /*  macro1(name, 150, 400,  "m2overPt2_full_gen","Truth (m/p_{T})^{2}", -0.02,0.1, "m2overPt2_full", "Calo (m/p_{T})^{2}", -.02,0.1);
     macro1(name, 150, 400, "chPtRcSubt", "#Sigmap_{T}^{trk}", -20, 300, "m2_trk", "m_{trk}^{2} (Subtracted)", -500, 900) ;
     macro1(name, 150, 400, "chPtRcSubt", "#Sigmap_{T}^{trk}", -20, 300, "m2overPt2_trk", "m_{trk}^{2}/#Sigmap_{T}^{trk 2}", -.05,.1);
     macro1(name, 150, 400, "nTrk", "N^{trk}", -10, 20, "m2_trk", "m_{trk}^{2} (Subtracted)", -500, 900) ;
@@ -25,13 +26,16 @@ void drawMassCorrelation() {
     macro1(name, 150, 400, "nTrk", "N^{trk}", -10, 20, "m2overPt2_full", "m_{full}^{2}/p_{T}^{Jet 2}", -.05,.1);
     macro1(name, 150, 400, "maxPoverPtTrk", "Max[pT^{trk}]/#Sigmap_{T}^{trk}", 0, 1.2,  "m2_full", "m_{full}^{2}", -500, 3000) ;
     macro1(name, 150, 400, "maxPoverPtTrk", "Max[pT^{trk}]/#Sigmap_{T}^{trk}", 0, 1.2,  "m2overPt2_full", "m_{full}^{2}/p_{T}^{Jet 2}", -.05,.1);  
-  }
+
 
   macro1(name, 150, 400,  "m2_full_gen","Truth m^{2}", -1000,3000, "m2_full", "Calo m^{2}", -1000, 3000);
-  macro1(name, 150, 400,  "m2overPt2_full_gen","Truth (m/p_{T})^{2}", -0.4,0.4, "m2overPt2_full", "Calo (m/p_{T})^{2}", -.1,0.1);
   macro1(name, 150, 400,  "m2_trk_gen","Truth Charged m^{2}", -300,1000, "m2_trk", "Track m^{2}", -300, 1000);
   macro1(name, 150, 400,  "m2overPt2_trk_gen","Truth Charged (m/p_{T})^{2}", -.1,.1, "m2overPt2_trk", "Track (m/p_{T})^{2}", -.1,.1);
-
+  */
+    macro1(name, 150, 400, "pt", "p_{T}", 150, 400,   "genTrimM","Truth m, trimmed", -10,100);
+  //  macro1(name, 150, 400, "pt", "p_{T}", 150, 400,  "m2_trk", "m_{trk}^{2} (Subtracted)", -900, 900) ;
+  //  macro1(name, 150, 400,  "(genTrimM*genTrimM)","Truth m^{2}, trimmed", -1000,3000, "(trimMcorr*trimMcorr)", "Calo m^{2}, trimmed", -1000, 3000);
+  //  macro1(name, 150, 400,  "genTrimM","Truth m, trimmed", -10,100, "trimMcorr", "Calo m, trimmed", -10, 100);
 
 
 }
