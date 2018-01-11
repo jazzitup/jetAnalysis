@@ -40,6 +40,8 @@ void getXbin(int &nBins, double* xBin, int optX) {
   if ( optX == 1 ) {
     nBins = 6; 
     double ptBin[7]= {110,130,150,170,200,250,400};
+    //    nBins = 1; 
+    //    double ptBin[2]= {0,1000};
     for ( int i=0 ; i<= nBins ; i++) {
       xBin[i] = ptBin[i] ; 
     }    
@@ -67,9 +69,9 @@ void getYbin(int &nBins, double* yBin, int optY) {
 
   if ( optY == 1) {
     nBins = 12;
-    double massBin[13] = { 0,0,0,10,13,15,17,19,21,24,28,35,200};
-    yBin[0] = -500;
-    yBin[1] = -75;
+    double massBin[13] = { 0,0,0,10,13,15,17,19,21,24,28,35,50};
+    yBin[0] = -1000;
+    yBin[1] = -500;
     for ( int i=2 ; i<= nBins ; i++) {
       yBin[i] = massBin[i]*massBin[i];
     }
@@ -106,9 +108,9 @@ void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int opt
 bool passEvent( jetSubStr myJetMc, int icent)  {
   if ( myJetMc.cent != icent ) 
     return false;
-  if ( myJetMc.recoPt < 100 )
+  if ( myJetMc.recoPt < 80 )
     return false;
-  if ( myJetMc.genPt < 70 ) 
+  if ( myJetMc.genPt < 80 ) 
     return false;
   
   return true;
@@ -118,7 +120,6 @@ bool passEvent( jetSubStr myJetMc, int icent)  {
 RooUnfoldResponse* getResponce( int icent = 0, int optX=1, int optY=1,  TH2D* hTruth=0, TH2D* hReco=0 );
 
 void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructure_Data_HION9_v4.7_v1_Jan7") { 
-  int nIter = 4;
   int nXbins;
   double xBin[30];
   getXbin(nXbins, xBin, optX);
@@ -139,13 +140,14 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
   TCanvas* c01 = new TCanvas("c01", "",1000,500);
   c01->Divide(2,1); 
   for ( int i=0 ; i<=6; i++) {
-    if ( (i!=0) && (i!=3) && (i!=6))
+    int icent = i;
+    if ( (icent!=0) && (icent!=3) && (icent!=6) )
+      //if ( (icent!=0) )
       continue; 
     
     hTruth[i] = (TH2D*)hTruthTemp->Clone(Form("%s_icent%d",hTruthTemp->GetName(),i));
     hReco[i] = (TH2D*)hRecoTemp->Clone(Form("%s_icent%d",hRecoTemp->GetName(),i));
     res[i] = getResponce(i, optX, optY, hTruth[i], hReco[i]);
-    
     c01->cd(1);   hTruth[0]->Draw("colz");
     c01->cd(2);   hReco[0]->Draw("colz");
     c01->SaveAs(Form("correlation_cent%d.pdf",i));
@@ -154,6 +156,7 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
   cout << "================================ MC UNFOLD ===================================" << endl;
   for ( int icent=0 ; icent<=6; icent++) {
     if ( (icent!=0) && (icent!=3) && (icent!=6) )       
+      //if ( (icent!=0) )
       continue;
 
     TCanvas* c1 = new TCanvas(Form("c1_icent%d",icent),"",1200,800);
@@ -172,6 +175,7 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
       handsomeTH1(hmassUnf,2);
       hmassGen->SetXTitle("m^{2} (GeV^{2})");
       //      cleverRangeLog(hmassGen,2,1e-3);
+      hmassGen->SetAxisRange(-500,35*35-1);
       hmassGen->DrawCopy("hist");
       hmassRaw->DrawCopy("e same");
       hmassUnf->DrawCopy("e same");
@@ -186,7 +190,7 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
 RooUnfoldResponse* getResponce( int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco)
 {
 
-
+  
   TString jz3 = "jetSubstructure_himix_test_v4.6_r4_Trimming_rSub0.25_fCut0.10" ;
   
   cout << "==================================== TRAIN ====================================" << endl;
@@ -204,6 +208,7 @@ RooUnfoldResponse* getResponce( int icent,  int optX, int optY, TH2D* hTruth, TH
   TH2D* hRecoMc = (TH2D*)hReco->Clone("hRecoMc");
 
   RooUnfoldResponse* res = new RooUnfoldResponse( hTruthMc, hRecoMc );
+  res->SetName(Form("responseMatrix_icent%d",icent));
 
   for (Int_t i= 0; i<trMc->GetEntries() ; i++) {
     trMc->GetEntry(i);
@@ -218,7 +223,7 @@ RooUnfoldResponse* getResponce( int icent,  int optX, int optY, TH2D* hTruth, TH
     hReco->Fill ( recoVarX, recoVarY, myJetMc.weight);
     hTruth->Fill ( truthVarX, truthVarY, myJetMc.weight);
   }
-  
+
   return res;
 }
 
