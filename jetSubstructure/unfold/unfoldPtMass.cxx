@@ -73,19 +73,29 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
 
   if ( optY == 1) {
     nBins = 14;
-    double massBin[15] = { -0.2,-0.1,0,10,13,15,17,19,21,24,28,35,50,75,100};
+    double massBin[15] = { -2,-1,0,10,13,15,17,19,21,24,28,35,50,75,100};
     for ( int i=0 ; i<= nBins ; i++) {
       yBinSqrt[i] = massBin[i];
     }
-
     yBin[0] = -1000;
     yBin[1] = -500;
     for ( int i=2 ; i<= nBins ; i++) {
       yBin[i] = massBin[i]*massBin[i];
     }
-
-
   }
+  else if ( optY == 2) {
+    nBins = 11;
+    double massBin[12] = { -0.02,-0.01,0,0.03, 0.06, 0.09, 0.12, 0.15, 0.18, 0.21, 0.24, 0.27};
+    for ( int i=0 ; i<= nBins ; i++) {
+      yBinSqrt[i] = massBin[i];
+    }
+    yBin[0] = -0.03;
+    yBin[1] = -0.001;
+    for ( int i=2 ; i<= nBins ; i++) {
+      yBin[i] = massBin[i]*massBin[i];
+    }
+  }
+  
   else if ( optY == 7)   {
     nBins = 12 ;
     for ( int i=0 ; i<= nBins ; i++) {
@@ -99,14 +109,23 @@ void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int opt
   
   double genM2 = myJetMc.genMass* myJetMc.genMass;
   double recoM2 = myJetMc.recoMass * myJetMc.recoMass;
+  double genPt2 = myJetMc.genPt* myJetMc.genPt;
+  double recoPt2 = myJetMc.recoPt * myJetMc.recoPt;
+
+
   if ( myJetMc.recoMass < 0 ) recoM2 = - recoM2;
-  double genMoverPt2 = genM2 / (myJetMc.genPt*myJetMc.genPt);
-  double recoMoverPt2 = recoM2 / (myJetMc.recoPt*myJetMc.recoPt);
+  double genMoverPt2 = genM2 / genPt2; 
+  double recoMoverPt2 = recoM2 / recoPt2;
 
   if (optY==1)  {
     recoVarY = recoM2;
     truthVarY = genM2;
   }
+  if (optY==2)  {
+    recoVarY = recoMoverPt2;
+    truthVarY = genMoverPt2;
+  }
+
   else if ( optY == 7) { // charge assisted mass
     truthVarY = genM2;
     float recoVarYsqrt = myJetMc.recoChMassRcSubt * myJetMc.recoPt / myJetMc.recoChPtRcSubt ;
@@ -114,6 +133,19 @@ void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int opt
     if ( recoVarYsqrt < 0)   recoVarY = - recoVarY ;
   }
   
+}
+void transformSqrt (TH1D* h1, TH1D* h2) { 
+  h2->Reset();
+  for ( int i = 0 ; i <=h1->GetNbinsX() ; i++) { 
+    double xx = h1->GetBinCenter(i);
+    double yy = h1->GetBinContent(i);
+    double yye = h1->GetBinError(i);
+    if ( yy < 0 ) 
+      continue;
+    int theBin = h2->FindBin( sqrt(xx) );
+    h2->SetBinContent(theBin, yy);
+    h2->SetBinError(theBin, yye);
+  }
 }
 
 bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
@@ -152,7 +184,6 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
 
   TH2D* hRecoData[7];
   TH2D* hResultData[7];
-
 
   TCanvas* c01 = new TCanvas("c01", "",1000,500);
   c01->Divide(2,1); 
@@ -199,9 +230,9 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
       handsomeTH1(hmassRaw,8);
       handsomeTH1(hmassUnf,2);
       hmassGen->SetXTitle("m^{2} (GeV^{2})");
-      //      cleverRangeLog(hmassGen,2,1e-3);
-      hmassGen->SetAxisRange(-500,35*35-1);
-      cleverRangeLog(hmassGen, 10, 0.001);
+      if ( optY == 1)   hmassGen->SetAxisRange(-500,35*35-1);
+      if ( optY == 2)   hmassGen->SetAxisRange(-0.02,0.08);
+      cleverRangeLog(hmassGen, 10, 0.0001);
       hmassGen->DrawCopy("hist");
       hmassRaw->DrawCopy("e same");
       hmassUnf->DrawCopy("e same");
@@ -231,25 +262,38 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
     RooUnfoldBayes unfoldData (res[icent], hRecoData[icent], nIter);    // OR
     hResultData[icent] = (TH2D*)unfoldData.Hreco();
     hResultData[icent]->SetName( Form("hresultData_icent%d",icent) );
-
+    
+    TH1D* hmassUnfSqrt[10];
     for ( int ix = 1 ; ix<= nXbins ; ix++) { 
       c2->cd(ix);
       TH1D* hmassRaw = (TH1D*)hRecoData[icent]->ProjectionY(Form("hmassDataRaw_icent%d_ipt%d",icent,ix),ix,ix);
       TH1D* hmassUnf = (TH1D*)hResultData[icent]->ProjectionY(Form("hmassDataUnf_icent%d_ipt%d",icent,ix),ix,ix);
-      
+      hmassUnfSqrt[ix] = new TH1D(Form("%s_sqrt",hmassUnf->GetName()),"; m (GeV) ; Entries", nYbins, yBinSqrt);
+      transformSqrt(hmassUnf, hmassUnfSqrt[ix] ) ;
+
       TH1ScaleByWidth(hmassRaw);
       TH1ScaleByWidth(hmassUnf);
-
+      TH1ScaleByWidth(hmassUnfSqrt[ix]);
+      
+      scaleInt(hmassUnfSqrt[ix]);
+      
       hmassUnf->SetNdivisions(505);
       handsomeTH1(hmassRaw,8);
       handsomeTH1(hmassUnf,2);
+      handsomeTH1(hmassUnfSqrt[ix],2);
       hmassRaw->SetXTitle("m^{2} (GeV^{2})");
-      hmassRaw->SetAxisRange(-500,35*35-1);
-      hmassUnf->SetAxisRange(-500,35*35-1);
-      cleverRangeLog(hmassRaw, 20, 0.001);
+      if ( optY==1) {  
+	hmassRaw->SetAxisRange(-500,35*35-1);
+	hmassUnf->SetAxisRange(-500,35*35-1);
+      }
+      else if ( optY==2) { 
+	hmassRaw->SetAxisRange(-.1, .1);
+	hmassUnf->SetAxisRange(-.1, .1);
+      }
+      cleverRangeLog(hmassRaw, 20, 0.0001);
       hmassRaw->DrawCopy("e");
       hmassUnf->DrawCopy("e same");
-
+      
       if ( ix==1)  drawCentrality(icent, 0.35,0.85,1,20);
       drawBin(xBin,ix,"GeV",0.35,0.75,1,18);
       gPad->SetLogy();
@@ -266,15 +310,24 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
       
     }
     
-    
+    TCanvas* c3 = new TCanvas(Form("c3_icent%d",icent),"",1200,800);
+    c3->Divide(3,2);
+    for ( int ix = 1 ; ix<= nXbins ; ix++) {
+      c3->cd(ix);
+      hmassUnfSqrt[ix]->SetXTitle("m (GeV)");
+      if ( optY==1)   hmassUnfSqrt[ix]->SetAxisRange(0.00001,0.1,"Y");
+      else if ( optY==2)   hmassUnfSqrt[ix]->SetAxisRange(0.00001,15,"Y");
+      hmassUnfSqrt[ix]->DrawCopy("e");
+      if ( ix==1)  drawCentrality(icent, 0.5,0.85,1,20);
+      drawBin(xBin,ix,"GeV",0.5,0.8,1,18);
+      //      gPad->SetLogy();
+    }
+    c3->SaveAs(Form("c3_icent%d.pdf",icent));
   }
-
 }
 
 RooUnfoldResponse* getResponce( int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco)
 {
-
-  
   TString jz3 = "jetSubstructure_himix_test_v4.6_r4_Trimming_rSub0.25_fCut0.10.root" ;
   
   cout << "==================================== TRAIN ====================================" << endl;
