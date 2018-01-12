@@ -36,6 +36,10 @@ void drawCentrality(int icent = 0, float xp=0.2, float yp=0.8, int textColor=kBl
   if ( icent==5 )  drawText( "50-60%",xp,yp,textColor,textSize) ;
   if ( icent==6 )  drawText( "60-80%",xp,yp,textColor,textSize) ;
 }
+void drawBin(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
+  drawText( Form("%d - %d %s", (int)(xBin[ix-1]),  (int)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
+}
+
 void getXbin(int &nBins, double* xBin, int optX) { 
   if ( optX == 1 ) {
     nBins = 6; 
@@ -65,16 +69,22 @@ void getXvalues( double &recoVarX, double &truthVarX, jetSubStr myJetMc, int opt
   }
 }
 
-void getYbin(int &nBins, double* yBin, int optY) {
+void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
 
   if ( optY == 1) {
-    nBins = 12;
-    double massBin[13] = { 0,0,0,10,13,15,17,19,21,24,28,35,50};
+    nBins = 14;
+    double massBin[15] = { -0.2,-0.1,0,10,13,15,17,19,21,24,28,35,50,75,100};
+    for ( int i=0 ; i<= nBins ; i++) {
+      yBinSqrt[i] = massBin[i];
+    }
+
     yBin[0] = -1000;
     yBin[1] = -500;
     for ( int i=2 ; i<= nBins ; i++) {
       yBin[i] = massBin[i]*massBin[i];
     }
+
+
   }
   else if ( optY == 7)   {
     nBins = 12 ;
@@ -83,6 +93,7 @@ void getYbin(int &nBins, double* yBin, int optY) {
     }
   }
 }
+
 
 void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int optY) {
   
@@ -105,12 +116,12 @@ void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int opt
   
 }
 
-bool passEvent( jetSubStr myJetMc, int icent)  {
+bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
   if ( myJetMc.cent != icent ) 
     return false;
   if ( myJetMc.recoPt < 80 )
     return false;
-  if ( myJetMc.genPt < 80 ) 
+  if ( (isMC) && ( myJetMc.genPt < 80 ) )
     return false;
   
   return true;
@@ -118,6 +129,7 @@ bool passEvent( jetSubStr myJetMc, int icent)  {
 }
 
 RooUnfoldResponse* getResponce( int icent = 0, int optX=1, int optY=1,  TH2D* hTruth=0, TH2D* hReco=0 );
+void getDataSpectra( int icent=0,  int optX=1, int optY=1, TH2D* hReco=0);
 
 void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructure_Data_HION9_v4.7_v1_Jan7") { 
   int nXbins;
@@ -128,7 +140,8 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
 
   int nYbins ;
   double yBin[30] ;
-  getYbin(nYbins, yBin, optY);
+  double yBinSqrt[30] ; 
+  getYbin(nYbins, yBin, yBinSqrt, optY);
 
   TH2D* hTruthTemp = new TH2D("hTruth","",nXbins,xBin,nYbins, yBin);
   TH2D* hRecoTemp = (TH2D*)hTruthTemp->Clone("hReco");
@@ -137,6 +150,10 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
   TH2D* hReco[7];
   TH2D* hResultMc[7];
 
+  TH2D* hRecoData[7];
+  TH2D* hResultData[7];
+
+
   TCanvas* c01 = new TCanvas("c01", "",1000,500);
   c01->Divide(2,1); 
   for ( int i=0 ; i<=6; i++) {
@@ -144,57 +161,124 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
     if ( (icent!=0) && (icent!=3) && (icent!=6) )
       //if ( (icent!=0) )
       continue; 
-    
     hTruth[i] = (TH2D*)hTruthTemp->Clone(Form("%s_icent%d",hTruthTemp->GetName(),i));
     hReco[i] = (TH2D*)hRecoTemp->Clone(Form("%s_icent%d",hRecoTemp->GetName(),i));
     res[i] = getResponce(i, optX, optY, hTruth[i], hReco[i]);
     c01->cd(1);   hTruth[0]->Draw("colz");
     c01->cd(2);   hReco[0]->Draw("colz");
     c01->SaveAs(Form("correlation_cent%d.pdf",i));
+    
+    hRecoData[i] = (TH2D*)hRecoTemp->Clone(Form("hRecoData_icent%d",icent));
+    getDataSpectra( icent, optX, optY, hRecoData[i]) ;
   }
-
+  
   cout << "================================ MC UNFOLD ===================================" << endl;
   for ( int icent=0 ; icent<=6; icent++) {
     if ( (icent!=0) && (icent!=3) && (icent!=6) )       
-      //if ( (icent!=0) )
-      continue;
-
-    TCanvas* c1 = new TCanvas(Form("c1_icent%d",icent),"",1200,800);
-    c1->Divide(3,2);
+	continue;
+    
+    TCanvas* c1 = new TCanvas(Form("c1_icent%d",icent),"",1200,400);
+    //    c1->Divide(6,1);
+    makeEfficiencyCanvas(c1,6,  0.05, 0.01, 0.1, 0.3, 0.01);
     RooUnfoldBayes unfoldMc (res[icent], hReco[icent], nIter);    // OR
     hResultMc[icent]  = (TH2D*)unfoldMc.Hreco();
     hResultMc[icent]->SetName( Form("hresultmc_icent%d",icent) );
     //    unfoldMc.PrintTable (cout, hTruth[icent]);
+    // MC! 
     for ( int ix = 1 ; ix<= nXbins ; ix++) { 
       c1->cd(ix);
       TH1D* hmassRaw = (TH1D*)hReco[icent]->ProjectionY(Form("hmassMCRaw_icent%d_ipt%d",icent,ix),ix,ix);
       TH1D* hmassGen = (TH1D*)hTruth[icent]->ProjectionY(Form("hmassMCTruth_icent%d_ipt%d",icent,ix),ix,ix);
       TH1D* hmassUnf = (TH1D*)hResultMc[icent]->ProjectionY(Form("hmassMCUnf_icent%d_ipt%d",icent,ix),ix,ix);
+      
+      TH1ScaleByWidth(hmassRaw);
+      TH1ScaleByWidth(hmassGen);
+      TH1ScaleByWidth(hmassUnf);
+
       hmassGen->SetNdivisions(505);
       handsomeTH1(hmassRaw,8);
       handsomeTH1(hmassUnf,2);
       hmassGen->SetXTitle("m^{2} (GeV^{2})");
       //      cleverRangeLog(hmassGen,2,1e-3);
       hmassGen->SetAxisRange(-500,35*35-1);
+      cleverRangeLog(hmassGen, 10, 0.001);
       hmassGen->DrawCopy("hist");
       hmassRaw->DrawCopy("e same");
       hmassUnf->DrawCopy("e same");
-      if ( ix==1)  drawCentrality(icent, 0.6,0.7,1,25);
+      if ( ix==1)  drawCentrality(icent, 0.35,0.85,1,20);
+      drawBin(xBin,ix,"GeV",0.35,0.75,1,18);
+      gPad->SetLogy();
+      
+      c1->cd(ix + nXbins);
+      TH1D* rRaw = (TH1D*)hmassRaw->Clone(Form("%s_r",hmassRaw->GetName()));
+      TH1D* rGen = (TH1D*)hmassGen->Clone(Form("%s_r",hmassGen->GetName()));
+      TH1D* rUnf = (TH1D*)hmassUnf->Clone(Form("%s_r",hmassUnf->GetName()));
+      rRaw->Divide( hmassGen ) ;
+      rGen->Divide( hmassGen ) ;
+      rUnf->Divide( hmassGen ) ;
+      rGen->SetAxisRange(0,3,"Y");
+      fixedFontHist(rGen,2.5);
+      rGen->DrawCopy("hist");
+      rRaw->DrawCopy("same");
+      rUnf->DrawCopy("same");
+
+    }
+
+    // DATA! 
+    TCanvas* c2 = new TCanvas(Form("c2_icent%d",icent),"",1200,400);
+    //    c1->Divide(6,1);
+    makeEfficiencyCanvas(c2,6,  0.05, 0.01, 0.1, 0.3, 0.01);
+    RooUnfoldBayes unfoldData (res[icent], hRecoData[icent], nIter);    // OR
+    hResultData[icent] = (TH2D*)unfoldData.Hreco();
+    hResultData[icent]->SetName( Form("hresultData_icent%d",icent) );
+
+    for ( int ix = 1 ; ix<= nXbins ; ix++) { 
+      c2->cd(ix);
+      TH1D* hmassRaw = (TH1D*)hRecoData[icent]->ProjectionY(Form("hmassDataRaw_icent%d_ipt%d",icent,ix),ix,ix);
+      TH1D* hmassUnf = (TH1D*)hResultData[icent]->ProjectionY(Form("hmassDataUnf_icent%d_ipt%d",icent,ix),ix,ix);
+      
+      TH1ScaleByWidth(hmassRaw);
+      TH1ScaleByWidth(hmassUnf);
+
+      hmassUnf->SetNdivisions(505);
+      handsomeTH1(hmassRaw,8);
+      handsomeTH1(hmassUnf,2);
+      hmassRaw->SetXTitle("m^{2} (GeV^{2})");
+      hmassRaw->SetAxisRange(-500,35*35-1);
+      hmassUnf->SetAxisRange(-500,35*35-1);
+      cleverRangeLog(hmassRaw, 20, 0.001);
+      hmassRaw->DrawCopy("e");
+      hmassUnf->DrawCopy("e same");
+
+      if ( ix==1)  drawCentrality(icent, 0.35,0.85,1,20);
+      drawBin(xBin,ix,"GeV",0.35,0.75,1,18);
+      gPad->SetLogy();
+      
+      c2->cd(ix + nXbins);
+      TH1D* rRaw = (TH1D*)hmassRaw->Clone(Form("%s_r",hmassRaw->GetName()));
+      TH1D* rUnf = (TH1D*)hmassUnf->Clone(Form("%s_r",hmassUnf->GetName()));
+      rRaw->Divide( hmassUnf ) ;
+      rUnf->Divide( hmassUnf ) ;
+      fixedFontHist(rRaw,2.5);
+      rRaw->SetAxisRange(0,3,"Y");
+      rRaw->DrawCopy("");
+      rUnf->DrawCopy("hist same");
       
     }
     
+    
   }
-  
+
 }
 
 RooUnfoldResponse* getResponce( int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco)
 {
 
   
-  TString jz3 = "jetSubstructure_himix_test_v4.6_r4_Trimming_rSub0.25_fCut0.10" ;
+  TString jz3 = "jetSubstructure_himix_test_v4.6_r4_Trimming_rSub0.25_fCut0.10.root" ;
   
   cout << "==================================== TRAIN ====================================" << endl;
-  TFile* fMc = new TFile(Form("../ntuples/%s.root",jz3.Data()));
+  TFile* fMc = new TFile(Form("../ntuples/%s",jz3.Data()));
   TTree* trMc = (TTree*)fMc->Get("tr");
   jetSubStr myJetMc;
   TBranch       *b_myJetSubMc;
@@ -212,7 +296,7 @@ RooUnfoldResponse* getResponce( int icent,  int optX, int optY, TH2D* hTruth, TH
 
   for (Int_t i= 0; i<trMc->GetEntries() ; i++) {
     trMc->GetEntry(i);
-    if ( ! passEvent(myJetMc, icent) ) 
+    if ( ! passEvent(myJetMc, icent, true) )  // isMC = true
       continue; 
 
     double recoVarX, truthVarX;
@@ -227,6 +311,35 @@ RooUnfoldResponse* getResponce( int icent,  int optX, int optY, TH2D* hTruth, TH
   return res;
 }
 
+
+void getDataSpectra( int icent,  int optX, int optY, TH2D* hReco)  {
+  TString fname = "jetSubstructure_Data_HION9_v4.7_v1_Jan7.root";
+  TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));
+  TTree* tr = (TTree*)fData->Get("tr");
+  jetSubStr myJet;
+  TBranch       *b_myJet;
+  tr->SetBranchAddress("jets", &(myJet.cent), &b_myJet);
+
+  // Train with a Breit-Wigner, mean 0.3 and width 2.5.
+  cout << " Data entries = " << tr->GetEntries() << endl;
+
+  hReco->Reset();
+
+  for (Int_t i= 0; i<tr->GetEntries() ; i++) {
+    tr->GetEntry(i);
+    if ( ! passEvent(myJet, icent, false) ) // isMC = false
+      continue;
+
+    double recoVarX, truthVarX;
+    getXvalues( recoVarX, truthVarX, myJet, optX);
+    double recoVarY, truthVarY;
+    getYvalues( recoVarY, truthVarY, myJet, optY);
+
+    hReco->Fill ( recoVarX, recoVarY);  // no reweighting for data
+    
+  }
+}
+ 
 #ifndef __CINT__
 int main () { unfoldPtMass(); return 0; }  // Main program when run stand-alone
 #endif
