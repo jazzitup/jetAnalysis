@@ -15,6 +15,7 @@ using std::endl;
 #include "../getSdHists.C"
 #include "../ntupleDefinition.h"
 #include "../commonUtility.h"
+#include "../jzWeight.h"
 #endif
 
 //==============================================================================
@@ -42,8 +43,8 @@ void drawBin(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp
 
 void getXbin(int &nBins, double* xBin, int optX) { 
   if ( optX == 1 ) {
-    nBins = 6; 
-    double ptBin[7]= {110,130,150,170,200,250,400};
+    nBins = 8; 
+    double ptBin[9]= {100,110, 120, 130, 150, 170,200,250,400};
     //    nBins = 1; 
     //    double ptBin[2]= {0,1000};
     for ( int i=0 ; i<= nBins ; i++) {
@@ -151,19 +152,20 @@ void transformSqrt (TH1D* h1, TH1D* h2) {
 bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
   if ( myJetMc.cent != icent ) 
     return false;
-  if ( myJetMc.recoPt < 80 )
-    return false;
-  if ( (isMC) && ( myJetMc.genPt < 80 ) )
-    return false;
+  //  if ( myJetMc.recoPt < 80 )
+  //    return false;
+  //  if ( (isMC) && ( myJetMc.genPt < 80 ) )
+  //    return false;
   
   return true;
   
 }
 
-RooUnfoldResponse* getResponce( int icent = 0, int optX=1, int optY=1,  TH2D* hTruth=0, TH2D* hReco=0 );
+RooUnfoldResponse* getResponse( int icent = 0, int optX=1, int optY=1,  TH2D* hTruth=0, TH2D* hReco=0);
 void getDataSpectra( int icent=0,  int optX=1, int optY=1, TH2D* hReco=0);
 
 void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructure_Data_HION9_v4.7_v1_Jan7") { 
+  TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
   getXbin(nXbins, xBin, optX);
@@ -178,6 +180,7 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
   TH2D* hTruthTemp = new TH2D("hTruth","",nXbins,xBin,nYbins, yBin);
   TH2D* hRecoTemp = (TH2D*)hTruthTemp->Clone("hReco");
   RooUnfoldResponse* res[7];
+
   TH2D* hTruth[7];
   TH2D* hReco[7];
   TH2D* hResultMc[7];
@@ -194,7 +197,8 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
       continue; 
     hTruth[i] = (TH2D*)hTruthTemp->Clone(Form("%s_icent%d",hTruthTemp->GetName(),i));
     hReco[i] = (TH2D*)hRecoTemp->Clone(Form("%s_icent%d",hRecoTemp->GetName(),i));
-    res[i] = getResponce(i, optX, optY, hTruth[i], hReco[i]);
+    res[i] = getResponse(i, optX, optY, hTruth[i], hReco[i]);
+
     c01->cd(1);   hTruth[0]->Draw("colz");
     c01->cd(2);   hReco[0]->Draw("colz");
     c01->SaveAs(Form("correlation_cent%d.pdf",i));
@@ -210,7 +214,7 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
     
     TCanvas* c1 = new TCanvas(Form("c1_icent%d",icent),"",1200,400);
     //    c1->Divide(6,1);
-    makeEfficiencyCanvas(c1,6,  0.05, 0.01, 0.1, 0.3, 0.01);
+    makeEfficiencyCanvas(c1,nXbins,  0.05, 0.01, 0.1, 0.3, 0.01);
     RooUnfoldBayes unfoldMc (res[icent], hReco[icent], nIter);    // OR
     hResultMc[icent]  = (TH2D*)unfoldMc.Hreco();
     hResultMc[icent]->SetName( Form("hresultmc_icent%d",icent) );
@@ -252,13 +256,13 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
       rGen->DrawCopy("hist");
       rRaw->DrawCopy("same");
       rUnf->DrawCopy("same");
-
+      c1->SaveAs(Form("c1_icent%d_optX%d_optY%d.pdf",icent,optX,optY));
     }
 
     // DATA! 
     TCanvas* c2 = new TCanvas(Form("c2_icent%d",icent),"",1200,400);
     //    c1->Divide(6,1);
-    makeEfficiencyCanvas(c2,6,  0.05, 0.01, 0.1, 0.3, 0.01);
+    makeEfficiencyCanvas(c2,nXbins,  0.05, 0.01, 0.1, 0.3, 0.01);
     RooUnfoldBayes unfoldData (res[icent], hRecoData[icent], nIter);    // OR
     hResultData[icent] = (TH2D*)unfoldData.Hreco();
     hResultData[icent]->SetName( Form("hresultData_icent%d",icent) );
@@ -307,11 +311,11 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
       rRaw->SetAxisRange(0,3,"Y");
       rRaw->DrawCopy("");
       rUnf->DrawCopy("hist same");
-      
+      c2->SaveAs(Form("c2_icent%d_optX%d_optY%d.pdf",icent,optX,optY));      
     }
     
-    TCanvas* c3 = new TCanvas(Form("c3_icent%d",icent),"",1200,800);
-    c3->Divide(3,2);
+    TCanvas* c3 = new TCanvas(Form("c3_icent%d",icent),"",1200,600);
+    c3->Divide( (int)((nXbins+0.1)/2.),2);
     for ( int ix = 1 ; ix<= nXbins ; ix++) {
       c3->cd(ix);
       hmassUnfSqrt[ix]->SetXTitle("m (GeV)");
@@ -322,50 +326,82 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
       drawBin(xBin,ix,"GeV",0.5,0.8,1,18);
       //      gPad->SetLogy();
     }
-    c3->SaveAs(Form("c3_icent%d.pdf",icent));
+    c3->SaveAs(Form("c3_icent%d_optX%d_optY%d.pdf",icent,optX,optY));
   }
 }
 
-RooUnfoldResponse* getResponce( int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco)
+RooUnfoldResponse* getResponse( int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco)
 {
-  TString jz3 = "jetSubstructure_himix_test_v4.6_r4_Trimming_rSub0.25_fCut0.10.root" ;
+  TH1::SetDefaultSumw2();
+  TString jz2 = "jetSubstructure_MC_HION9_jz2_r4_Jan10.root";
+  TString jz3 = "jetSubstructure_MC_HION9_jz3_r4_Jan10.root";
+  TString jz4 = "jetSubstructure_MC_HION9_jz4_r4_Jan10.root";
+
+  //  if ( nJz ==2 ) jzNorm = hi9EvtWgtJZ2;
+  //  if ( nJz ==3 ) jzNorm = hi9EvtWgtJZ3;
+  //  if ( nJz ==4 ) jzNorm = hi9EvtWgtJZ4;
   
-  cout << "==================================== TRAIN ====================================" << endl;
-  TFile* fMc = new TFile(Form("../ntuples/%s",jz3.Data()));
-  TTree* trMc = (TTree*)fMc->Get("tr");
-  jetSubStr myJetMc;
-  TBranch       *b_myJetSubMc;
-  trMc->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+  jetSubStr  myJetMc;
+  TBranch  *b_myJetSubMc;
+  
+  cout << " Setting tree branch address..." << endl;
+  TFile* fjz2 = new TFile(Form("../ntuples/%s",jz2.Data()));
+  TTree* tr2 = (TTree*)fjz2->Get("tr");
+  tr2->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+
+  TFile* fjz3 = new TFile(Form("../ntuples/%s",jz3.Data()));
+  TTree* tr3 = (TTree*)fjz3->Get("tr");
+  tr3->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+
+  TFile* fjz4 = new TFile(Form("../ntuples/%s",jz4.Data()));
+  TTree* tr4 = (TTree*)fjz4->Get("tr");
+  tr4->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
 
   // Train with a Breit-Wigner, mean 0.3 and width 2.5.
-  cout << " JZ3 entries = " << trMc->GetEntries() << endl;
-  
-
   TH2D* hTruthMc = (TH2D*)hTruth->Clone("hTruthMc");
   TH2D* hRecoMc = (TH2D*)hReco->Clone("hRecoMc");
 
   RooUnfoldResponse* res = new RooUnfoldResponse( hTruthMc, hRecoMc );
   res->SetName(Form("responseMatrix_icent%d",icent));
-
-  for (Int_t i= 0; i<trMc->GetEntries() ; i++) {
-    trMc->GetEntry(i);
-    if ( ! passEvent(myJetMc, icent, true) )  // isMC = true
-      continue; 
-
-    double recoVarX, truthVarX;
-    getXvalues( recoVarX, truthVarX, myJetMc, optX);
-    double recoVarY, truthVarY;
-    getYvalues( recoVarY, truthVarY, myJetMc, optY);
-    res->Fill(  recoVarX, recoVarY,    truthVarX, truthVarY, myJetMc.weight);
-    hReco->Fill ( recoVarX, recoVarY, myJetMc.weight);
-    hTruth->Fill ( truthVarX, truthVarY, myJetMc.weight);
+  
+  for ( int ijz =2 ; ijz<=4 ; ijz++) { 
+    TTree* tr;
+    double jzNorm=0;
+    if ( ijz==2)  {
+      tr = tr2;   
+      jzNorm = hi9EvtWgtJZ2; 
+    }
+    else if ( ijz==3)  {
+      tr = tr3;   
+      jzNorm = hi9EvtWgtJZ3; 
+    }
+    else if ( ijz==4)  {
+      tr = tr4;   
+      jzNorm = hi9EvtWgtJZ4; 
+    }
+    cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
+    for (Int_t i= 0; i<tr->GetEntries() ; i++) {
+      //      if ( i > tr->GetEntries()/100 ) continue;
+      tr->GetEntry(i);
+      if ( ! passEvent(myJetMc, icent, true) )  // isMC = true
+	continue; 
+      
+      double recoVarX, truthVarX;
+      getXvalues( recoVarX, truthVarX, myJetMc, optX);
+      double recoVarY, truthVarY;
+      getYvalues( recoVarY, truthVarY, myJetMc, optY);
+      res->Fill(  recoVarX, recoVarY,    truthVarX, truthVarY, myJetMc.weight * jzNorm);
+      hReco->Fill ( recoVarX, recoVarY, myJetMc.weight * jzNorm);
+      hTruth->Fill ( truthVarX, truthVarY, myJetMc.weight * jzNorm);
+    }
+    
   }
-
   return res;
 }
 
 
 void getDataSpectra( int icent,  int optX, int optY, TH2D* hReco)  {
+  TH1::SetDefaultSumw2();
   TString fname = "jetSubstructure_Data_HION9_v4.7_v1_Jan7.root";
   TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));
   TTree* tr = (TTree*)fData->Get("tr");
