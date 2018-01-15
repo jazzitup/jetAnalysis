@@ -22,8 +22,12 @@ using std::endl;
 // Global definitions
 //==============================================================================
 
+double fracStst=.01;
+
 const Double_t cutdummy= -99999.0;
 const int nIter = 4;
+bool useHalfStat = true;
+
 
 //==============================================================================
 // Gaussian smearing, systematic translation, and variable inefficiency
@@ -43,8 +47,11 @@ void drawBin(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp
 
 void getXbin(int &nBins, double* xBin, int optX) { 
   if ( optX == 1 ) {
+    //    nBins = 10; 
+    //    double ptBin[11]= {100,110, 120, 130, 150, 170,200,250,300,400,1000};
+    // jet FF bins 
     nBins = 8; 
-    double ptBin[9]= {100,110, 120, 130, 150, 170,200,250,400};
+    double ptBin[9]= {100, 126, 158, 200, 251, 316, 398, 503, 800};
     //    nBins = 1; 
     //    double ptBin[2]= {0,1000};
     for ( int i=0 ; i<= nBins ; i++) {
@@ -74,7 +81,7 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
 
   if ( optY == 1) {
     nBins = 14;
-    double massBin[15] = { -2,-1,0,10,13,15,17,19,21,24,28,35,50,75,100};
+    double massBin[15] = { -2,-1,0,10,13,15,17,19,21,24,28,35,50,100,200};
     for ( int i=0 ; i<= nBins ; i++) {
       yBinSqrt[i] = massBin[i];
     }
@@ -152,19 +159,19 @@ void transformSqrt (TH1D* h1, TH1D* h2) {
 bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
   if ( myJetMc.cent != icent ) 
     return false;
-  //  if ( myJetMc.recoPt < 80 )
-  //    return false;
-  //  if ( (isMC) && ( myJetMc.genPt < 80 ) )
-  //    return false;
+  if ( myJetMc.recoPt < 100 )
+    return false;
+  if ( (isMC) && ( myJetMc.genPt < 100 ) ) // Must be the same to the lowest pT bin 
+    return false;
   
   return true;
   
 }
 
-RooUnfoldResponse* getResponse( int icent = 0, int optX=1, int optY=1,  TH2D* hTruth=0, TH2D* hReco=0);
-void getDataSpectra( int icent=0,  int optX=1, int optY=1, TH2D* hReco=0);
+RooUnfoldResponse* getResponse( int icent = 0, int optX=1, int optY=1,  TH2D* hTruth=0, TH2D* hReco=0, double radius =0.4);
+void getDataSpectra( int icent=0,  int optX=1, int optY=1, TH2D* hReco=0, double radius=0.4);
 
-void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructure_Data_HION9_v4.7_v1_Jan7") { 
+void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -197,14 +204,17 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
       continue; 
     hTruth[i] = (TH2D*)hTruthTemp->Clone(Form("%s_icent%d",hTruthTemp->GetName(),i));
     hReco[i] = (TH2D*)hRecoTemp->Clone(Form("%s_icent%d",hRecoTemp->GetName(),i));
-    res[i] = getResponse(i, optX, optY, hTruth[i], hReco[i]);
-
+    //    hTruth[i]->Reset();
+    //    hReco[i]->Reset();
+    
+    res[i] = getResponse(i, optX, optY, hTruth[i], hReco[i], radius);
+    
     c01->cd(1);   hTruth[0]->Draw("colz");
     c01->cd(2);   hReco[0]->Draw("colz");
-    c01->SaveAs(Form("correlation_cent%d.pdf",i));
+    c01->SaveAs(Form("correlation_cent%d_radius%.1f.pdf",i,(float)radius));
     
     hRecoData[i] = (TH2D*)hRecoTemp->Clone(Form("hRecoData_icent%d",icent));
-    getDataSpectra( icent, optX, optY, hRecoData[i]) ;
+    getDataSpectra( icent, optX, optY, hRecoData[i], radius) ;
   }
   
   cout << "================================ MC UNFOLD ===================================" << endl;
@@ -212,16 +222,23 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
     if ( (icent!=0) && (icent!=3) && (icent!=6) )       
 	continue;
     
-    TCanvas* c1 = new TCanvas(Form("c1_icent%d",icent),"",1200,400);
+    TCanvas* c1a = new TCanvas(Form("c1a_icent%d",icent),"",1200,400);
+    TCanvas* c1b = new TCanvas(Form("c1b_icent%d",icent),"",1200,400);
     //    c1->Divide(6,1);
-    makeEfficiencyCanvas(c1,nXbins,  0.05, 0.01, 0.1, 0.3, 0.01);
+    makeEfficiencyCanvas(c1a,(nXbins+1)/2,  0.05, 0.01, 0.1, 0.3, 0.01);
+    makeEfficiencyCanvas(c1b,(nXbins+1)/2,  0.05, 0.01, 0.1, 0.3, 0.01);
     RooUnfoldBayes unfoldMc (res[icent], hReco[icent], nIter);    // OR
     hResultMc[icent]  = (TH2D*)unfoldMc.Hreco();
     hResultMc[icent]->SetName( Form("hresultmc_icent%d",icent) );
     //    unfoldMc.PrintTable (cout, hTruth[icent]);
     // MC! 
     for ( int ix = 1 ; ix<= nXbins ; ix++) { 
-      c1->cd(ix);
+      
+      if ( ix <= (nXbins+1)/2 )
+	c1a->cd(ix);
+      else 
+	c1b->cd(ix - (nXbins+1)/2);
+      
       TH1D* hmassRaw = (TH1D*)hReco[icent]->ProjectionY(Form("hmassMCRaw_icent%d_ipt%d",icent,ix),ix,ix);
       TH1D* hmassGen = (TH1D*)hTruth[icent]->ProjectionY(Form("hmassMCTruth_icent%d_ipt%d",icent,ix),ix,ix);
       TH1D* hmassUnf = (TH1D*)hResultMc[icent]->ProjectionY(Form("hmassMCUnf_icent%d_ipt%d",icent,ix),ix,ix);
@@ -234,42 +251,59 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
       handsomeTH1(hmassRaw,8);
       handsomeTH1(hmassUnf,2);
       hmassGen->SetXTitle("m^{2} (GeV^{2})");
-      if ( optY == 1)   hmassGen->SetAxisRange(-500,35*35-1);
+      if ( optY == 1)   hmassGen->SetAxisRange(1,2000);
       if ( optY == 2)   hmassGen->SetAxisRange(-0.02,0.08);
       cleverRangeLog(hmassGen, 10, 0.0001);
+      hmassGen->SetTitleOffset(1.5,"Y");
       hmassGen->DrawCopy("hist");
       hmassRaw->DrawCopy("e same");
       hmassUnf->DrawCopy("e same");
-      if ( ix==1)  drawCentrality(icent, 0.35,0.85,1,20);
-      drawBin(xBin,ix,"GeV",0.35,0.75,1,18);
+      if ( ix==1)  drawCentrality(icent, 0.45,0.9,1,20);
+      drawBin(xBin,ix,"GeV",0.45,0.8,1,18);
       gPad->SetLogy();
       
-      c1->cd(ix + nXbins);
+      if ( ix <= (nXbins+1)/2 )
+        c1a->cd(ix + (nXbins+1)/2);
+      else
+        c1b->cd(ix);
+
       TH1D* rRaw = (TH1D*)hmassRaw->Clone(Form("%s_r",hmassRaw->GetName()));
       TH1D* rGen = (TH1D*)hmassGen->Clone(Form("%s_r",hmassGen->GetName()));
       TH1D* rUnf = (TH1D*)hmassUnf->Clone(Form("%s_r",hmassUnf->GetName()));
       rRaw->Divide( hmassGen ) ;
       rGen->Divide( hmassGen ) ;
       rUnf->Divide( hmassGen ) ;
-      rGen->SetAxisRange(0,3,"Y");
+      
+      rGen->SetTitleOffset(1.5,"Y");
+      rGen->SetAxisRange(0.88,1.1,"Y");
+      rGen->SetNdivisions(501,"Y");
+      rGen->SetYTitle("Ratio");
+
       fixedFontHist(rGen,2.5);
       rGen->DrawCopy("hist");
       rRaw->DrawCopy("same");
       rUnf->DrawCopy("same");
-
     }
-
+    c1a->SaveAs(Form("c1a_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
+    c1b->SaveAs(Form("c1b_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
+    
     // DATA! 
-    TCanvas* c2 = new TCanvas(Form("c2_icent%d",icent),"",1200,400);
+    TCanvas* c2a = new TCanvas(Form("c2a_icent%d",icent),"",1200,400);
+    TCanvas* c2b = new TCanvas(Form("c2b_icent%d",icent),"",1200,400);
     //    c1->Divide(6,1);
-    makeEfficiencyCanvas(c2,nXbins,  0.05, 0.01, 0.1, 0.3, 0.01);
+    makeEfficiencyCanvas(c2a,(nXbins+1)/2,  0.05, 0.01, 0.1, 0.3, 0.01);
+    makeEfficiencyCanvas(c2b,(nXbins+1)/2,  0.05, 0.01, 0.1, 0.3, 0.01);
     RooUnfoldBayes unfoldData (res[icent], hRecoData[icent], nIter);    // OR
     hResultData[icent] = (TH2D*)unfoldData.Hreco();
     hResultData[icent]->SetName( Form("hresultData_icent%d",icent) );
     
     TH1D* hmassUnfSqrt[10];
     for ( int ix = 1 ; ix<= nXbins ; ix++) { 
-      c2->cd(ix);
+      if ( ix <= (nXbins+1)/2 )
+        c2a->cd(ix);
+      else
+        c2b->cd(ix - (nXbins+1)/2);
+
       TH1D* hmassRaw = (TH1D*)hRecoData[icent]->ProjectionY(Form("hmassDataRaw_icent%d_ipt%d",icent,ix),ix,ix);
       TH1D* hmassUnf = (TH1D*)hResultData[icent]->ProjectionY(Form("hmassDataUnf_icent%d_ipt%d",icent,ix),ix,ix);
       hmassUnfSqrt[ix] = new TH1D(Form("%s_sqrt",hmassUnf->GetName()),"; m (GeV) ; Entries", nYbins, yBinSqrt);
@@ -287,32 +321,42 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
       handsomeTH1(hmassUnfSqrt[ix],2);
       hmassRaw->SetXTitle("m^{2} (GeV^{2})");
       if ( optY==1) {  
-	hmassRaw->SetAxisRange(-500,35*35-1);
-	hmassUnf->SetAxisRange(-500,35*35-1);
+	hmassRaw->SetAxisRange(1,2000);
+	hmassUnf->SetAxisRange(1,2000);
       }
       else if ( optY==2) { 
 	hmassRaw->SetAxisRange(-.1, .1);
 	hmassUnf->SetAxisRange(-.1, .1);
       }
       cleverRangeLog(hmassRaw, 20, 0.0001);
+      hmassRaw->SetNdivisions(505);
+      hmassRaw->SetTitleOffset(1.5,"Y");
       hmassRaw->DrawCopy("e");
       hmassUnf->DrawCopy("e same");
       
-      if ( ix==1)  drawCentrality(icent, 0.35,0.85,1,20);
-      drawBin(xBin,ix,"GeV",0.35,0.75,1,18);
+      if ( ix==1)  drawCentrality(icent, 0.35,0.9,1,20);
+      drawBin(xBin,ix,"GeV",0.35,0.82,1,18);
       gPad->SetLogy();
       
-      c2->cd(ix + nXbins);
+      if ( ix <= (nXbins+1)/2 )
+        c2a->cd(ix + (nXbins+1)/2);
+      else
+        c2b->cd(ix);
       TH1D* rRaw = (TH1D*)hmassRaw->Clone(Form("%s_r",hmassRaw->GetName()));
       TH1D* rUnf = (TH1D*)hmassUnf->Clone(Form("%s_r",hmassUnf->GetName()));
       rRaw->Divide( hmassUnf ) ;
       rUnf->Divide( hmassUnf ) ;
       fixedFontHist(rRaw,2.5);
-      rRaw->SetAxisRange(0,3,"Y");
+      rRaw->SetTitleOffset(1.5,"Y");
+      //      rRaw->SetNdivisions(505,"Y");
+      rRaw->SetYTitle("Ratio");
+      rRaw->SetAxisRange(0.,3,"Y");
+      rRaw->SetNdivisions(505);
       rRaw->DrawCopy("");
       rUnf->DrawCopy("hist same");
-      
     }
+    c2a->SaveAs(Form("c2a_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));      
+    c2b->SaveAs(Form("c2b_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));      
     
     TCanvas* c3 = new TCanvas(Form("c3_icent%d",icent),"",1200,600);
     c3->Divide( (int)((nXbins+0.1)/2.),2);
@@ -322,21 +366,30 @@ void unfoldPtMass(int optX =1, int optY = 1, TString fnameData = "jetSubstructur
       if ( optY==1)   hmassUnfSqrt[ix]->SetAxisRange(0.00001,0.1,"Y");
       else if ( optY==2)   hmassUnfSqrt[ix]->SetAxisRange(0.00001,15,"Y");
       hmassUnfSqrt[ix]->DrawCopy("e");
-      if ( ix==1)  drawCentrality(icent, 0.5,0.85,1,20);
-      drawBin(xBin,ix,"GeV",0.5,0.8,1,18);
+      if ( ix==1)  drawCentrality(icent, 0.45,0.85,1,20);
+      drawBin(xBin,ix,"GeV",0.45,0.8,1,18);
       //      gPad->SetLogy();
     }
-    c3->SaveAs(Form("c3_icent%d_optX%d_optY%d.pdf",icent,optX,optY));
+    c3->SaveAs(Form("c3_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
   }
 }
 
-RooUnfoldResponse* getResponse( int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco)
+RooUnfoldResponse* getResponse( int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, double radius)
 {
   TH1::SetDefaultSumw2();
-  TString jz2 = "jetSubstructure_MC_HION9_jz2_r4_Jan10.root";
-  TString jz3 = "jetSubstructure_MC_HION9_jz3_r4_Jan10.root";
-  TString jz4 = "jetSubstructure_MC_HION9_jz4_r4_Jan10.root";
-
+  TString jz2;
+  TString jz3;
+  TString jz4;
+  if ( radius==0.4 ) { 
+    jz2 = "jetSubstructure_MC_HION9_jz2_r4_Jan10.root";
+    jz3 = "jetSubstructure_MC_HION9_jz3_r4_Jan10.root";
+    jz4 = "jetSubstructure_MC_HION9_jz4_r4_Jan10.root";
+  }
+  else if ( radius==0.6) { 
+    jz2 = "jetSubstructure_MC_HION9_jz2_r6_Jan11.root";
+    jz3 = "jetSubstructure_MC_HION9_jz3_r6_Jan11.root";
+    jz4 = "jetSubstructure_MC_HION9_jz4_r6_Jan11.root";
+  }
   //  if ( nJz ==2 ) jzNorm = hi9EvtWgtJZ2;
   //  if ( nJz ==3 ) jzNorm = hi9EvtWgtJZ3;
   //  if ( nJz ==4 ) jzNorm = hi9EvtWgtJZ4;
@@ -381,18 +434,22 @@ RooUnfoldResponse* getResponse( int icent,  int optX, int optY, TH2D* hTruth, TH
     }
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
     for (Int_t i= 0; i<tr->GetEntries() ; i++) {
-      //      if ( i > tr->GetEntries()/100 ) continue;
+      if ( i > tr->GetEntries() * fracStst ) continue;
       tr->GetEntry(i);
-      if ( ! passEvent(myJetMc, icent, true) )  // isMC = true
-	continue; 
+      
+      if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
+	continue;
       
       double recoVarX, truthVarX;
       getXvalues( recoVarX, truthVarX, myJetMc, optX);
       double recoVarY, truthVarY;
       getYvalues( recoVarY, truthVarY, myJetMc, optY);
-      res->Fill(  recoVarX, recoVarY,    truthVarX, truthVarY, myJetMc.weight * jzNorm);
-      hReco->Fill ( recoVarX, recoVarY, myJetMc.weight * jzNorm);
-      hTruth->Fill ( truthVarX, truthVarY, myJetMc.weight * jzNorm);
+      if ( useHalfStat && (i%2==0) )  
+	res->Fill(  recoVarX, recoVarY,    truthVarX, truthVarY, myJetMc.weight * jzNorm);
+      if ( useHalfStat && (i%2==1) )   {
+	hReco->Fill ( recoVarX, recoVarY, myJetMc.weight * jzNorm);
+	hTruth->Fill ( truthVarX, truthVarY, myJetMc.weight * jzNorm);
+      }
     }
     
   }
@@ -400,9 +457,16 @@ RooUnfoldResponse* getResponse( int icent,  int optX, int optY, TH2D* hTruth, TH
 }
 
 
-void getDataSpectra( int icent,  int optX, int optY, TH2D* hReco)  {
+void getDataSpectra( int icent,  int optX, int optY, TH2D* hReco, double radius)  {
   TH1::SetDefaultSumw2();
-  TString fname = "jetSubstructure_Data_HION9_v4.7_v1_Jan7.root";
+  TString fname;
+  if ( radius == 0.4 ) { 
+    fname = "jetSubstructure_Data_HION9_v4.7_r4_Jan12.root";
+  }
+  else if ( radius==0.6) { 
+    fname = "jetSubstructure_Data_HION9_v4.7_r6_Jan12.root";
+  }
+
   TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));
   TTree* tr = (TTree*)fData->Get("tr");
   jetSubStr myJet;
@@ -416,6 +480,8 @@ void getDataSpectra( int icent,  int optX, int optY, TH2D* hReco)  {
 
   for (Int_t i= 0; i<tr->GetEntries() ; i++) {
     tr->GetEntry(i);
+    //    if ( i > tr->GetEntry(i) * 0.05) continue;
+
     if ( ! passEvent(myJet, icent, false) ) // isMC = false
       continue;
 

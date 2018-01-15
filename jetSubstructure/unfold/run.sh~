@@ -5,9 +5,9 @@ EOF
 
 for optX in 1
 do
-    for optY in 2
+    for optY in 1
     do
-	root -l  'unfoldPtMass.cxx+('$optX','$optY',"jetSubstructure_Data_HION9_v4.7_v1_Jan7")'
+	root -l  'unfoldPtMass.cxx+('$optX','$optY',0.6)'
     done
 done
 
