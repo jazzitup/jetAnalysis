@@ -22,20 +22,22 @@ using std::endl;
 // Global definitions
 //==============================================================================
 
-double fracStst=1;
-bool useFullStat = true;
+bool checkClosure=true;
+double fracStst=1;//.01;
+bool useFullMC = true;
+
+double fracStstData=1;
+
 
 const Double_t cutdummy= -99999.0;
-const int nIter = 4;
-
 
 //
 bool selectedCent(int icent=0) {
-  if ( icent ==6 )  return true;
   if ( icent ==0 )  return true;
+  if ( icent ==6 )  return true;
   //  if ( icent ==1 )  return true;
   //  if ( icent ==2 )  return true;
-  if ( icent ==3 )  return true;
+  //  if ( icent ==3 )  return true;
   //  if ( icent ==4 )  return true;
   //  if ( icent ==5 )  return true;
   return false;
@@ -106,7 +108,7 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
     for ( int i=0 ; i<= nBins ; i++) {
       yBinSqrt[i] = massBin[i];
     }
-    yBin[0] = -1000;
+    yBin[0] = -5000;
     yBin[1] = -500;
     for ( int i=2 ; i<= nBins ; i++) {
       yBin[i] = massBin[i]*massBin[i];
@@ -114,12 +116,12 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
   }
   else if ( optY == 2) {
     nBins = 11;
-    double massBin[12] = { -0.02,-0.01,0,0.03, 0.06, 0.09, 0.12, 0.15, 0.18, 0.21, 0.24, 0.27};
+    double massBin[12] = { -0.02,-0.01,0,0.03, 0.06, 0.09, 0.12, 0.15, 0.18, 0.24, 0.3,0.7};
     for ( int i=0 ; i<= nBins ; i++) {
       yBinSqrt[i] = massBin[i];
     }
-    yBin[0] = -0.03;
-    yBin[1] = -0.001;
+    yBin[0] = -0.02;
+    yBin[1] = -0.005;
     for ( int i=2 ; i<= nBins ; i++) {
       yBin[i] = massBin[i]*massBin[i];
     }
@@ -192,7 +194,7 @@ bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
 RooUnfoldResponse* getResponse( int icent = 0, int optX=1, int optY=1,  TH2D* hTruth=0, TH2D* hReco=0, double radius =0.4);
 void getDataSpectra( int icent=0,  int optX=1, int optY=1, TH2D* hReco=0, double radius=0.4);
 
-void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
+void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4, int nIter=4) {
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -276,7 +278,7 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
       handsomeTH1(hmassRaw,8);
       handsomeTH1(hmassUnf,2);
       hmassGen->SetXTitle("m^{2} (GeV^{2})");
-      if ( optY == 1)   hmassGen->SetAxisRange(1,2000);
+      //      if ( optY == 1)   hmassGen->SetAxisRange(1,2000);
       if ( optY == 2)   hmassGen->SetAxisRange(-0.02,0.08);
       cleverRangeLog(hmassGen, 10, 0.0001);
       hmassGen->SetTitleOffset(1.5,"Y");
@@ -310,8 +312,8 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
       rUnf->Divide( hmassGen ) ;
       
       rGen->SetTitleOffset(1.5,"Y");
-      //      rGen->SetAxisRange(0.88,1.12,"Y");
-      rGen->SetAxisRange(0,3,"Y");
+      if (checkClosure) rGen->SetAxisRange(0.88,1.12,"Y");
+      else rGen->SetAxisRange(0,3,"Y");
       rGen->SetNdivisions(503,"Y");
       rGen->SetYTitle("Ratio");
 
@@ -370,8 +372,8 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
     rUnf->Divide( hxGen ) ;
     
     rGen->SetTitleOffset(1.5,"Y");
-    //    rGen->SetAxisRange(0.88,1.12,"Y");
-    rGen->SetAxisRange(0.,3,"Y");
+    if (checkClosure) rGen->SetAxisRange(0.88,1.12,"Y");
+    else rGen->SetAxisRange(0.,3,"Y");
     rGen->SetNdivisions(503,"Y");
     rGen->SetYTitle("Ratio");
     
@@ -381,7 +383,7 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
     rUnf->DrawCopy("same");
 
 
-    c1c->SaveAs(Form("xBinClosure1_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
+    c1c->SaveAs(Form("xBinClosure1_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
     ////////// end of pT closure 
     
     
@@ -454,8 +456,9 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
       rRaw->DrawCopy("");
       rUnf->DrawCopy("hist same");
     }
-    c2a->SaveAs(Form("c2a_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));      
-    c2b->SaveAs(Form("c2b_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));      
+    c2a->SaveAs(Form("c2a_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));     
+    c2b->SaveAs(Form("c2b_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
+     
     
     ////////// Beginning of pT unfolding
     TCanvas* c2c = new TCanvas(Form("xBin_dataUnfolding_icent%d",icent),"",500,500);
@@ -494,7 +497,7 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
     fixedFontHist(rDataUnf,2.5);
     rDataUnf->DrawCopy("hist");
     rDataRaw->DrawCopy("same");
-    c2c->SaveAs(Form("c2c_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
+    c2c->SaveAs(Form("c2c_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
     ////////// end of pT unfolding
 
     TCanvas* c3 = new TCanvas(Form("c3_icent%d",icent),"",1200,600);
@@ -510,7 +513,7 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
       //      gPad->SetLogy();
       hFinalMass[ix][icent] = (TH1D*)hmassUnfSqrt[ix]->Clone(Form("hmassFinal_ix%d_icent%d",ix,icent));
     }
-    c3->SaveAs(Form("c3_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
+    c3->SaveAs(Form("c3_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
     
   }
 
@@ -533,7 +536,7 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
 	jumSun(0,1,200,1);
 	//      gPad->SetLogy();
       }
-      c4->SaveAs(Form("RCP_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
+      c4->SaveAs(Form("RCP_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
     }
   }
 }
@@ -608,9 +611,9 @@ RooUnfoldResponse* getResponse( int icent,  int optX, int optY, TH2D* hTruth, TH
       getXvalues( recoVarX, truthVarX, myJetMc, optX);
       double recoVarY, truthVarY;
       getYvalues( recoVarY, truthVarY, myJetMc, optY);
-      if ( useFullStat || (i%2==0) )  
+      if ( useFullMC || (i%2==0) )  
 	res->Fill(  recoVarX, recoVarY,    truthVarX, truthVarY, myJetMc.weight * jzNorm);
-      if ( useFullStat || (i%2==1) )   {
+      if ( useFullMC || (i%2==1) )   {
 	hReco->Fill ( recoVarX, recoVarY, myJetMc.weight * jzNorm);
 	hTruth->Fill ( truthVarX, truthVarY, myJetMc.weight * jzNorm);
       }
@@ -644,8 +647,8 @@ void getDataSpectra( int icent,  int optX, int optY, TH2D* hReco, double radius)
 
   for (Int_t i= 0; i<tr->GetEntries() ; i++) {
     tr->GetEntry(i);
-    //    if ( i > tr->GetEntry(i) * 0.05) continue;
-
+    if ( i > tr->GetEntries() * fracStstData) continue;
+    
     if ( ! passEvent(myJet, icent, false) ) // isMC = false
       continue;
 
