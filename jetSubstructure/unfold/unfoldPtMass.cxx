@@ -22,16 +22,22 @@ using std::endl;
 // Global definitions
 //==============================================================================
 
-double fracStst=.01;
+double fracStst=1;
+bool useFullStat = true;
 
 const Double_t cutdummy= -99999.0;
 const int nIter = 4;
-bool useHalfStat = true;
+
 
 //
 bool selectedCent(int icent=0) {
+  if ( icent ==6 )  return true;
   if ( icent ==0 )  return true;
-  //  if ( icent ==6 )  return true;
+  //  if ( icent ==1 )  return true;
+  //  if ( icent ==2 )  return true;
+  if ( icent ==3 )  return true;
+  //  if ( icent ==4 )  return true;
+  //  if ( icent ==5 )  return true;
   return false;
 }
 
@@ -47,6 +53,14 @@ void drawCentrality(int icent = 0, float xp=0.2, float yp=0.8, int textColor=kBl
   if ( icent==4 )  drawText( "40-50%",xp,yp,textColor,textSize) ;
   if ( icent==5 )  drawText( "50-60%",xp,yp,textColor,textSize) ;
   if ( icent==6 )  drawText( "60-80%",xp,yp,textColor,textSize) ;
+}
+void drawCentralityRCP(int icent = 0, float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
+  if ( icent==0 )  drawText( "0-10% / 60-80%",xp,yp,textColor,textSize) ;
+  if ( icent==1 )  drawText( "10-20% / 60-80%",xp,yp,textColor,textSize) ;
+  if ( icent==2 )  drawText( "20-30% / 60-80%",xp,yp,textColor,textSize) ;
+  if ( icent==3 )  drawText( "30-40% / 60-80%",xp,yp,textColor,textSize) ;
+  if ( icent==4 )  drawText( "40-50% / 60-80%",xp,yp,textColor,textSize) ;
+  if ( icent==5 )  drawText( "50-60% / 60-80%",xp,yp,textColor,textSize) ;
 }
 void drawBin(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
   drawText( Form("%d - %d %s", (int)(xBin[ix-1]),  (int)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
@@ -202,6 +216,10 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
   TH2D* hRecoData[7];
   TH2D* hResultData[7];
 
+  TH1D* hFinalMass[10][10]; // pT, centrality
+
+
+
   TCanvas* c01 = new TCanvas("c01", "",1000,500);
   c01->Divide(2,1); 
   for ( int i=0 ; i<=6; i++) {
@@ -269,6 +287,16 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
       drawBin(xBin,ix,"GeV",0.45,0.8,1,18);
       gPad->SetLogy();
       
+      TLegend *leg1;
+      if ( ix==1)  	 {
+	leg1 = new TLegend(0.4370346,0.4055221,0.9584778,0.7726996,NULL,"brNDC");
+	easyLeg(leg1,"MC");
+	leg1->AddEntry(hmassGen,"Truth", "l");
+	leg1->AddEntry(hmassRaw,"Reco", "lp");
+	leg1->AddEntry(hmassUnf,"Unfolded","lp");
+	leg1->Draw();
+      }
+
       if ( ix <= (nXbins+1)/2 )
         c1a->cd(ix + (nXbins+1)/2);
       else
@@ -282,7 +310,8 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
       rUnf->Divide( hmassGen ) ;
       
       rGen->SetTitleOffset(1.5,"Y");
-      rGen->SetAxisRange(0.88,1.12,"Y");
+      //      rGen->SetAxisRange(0.88,1.12,"Y");
+      rGen->SetAxisRange(0,3,"Y");
       rGen->SetNdivisions(503,"Y");
       rGen->SetYTitle("Ratio");
 
@@ -290,9 +319,71 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
       rGen->DrawCopy("hist");
       rRaw->DrawCopy("same");
       rUnf->DrawCopy("same");
+
+      //      TLegend *leg2 = new TLegend(0.2064611,0.6408163,0.8804568,0.7959184,NULL,"brNDC");
+      //      easyLeg(leg2,"Ratio");
+      //      leg2->AddEntry(rUnf,"Unfolded/Truth","lp");
+      //      leg2->Draw();
     }
-    c1a->SaveAs(Form("c1a_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
-    c1b->SaveAs(Form("c1b_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
+
+
+    c1a->SaveAs(Form("massClosure1_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
+    c1b->SaveAs(Form("massClosure2_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
+
+    ////////// Beginning of pT closure 
+    TCanvas* c1c = new TCanvas(Form("xBin_closure_icent%d",icent),"",500,500);
+    makeEfficiencyCanvas(c1c,1,  0.05, 0.01, 0.1, 0.3, 0.01);
+    c1c->cd(1);
+    TH1D* hxRaw = (TH1D*)hReco[icent]->ProjectionX(Form("hxMCRaw_icent%d",icent));
+    TH1D* hxGen = (TH1D*)hTruth[icent]->ProjectionX(Form("hxMCTruth_icent%d",icent));
+    TH1D* hxUnf = (TH1D*)hResultMc[icent]->ProjectionX(Form("hxMCUnf_icent%d",icent));
+    TH1ScaleByWidth(hxRaw);
+    TH1ScaleByWidth(hxGen);
+    TH1ScaleByWidth(hxUnf);
+    hxGen->SetNdivisions(505);
+    handsomeTH1(hxRaw,8);
+    handsomeTH1(hxUnf,2);
+    if ( optX == 1 )  hxGen->SetXTitle("p_{T} (GeV/c)");
+    cleverRangeLog(hxGen, 100, 1.e-9);
+    hxGen->SetTitleOffset(1.2,"Y");
+    hxGen->SetTitle("");
+    hxGen->SetYTitle("dN/dp_{T} (GeV^-1)");
+    hxGen->DrawCopy("hist");
+    hxRaw->DrawCopy("e same");
+    hxUnf->DrawCopy("e same");
+    drawCentrality(icent, 0.7,0.9,1,25);
+    gPad->SetLogy();
+    TLegend *leg1c;
+    leg1c = new TLegend(0.5070346,0.5555221,0.9884778,0.9226996,NULL,"brNDC");
+    easyLeg(leg1c,"MC");
+    leg1c->AddEntry(hxGen,"Truth", "l");
+    leg1c->AddEntry(hxRaw,"Reco", "lp");
+    leg1c->AddEntry(hxUnf,"Unfolded","lp");
+    leg1c->Draw();
+    
+    c1c->cd(2);
+    TH1D* rRaw = (TH1D*)hxRaw->Clone(Form("%s_r",hxRaw->GetName()));
+    TH1D* rGen = (TH1D*)hxGen->Clone(Form("%s_r",hxGen->GetName()));
+    TH1D* rUnf = (TH1D*)hxUnf->Clone(Form("%s_r",hxUnf->GetName()));
+    rRaw->Divide( hxGen ) ;
+    rGen->Divide( hxGen ) ;
+    rUnf->Divide( hxGen ) ;
+    
+    rGen->SetTitleOffset(1.5,"Y");
+    //    rGen->SetAxisRange(0.88,1.12,"Y");
+    rGen->SetAxisRange(0.,3,"Y");
+    rGen->SetNdivisions(503,"Y");
+    rGen->SetYTitle("Ratio");
+    
+    fixedFontHist(rGen,2.5);
+    rGen->DrawCopy("hist");
+    rRaw->DrawCopy("same");
+    rUnf->DrawCopy("same");
+
+
+    c1c->SaveAs(Form("xBinClosure1_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
+    ////////// end of pT closure 
+    
     
     // DATA! 
     TCanvas* c2a = new TCanvas(Form("c2a_icent%d",icent),"",1200,400);
@@ -359,12 +450,53 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
       rRaw->SetYTitle("Ratio");
       rRaw->SetAxisRange(0.,3,"Y");
       rRaw->SetNdivisions(505);
+      rRaw->SetTitle("");
       rRaw->DrawCopy("");
       rUnf->DrawCopy("hist same");
     }
     c2a->SaveAs(Form("c2a_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));      
     c2b->SaveAs(Form("c2b_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));      
     
+    ////////// Beginning of pT unfolding
+    TCanvas* c2c = new TCanvas(Form("xBin_dataUnfolding_icent%d",icent),"",500,500);
+    makeEfficiencyCanvas(c2c,1,  0.05, 0.01, 0.1, 0.3, 0.01);
+    c2c->cd(1);
+    TH1D* hxDataRaw = (TH1D*)hRecoData[icent]->ProjectionX(Form("hxdataDataRaw_icent%d",icent));
+    TH1D* hxDataUnf = (TH1D*)hResultData[icent]->ProjectionX(Form("hxdataDataUnf_icent%d",icent));
+
+    TH1ScaleByWidth(hxDataRaw);
+    TH1ScaleByWidth(hxDataUnf);
+    hxDataUnf->SetNdivisions(505);
+    handsomeTH1(hxDataRaw,8);
+    handsomeTH1(hxDataUnf,2);
+    if ( optX == 1 )  hxDataUnf->SetXTitle("p_{T} (GeV/c)");
+    cleverRangeLog(hxDataUnf, 100, 1.e-9);
+    hxDataUnf->SetTitleOffset(1.2,"Y");
+    hxDataUnf->SetYTitle("dN/dp_{T} (GeV^-1)");
+    hxDataUnf->SetTitle("");
+    hxDataUnf->DrawCopy();
+    hxDataRaw->DrawCopy("e same");
+    drawCentrality(icent, 0.7,0.9,1,25);
+    gPad->SetLogy();
+
+    c2c->cd(2);
+    TH1D* rDataRaw = (TH1D*)hxDataRaw->Clone(Form("%s_r",hxDataRaw->GetName()));
+    TH1D* rDataUnf = (TH1D*)hxDataUnf->Clone(Form("%s_r",hxDataUnf->GetName()));
+    rDataRaw->Divide( hxDataUnf ) ;
+    rDataUnf->Divide( hxDataUnf ) ;
+
+    rDataUnf->SetTitleOffset(1.5,"Y");
+    rDataUnf->SetAxisRange(0,3,"Y");
+    rDataUnf->SetNdivisions(505,"Y");
+    rDataUnf->SetTitle("");
+    rDataUnf->SetYTitle("Ratio");
+
+    fixedFontHist(rDataUnf,2.5);
+    rDataUnf->DrawCopy("hist");
+    rDataRaw->DrawCopy("same");
+    c2c->SaveAs(Form("c2c_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
+    ////////// end of pT unfolding
+
     TCanvas* c3 = new TCanvas(Form("c3_icent%d",icent),"",1200,600);
     c3->Divide( (int)((nXbins+0.1)/2.),2);
     for ( int ix = 1 ; ix<= nXbins ; ix++) {
@@ -376,8 +508,33 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
       if ( ix==1)  drawCentrality(icent, 0.45,0.85,1,20);
       drawBin(xBin,ix,"GeV",0.45,0.8,1,18);
       //      gPad->SetLogy();
+      hFinalMass[ix][icent] = (TH1D*)hmassUnfSqrt[ix]->Clone(Form("hmassFinal_ix%d_icent%d",ix,icent));
     }
     c3->SaveAs(Form("c3_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
+    
+  }
+
+  int periBin = 6;
+  if ( selectedCent(periBin) ) {
+    for ( int icent=0 ; icent<=periBin ;icent++) {
+      if ( !(selectedCent(icent)) )	continue;
+      if ( icent == periBin )	continue;
+
+      TCanvas* c4 = new TCanvas(Form("c4_icent%d",icent),"",1200,600);
+      c4->Divide( (int)((nXbins+0.1)/2.),2);
+      for ( int ix = 1 ; ix<= nXbins ; ix++) {
+	c4->cd(ix);
+	TH1D* rcp = (TH1D*)hFinalMass[ix][icent]->Clone(Form("%s_rcp",hFinalMass[ix][icent]->GetName()));
+	rcp->SetAxisRange(0,2,"Y");
+	rcp->Divide(hFinalMass[ix][periBin]);
+	rcp->DrawCopy("e");
+	if ( ix==2)  drawCentralityRCP(icent, 0.35,0.85,1,20);
+	drawBin(xBin,ix,"GeV",0.45,0.8,1,18);
+	jumSun(0,1,200,1);
+	//      gPad->SetLogy();
+      }
+      c4->SaveAs(Form("RCP_icent%d_optX%d_optY%d_radius%.1f.pdf",icent,optX,optY,(float)radius));
+    }
   }
 }
 
@@ -451,9 +608,9 @@ RooUnfoldResponse* getResponse( int icent,  int optX, int optY, TH2D* hTruth, TH
       getXvalues( recoVarX, truthVarX, myJetMc, optX);
       double recoVarY, truthVarY;
       getYvalues( recoVarY, truthVarY, myJetMc, optY);
-      if ( useHalfStat && (i%2==0) )  
+      if ( useFullStat || (i%2==0) )  
 	res->Fill(  recoVarX, recoVarY,    truthVarX, truthVarY, myJetMc.weight * jzNorm);
-      if ( useHalfStat && (i%2==1) )   {
+      if ( useFullStat || (i%2==1) )   {
 	hReco->Fill ( recoVarX, recoVarY, myJetMc.weight * jzNorm);
 	hTruth->Fill ( truthVarX, truthVarY, myJetMc.weight * jzNorm);
       }
