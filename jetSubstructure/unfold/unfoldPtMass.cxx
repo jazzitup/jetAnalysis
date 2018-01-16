@@ -22,11 +22,18 @@ using std::endl;
 // Global definitions
 //==============================================================================
 
-double fracStst=1;
+double fracStst=.01;
 
 const Double_t cutdummy= -99999.0;
 const int nIter = 4;
 bool useHalfStat = true;
+
+//
+bool selectedCent(int icent=0) {
+  if ( icent ==0 )  return true;
+  //  if ( icent ==6 )  return true;
+  return false;
+}
 
 
 //==============================================================================
@@ -199,9 +206,9 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
   c01->Divide(2,1); 
   for ( int i=0 ; i<=6; i++) {
     int icent = i;
-    if ( (icent!=0) && (icent!=3) && (icent!=6) )
-      //if ( (icent!=0) )
-      continue; 
+    if ( !selectedCent(icent)) 
+      continue;
+
     hTruth[i] = (TH2D*)hTruthTemp->Clone(Form("%s_icent%d",hTruthTemp->GetName(),i));
     hReco[i] = (TH2D*)hRecoTemp->Clone(Form("%s_icent%d",hRecoTemp->GetName(),i));
     //    hTruth[i]->Reset();
@@ -219,8 +226,8 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
   
   cout << "================================ MC UNFOLD ===================================" << endl;
   for ( int icent=0 ; icent<=6; icent++) {
-    if ( (icent!=0) && (icent!=3) && (icent!=6) )       
-	continue;
+    if ( !selectedCent(icent)) 
+      continue;
     
     TCanvas* c1a = new TCanvas(Form("c1a_icent%d",icent),"",1200,400);
     TCanvas* c1b = new TCanvas(Form("c1b_icent%d",icent),"",1200,400);

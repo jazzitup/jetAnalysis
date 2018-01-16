@@ -22,7 +22,7 @@ using std::endl;
 // Global definitions
 //==============================================================================
 
-double fracStst=.01;
+double fracStst=1;
 
 const Double_t cutdummy= -99999.0;
 const int nIter = 4;
@@ -51,7 +51,7 @@ void getXbin(int &nBins, double* xBin, int optX) {
     //    double ptBin[11]= {100,110, 120, 130, 150, 170,200,250,300,400,1000};
     // jet FF bins 
     nBins = 8; 
-    double ptBin[9]= {100, 126, 158, 200, 251, 316, 398, 503, 800};
+    double ptBin[9]= {100, 126, 158, 200, 251, 316, 398, 501, 800};
     //    nBins = 1; 
     //    double ptBin[2]= {0,1000};
     for ( int i=0 ; i<= nBins ; i++) {
@@ -275,8 +275,8 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4) {
       rUnf->Divide( hmassGen ) ;
       
       rGen->SetTitleOffset(1.5,"Y");
-      rGen->SetAxisRange(0.88,1.1,"Y");
-      rGen->SetNdivisions(501,"Y");
+      rGen->SetAxisRange(0.88,1.12,"Y");
+      rGen->SetNdivisions(503,"Y");
       rGen->SetYTitle("Ratio");
 
       fixedFontHist(rGen,2.5);

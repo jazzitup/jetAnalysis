@@ -3,7 +3,7 @@ gSystem->Load("libRooUnfold");
 .L unfoldPtMass.cxx+
 EOF
 
-for optX in 1
+for optX in 2
 do
     for optY in 1
     do
