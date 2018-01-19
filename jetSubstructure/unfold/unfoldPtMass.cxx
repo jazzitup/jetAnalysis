@@ -33,13 +33,13 @@ const Double_t cutdummy= -99999.0;
 
 //
 bool selectedCent(int icent=0) {
-  //  if ( icent ==0 )  return true;
+  if ( icent ==0 )  return true;
   if ( icent ==6 )  return true;
   //  if ( icent ==1 )  return true;
   //  if ( icent ==2 )  return true;
-  if ( icent ==3 )  return true;
+  //if ( icent ==3 )  return true;
   //  if ( icent ==4 )  return true;
-  if ( icent ==5 )  return true;
+  //  if ( icent ==5 )  return true;
   return false;
 }
 
@@ -103,15 +103,15 @@ void getXvalues( double &recoVarX, double &truthVarX, jetSubStr myJetMc, int opt
 void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
 
   if ( optY == 1) {
-    nBins = 14;
-    double massBin[15] = { -2,-1,0,10,13,15,17,19,21,24,28,35,50,100,200};
+    nBins = 17;
+    double massBin[18] = { -50, -30, -20, -13,-10,0,10,13,15,17,19,21,24,28,35,50,100,200};
     for ( int i=0 ; i<= nBins ; i++) {
       yBinSqrt[i] = massBin[i];
     }
-    yBin[0] = -5000;
-    yBin[1] = -500;
-    for ( int i=2 ; i<= nBins ; i++) {
+    for ( int i=0 ; i<= nBins ; i++) {
       yBin[i] = massBin[i]*massBin[i];
+      if ( massBin[i] < 0 ) 
+	yBin[i] = - yBin[i]; 
     }
   }
   else if ( optY == 2) {
@@ -194,7 +194,7 @@ bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
 RooUnfoldResponse* getResponse( int icent = 0, int optX=1, int optY=1,  TH2D* hTruth=0, TH2D* hReco=0, double radius =0.4);
 void getDataSpectra( int icent=0,  int optX=1, int optY=1, TH2D* hReco=0, double radius=0.4);
 
-void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4, int nIter=4) {
+void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -534,9 +534,33 @@ void unfoldPtMass(int optX =1, int optY = 1, double radius= 0.4, int nIter=4) {
 	if ( ix==2)  drawCentralityRCP(icent, 0.35,0.85,1,20);
 	drawBin(xBin,ix,"GeV",0.45,0.8,1,18);
 	jumSun(0,1,200,1);
-	//      gPad->SetLogy();
       }
       c4->SaveAs(Form("RCP_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
+
+      TCanvas* c5 = new TCanvas(Form("c5_icent%d",icent),"",1200,600);
+      c5->Divide( (int)((nXbins+0.1)/2.),2);
+      for ( int ix = 1 ; ix<= nXbins ; ix++) {
+	c5->cd(ix);
+	handsomeTH1(hFinalMass[ix][periBin],1);
+	handsomeTH1(hFinalMass[ix][icent],2);
+	cleverRange(hFinalMass[ix][periBin],2);
+	hFinalMass[ix][periBin]->Draw();
+	hFinalMass[ix][icent]->Draw("same");
+	//	rcp->DrawCopy("e");
+	if ( ix==2)  drawCentrality(icent, 0.35,0.85,1,20);
+	drawBin(xBin,ix,"GeV",0.45,0.8,1,18);
+      }
+      c5->SaveAs(Form("Cent-Peri_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
+      
+    }
+  }
+  TFile* fout = new TFile(Form("unfoldingResult_optX%d_optY%d_radius%.1f_nIter%d.root",optX,optY,(float)radius,nIter),"recreate");
+  for ( int i=0 ; i<=6; i++) {
+    int icent = i;
+    if ( !selectedCent(icent))
+      continue;
+    for ( int ix = 1 ; ix<= nXbins ; ix++) {
+      hFinalMass[ix][icent]->Write();
     }
   }
 }
