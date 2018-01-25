@@ -22,6 +22,10 @@ using std::endl;
 // Global definitions
 //==============================================================================
 
+
+int kPP   = 0 ;
+int kPbPb = 1 ;
+
 bool checkClosure=true;
 double fracStst=1;
 bool useFullMC = true;
@@ -38,10 +42,10 @@ const Double_t cutdummy= -99999.0;
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
   if ( icent ==6 )  return true;
-  //  if ( icent ==1 )  return true;
-  //  if ( icent ==2 )  return true;
-  //if ( icent ==3 )  return true;
-  //  if ( icent ==4 )  return true;
+  // if ( icent ==1 )  return true;
+  // if ( icent ==2 )  return true;
+  if ( icent ==3 )  return true;
+  //if ( icent ==4 )  return true;
   //  if ( icent ==5 )  return true;
   return false;
 }
@@ -50,7 +54,8 @@ bool selectedCent(int icent=0) {
 //==============================================================================
 // Gaussian smearing, systematic translation, and variable inefficiency
 //==============================================================================
-void drawCentrality(int icent = 0, float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
+void drawCentrality(int kSample, int icent = 0, float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
+  if ( kSample==kPP)  drawText( "p+p",xp,yp,textColor,textSize) ;
   if ( icent==0 )  drawText( "0-10%",xp,yp,textColor,textSize) ;
   if ( icent==1 )  drawText( "10-20%",xp,yp,textColor,textSize) ;
   if ( icent==2 )  drawText( "20-30%",xp,yp,textColor,textSize) ;
@@ -199,10 +204,11 @@ bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
   
 }
 
-RooUnfoldResponse* getResponse( int icent = 0, int optX=1, int optY=1,  TH2D* hTruth=0, TH2D* hReco=0, double radius =0.4);
-void getDataSpectra( int icent=0,  int optX=1, int optY=1, TH2D* hReco=0, double radius=0.4);
+RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=1,  TH2D* hTruth=0, TH2D* hReco=0, double radius =0.4);
+void getDataSpectra( int kSample = kPP, int icent=0,  int optX=1, int optY=1, TH2D* hReco=0, double radius=0.4);
 
-void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
+
+void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -238,25 +244,29 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
     int icent = i;
     if ( !selectedCent(icent)) 
       continue;
+    if ( (kSample == kPP) && ( icent != 0 ) )
+      continue;
 
     hTruth[i] = (TH2D*)hTruthTemp->Clone(Form("%s_icent%d",hTruthTemp->GetName(),i));
     hReco[i] = (TH2D*)hRecoTemp->Clone(Form("%s_icent%d",hRecoTemp->GetName(),i));
     //    hTruth[i]->Reset();
     //    hReco[i]->Reset();
     
-    res[i] = getResponse(i, optX, optY, hTruth[i], hReco[i], radius);
+    res[i] = getResponse(kSample, i, optX, optY, hTruth[i], hReco[i], radius);
     
     c01->cd(1);   hTruth[i]->Draw("colz");
     c01->cd(2);   hReco[i]->Draw("colz");
     c01->SaveAs(Form("correlation_cent%d_radius%.1f.pdf",i,(float)radius));
     
     hRecoData[i] = (TH2D*)hRecoTemp->Clone(Form("hRecoData_icent%d",icent));
-    getDataSpectra( icent, optX, optY, hRecoData[i], radius) ;
+    getDataSpectra( kSample, icent, optX, optY, hRecoData[i], radius) ;
   }
   
   cout << "================================ MC UNFOLD ===================================" << endl;
   for ( int icent=0 ; icent<=6; icent++) {
     if ( !selectedCent(icent)) 
+      continue;
+    if ( (kSample == kPP) && ( icent !=0 ) )
       continue;
     
     TCanvas* c1a = new TCanvas(Form("c1a_icent%d",icent),"",1200,400);
@@ -295,7 +305,7 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
       hmassGen->DrawCopy("hist");
       hmassRaw->DrawCopy("e same");
       hmassUnf->DrawCopy("e same");
-      if ( ix==1)  drawCentrality(icent, 0.45,0.9,1,20);
+      if ( ix==1)  drawCentrality(kSample,icent, 0.45,0.9,1,20);
       drawBin(xBin,ix,"GeV",0.45,0.8,1,18);
       gPad->SetLogy();
       hRawMC[ix][icent] = (TH1D*)hmassRaw->Clone(Form("hmassRawMC_ix%d_icent%d",ix,icent)); 
@@ -363,7 +373,7 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
     hxGen->DrawCopy("hist");
     hxRaw->DrawCopy("e same");
     hxUnf->DrawCopy("e same");
-    drawCentrality(icent, 0.7,0.9,1,25);
+    drawCentrality(kSample,icent, 0.7,0.9,1,25);
     gPad->SetLogy();
     TLegend *leg1c;
     leg1c = new TLegend(0.5070346,0.5555221,0.9884778,0.9226996,NULL,"brNDC");
@@ -393,7 +403,7 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
     rUnf->DrawCopy("same");
 
 
-    c1c->SaveAs(Form("xBinClosure1_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
+    c1c->SaveAs(Form("xBinClosure1_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",kSample,icent,optX,optY,(float)radius,nIter));
     ////////// end of pT closure 
     
     
@@ -447,7 +457,7 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
     
       hRawData[ix][icent] = (TH1D*)hmassRaw->Clone(Form("hmassRawData_ix%d_icent%d",ix,icent));
       
-      if ( ix==1)  drawCentrality(icent, 0.35,0.9,1,20);
+      if ( ix==1)  drawCentrality(kSample,icent, 0.35,0.9,1,20);
       drawBin(xBin,ix,"GeV",0.35,0.82,1,18);
       gPad->SetLogy();
       
@@ -469,8 +479,8 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
       rRaw->DrawCopy("");
       rUnf->DrawCopy("hist same");
     }
-    c2a->SaveAs(Form("c2a_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));     
-    c2b->SaveAs(Form("c2b_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
+    c2a->SaveAs(Form("c2a_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",kSample,icent,optX,optY,(float)radius,nIter));     
+    c2b->SaveAs(Form("c2b_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",kSample,icent,optX,optY,(float)radius,nIter));
      
     
     ////////// Beginning of pT unfolding
@@ -492,7 +502,7 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
     hxDataUnf->SetTitle("");
     hxDataUnf->DrawCopy();
     hxDataRaw->DrawCopy("e same");
-    drawCentrality(icent, 0.7,0.9,1,25);
+    drawCentrality(kSample,icent, 0.7,0.9,1,25);
     gPad->SetLogy();
 
     c2c->cd(2);
@@ -510,7 +520,7 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
     fixedFontHist(rDataUnf,2.5);
     rDataUnf->DrawCopy("hist");
     rDataRaw->DrawCopy("same");
-    c2c->SaveAs(Form("c2c_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
+    c2c->SaveAs(Form("c2c_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",kSample,icent,optX,optY,(float)radius,nIter));
     ////////// end of pT unfolding
 
     TCanvas* c3 = new TCanvas(Form("c3_icent%d",icent),"",1200,600);
@@ -527,19 +537,20 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
       if ( optY==2)   hmassUnfSqrt[ix]->SetAxisRange(0.0000,0.25,"X");
 
       hmassUnfSqrt[ix]->DrawCopy("e");
-      if ( ix==1)  drawCentrality(icent, 0.45,0.85,1,20);
+      if ( ix==1)  drawCentrality(kSample,icent, 0.45,0.85,1,20);
       drawBin(xBin,ix,"GeV",0.30,0.8,1,18);
       //      gPad->SetLogy();
       hFinalMass[ix][icent] = (TH1D*)hmassUnfSqrt[ix]->Clone(Form("hmassFinal_ix%d_icent%d",ix,icent));
     }
-    c3->SaveAs(Form("c3_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
+    c3->SaveAs(Form("c3_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",kSample,icent,optX,optY,(float)radius,nIter));
     
   }
 
   int periBin = 6;
-  if ( selectedCent(periBin) ) {
+  if ( selectedCent(periBin) && (kSample == kPbPb ) ){
     for ( int icent=0 ; icent<=periBin ;icent++) {
       if ( !(selectedCent(icent)) )	continue;
+      
       if ( icent == periBin )	continue;
 
       TCanvas* c4 = new TCanvas(Form("c4_icent%d",icent),"",1200,600);
@@ -570,17 +581,19 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
 	hFinalMass[ix][periBin]->Draw();
 	hFinalMass[ix][icent]->Draw("same");
 	//	rcp->DrawCopy("e");
-	if ( ix==2)  drawCentrality(icent, 0.3,0.85,1,20);
+	if ( ix==2)  drawCentrality(kSample,icent, 0.3,0.85,1,20);
 	drawBin(xBin,ix,"GeV",0.35,0.8,1,18);
       }
       c5->SaveAs(Form("Cent-Peri_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
       
     }
   }
-  TFile* fout = new TFile(Form("unfoldingResult_optX%d_optY%d_radius%.1f_nIter%d.root",optX,optY,(float)radius,nIter),"recreate");
+  TFile* fout = new TFile(Form("unfoldingResult_coll%d_optX%d_optY%d_radius%.1f_nIter%d.root",kSample,optX,optY,(float)radius,nIter),"recreate");
   for ( int i=0 ; i<=6; i++) {
     int icent = i;
     if ( !selectedCent(icent))
+      continue;
+    if ( (kSample == kPP) && ( icent !=0 ) )
       continue;
     for ( int ix = 1 ; ix<= nXbins ; ix++) {
       hFinalMass[ix][icent]->Write();
@@ -590,21 +603,31 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
   }
 }
 
-RooUnfoldResponse* getResponse( int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, double radius)
+RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, double radius)
 {
   TH1::SetDefaultSumw2();
   TString jz2;
   TString jz3;
   TString jz4;
-  if ( radius==0.4 ) { 
-    jz2 = "jetSubstructure_MC_HION9_jz2_r4_Jan10.root";
-    jz3 = "jetSubstructure_MC_HION9_jz3_r4_Jan10.root";
-    jz4 = "jetSubstructure_MC_HION9_jz4_r4_Jan10.root";
+  if ( kSample == kPbPb ) {
+    if ( radius==0.4 ) { 
+      jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+      jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+      jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+    }
+    else if ( radius==0.6) { 
+      //      jz2 = "jetSubstructure_MC_HION9_jz2_r6_Jan11.root";
+      //      jz3 = "jetSubstructure_MC_HION9_jz3_r6_Jan11.root";
+      //      jz4 = "jetSubstructure_MC_HION9_jz4_r6_Jan11.root";
+    }
   }
-  else if ( radius==0.6) { 
-    jz2 = "jetSubstructure_MC_HION9_jz2_r6_Jan11.root";
-    jz3 = "jetSubstructure_MC_HION9_jz3_r6_Jan11.root";
-    jz4 = "jetSubstructure_MC_HION9_jz4_r6_Jan11.root";
+  else if ( kSample == kPP ) {
+    if ( radius==0.4 ) {
+      jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+      jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+      jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+    }
+
   }
   //  if ( nJz ==2 ) jzNorm = hi9EvtWgtJZ2;
   //  if ( nJz ==3 ) jzNorm = hi9EvtWgtJZ3;
@@ -673,14 +696,23 @@ RooUnfoldResponse* getResponse( int icent,  int optX, int optY, TH2D* hTruth, TH
 }
 
 
-void getDataSpectra( int icent,  int optX, int optY, TH2D* hReco, double radius)  {
+void getDataSpectra(int kSample,  int icent,  int optX, int optY, TH2D* hReco, double radius)  {
   TH1::SetDefaultSumw2();
   TString fname;
-  if ( radius == 0.4 ) { 
-    fname = "jetSubstructure_Data_HION9_v4.7_r4_Jan12.root";
+  if ( kSample == kPbPb ) {
+    if ( radius == 0.4 ) { 
+      fname = "jetSubstructure_Data_HION9_v4.7_r4_Jan12.root";
+    }
+    else if ( radius==0.6) { 
+      fname = "jetSubstructure_Data_HION9_v4.7_r6_Jan12.root";
+    }
   }
-  else if ( radius==0.6) { 
-    fname = "jetSubstructure_Data_HION9_v4.7_r6_Jan12.root";
+  else if ( kSample == kPP) {
+    if ( radius == 0.4 ) { 
+      fname = "jetSubstructure_data_HION9_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+      //      fname = "jetSubstructure_Data_HION9_v4.7_r4_Jan12.root";
+    }
+
   }
 
   TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));

@@ -3,19 +3,20 @@ gSystem->Load("libRooUnfold");
 .L unfoldPtMass.cxx+
 EOF
 
-for optX in 1  
+for kSample in 0  # 0 = pp,  1 = pbpb
 do
-    for optY in 1 2
+    for optX in 1  
     do
-	for radius in 0.4
+	for optY in 2
 	do
-	    for niter in 6 8 # 10 12 14 20
+	    for radius in 0.4
 	    do
-		root -l -b -q  'unfoldPtMass.cxx+('$optX','$optY','$radius','$niter')'
+		for niter in 2  # 10 12 14 20
+		do
+		    root -l -b -q  'unfoldPtMass.cxx+('$kSample','$optX','$optY','$radius','$niter')'
+		done
 	    done
 	done
     done
 done
-
-
 
