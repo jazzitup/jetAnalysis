@@ -23,10 +23,13 @@ using std::endl;
 //==============================================================================
 
 bool checkClosure=true;
-double fracStst=1;//.01;
+double fracStst=1;
 bool useFullMC = true;
 
 double fracStstData=1;
+
+double ptCut = 158;
+double ptCutGen = 20;
 
 
 const Double_t cutdummy= -99999.0;
@@ -70,13 +73,18 @@ void drawBin(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp
 
 void getXbin(int &nBins, double* xBin, int optX) { 
   if ( optX == 1 ) {
-    //    nBins = 10; 
-    //    double ptBin[11]= {100,110, 120, 130, 150, 170,200,250,300,400,1000};
-    // jet FF bins 
-    nBins = 8; 
-    double ptBin[9]= {100, 126, 158, 200, 251, 316, 398, 501, 800};
-    //    nBins = 1; 
-    //    double ptBin[2]= {0,1000};
+
+    nBins = 12;
+    double ptBin[13]={63.096, 82., 100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944, 794.308, 999.970};
+
+    //    nBins = 16;
+    //    double ptBin[17]={25.119, 31.623, 40.0, 50.119, 63.096, 82., 100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944, 794.308, 999.970};
+
+    //    nBins = 8; 
+    //    double ptBin[9]= {100, 126, 158, 200, 251, 316, 398, 501, 800};
+
+
+
     for ( int i=0 ; i<= nBins ; i++) {
       xBin[i] = ptBin[i] ; 
     }    
@@ -103,8 +111,8 @@ void getXvalues( double &recoVarX, double &truthVarX, jetSubStr myJetMc, int opt
 void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
 
   if ( optY == 1) {
-    nBins = 17;
-    double massBin[18] = { -50, -30, -20, -13,-10,0,10,13,15,17,19,21,24,28,35,50,100,200};
+    nBins = 18;
+    double massBin[19] = { -35,-19,-17,-15, -13,-10,0,10,13,15,17,19,21,24,28,35,50,100,200};
     for ( int i=0 ; i<= nBins ; i++) {
       yBinSqrt[i] = massBin[i];
     }
@@ -182,9 +190,9 @@ void transformSqrt (TH1D* h1, TH1D* h2) {
 bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
   if ( myJetMc.cent != icent ) 
     return false;
-  if ( myJetMc.recoPt < 100 )
+  if ( myJetMc.recoPt < ptCut )
     return false;
-  if ( (isMC) && ( myJetMc.genPt < 100 ) ) // Must be the same to the lowest pT bin 
+  if ( (isMC) && ( myJetMc.genPt < ptCutGen ) ) // Must be the same to the lowest pT bin 
     return false;
   
   return true;
@@ -218,7 +226,9 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
   TH2D* hRecoData[7];
   TH2D* hResultData[7];
 
-  TH1D* hFinalMass[10][10]; // pT, centrality
+  TH1D* hFinalMass[20][10]; // pT, centrality
+  TH1D* hRawMC[20][10]; // pT, centrality
+  TH1D* hRawData[20][10]; // pT, centrality
 
 
 
@@ -278,7 +288,7 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
       handsomeTH1(hmassRaw,8);
       handsomeTH1(hmassUnf,2);
       hmassGen->SetXTitle("m^{2} (GeV^{2})");
-      //      if ( optY == 1)   hmassGen->SetAxisRange(1,2000);
+      if ( optY == 1)   hmassGen->SetAxisRange(1,2000);
       if ( optY == 2)   hmassGen->SetAxisRange(-0.02,0.08);
       cleverRangeLog(hmassGen, 10, 0.0001);
       hmassGen->SetTitleOffset(1.5,"Y");
@@ -288,7 +298,7 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
       if ( ix==1)  drawCentrality(icent, 0.45,0.9,1,20);
       drawBin(xBin,ix,"GeV",0.45,0.8,1,18);
       gPad->SetLogy();
-      
+      hRawMC[ix][icent] = (TH1D*)hmassRaw->Clone(Form("hmassRawMC_ix%d_icent%d",ix,icent)); 
       TLegend *leg1;
       if ( ix==1)  	 {
 	leg1 = new TLegend(0.4370346,0.4055221,0.9584778,0.7726996,NULL,"brNDC");
@@ -419,20 +429,23 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
       handsomeTH1(hmassRaw,8);
       handsomeTH1(hmassUnf,2);
       handsomeTH1(hmassUnfSqrt[ix],2);
-      hmassRaw->SetXTitle("m^{2} (GeV^{2})");
       if ( optY==1) {  
 	hmassRaw->SetAxisRange(1,2000);
 	hmassUnf->SetAxisRange(1,2000);
       }
       else if ( optY==2) { 
-	hmassRaw->SetAxisRange(-.1, .1);
-	hmassUnf->SetAxisRange(-.1, .1);
+	hmassRaw->SetAxisRange(-.02, .08);
+	hmassUnf->SetAxisRange(-.02, .08);
       }
       cleverRangeLog(hmassRaw, 20, 0.0001);
       hmassRaw->SetNdivisions(505);
       hmassRaw->SetTitleOffset(1.5,"Y");
+      if ( optY==1)	   hmassRaw->SetXTitle("m^{2} (GeV^{2})");
+      else if ( optY==2)   hmassRaw->SetXTitle("(m/p_{T})^{2} (GeV^{2})");
       hmassRaw->DrawCopy("e");
       hmassUnf->DrawCopy("e same");
+    
+      hRawData[ix][icent] = (TH1D*)hmassRaw->Clone(Form("hmassRawData_ix%d_icent%d",ix,icent));
       
       if ( ix==1)  drawCentrality(icent, 0.35,0.9,1,20);
       drawBin(xBin,ix,"GeV",0.35,0.82,1,18);
@@ -504,12 +517,18 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
     c3->Divide( (int)((nXbins+0.1)/2.),2);
     for ( int ix = 1 ; ix<= nXbins ; ix++) {
       c3->cd(ix);
+      if ( optY==1)   hmassUnfSqrt[ix]->SetXTitle("m (GeV)");
+      if ( optY==2)   hmassUnfSqrt[ix]->SetXTitle("m/p_{T}");
       hmassUnfSqrt[ix]->SetXTitle("m (GeV)");
       if ( optY==1)   hmassUnfSqrt[ix]->SetAxisRange(0.00001,0.1,"Y");
       else if ( optY==2)   hmassUnfSqrt[ix]->SetAxisRange(0.00001,15,"Y");
+      
+      if ( optY==1)   hmassUnfSqrt[ix]->SetAxisRange(0.0000,100,"X");
+      if ( optY==2)   hmassUnfSqrt[ix]->SetAxisRange(0.0000,0.25,"X");
+
       hmassUnfSqrt[ix]->DrawCopy("e");
       if ( ix==1)  drawCentrality(icent, 0.45,0.85,1,20);
-      drawBin(xBin,ix,"GeV",0.45,0.8,1,18);
+      drawBin(xBin,ix,"GeV",0.30,0.8,1,18);
       //      gPad->SetLogy();
       hFinalMass[ix][icent] = (TH1D*)hmassUnfSqrt[ix]->Clone(Form("hmassFinal_ix%d_icent%d",ix,icent));
     }
@@ -530,9 +549,11 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
 	TH1D* rcp = (TH1D*)hFinalMass[ix][icent]->Clone(Form("%s_rcp",hFinalMass[ix][icent]->GetName()));
 	rcp->SetAxisRange(0,2,"Y");
 	rcp->Divide(hFinalMass[ix][periBin]);
+	if ( optY==1)   rcp->SetAxisRange(0.0000,45,"X");
+	if ( optY==2)   rcp->SetAxisRange(0.0000,0.25,"X");
 	rcp->DrawCopy("e");
 	if ( ix==2)  drawCentralityRCP(icent, 0.35,0.85,1,20);
-	drawBin(xBin,ix,"GeV",0.45,0.8,1,18);
+	drawBin(xBin,ix,"GeV",0.30,0.8,1,18);
 	jumSun(0,1,200,1);
       }
       c4->SaveAs(Form("RCP_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
@@ -544,11 +565,13 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
 	handsomeTH1(hFinalMass[ix][periBin],1);
 	handsomeTH1(hFinalMass[ix][icent],2);
 	cleverRange(hFinalMass[ix][periBin],2);
+	if ( optY==1)   hFinalMass[ix][periBin]->SetAxisRange(0.0000,100,"X");
+        if ( optY==2)   hFinalMass[ix][periBin]->SetAxisRange(0.0000,0.25,"X");
 	hFinalMass[ix][periBin]->Draw();
 	hFinalMass[ix][icent]->Draw("same");
 	//	rcp->DrawCopy("e");
-	if ( ix==2)  drawCentrality(icent, 0.35,0.85,1,20);
-	drawBin(xBin,ix,"GeV",0.45,0.8,1,18);
+	if ( ix==2)  drawCentrality(icent, 0.3,0.85,1,20);
+	drawBin(xBin,ix,"GeV",0.35,0.8,1,18);
       }
       c5->SaveAs(Form("Cent-Peri_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
       
@@ -561,6 +584,8 @@ void unfoldPtMass(int optX =1, int optY = 2, double radius= 0.4, int nIter=4) {
       continue;
     for ( int ix = 1 ; ix<= nXbins ; ix++) {
       hFinalMass[ix][icent]->Write();
+      hRawMC[ix][icent]->Write();
+      hRawData[ix][icent]->Write();
     }
   }
 }
