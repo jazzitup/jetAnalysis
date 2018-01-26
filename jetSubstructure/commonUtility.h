@@ -407,7 +407,7 @@ void makeMultiPanelCanvas(TCanvas*& canv, const Int_t columns,
 void makeEfficiencyCanvas(TCanvas*& canv, const Int_t columns,
                           const Float_t leftOffset=0.05,
                           const Float_t bottomOffset=0.01,
-                          const Float_t leftMargin=0.25,
+                          const Float_t leftMargin=0.10,
                           const Float_t bottomMargin=0.25,
                           const Float_t edge=0.01) {
 
@@ -473,6 +473,10 @@ void makeEfficiencyCanvas(TCanvas*& canv, const Int_t columns,
          pad[i][j]->SetNumber(columns*j+i+1);
       }
    }
+   
+   canv->cd(1)->SetLeftMargin(0.15);
+   canv->cd(columns+1)->SetLeftMargin(0.15);
+   
 }
 
 
@@ -594,7 +598,7 @@ void scaleInt( TH1 *a=0, double normFac=1., double minX=-999.21231, double maxX=
   if ( maxX != -999.21231)
     highBin=a->FindBin(maxX);
 
-  fac =  a->Integral( lowBin, highBin);
+  fac =  a->Integral( lowBin, highBin,"width");
   if ( fac>0) a->Scale(normFac/fac);
 }
 
