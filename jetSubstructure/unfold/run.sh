@@ -3,7 +3,7 @@ gSystem->Load("libRooUnfold");
 .L unfoldPtMass.cxx+
 EOF
 
-for kSample in 1  # 0 = pp,  1 = pbpb
+for kSample in 0 1  # 0 = pp,  1 = pbpb
 do
     for optX in 1  
     do

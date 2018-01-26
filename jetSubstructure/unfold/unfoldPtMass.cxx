@@ -22,9 +22,7 @@ using std::endl;
 // Global definitions
 //==============================================================================
 
-
-int kPP   = 0 ;
-int kPbPb = 1 ;
+#include "unfoldingUtils.h"
 
 bool checkClosure=true;
 double fracStst=1;
@@ -54,27 +52,6 @@ bool selectedCent(int icent=0) {
 //==============================================================================
 // Gaussian smearing, systematic translation, and variable inefficiency
 //==============================================================================
-void drawCentrality(int kSample, int icent = 0, float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
-  if ( kSample==kPP)  drawText( "p+p",xp,yp,textColor,textSize) ;
-  else if ( icent==0 )  drawText( "0-10%",xp,yp,textColor,textSize) ;
-  else if ( icent==1 )  drawText( "10-20%",xp,yp,textColor,textSize) ;
-  else if ( icent==2 )  drawText( "20-30%",xp,yp,textColor,textSize) ;
-  else if ( icent==3 )  drawText( "30-40%",xp,yp,textColor,textSize) ;
-  else if ( icent==4 )  drawText( "40-50%",xp,yp,textColor,textSize) ;
-  else if ( icent==5 )  drawText( "50-60%",xp,yp,textColor,textSize) ;
-  else if ( icent==6 )  drawText( "60-80%",xp,yp,textColor,textSize) ;
-}
-void drawCentralityRCP(int icent = 0, float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
-  if ( icent==0 )  drawText( "0-10% / 60-80%",xp,yp,textColor,textSize) ;
-  if ( icent==1 )  drawText( "10-20% / 60-80%",xp,yp,textColor,textSize) ;
-  if ( icent==2 )  drawText( "20-30% / 60-80%",xp,yp,textColor,textSize) ;
-  if ( icent==3 )  drawText( "30-40% / 60-80%",xp,yp,textColor,textSize) ;
-  if ( icent==4 )  drawText( "40-50% / 60-80%",xp,yp,textColor,textSize) ;
-  if ( icent==5 )  drawText( "50-60% / 60-80%",xp,yp,textColor,textSize) ;
-}
-void drawBin(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
-  drawText( Form("%d - %d %s", (int)(xBin[ix-1]),  (int)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
-}
 
 void getXbin(int &nBins, double* xBin, int optX) { 
   if ( optX == 1 ) {
@@ -178,6 +155,7 @@ void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int opt
   }
   
 }
+
 void transformSqrt (TH1D* h1, TH1D* h2) { 
   h2->Reset();
   for ( int i = 0 ; i <=h1->GetNbinsX() ; i++) { 

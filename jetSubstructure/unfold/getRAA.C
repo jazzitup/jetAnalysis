@@ -1,13 +1,8 @@
 #include "unfoldingUtils.h"
 
 
-double minPt = 100;
-double minPtMcTruth = 20;
-TString prefix = ""; //Form("ptCut_%d_%d",(int)minPt,(int)minPtMcTruth);
 
-
-
-void getUnfoldingStability(int kSample= kPP, int icent = 0, int optY=2) {
+void getRAA(int kSample= kPP, int icent = 0, int optY=2) {
   //  double ptBin[9]= {100, 126, 158, 200, 251, 316, 398, 501, 800};
   //  double ptBin[9]= {110, 136, 150, 168, 200, 251, 398, 501, 800};
   //  const int nPtBin = 7;
