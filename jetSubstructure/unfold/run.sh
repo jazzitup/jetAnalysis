@@ -7,11 +7,11 @@ for kSample in 0 1  # 0 = pp,  1 = pbpb
 do
     for optX in 1  
     do
-	for optY in 1 2
+	for optY in 2
 	do
 	    for radius in 0.4
 	    do
-		for niter in 2 4 6 8 10 # 10 12 14 20
+		for niter in 4  # 10 12 14 20
 		do
 		    root -l -b -q  'unfoldPtMass.cxx+('$kSample','$optX','$optY','$radius','$niter')'
 		done

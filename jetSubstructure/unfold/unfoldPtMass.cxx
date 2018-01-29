@@ -39,12 +39,12 @@ const Double_t cutdummy= -99999.0;
 //
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-  if ( icent ==6 )  return true;
-  // if ( icent ==1 )  return true;
-  // if ( icent ==2 )  return true;
+  if ( icent ==1 )  return true;
+  if ( icent ==2 )  return true;
   if ( icent ==3 )  return true;
-  //if ( icent ==4 )  return true;
-  //  if ( icent ==5 )  return true;
+  if ( icent ==4 )  return true;
+  if ( icent ==5 )  return true;
+  if ( icent ==6 )  return true;
   return false;
 }
 
@@ -204,20 +204,20 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
   TH2D* hTruthTemp = new TH2D("hTruth","",nXbins,xBin,nYbins, yBin);
   TH2D* hRecoTemp = (TH2D*)hTruthTemp->Clone("hReco");
   RooUnfoldResponse* res[7];
-
+  
   TH2D* hTruth[7];
   TH2D* hReco[7];
   TH2D* hResultMc[7];
-
+  
   TH2D* hRecoData[7];
   TH2D* hResultData[7];
-
+  
   TH1D* hFinalMass[20][10]; // pT, centrality
   TH1D* hRawMC[20][10]; // pT, centrality
   TH1D* hRawData[20][10]; // pT, centrality
-
-
-
+  
+  
+  
   TCanvas* c01 = new TCanvas("c01", "",1000,500);
   c01->Divide(2,1); 
   for ( int i=0 ; i<=6; i++) {
