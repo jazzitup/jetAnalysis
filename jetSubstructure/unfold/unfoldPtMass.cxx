@@ -41,11 +41,11 @@ const Double_t cutdummy= -99999.0;
 //
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-  if ( icent ==1 )  return true;
-  if ( icent ==2 )  return true;
-  if ( icent ==3 )  return true;
-  if ( icent ==4 )  return true;
-  if ( icent ==5 )  return true;
+  //  if ( icent ==1 )  return true;
+  //  if ( icent ==2 )  return true;
+  //  if ( icent ==3 )  return true;
+  //  if ( icent ==4 )  return true;
+  //  if ( icent ==5 )  return true;
   if ( icent ==6 )  return true;
   return false;
 }
@@ -107,8 +107,8 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
     }
   }
   else if ( optY == 2) {
-    nBins = 11;
-    double massBin[12] = { -0.15,-0.06,-0.03,0,0.03, 0.06, 0.09, 0.12, 0.15, 0.18, 0.24, 0.3};
+    nBins = 12;
+    double massBin[13] = { -0.15,-0.06,-0.03,0,0.03, 0.06, 0.09, 0.12, 0.15, 0.18, 0.24, 0.3,0.35};
     for ( int i=0 ; i<= nBins ; i++) {
       yBinSqrt[i] = massBin[i];
     }
@@ -510,8 +510,8 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
     c3->Divide( (int)((nXbins+0.1)/2.),2);
     for ( int ix = 1 ; ix<= nXbins ; ix++) {
       c3->cd(ix);
-      if ( optY==1)   hmassUnfSqrt[ix]->SetXTitle("m (GeV)");
-      if ( optY==2)   hmassUnfSqrt[ix]->SetXTitle("m/p_{T}");
+      if ( optY==1)   hmassUnfSqrt[ix]->SetXTitle("m^{2} (GeV)");
+      if ( optY==2)   hmassUnfSqrt[ix]->SetXTitle("m^{2}/p_{T}^{2}");
       hmassUnfSqrt[ix]->SetXTitle("m (GeV)");
       if ( optY==1)   hmassUnfSqrt[ix]->SetAxisRange(0.00001,0.1,"Y");
       else if ( optY==2)   hmassUnfSqrt[ix]->SetAxisRange(0.00001,15,"Y");
@@ -638,9 +638,11 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 
   // JES 
   TH2D* hJES = (TH2D*)hTruthMc->Clone("hJES");
-  if ( optY==1)   hJES->SetYTitle("m (GeV)");
-  if ( optY==2)   hJES->SetYTitle("m/p_{T}");
-  hJES->SetXTitle("p_{T} (GeV/c)");
+  //  if ( optY==1)   hJES->SetYTitle("Truth m^{2} (GeV)");
+  //  if ( optY==2)   hJES->SetYTitle("Truth (m/p_{T})^{2}");
+  if ( optY==1)   hJES->SetYTitle("Reco m^{2} (GeV)");
+  if ( optY==2)   hJES->SetYTitle("Reco (m/p_{T})^{2}");
+  hJES->SetXTitle("Truth p_{T} (GeV/c)");
   TH2D* hJER = (TH2D*)hJES->Clone("hJER");
   handsomeTH1(hJES);
   handsomeTH1(hJER);
@@ -703,7 +705,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       // JES
       if ( doJES) {
 	double theRatio = recoVarX / truthVarX ;
-	int theXBin = xBinTemp->FindBin(recoVarX);
+	int theXBin = xBinTemp->FindBin(truthVarX);
+	//int theYBin = yBinTemp->FindBin(truthVarY);
 	int theYBin = yBinTemp->FindBin(recoVarY);
 	if ( (theXBin > nXbins) || (theXBin < 1) ||(theYBin > nYbins) || (theYBin < 1)  )
 	  continue;
@@ -735,9 +738,14 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     TCanvas * cJes2 = new TCanvas(Form("jes2_%d",nIterCan),"",800,400);
     cJes2->Divide(2,1);
     cJes2->cd(1);
+    hJES->SetAxisRange(0.8,1.2,"Z");
     hJES->Draw("colz");
+    drawText("Energy Scale",0.55,0.88,1,20);
+    drawCentrality(kSample,icent, 0.55,0.8,1,20);
     cJes2->cd(2);
+    hJER->SetAxisRange(0.,0.25,"Z");
     hJER->Draw("colz");
+    drawText("Resolution",0.5,0.88,1,20);
     cJes2->cd(1)->Update();
     TPaletteAxis *palette1 = (TPaletteAxis*)hJES->GetListOfFunctions()->FindObject("palette");
     palette1->SetX1NDC(0.87);
