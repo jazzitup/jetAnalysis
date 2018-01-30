@@ -36,16 +36,20 @@ double ptCut = 100;
 double ptCutGen = 20;
 int nIterCan=1;
 
+bool doReweight = true;
+TString fReweightPP = "reweightFactors/unfoldingResult_coll0_optX1_optY2_radius0.4_nIter4.root";
+TString fReweightPbPb = "reweightFactors/unfoldingResult_coll1_optX1_optY2_radius0.4_nIter4.root";
+
 const Double_t cutdummy= -99999.0;
 
 //
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-  //  if ( icent ==1 )  return true;
-  //  if ( icent ==2 )  return true;
-  //  if ( icent ==3 )  return true;
-  //  if ( icent ==4 )  return true;
-  //  if ( icent ==5 )  return true;
+    if ( icent ==1 )  return true;
+    if ( icent ==2 )  return true;
+    if ( icent ==3 )  return true;
+    if ( icent ==4 )  return true;
+    if ( icent ==5 )  return true;
   if ( icent ==6 )  return true;
   return false;
 }
@@ -215,10 +219,12 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
   TH2D* hRecoData[7];
   TH2D* hResultData[7];
   
+  TH2D* hRatio[7];  // = hRecoData / hReco
+
+
   TH1D* hFinalMass[20][10]; // pT, centrality
   TH1D* hRawMC[20][10]; // pT, centrality
   TH1D* hRawData[20][10]; // pT, centrality
-  
   
   
   TCanvas* c01 = new TCanvas("c01", "",1000,500);
@@ -243,6 +249,12 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
     
     hRecoData[i] = (TH2D*)hRecoTemp->Clone(Form("hRecoData_icent%d",icent));
     getDataSpectra( kSample, icent, optX, optY, hRecoData[i], radius) ;
+    
+    
+    hRatio[i] = (TH2D*)hRecoData[i]->Clone(Form("hWeight_icent%d",icent));
+    hRatio[i]->Divide(hReco[i]);
+    //    scaleInt2(hRatio[i]);
+
   }
   
   cout << "================================ MC UNFOLD ===================================" << endl;
@@ -399,7 +411,7 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
     RooUnfoldBayes unfoldData (res[icent], hRecoData[icent], nIter);    // OR
     hResultData[icent] = (TH2D*)unfoldData.Hreco();
     hResultData[icent]->SetName( Form("hresultData_icent%d",icent) );
-    
+  
     TH1D* hmassUnfSqrt[10];
     for ( int ix = 1 ; ix<= nXbins ; ix++) { 
       if ( ix <= (nXbins+1)/2 )
@@ -439,7 +451,7 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
       hmassUnf->DrawCopy("e same");
     
       hRawData[ix][icent] = (TH1D*)hmassRaw->Clone(Form("hmassRawData_ix%d_icent%d",ix,icent));
-      
+
       if ( ix==1)  drawCentrality(kSample,icent, 0.35,0.9,1,20);
       drawBin(xBin,ix,"GeV",0.35,0.82,1,18);
       gPad->SetLogy();
@@ -571,13 +583,18 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
       
     }
   }
+
+  
   TFile* fout = new TFile(Form("spectraFiles/unfoldingResult_coll%d_optX%d_optY%d_radius%.1f_nIter%d.root",kSample,optX,optY,(float)radius,nIter),"recreate");
   for ( int i=0 ; i<=6; i++) {
     int icent = i;
-    if ( !selectedCent(icent))
-      continue;
-    if ( (kSample == kPP) && ( icent !=0 ) )
-      continue;
+    if ( !selectedCent(icent))      continue;
+    if ( (kSample == kPP) && ( icent !=0 ) )      continue;
+
+    hReco[i]->Write();
+    hRecoData[i]->Write();
+    hRatio[i]->Write();
+
     for ( int ix = 1 ; ix<= nXbins ; ix++) {
       hFinalMass[ix][icent]->Write();
       hRawMC[ix][icent]->Write();
@@ -612,9 +629,13 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     }
 
   }
-  //  if ( nJz ==2 ) jzNorm = hi9EvtWgtJZ2;
-  //  if ( nJz ==3 ) jzNorm = hi9EvtWgtJZ3;
-  //  if ( nJz ==4 ) jzNorm = hi9EvtWgtJZ4;
+  TH2D* hReweight; 
+  TFile* fReweight; 
+  if ( doReweight ) {
+    if ( kSample == kPP)         fReweight = new TFile(fReweightPP) ;
+    else if ( kSample == kPbPb)  fReweight = new TFile(fReweightPbPb) ;
+    hReweight = (TH2D*)fReweight->Get(Form("hWeight_icent%d",icent));
+  }
   
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
@@ -668,7 +689,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   
   RooUnfoldResponse* res = new RooUnfoldResponse( hTruthMc, hRecoMc );
   res->SetName(Form("responseMatrix_icent%d",icent));
-  
+
   for ( int ijz =2 ; ijz<=4 ; ijz++) { 
     TTree* tr;
     double jzNorm=0;
@@ -691,26 +712,34 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       
       if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
 	continue;
-      
+
       double recoVarX, truthVarX;
       getXvalues( recoVarX, truthVarX, myJetMc, optX);
       double recoVarY, truthVarY;
       getYvalues( recoVarY, truthVarY, myJetMc, optY);
+
+      // Data/MC reweighting factors 
+      double rewFact = 1; 
+      if ( doReweight) { 
+	int rewBin = hReweight->FindBin(recoVarX,recoVarY); 
+	rewFact = hReweight->GetBinContent(rewBin);
+      }
+
       if ( useFullMC || (i%2==0) )  
-	res->Fill(  recoVarX, recoVarY,    truthVarX, truthVarY, myJetMc.weight * jzNorm);
+	res->Fill(  recoVarX, recoVarY,    truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm);
       if ( useFullMC || (i%2==1) )   {
-	hReco->Fill ( recoVarX, recoVarY, myJetMc.weight * jzNorm);
-	hTruth->Fill ( truthVarX, truthVarY, myJetMc.weight * jzNorm);
+	hReco->Fill ( recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm);
+	hTruth->Fill ( truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm);
       }
       // JES
       if ( doJES) {
 	double theRatio = recoVarX / truthVarX ;
 	int theXBin = xBinTemp->FindBin(truthVarX);
-	//int theYBin = yBinTemp->FindBin(truthVarY);
-	int theYBin = yBinTemp->FindBin(recoVarY);
+	int theYBin = yBinTemp->FindBin(truthVarY);
+	//int theYBin = yBinTemp->FindBin(recoVarY);
 	if ( (theXBin > nXbins) || (theXBin < 1) ||(theYBin > nYbins) || (theYBin < 1)  )
 	  continue;
-	hdist[theXBin][theYBin]->Fill(theRatio, myJetMc.weight * jzNorm ) ;
+	hdist[theXBin][theYBin]->Fill(theRatio, myJetMc.weight * rewFact * jzNorm ) ;
       }
       
     }
@@ -740,11 +769,13 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     cJes2->cd(1);
     hJES->SetAxisRange(0.8,1.2,"Z");
     hJES->Draw("colz");
+    gPad->SetLogx();
     drawText("Energy Scale",0.55,0.88,1,20);
     drawCentrality(kSample,icent, 0.55,0.8,1,20);
     cJes2->cd(2);
     hJER->SetAxisRange(0.,0.25,"Z");
     hJER->Draw("colz");
+    gPad->SetLogx();
     drawText("Resolution",0.5,0.88,1,20);
     cJes2->cd(1)->Update();
     TPaletteAxis *palette1 = (TPaletteAxis*)hJES->GetListOfFunctions()->FindObject("palette");

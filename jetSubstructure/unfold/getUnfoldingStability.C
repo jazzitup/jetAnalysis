@@ -26,11 +26,12 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optY=2) {
   int nPtBinDraw = highPtBin - lowPtBin + 1;
 
   vector<int> vIter;
-  vIter.push_back (2);
   vIter.push_back (4);
+  vIter.push_back (2);
+  vIter.push_back (3);
   vIter.push_back (6);
   vIter.push_back (8);
-  vIter.push_back (10);
+  //  vIter.push_back (10);
   //  vIter.push_back (8);
   //  vIter.push_back (12);
   //  vIter.push_back (14);
@@ -65,18 +66,21 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optY=2) {
     else if ( optY==2)    hRawMC[ipt][in]->SetXTitle("(m/p_{T})^{2})");
     if ( hRawMC[ipt][in]->Integral()>0) cleverRange(hRawMC[ipt][in],1.5);
     hRawMC[ipt][in]->SetYTitle("Entries (arbitraty unit)");
+    cleverRangeLog(hRawMC[ipt][in],15);
     hRawMC[ipt][in]->Draw("hist");
     hRawData[ipt][in]->Draw("same e");
 
     if ( ipt==lowPtBin)  drawCentrality(kSample, icent, 0.45,0.86,1,24);
     //    drawText(Form("%dth iteration / 4th",vIter[in]),0.45,0.7,2,14);
     drawBin(ptBin,ipt,"GeV",0.3,0.78,1,20);
+    gPad->SetLogy();
 
   }
   c1->SaveAs(Form("pdfs/mcVsData_coll%d_icent%d.pdf",kSample,icent));
 
 
-
+  TH1D* hRatio[20][10];  // ipt, iteration
+  
   for ( int in = 1 ; in< vIter.size() ; in++)  {//    for (int icent = 1 ; icent<=8 ; icent++)  { 
     TCanvas* c2=  new TCanvas(Form("c2_%d",in),"",1200,800);
     //    c2->Divide((nPtBinDraw+1)/2,2);
@@ -98,32 +102,32 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optY=2) {
       
       if ( ipt==lowPtBin)  drawCentrality(kSample, icent, 0.45,0.85,1,24);
       drawBin(ptBin,ipt,"GeV",0.45,0.76,1,18);
-      drawText(Form("%dth iteration / 2nd",vIter[in]),0.45,0.65,2,16);
+      drawText(Form("%dth iteration / 4th",vIter[in]),0.45,0.65,2,16);
+      hRatio[ipt][in]  = (TH1D*)hmass[ipt][in]->Clone(Form("hmass_ipt%d_in%d",ipt,in));
       
     }
     c2->SaveAs(Form("pdfs/unfoldingStability_coll%d_icent%d_nIter%d.pdf",kSample,icent,vIter[in]));
-    
-    /*    if ( in==1) {
-      TCanvas* c3=  new TCanvas(Form("c3_%d",in),"",1200,800);
-      c3->Divide(4,2);
-      for ( int ipt = 1 ; ipt<=nPtBin ; ipt++)  {
-	c3->cd(ipt);
-	scaleInt(hRawMC[ipt][in]);
-	scaleInt(hRawData[ipt][in]);
-	cleverRange(hRawMC[ipt][in],2);
-	handsomeTH1(hRawData[ipt][in],2);
-	hRawMC[ipt][in]->SetAxisRange(-0.02,0.08);
-	hRawMC[ipt][in]->SetXTitle("m/p_{T}");
-	hRawMC[ipt][in]->Draw();
-	hRawData[ipt][in]->Draw("same");
-	if ( ipt==1)  drawCentrality(icent, 0.45,0.9,1,20);
-	drawText(Form("%dth iteration / 4th",vIter[in]),0.45,0.7,2,14);
-	drawBin(ptBin,ipt,"GeV",0.45,0.8,1,18);
-	
-      }
-      c3->SaveAs(Form("rawMass_icent%d.gif",icent));
-      }*/
-    
   }
+  TCanvas* cOverlay=  new TCanvas("cOverlay","",1200,800);
+  makeMultiPanelCanvas(cOverlay,(nPtBinDraw+1)/2,2);
+  for ( int ipt = lowPtBin ; ipt<=highPtBin ; ipt++)  {
+    cOverlay->cd(ipt - lowPtBin +1);
+    TLegend *leg = new TLegend(0.2758281,0.0008063921,0.9970038,0.3762096,NULL,"brNDC");
+    easyLeg(leg,Form("Ratio to %dth iteration",vIter[0]));
+    for ( int in = 1 ; in< vIter.size() ; in++)  {  
+      handsomeTH1(hRatio[ipt][in], in);
+      hRatio[ipt][in]->SetAxisRange(0.5,1.5,"Y");
+      if ( in ==1 ) hRatio[ipt][in]->Draw();
+      else hRatio[ipt][in]->Draw("same");
+      if ( optY==1) jumSun(0,1,100,1);
+      else if ( optY==2) jumSun(0,1,0.27,1);
+      
+      if ( ipt==lowPtBin)  drawCentrality(kSample, icent, 0.45,0.88,1,24);
+      drawBin(ptBin,ipt,"GeV",0.45,0.80,1,18);
+      leg->AddEntry(hRatio[ipt][in], Form("Iter. %d",vIter[in])); 
+    }
+    if ( ipt == lowPtBin)  leg->Draw();
+  }
+  cOverlay->SaveAs(Form("pdfs/unfoldingStability_coll%d_icent%d_Overlay.pdf",kSample,icent));
   
 }

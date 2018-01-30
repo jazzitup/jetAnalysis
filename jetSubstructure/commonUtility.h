@@ -602,6 +602,18 @@ void scaleInt( TH1 *a=0, double normFac=1., double minX=-999.21231, double maxX=
   if ( fac>0) a->Scale(normFac/fac);
 }
 
+void scaleInt2( TH2 *a=0, double normFac=1.)
+{
+  float fac=0;
+  int lowBinX=1; 
+  int highBinX=a->GetNbinsX();
+  int lowBinY=1; 
+  int highBinY=a->GetNbinsY();
+  
+  fac =  a->Integral( lowBinX, highBinX, lowBinY, highBinY, "width");
+  if ( fac>0) a->Scale(normFac/fac);
+}
+
 
 
 double goodIntegral( TH1 *a=0, int lower=-123, int upper=-123)
