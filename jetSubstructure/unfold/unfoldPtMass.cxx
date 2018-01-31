@@ -216,7 +216,7 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
   TH2D* hTruth[7];
   TH2D* hReco[7];
   TH2D* hResultMc[7];
-  
+
   TH2D* hRecoData[7];
   TH2D* hResultData[7];
   
@@ -257,7 +257,7 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
     //    scaleInt2(hRatio[i]);
 
   }
-  
+
   cout << "================================ MC UNFOLD ===================================" << endl;
   for ( int icent=0 ; icent<=6; icent++) {
     if ( !selectedCent(icent)) 
@@ -606,6 +606,7 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
 
 RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, double radius)
 {
+
   TH1::SetDefaultSumw2();
   TString jz2;
   TString jz3;
@@ -630,6 +631,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     }
 
   }
+
   TH2D* hReweight; 
   TFile* fReweight; 
   if ( doReweight ) {
@@ -637,6 +639,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     else if ( kSample == kPbPb)  fReweight = new TFile(fReweightPbPb) ;
     hReweight = (TH2D*)fReweight->Get(Form("hWeight_icent%d",icent));
   }
+
   
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
@@ -680,10 +683,16 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TH1D* yBinTemp = new TH1D("yBinTemp","", nYbins, yBin);
   TH1D* xBinTemp = new TH1D("xBinTemp","", nXbins, xBin);
   TH1D* hdist[30][30];
+
+  TH2D* hResY[20]; // pt Bin
+
+
+
   if ( doJES) {   
     for ( int iy = 1 ; iy<=nYbins ;iy++) {
       for ( int ix = 1 ; ix<=nXbins ;ix++) {
 	hdist[ix][iy] = new TH1D(Form("hdist_iy%d_ix%d",iy,ix),";JES;Entries",100,0,2);
+	hResY[ix] = new TH2D(Form("hMassResponse_ix%d",ix),";Truth m^{2}/p_{T}^{2};Reco m^{2}/p_{T}^{2}",nYbins, yBin,nYbins, yBin);
       }
     }
   }  
@@ -725,7 +734,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	int rewBin = hReweight->FindBin(recoVarX,recoVarY); 
 	rewFact = hReweight->GetBinContent(rewBin);
       }
-
+      
       if ( useFullMC || (i%2==0) )  
 	res->Fill(  recoVarX, recoVarY,    truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm);
       if ( useFullMC || (i%2==1) )   {
@@ -741,6 +750,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	if ( (theXBin > nXbins) || (theXBin < 1) ||(theYBin > nYbins) || (theYBin < 1)  )
 	  continue;
 	hdist[theXBin][theYBin]->Fill(theRatio, myJetMc.weight * rewFact * jzNorm ) ;
+	
+	hResY[theXBin]->Fill(truthVarY,recoVarY,myJetMc.weight * rewFact * jzNorm );
       }
       
     }
@@ -750,10 +761,10 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     int lowMassBin = 4;
     int highMassBin = 12;
     int nMassBinDraw = highMassBin - lowMassBin + 1;
-
-
+    
+    
     nIterCan++;
-      for ( int ix=1 ; ix<=nXbins;ix++) {
+    for ( int ix=1 ; ix<=nXbins;ix++) {
       TCanvas * cJes = new TCanvas(Form("jes_%d",nIterCan),"",1200,400);
       makeMultiPanelCanvas(cJes,nMassBinDraw,1);
       //      makeMultiPanelCanvas(cJes,(nMassBinDraw+1)/2,2);
@@ -806,7 +817,14 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       }
     }
     
-}
+    for ( int ix=1 ; ix<=nXbins;ix++) {
+      TCanvas * cResp = new TCanvas(Form("jes_%d",nIterCan),"",500,500);
+      hResY[ix]->Draw("colz");
+      cResp->SaveAs(Form("pdfs/massResponse_kSample%d_icent%d_optX%d_optY%d_ix%d.pdf",kSample, icent, optX, optY,ix));
+    }
+    
+    
+  }
   
   return res;
 }
