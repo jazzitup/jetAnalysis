@@ -11,7 +11,7 @@ do
 	do
 	    for radius in 0.4
 	    do
-		for niter in 4 #2 3 4 6 8  # 10 12 14 20
+		for niter in  4 #6 8 10 12 14 16 18 20 # 10 12 14 20
 		do
 		    root -l -b -q  'unfoldPtMass.cxx+('$kSample','$optX','$optY','$radius','$niter')'
 		done

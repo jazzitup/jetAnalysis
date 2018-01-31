@@ -45,12 +45,13 @@ const Double_t cutdummy= -99999.0;
 //
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-    if ( icent ==1 )  return true;
-    if ( icent ==2 )  return true;
-    if ( icent ==3 )  return true;
-    if ( icent ==4 )  return true;
-    if ( icent ==5 )  return true;
   if ( icent ==6 )  return true;
+
+  //   if ( icent ==1 )  return true;
+  //  if ( icent ==2 )  return true;
+  if ( icent ==3 )  return true;
+  //  if ( icent ==4 )  return true;
+  //  if ( icent ==5 )  return true;
   return false;
 }
 
@@ -746,19 +747,30 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     
   }
   if ( doJES) {
+    int lowMassBin = 4;
+    int highMassBin = 12;
+    int nMassBinDraw = highMassBin - lowMassBin + 1;
+
+
     nIterCan++;
-    for ( int ix=1 ; ix<=nXbins;ix++) {
-      TCanvas * cJes = new TCanvas(Form("jes_%d",nIterCan),"",1200,800);
-      makeMultiPanelCanvas(cJes,(nYbins+1)/2,2);
-      for ( int iy=1 ; iy<=nYbins;iy++) {
-	cJes->cd(iy);
+      for ( int ix=1 ; ix<=nXbins;ix++) {
+      TCanvas * cJes = new TCanvas(Form("jes_%d",nIterCan),"",1200,400);
+      makeMultiPanelCanvas(cJes,nMassBinDraw,1);
+      //      makeMultiPanelCanvas(cJes,(nMassBinDraw+1)/2,2);
+      for ( int iy = lowMassBin ; iy<= highMassBin ; iy++)  {   //      for ( int iy=1 ; iy<=nYbins;iy++) {
+	cJes->cd(iy - lowMassBin + 1);
 	handsomeTH1(hdist[ix][iy],1);
-	cleverRange(hdist[ix][iy],1.5);
+	scaleInt(hdist[ix][iy],2);
+	cleverRange(hdist[ix][iy],2);
+	hdist[ix][iy]->SetAxisRange(0.5,1.5,"X");
 	hdist[ix][iy]->Draw();
 	hJES->SetBinContent(ix,iy, hdist[ix][iy]->GetMean() );
 	hJES->SetBinError(ix,iy, hdist[ix][iy]->GetMeanError() );
 	hJER->SetBinContent(ix,iy, hdist[ix][iy]->GetRMS() );
 	hJER->SetBinError(ix,iy, hdist[ix][iy]->GetRMSError() );
+	if ( iy == lowMassBin) drawBin(xBin,ix,"GeV",0.25,0.85,1,18);
+	drawBin(yBin,iy,"",0.25,0.78,1,15);
+	jumSun(1,0,1,100);
       }
       cJes->SaveAs(Form("pdfs/jesDist_kSample%d_icent%d_optX%d_optY%d_ix%d.pdf",kSample, icent, optX, optY,ix));
     }
@@ -793,7 +805,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
         delete hdist[ix][iy];
       }
     }
-  }
+    
+}
   
   return res;
 }

@@ -17,7 +17,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optY=2) {
     cout << " pp sample must have cent = 0" << endl;
     return;
   }
-    
+  
 
   const int nPtBin = 12;
   double ptBin[13]={63.096, 82., 100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944,  794.308, 999.970};
@@ -28,9 +28,10 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optY=2) {
   vector<int> vIter;
   vIter.push_back (4);
   vIter.push_back (2);
-  vIter.push_back (3);
   vIter.push_back (6);
   vIter.push_back (8);
+  vIter.push_back (12);
+  //  vIter.push_back (16);
   //  vIter.push_back (10);
   //  vIter.push_back (8);
   //  vIter.push_back (12);

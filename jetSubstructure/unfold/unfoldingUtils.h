@@ -49,7 +49,12 @@ void drawCentralityRCP(int icent = 0, float xp=0.2, float yp=0.8, int textColor=
 
 
 void drawBin(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
-  drawText( Form("%d - %d %s", (int)(xBin[ix-1]),  (int)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
+  if ( xBin[ix-1] >= 1  ) drawText( Form("%d - %d %s", (int)(xBin[ix-1]),  (int)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
+  else if ( xBin[ix-1] >= 0.1 ) drawText( Form("%.2f - %.2f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
+  else if ( xBin[ix-1] >= 0.01 ) drawText( Form("%.3f - %.3f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
+  else if ( xBin[ix-1] >= 0.001 ) drawText( Form("%.4f - %.4f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
+  else if ( xBin[ix-1] >= 0.0001 ) drawText( Form("%.5f - %.5f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
+  else  drawText( Form("%.5f - %.5f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
 }
 
 

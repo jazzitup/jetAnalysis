@@ -22,7 +22,7 @@ void getRAA(int icent=0, int optY=2, int nIter = 4) {
     // pp 
     hmass[ipt][kPP][0] = getHisto(kPP, ipt,0,nIter,optY);
     // Pb Pb
-    hmass[ipt][kPbPb][icent] = getHisto(kPbPb, ipt,0,nIter,optY);
+    hmass[ipt][kPbPb][icent] = getHisto(kPbPb, ipt,icent,nIter,optY);
   }
   
   TCanvas* c1=  new TCanvas("c4","",1200,800);
