@@ -27,7 +27,7 @@ using std::endl;
 
 bool doJES = true;
 bool checkClosure=true;
-double fracStst=1;
+double fracStst=01;
 bool useFullMC = true;
 
 double fracStstData=1;
@@ -820,7 +820,11 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     for ( int ix=1 ; ix<=nXbins;ix++) {
       TCanvas * cResp = new TCanvas(Form("jes_%d",nIterCan),"",500,500);
       hResY[ix]->Draw("colz");
+      drawCentrality(kSample,icent, 0.3,0.9,1,20);
+      drawBin(xBin,ix,"GeV",0.48,0.82,1,20);
+      drawText("Truth p_{T}:",0.3,0.82,1,20);
       cResp->SaveAs(Form("pdfs/massResponse_kSample%d_icent%d_optX%d_optY%d_ix%d.pdf",kSample, icent, optX, optY,ix));
+      
     }
     
     
