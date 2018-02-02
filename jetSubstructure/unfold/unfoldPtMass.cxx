@@ -22,7 +22,7 @@ using std::endl;
 // Global definitions
 //==============================================================================
 
-#include "unfoldingUtils.h"
+#include "../JssUtils.h"
 #include <TPaletteAxis.h>
 
 bool doJES = true;
