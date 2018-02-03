@@ -1,11 +1,13 @@
-#include "../commonUtility.h"
+#ifndef JSSUTIL_Yongsun_H
+#define JSSUTIL_Yongsun_H
+#include "commonUtility.h"
 
 int kPP   = 0 ;
 int kPbPb = 1 ;
 
 
 TH1D* getHisto( int kSample = kPP, int ipt=0, int icent=0, int nIter=0, int optY=2) {
-  TFile* f = new TFile(Form("spectraFiles/unfoldingResult_coll%d_optX1_optY%d_radius0.4_nIter%d.root",kSample,optY,			    nIter));
+  TFile* f = new TFile(Form("spectraFiles/unfoldingResult_coll%d_optX1_optY%d_radius0.4_nIter%d.root",kSample,optY, nIter));
   TH1D* ret = (TH1D*)f->Get(Form("hmassFinal_ix%d_icent%d",ipt,icent));
   return ret;
 }
@@ -58,3 +60,4 @@ void drawBin(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp
 }
 
 
+#endif

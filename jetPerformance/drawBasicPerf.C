@@ -52,19 +52,19 @@ Jes drawBasicPerf(int radius=10, int cent=0, int sampleID=0)  // sampleID 0 = pp
     TString infName="";
     if ( sampleID == 0 ) { 
       if ( radius == 10 ) {  
-	if (i==2)        {  infName ="histograms/R10_indexCali1_noRecGen_jz2.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
+	if (i==2)        {  infName ="histograms/R10_indexCali1_noRecGen_jz2.root";  jzCs[i] = 1.9648E+7; jzFiltEff[i] = 1.2948E-04; }
 	else if (i==3)   {  infName ="histograms/R10_indexCali1_noRecGen_jz3.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
 	else if (i==4)   {  infName ="histograms/R10_indexCali1_noRecGen_jz4.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
       }
       else if ( radius == 4 ) {  
-	if (i==2)        {  infName ="histograms/R4_indexCali1_noRecGen_jz2.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
+	if (i==2)        {  infName ="histograms/R4_indexCali1_noRecGen_jz2.root";  jzCs[i] = 1.9648E+7; jzFiltEff[i] = 1.2948E-04; }
 	else if (i==3)   {  infName ="histograms/R4_indexCali1_noRecGen_jz3.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
 	else if (i==4)   {  infName ="histograms/R4_indexCali1_noRecGen_jz4.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
       }
     }
     else if ( sampleID == 1 ) { 
       if ( radius == 10 ) { 
-	if (i==2)        {  infName ="histograms/pbpbMC/pbpbMC_R10_jz2.root";  jzCs[i] = 1.7053000E+7; jzFiltEff[i] = 1.2948E-04; }
+	if (i==2)        {  infName ="histograms/pbpbMC/pbpbMC_R10_jz2.root";  jzCs[i] = 1.9648E+7; jzFiltEff[i] = 1.2948E-04; }
         else if (i==3)   {  infName ="histograms/pbpbMC/pbpbMC_R10_jz3.root";  jzCs[i] = 5.7613E+05  ; jzFiltEff[i] = 4.2129E-05; }
         else if (i==4)   {  infName ="histograms/pbpbMC/pbpbMC_R10_jz4.root";  jzCs[i] = 4.1522E+04  ; jzFiltEff[i] = 2.8563E-06; }
       }
@@ -219,6 +219,7 @@ Jes drawBasicPerf(int radius=10, int cent=0, int sampleID=0)  // sampleID 0 = pp
   // Fill hRatioPtEtaJz histograms
   TH1D* hTempPt = (TH1D*)hresp[2]->ProjectionX("tempForPtBin");
   cout <<" pt bin: ";
+  cout << "number of bins = " << hTempPt->GetNbinsX() << endl;
   for ( int ipt = 1; ipt<= hTempPt->GetNbinsX() + 1 ; ipt++) { 
     ptBin[ipt] = (double)hTempPt->GetBinLowEdge(ipt);     cout <<" "<< ptBin[ipt]  ; ptBin[ipt];
   }

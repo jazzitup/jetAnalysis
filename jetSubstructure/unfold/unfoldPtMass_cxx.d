@@ -140,7 +140,7 @@
 ./unfoldPtMass_cxx.so: /Users/yongsunkim/root/include/TH2F.h
 ./unfoldPtMass_cxx.so: /Users/yongsunkim/root/include/TGaxis.h
 ./unfoldPtMass_cxx.so: ../ntupleDefinition.h ../commonUtility.h ../jzWeight.h
-./unfoldPtMass_cxx.so: unfoldingUtils.h
+./unfoldPtMass_cxx.so: ../JssUtils.h
 ./unfoldPtMass_cxx.so: /Users/yongsunkim/root/include/TPaletteAxis.h
 ./unfoldPtMass_cxx.so: /Users/yongsunkim/root/include/cintdictversion.h /Users/yongsunkim/root/include/RVersion.h
 unfoldPtMass_cxx__ROOTBUILDVERSION= 5.34/34
