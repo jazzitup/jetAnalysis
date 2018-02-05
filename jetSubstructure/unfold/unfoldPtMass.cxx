@@ -25,6 +25,8 @@ using std::endl;
 #include "../JssUtils.h"
 #include <TPaletteAxis.h>
 
+bool applyMDJES=true;
+
 bool doJES = true;
 bool checkClosure=true;
 double fracStst=01;
@@ -52,6 +54,20 @@ bool selectedCent(int icent=0) {
   if ( icent ==4 )  return true;
   if ( icent ==5 )  return true;
   return false;
+}
+
+// JES 
+void getGammaFunction(int kSample, int icent, TH2D* hgTheta, TH2D* hgK, TH2D* hgMean) {
+  TFile* f1 = new TFile("../massDependentJES/JMS.root");
+  int sampleID;
+  if ( kSample == kPP) sampleID =0 ; 
+  else if ( kSample == kPbPb) {
+    sampleID = icent + 1 ; 
+  }
+  
+  hgTheta = (TH2D*)f1->Get(Form("h2_gammaTheta_c%d",sampleID));
+  hgK = (TH2D*)f1->Get(Form("h2_gammaK_c%d",sampleID));
+  hgMean = (TH2D*)f1->Get(Form("h2_gammaMean_c%d",sampleID));
 }
 
 
@@ -688,10 +704,10 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 
 
   if ( doJES) {   
-    for ( int iy = 1 ; iy<=nYbins ;iy++) {
-      for ( int ix = 1 ; ix<=nXbins ;ix++) {
+    for ( int ix = 1 ; ix<=nXbins ;ix++) {
+      hResY[ix] = new TH2D(Form("hMassResponse_ix%d",ix),";Truth m^{2}/p_{T}^{2};Reco m^{2}/p_{T}^{2}",nYbins, yBin,nYbins, yBin);
+      for ( int iy = 1 ; iy<=nYbins ;iy++) {
 	hdist[ix][iy] = new TH1D(Form("jes_iy%d_ipt%d",iy,ix),";JES;Entries",100,0,2);
-	hResY[ix] = new TH2D(Form("hMassResponse_ix%d",ix),";Truth m^{2}/p_{T}^{2};Reco m^{2}/p_{T}^{2}",nYbins, yBin,nYbins, yBin);
       }
     }
   }  

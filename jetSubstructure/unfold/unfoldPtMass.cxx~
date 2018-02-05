@@ -22,8 +22,10 @@ using std::endl;
 // Global definitions
 //==============================================================================
 
-#include "unfoldingUtils.h"
+#include "../JssUtils.h"
 #include <TPaletteAxis.h>
+
+bool applyMDJES=true;
 
 bool doJES = true;
 bool checkClosure=true;
@@ -52,6 +54,18 @@ bool selectedCent(int icent=0) {
   if ( icent ==4 )  return true;
   if ( icent ==5 )  return true;
   return false;
+}
+
+// JES 
+void getGammaFunction( int kSample, int icent, double &p0, double &p1, double &p2) {
+  TH2D* h2_gammaTheta = (TH1D*)f->Get("");
+  
+  h2_gammaTheta->SetBinContent(xbin,ybin,p0);
+  h2_gammaTheta->SetBinError(xbin,e0);
+  h2_gammaK->SetBinContent(xbin,ybin,p1);
+  h2_gammaK->SetBinError(xbin,e1);
+  h2_gammaMean->SetBinContent(xbin,ybin,p0*p1+p2);
+  h2_gammaMean->SetBinError(xbin,0);
 }
 
 
