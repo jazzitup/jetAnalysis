@@ -6,6 +6,17 @@ int kPP   = 0 ;
 int kPbPb = 1 ;
 
 
+TH1D* getHistoRweighted( int kSample = kPP, int ipt=0, int icent=0, int nIter=0, int optY=2) {
+  TFile* f = new TFile(Form("spectraFiles_fullForResponse_fullForReweighting/unfoldingResult_coll%d_optX1_optY%d_radius0.4_nIter%d.root",kSample,optY, nIter));
+  TH1D* ret = (TH1D*)f->Get(Form("hmassFinal_ix%d_icent%d",ipt,icent));
+  return ret;
+}
+TH1D* getHistoMassDepJES( int kSample = kPP, int ipt=0, int icent=0, int nIter=0, int optY=2) {
+  TFile* f = new TFile(Form("spectraFiles_massDependentJESDone/unfoldingResult_coll%d_optX1_optY%d_radius0.4_nIter%d.root",kSample,optY, nIter));
+  TH1D* ret = (TH1D*)f->Get(Form("hmassFinal_ix%d_icent%d",ipt,icent));
+  return ret;
+}
+
 TH1D* getHisto( int kSample = kPP, int ipt=0, int icent=0, int nIter=0, int optY=2) {
   TFile* f = new TFile(Form("spectraFiles/unfoldingResult_coll%d_optX1_optY%d_radius0.4_nIter%d.root",kSample,optY, nIter));
   TH1D* ret = (TH1D*)f->Get(Form("hmassFinal_ix%d_icent%d",ipt,icent));

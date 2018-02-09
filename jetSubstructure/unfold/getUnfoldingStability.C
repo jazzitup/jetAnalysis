@@ -7,7 +7,7 @@ TString prefix = ""; //Form("ptCut_%d_%d",(int)minPt,(int)minPtMcTruth);
 
 
 
-void getUnfoldingStability(int kSample= kPP, int icent = 0, int optY=2) {
+void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optY=2) {
   //  double ptBin[9]= {100, 126, 158, 200, 251, 316, 398, 501, 800};
   //  double ptBin[9]= {110, 136, 150, 168, 200, 251, 398, 501, 800};
   //  const int nPtBin = 7;
@@ -21,16 +21,18 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optY=2) {
 
   const int nPtBin = 12;
   double ptBin[13]={63.096, 82., 100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944,  794.308, 999.970};
-  int lowPtBin = 4;
-  int highPtBin = 10;
+  int lowPtBin = 1;
+  int highPtBin = 2;
+  //  int lowPtBin = 4;
+  //  int highPtBin = 10;
   int nPtBinDraw = highPtBin - lowPtBin + 1;
 
-  vector<int> vIter;
+  vector<int> vIter;  //2 3 4 6 8 10
   vIter.push_back (4);
-  vIter.push_back (2);
-  vIter.push_back (6);
-  vIter.push_back (8);
-  vIter.push_back (12);
+  vIter.push_back (4);
+    vIter.push_back (3);
+    vIter.push_back (6);
+    vIter.push_back (8);
   //  vIter.push_back (16);
   //  vIter.push_back (10);
   //  vIter.push_back (8);
@@ -91,7 +93,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optY=2) {
       hmass[ipt][in]->Divide(hmass[ipt][0]);
       hmass[ipt][in]->SetAxisRange(0,3,"Y");
       hmass[ipt][in]->SetYTitle("Ratio");
-      if ( optY==1)  hmass[ipt][in]->SetAxisRange(0,100,"X");
+      if ( optY==1)  hmass[ipt][in]->SetAxisRange(0,30,"X");
       else if ( optY==2) hmass[ipt][in]->SetAxisRange(0,0.27,"X");
       if ( optY==1)    hmass[ipt][in]->SetXTitle("m (GeV)");
       else if ( optY==2)    hmass[ipt][in]->SetXTitle("m/p_{T}");
@@ -130,5 +132,6 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optY=2) {
     if ( ipt == lowPtBin)  leg->Draw();
   }
   cOverlay->SaveAs(Form("pdfs/unfoldingStability_coll%d_icent%d_Overlay.pdf",kSample,icent));
+  cOverlay->SaveAs(Form("pdfs/unfoldingStability_coll%d_icent%d_Overlay.png",kSample,icent));
   
 }

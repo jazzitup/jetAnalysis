@@ -25,20 +25,25 @@ using std::endl;
 #include "../JssUtils.h"
 #include <TPaletteAxis.h>
 
-bool applyMDJES=true;
+bool applyMDJ=true;
 
 bool doJES = true;
+
+bool doCheckSmearing = false; //true;	
+int selBinX = 6; // 199 GeV - 251 GeV
+
 bool checkClosure=true;
 double fracStst=01;
-bool useFullMC = true;
 
-double fracStstData=1;
+double fracStstData=01;
 
 double ptCut = 100;
 double ptCutGen = 20;
 int nIterCan=1;
 
-bool doReweight = true;
+bool useFullMC = true;
+
+bool doReweight = false;
 TString fReweightPP = "reweightFactors/unfoldingResult_coll0_optX1_optY2_radius0.4_nIter4.root";
 TString fReweightPbPb = "reweightFactors/unfoldingResult_coll1_optX1_optY2_radius0.4_nIter4.root";
 
@@ -47,17 +52,25 @@ const Double_t cutdummy= -99999.0;
 //
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-  if ( icent ==6 )  return true;
+  /*  if ( icent ==6 )  return true;
   if ( icent ==1 )  return true;
   if ( icent ==2 )  return true;
   if ( icent ==3 )  return true;
   if ( icent ==4 )  return true;
-  if ( icent ==5 )  return true;
+  if ( icent ==5 )  return true;*/
   return false;
 }
 
-// JES 
-void getGammaFunction(int kSample, int icent, TH2D* hgTheta, TH2D* hgK, TH2D* hgMean) {
+// Extra JES 
+
+struct jesHists {
+  TH2D* hgTheta;
+  TH2D* hgK;
+  TH2D* hgMean;
+  TH2D* hJES;
+} ;
+
+jesHists getGammaFunction(int kSample, int icent) {
   TFile* f1 = new TFile("../massDependentJES/JMS.root");
   int sampleID;
   if ( kSample == kPP) sampleID =0 ; 
@@ -65,10 +78,21 @@ void getGammaFunction(int kSample, int icent, TH2D* hgTheta, TH2D* hgK, TH2D* hg
     sampleID = icent + 1 ; 
   }
   
-  hgTheta = (TH2D*)f1->Get(Form("h2_gammaTheta_c%d",sampleID));
-  hgK = (TH2D*)f1->Get(Form("h2_gammaK_c%d",sampleID));
-  hgMean = (TH2D*)f1->Get(Form("h2_gammaMean_c%d",sampleID));
+  jesHists ret; 
+  cout << Form("h2_gammaTheta_c%d",sampleID)<< endl;
+  cout << Form("h2_gammaKc%d",sampleID) << endl;
+  cout << Form("h2_gammaMean_c%d",sampleID) << endl;
+  TH2D* tempTheta = (TH2D*)f1->Get(Form("h2_gammaTheta_c%d",sampleID));
+  TH2D* tempK = (TH2D*)f1->Get(Form("h2_gammaK_c%d",sampleID));
+  TH2D* tempMean = (TH2D*)f1->Get(Form("h2_gammaMean_c%d",sampleID));
+  TH2D* tempJES = (TH2D*)f1->Get(Form("h2_JES_c%d",sampleID));
+  ret.hgTheta = tempTheta;
+  ret.hgK = tempK;
+  ret.hgMean = tempMean;
+  ret.hJES = tempJES;
+  return ret;
 }
+
 
 
 //==============================================================================
@@ -78,17 +102,16 @@ void getGammaFunction(int kSample, int icent, TH2D* hgTheta, TH2D* hgK, TH2D* hg
 void getXbin(int &nBins, double* xBin, int optX) { 
   if ( optX == 1 ) {
 
-    nBins = 12;
-    double ptBin[13]={63.096, 82., 100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944, 794.308, 999.970};
+    //    nBins = 12;
+    //    double ptBin[13]={63.096, 82., 100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944, 794.308, 999.970};
+        nBins = 2;
+        double ptBin[3]={125.892,  251.186,  630.944};
 
     //    nBins = 16;
     //    double ptBin[17]={25.119, 31.623, 40.0, 50.119, 63.096, 82., 100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944, 794.308, 999.970};
 
     //    nBins = 8; 
     //    double ptBin[9]= {100, 126, 158, 200, 251, 316, 398, 501, 800};
-
-
-
     for ( int i=0 ; i<= nBins ; i++) {
       xBin[i] = ptBin[i] ; 
     }    
@@ -242,7 +265,7 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
   TH1D* hRawMC[20][10]; // pT, centrality
   TH1D* hRawData[20][10]; // pT, centrality
   
-  
+
   TCanvas* c01 = new TCanvas("c01", "",1000,500);
   c01->Divide(2,1); 
   for ( int i=0 ; i<=6; i++) {
@@ -360,8 +383,8 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
     }
 
 
-    c1a->SaveAs(Form("pdfs/massClosure1_coll%d_icent%d_optX%d_optY%d_radius%.1f.pdf",kSample,icent,optX,optY,(float)radius));
-    c1b->SaveAs(Form("pdfs/massClosure2_coll%d_icent%d_optX%d_optY%d_radius%.1f.pdf",kSample,icent,optX,optY,(float)radius));
+    c1a->SaveAs(Form("pdfs/massClosure1_coll%d_icent%d_optX%d_optY%d_radius%.1f_applyMDJ%d.pdf",kSample,icent,optX,optY,(float)radius,(int)applyMDJ));
+    c1b->SaveAs(Form("pdfs/massClosure2_coll%d_icent%d_optX%d_optY%d_radius%.1f_applyMDJ%d.pdf",kSample,icent,optX,optY,(float)radius,(int)applyMDJ));
 
     ////////// Beginning of pT closure 
     TCanvas* c1c = new TCanvas(Form("xBin_closure_icent%d",icent),"",500,500);
@@ -414,7 +437,7 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
     rUnf->DrawCopy("same");
 
 
-    c1c->SaveAs(Form("pdfs/xBinClosure1_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",kSample,icent,optX,optY,(float)radius,nIter));
+    c1c->SaveAs(Form("pdfs/xBinClosure1_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d_applyMDJ%d.pdf",kSample,icent,optX,optY,(float)radius,nIter,(int)applyMDJ));
     ////////// end of pT closure 
     
     
@@ -490,8 +513,8 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
       rRaw->DrawCopy("");
       rUnf->DrawCopy("hist same");
     }
-    c2a->SaveAs(Form("pdfs/c2a_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",kSample,icent,optX,optY,(float)radius,nIter));     
-    c2b->SaveAs(Form("pdfs/c2b_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",kSample,icent,optX,optY,(float)radius,nIter));
+    c2a->SaveAs(Form("pdfs/c2a_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d_applyMDJ%d.pdf",kSample,icent,optX,optY,(float)radius,nIter,(int)applyMDJ));     
+    c2b->SaveAs(Form("pdfs/c2b_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d_applyMDJ%d.pdf",kSample,icent,optX,optY,(float)radius,nIter,(int)applyMDJ));
      
     
     ////////// Beginning of pT unfolding
@@ -531,7 +554,7 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
     fixedFontHist(rDataUnf,2.5);
     rDataUnf->DrawCopy("hist");
     rDataRaw->DrawCopy("same");
-    c2c->SaveAs(Form("pdfs/c2c_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",kSample,icent,optX,optY,(float)radius,nIter));
+    c2c->SaveAs(Form("pdfs/c2c_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d_applyMDJ%d.pdf",kSample,icent,optX,optY,(float)radius,nIter,(int)applyMDJ));
     ////////// end of pT unfolding
 
     TCanvas* c3 = new TCanvas(Form("c3_icent%d",icent),"",1200,600);
@@ -553,7 +576,7 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
       //      gPad->SetLogy();
       hFinalMass[ix][icent] = (TH1D*)hmassUnfSqrt[ix]->Clone(Form("hmassFinal_ix%d_icent%d",ix,icent));
     }
-    c3->SaveAs(Form("pdfs/c3_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",kSample,icent,optX,optY,(float)radius,nIter));
+    c3->SaveAs(Form("pdfs/c3_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d_applyMDJ%d.pdf",kSample,icent,optX,optY,(float)radius,nIter,(int)applyMDJ));
     
   }
 
@@ -578,7 +601,7 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
 	drawBin(xBin,ix,"GeV",0.30,0.8,1,18);
 	jumSun(0,1,200,1);
       }
-      c4->SaveAs(Form("pdfs/RCP_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
+      c4->SaveAs(Form("pdfs/RCP_icent%d_optX%d_optY%d_radius%.1f_nIter%d_applyMDJ%d.pdf",icent,optX,optY,(float)radius,nIter,(int)applyMDJ));
 
       TCanvas* c5 = new TCanvas(Form("c5_icent%d",icent),"",1200,600);
       c5->Divide( (int)((nXbins+0.1)/2.),2);
@@ -595,7 +618,7 @@ void unfoldPtMass(int kSample = kPP, int optX =1, int optY = 2, double radius= 0
 	if ( ix==2)  drawCentrality(kSample,icent, 0.3,0.85,1,20);
 	drawBin(xBin,ix,"GeV",0.35,0.8,1,18);
       }
-      c5->SaveAs(Form("pdfs/Cent-Peri_icent%d_optX%d_optY%d_radius%.1f_nIter%d.pdf",icent,optX,optY,(float)radius,nIter));
+      c5->SaveAs(Form("pdfs/Cent-Peri_icent%d_optX%d_optY%d_radius%.1f_nIter%d_applyMDJ%d.pdf",icent,optX,optY,(float)radius,nIter,(int)applyMDJ));
       
     }
   }
@@ -655,6 +678,19 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     hReweight = (TH2D*)fReweight->Get(Form("hWeight_icent%d",icent));
   }
 
+  jesHists myJes;
+  if ( applyMDJ)  {
+    myJes = getGammaFunction( kSample, icent);
+    TCanvas* cTemp1 = new TCanvas("cTemp1","",800,800);  
+    cTemp1->Divide(2,2);
+    cTemp1->cd(1);     myJes.hgTheta->Draw("colz");
+    cTemp1->cd(2);     myJes.hgK->Draw("colz");
+    cTemp1->cd(3);     myJes.hgMean->Draw("colz");
+    cTemp1->cd(4);     myJes.hJES->Draw("colz");
+    cTemp1->SaveAs("cTemp1.pdf");
+  }    
+
+
   
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
@@ -698,19 +734,31 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TH1D* yBinTemp = new TH1D("yBinTemp","", nYbins, yBin);
   TH1D* xBinTemp = new TH1D("xBinTemp","", nXbins, xBin);
   TH1D* hdist[30][30];
+  TH1D* hdistMass[30][30];
 
   TH2D* hResY[20]; // pt Bin
-
-
-
   if ( doJES) {   
     for ( int ix = 1 ; ix<=nXbins ;ix++) {
       hResY[ix] = new TH2D(Form("hMassResponse_ix%d",ix),";Truth m^{2}/p_{T}^{2};Reco m^{2}/p_{T}^{2}",nYbins, yBin,nYbins, yBin);
       for ( int iy = 1 ; iy<=nYbins ;iy++) {
-	hdist[ix][iy] = new TH1D(Form("jes_iy%d_ipt%d",iy,ix),";JES;Entries",100,0,2);
+	hdist[ix][iy] = new TH1D(Form("jes_iy%d_ipt%d",iy,ix),";JES;Entries",100,0,2);   // JES
+	hdistMass[ix][iy] = new TH1D(Form("jms_iy%d_ipt%d",iy,ix),";Mass scale;Entries",100,-2,4);
       }
     }
   }  
+
+  TH1D* hMassByPtMig[20]; // in Truth pT bin,
+  TH1D* hMassByMassMig[20]; // in truth mass bin  
+  if (doCheckSmearing)  {
+    for ( int ix = 1 ; ix<=nXbins ;ix++) {
+      hMassByPtMig[ix] = new TH1D(Form("hMassByPtMig_ix%d",ix),";m/pT;",nYbins, yBin);
+    }
+    for ( int iy = 1 ; iy<=nYbins ;iy++) {
+      hMassByMassMig[iy] = new TH1D(Form("hMassByMassMig_iy%d",iy),";m/pT;",nYbins, yBin);
+    }
+  }
+  
+  
   
   RooUnfoldResponse* res = new RooUnfoldResponse( hTruthMc, hRecoMc );
   res->SetName(Form("responseMatrix_icent%d",icent));
@@ -743,6 +791,16 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       double recoVarY, truthVarY;
       getYvalues( recoVarY, truthVarY, myJetMc, optY);
 
+      if ( (applyMDJ) &&  (optX == 1) )  {
+	double tempY = recoVarY;
+	if ( recoVarY< 0 )
+	  tempY = 0.00001;
+	int theBin = myJes.hJES->FindBin( recoVarX, sqrt(tempY) );
+	double scaleFactor = myJes.hJES->GetBinContent(theBin);
+	recoVarX =  recoVarX / scaleFactor;
+      }      
+      
+      
       // Data/MC reweighting factors 
       double rewFact = 1; 
       if ( doReweight) { 
@@ -758,15 +816,35 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       }
       // JES
       if ( doJES) {
-	double theRatio = recoVarX / truthVarX ;
+	double theRatioX = recoVarX / truthVarX ;
+	double theRatioY = recoVarY / truthVarY ;
+
 	int theXBin = xBinTemp->FindBin(truthVarX);
 	int theYBin = yBinTemp->FindBin(truthVarY);
 	//int theYBin = yBinTemp->FindBin(recoVarY);
 	if ( (theXBin > nXbins) || (theXBin < 1) ||(theYBin > nYbins) || (theYBin < 1)  )
 	  continue;
-	hdist[theXBin][theYBin]->Fill(theRatio, myJetMc.weight * rewFact * jzNorm ) ;
+	hdist[theXBin][theYBin]->Fill(theRatioX, myJetMc.weight * rewFact * jzNorm ) ;
+	hdistMass[theXBin][theYBin]->Fill(theRatioY, myJetMc.weight * rewFact * jzNorm ) ;
 	
 	hResY[theXBin]->Fill(truthVarY,recoVarY,myJetMc.weight * rewFact * jzNorm );
+      }
+      
+      // smearing check 
+      if (doCheckSmearing) {
+	int recoBinX = xBinTemp->FindBin(recoVarX);
+	int truthBinX = xBinTemp->FindBin(truthVarX);
+	int recoBinY = yBinTemp->FindBin(recoVarY);
+	int truthBinY = yBinTemp->FindBin(truthVarY);
+	if (recoBinX==selBinX) {
+	  if ( (truthBinX <= nXbins) && (truthBinX >= 1))  
+	    hMassByPtMig[truthBinX]->Fill (recoVarY,myJetMc.weight * rewFact * jzNorm); 
+	  
+	  if ((truthBinY <= nYbins) && (truthBinY >= 1)) 
+	    hMassByMassMig[truthBinY]->Fill (recoVarY,myJetMc.weight * rewFact * jzNorm);
+	  
+	}
+	
       }
       
     }
@@ -798,7 +876,28 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	drawBin(yBin,iy,"",0.25,0.78,1,15);
 	jumSun(1,0,1,100);
       }
-      cJes->SaveAs(Form("pdfs/jesDist_kSample%d_icent%d_optX%d_optY%d_ix%d.pdf",kSample, icent, optX, optY,ix));
+      cJes->SaveAs(Form("pdfs/jesDist_kSample%d_icent%d_optX%d_optY%d_ix%d_applyMDJ%d.pdf",kSample, icent, optX, optY,ix,(int)applyMDJ));
+      
+      TCanvas * cJms = new TCanvas(Form("jes_%d",nIterCan),"",1200,400);
+      makeMultiPanelCanvas(cJms,nMassBinDraw,1);
+      //      makeMultiPanelCanvas(cJms,(nMassBinDraw+1)/2,2);
+      for ( int iy = lowMassBin ; iy<= highMassBin ; iy++)  {   //      for ( int iy=1 ; iy<=nYbins;iy++) {
+        cJms->cd(iy - lowMassBin + 1);
+	handsomeTH1(hdistMass[ix][iy],1);
+	scaleInt(hdistMass[ix][iy],2);
+	cleverRange(hdistMass[ix][iy],2);
+        hdistMass[ix][iy]->SetAxisRange(0.5,1.5,"X");
+        hdistMass[ix][iy]->Draw();
+	hJES->SetBinContent(ix,iy, hdistMass[ix][iy]->GetMean() );
+        hJES->SetBinError(ix,iy, hdistMass[ix][iy]->GetMeanError() );
+	hJER->SetBinContent(ix,iy, hdistMass[ix][iy]->GetRMS() );
+        hJER->SetBinError(ix,iy, hdistMass[ix][iy]->GetRMSError() );
+        if ( iy == lowMassBin) drawBin(xBin,ix,"GeV",0.25,0.85,1,18);
+        drawBin(yBin,iy,"",0.25,0.78,1,15);
+        jumSun(1,0,1,100);
+      }
+      cJms->SaveAs(Form("pdfs/jmsDist_kSample%d_icent%d_optX%d_optY%d_ix%d_applyMDJ%d.pdf",kSample, icent, optX, optY,ix,(int)applyMDJ));
+
     }
     
     nIterCan++;
@@ -825,7 +924,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     palette2->SetX2NDC(0.92);
     //    palette1->SetY1NDC(0.1);
     //    palette1->SetY2NDC(0.95);
-    cJes2->SaveAs(Form("pdfs/JESJER_kSample%d_icent%d_optX%d_optY%d.pdf",kSample, icent, optX, optY));
+    cJes2->SaveAs(Form("pdfs/JESJER_kSample%d_icent%d_optX%d_optY%d_applyMDJ%d.pdf",kSample, icent, optX, optY,(int)applyMDJ));
     //    for ( int ix = 1 ; ix<=nXbins ;ix++) {
     //      for ( int iy = 1 ; iy<=nYbins ;iy++) {
     //        delete hdist[ix][iy];
@@ -838,7 +937,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       drawCentrality(kSample,icent, 0.3,0.9,1,20);
       drawBin(xBin,ix,"GeV",0.48,0.82,1,20);
       drawText("Truth p_{T}:",0.3,0.82,1,20);
-      cResp->SaveAs(Form("pdfs/massResponse_kSample%d_icent%d_optX%d_optY%d_ix%d.pdf",kSample, icent, optX, optY,ix));
+      cResp->SaveAs(Form("pdfs/massResponse_kSample%d_icent%d_optX%d_optY%d_ix%d_%d.pdf",kSample, icent, optX, optY,ix,(int)applyMDJ));
       
     }
     TString sampleName;
@@ -854,6 +953,51 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     
     
   }
+
+  
+  // smearing check
+  if (doCheckSmearing) {
+    TCanvas* cSmear = new TCanvas("csmear","",800,500);
+    cSmear->Divide(2,1);
+    cSmear->cd(1);
+    TH1D* hTemp1[20];
+    for ( int ix = 1 ; ix<=nXbins ;ix++) {
+      hTemp1[ix] = (TH1D*)hMassByPtMig[ix]->Clone(Form("hTemp1_ix%d",ix));
+      if ( ix>1) hTemp1[ix]->Add( hTemp1[ix-1] );
+    }
+    TLegend *leg2 = new TLegend(0.4464808,0.3843537,0.9999478,0.9122449,NULL,"brNDC");
+    easyLeg(leg2,"From other pT^{Truth}");
+    for ( int ix = nXbins ; ix>=1 ;ix--) {
+      hTemp1[ix]->SetLineColor(ix);
+      hTemp1[ix]->SetFillColor(ix);
+      cleverRange(hTemp1[ix],1.5,0.000001);
+      if ( ix == nXbins) hTemp1[ix]->Draw("hist");
+      else hTemp1[ix]->Draw("hist same");
+      //      if ( abs(ix - selBinX ) < 3) 
+      leg2->AddEntry(hTemp1[ix], Form("%d <p_{T}< %d GeV",(int)xBin[ix], (int)xBin[ix+1]), "lf" );
+    }
+    leg2->Draw();
+
+    cSmear->cd(2);
+    TH1D* hTemp2[20];
+    TLegend *leg3 = new TLegend(0.4464808,0.3843537,0.9999478,0.9122449,NULL,"brNDC");
+    easyLeg(leg3,"From other m/pT^{truth}");
+    for ( int iy = 1;  iy<= nYbins ; iy++) {
+      hTemp2[iy] = (TH1D*)hMassByMassMig[iy]->Clone(Form("hTemp2_iy%d",iy));
+      if ( iy>1) hTemp2[iy]->Add( hTemp1[iy-1] );
+    }
+    for ( int iy = nYbins ; iy>=1 ;iy--) {
+      hTemp2[iy]->SetLineColor(iy);
+      hTemp2[iy]->SetFillColor(iy);
+      cleverRange(hTemp2[iy],1.5,0.000001);
+      if ( iy == nYbins) hTemp2[iy]->Draw("hist");
+      else hTemp2[iy]->Draw("hist same");
+      if ( iy>=4) leg3->AddEntry(hTemp2[iy], Form("%.2f <m/p_{T} < %.2f ",(float)yBin[iy], (float)yBin[iy+1]), "lf" );
+    }
+    leg3->Draw();
+    cSmear->SaveAs("pdfs/cSmear.pdf");
+  }
+  
   
   return res;
 }
@@ -878,6 +1022,11 @@ void getDataSpectra(int kSample,  int icent,  int optX, int optY, TH2D* hReco, d
 
   }
 
+  jesHists myJes;
+  if ( applyMDJ)  {
+    myJes = getGammaFunction( kSample, icent);
+  }    
+  
   TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));
   TTree* tr = (TTree*)fData->Get("tr");
   jetSubStr myJet;
@@ -900,6 +1049,15 @@ void getDataSpectra(int kSample,  int icent,  int optX, int optY, TH2D* hReco, d
     getXvalues( recoVarX, truthVarX, myJet, optX);
     double recoVarY, truthVarY;
     getYvalues( recoVarY, truthVarY, myJet, optY);
+
+    if ( (applyMDJ) &&  (optX == 1) )  {
+      double tempY = recoVarY;
+      if ( recoVarY< 0 )
+	tempY = 0.00001;
+      int theBin = myJes.hJES->FindBin( recoVarX, sqrt(tempY) );
+      double scaleFactor = myJes.hJES->GetBinContent(theBin);
+      recoVarX =  recoVarX / scaleFactor;
+    }
 
     hReco->Fill ( recoVarX, recoVarY);  // no reweighting for data
     
