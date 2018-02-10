@@ -35,6 +35,20 @@ TH1D* getDataRaw( int kSample = kPP, int ipt=0, int icent=0, int nIter=0, int op
 }
 
 
+TH1D* getFinal_test4( int kSample = kPP, int ipt=0, int icent=0, int nIter=0, int optY=2) {
+  TFile* f = new TFile(Form("spectraFiles/unfoldingResult_coll%d_optX1_optY%d_radius0.4_nIter%d_test4.root",kSample,optY, nIter));
+  TH1D* ret = (TH1D*)f->Get(Form("hmassFinal_ix%d_icent%d",ipt,icent));
+  return ret;
+}
+
+TH1D* getInitial_test4( int kSample = kPP, int ipt=0, int icent=0, int nIter=0, int optY=2) {
+  TFile* f = new TFile(Form("spectraFiles/unfoldingResult_coll%d_optX1_optY%d_radius0.4_nIter%d_test4.root",kSample,optY, nIter));
+  TH1D* ret = (TH1D*)f->Get(Form("hmassInitial_ix%d_icent%d",ipt,icent));
+  return ret;
+}
+
+
+
 
 
 void drawCentrality( int kSample = kPP, int icent = 0, float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18) {
