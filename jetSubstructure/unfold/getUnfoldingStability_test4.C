@@ -49,12 +49,11 @@ void getUnfoldingStability_test4(int kSample= kPbPb, int icent = 0, int optY=2) 
   int nPtBinDraw = highPtBin - lowPtBin + 1;
   
   vector<int> vIter;  //2 3 4 6 8 10
-  vIter.push_back (2);
-  vIter.push_back (2);
+  vIter.push_back (1);
+  vIter.push_back (1);
   vIter.push_back (3);
-  vIter.push_back (4);
-  vIter.push_back (6);
-  vIter.push_back (8);
+  vIter.push_back (5);
+  vIter.push_back (7);
 
   //  vIter.push_back (8);
   //  vIter.push_back (16);
@@ -153,7 +152,7 @@ void getUnfoldingStability_test4(int kSample= kPbPb, int icent = 0, int optY=2) 
       
       if ( ipt==lowPtBin)  drawCentrality(kSample, icent, 0.45,0.85,1,24);
       drawBin(ptBin,ipt,"GeV",0.45,0.76,1,18);
-      drawText(Form("%dth iteration / 4th",vIter[in]),0.45,0.65,2,16);
+      drawText(Form("%dth iter. / MC Truth",vIter[in]),0.45,0.65,2,16);
       hRatio[ipt][in]  = (TH1D*)hmass[ipt][in]->Clone(Form("hmass_ipt%d_in%d",ipt,in));
       
     }
@@ -164,7 +163,7 @@ void getUnfoldingStability_test4(int kSample= kPbPb, int icent = 0, int optY=2) 
   for ( int ipt = lowPtBin ; ipt<=highPtBin ; ipt++)  {
     cOverlay->cd(ipt - lowPtBin +1);
     TLegend *leg = new TLegend(0.2758281,0.0008063921,0.9970038,0.3762096,NULL,"brNDC");
-    easyLeg(leg,Form("Ratio to %dth iteration",vIter[0]));
+    easyLeg(leg,"Ratio to MC Truth");
     for ( int in = 1 ; in< vIter.size() ; in++)  {  
       handsomeTH1(hRatio[ipt][in], in);
       hRatio[ipt][in]->SetAxisRange(0.,1.5,"Y");

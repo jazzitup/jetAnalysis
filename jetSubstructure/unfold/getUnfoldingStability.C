@@ -6,8 +6,29 @@ double minPtMcTruth = 20;
 TString prefix = ""; //Form("ptCut_%d_%d",(int)minPt,(int)minPtMcTruth);
 
 
+int findLowerBoundBin( TH1* h, int r1=1, int r2=-1 ) {
+  if  (r2 == -1 ) 
+    r2 = h->GetNbinsX();
+  
+  double cand = 0;
+  int ret = 1;
+  for ( int i = r1 ; i<= r2 ; i++) {
+    if ( i==r1 ) cand = h->GetBinContent(i);
+    double val = h->GetBinContent(i);
+    if ( val ==0 ) continue;
+    if ( TMath::IsNaN( val) ) continue;
 
-void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optY=2) {
+    if ( val < cand) {
+      ret = i;
+      cand = val;
+    }
+
+  }
+  cout << "findLowerBoundBin returns " << ret << endl;
+  return ret;
+}
+
+void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optY=8) {
   //  double ptBin[9]= {100, 126, 158, 200, 251, 316, 398, 501, 800};
   //  double ptBin[9]= {110, 136, 150, 168, 200, 251, 398, 501, 800};
   //  const int nPtBin = 7;
@@ -21,18 +42,25 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optY=2) {
 
   const int nPtBin = 12;
   double ptBin[13]={63.096, 82., 100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944,  794.308, 999.970};
-  int lowPtBin = 1;
-  int highPtBin = 2;
-  //  int lowPtBin = 4;
-  //  int highPtBin = 10;
+  //  int lowPtBin = 1;
+  //  int highPtBin = 2;
+  int lowPtBin = 4;
+  int highPtBin = 10;
   int nPtBinDraw = highPtBin - lowPtBin + 1;
-
+  
   vector<int> vIter;  //2 3 4 6 8 10
   vIter.push_back (4);
-  vIter.push_back (4);
-    vIter.push_back (3);
-    vIter.push_back (6);
-    vIter.push_back (8);
+  vIter.push_back (2);
+  vIter.push_back (3);
+  vIter.push_back (6);
+  vIter.push_back (8);
+  vIter.push_back (12);
+  vIter.push_back (16);
+  vIter.push_back (24);
+  vIter.push_back (26);
+  vIter.push_back (32);
+
+  //  vIter.push_back (8);
   //  vIter.push_back (16);
   //  vIter.push_back (10);
   //  vIter.push_back (8);
@@ -58,6 +86,7 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optY=2) {
   TCanvas* c1=  new TCanvas("c4","",1200,800);
   //  c1->Divide((nPtBinDraw+1)/2,2);
   makeMultiPanelCanvas(c1,(nPtBinDraw+1)/2,2);
+  TH1D* theRatio[20] ;
   for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
     int in = 0;
     c1->cd(ipt - lowPtBin + 1);
@@ -72,16 +101,34 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optY=2) {
     cleverRangeLog(hRawMC[ipt][in],15);
     hRawMC[ipt][in]->Draw("hist");
     hRawData[ipt][in]->Draw("same e");
-
     if ( ipt==lowPtBin)  drawCentrality(kSample, icent, 0.45,0.86,1,24);
     //    drawText(Form("%dth iteration / 4th",vIter[in]),0.45,0.7,2,14);
     drawBin(ptBin,ipt,"GeV",0.3,0.78,1,20);
     gPad->SetLogy();
-
+    
+    theRatio[ipt] = (TH1D*)hRawData[ipt][in]->Clone(Form("dataovermc_ipt%d",ipt));
+    theRatio[ipt]->Divide(hRawMC[ipt][in]);
   }
   c1->SaveAs(Form("pdfs/mcVsData_coll%d_icent%d.pdf",kSample,icent));
-
-
+  
+  TCanvas* c11=  new TCanvas("c11","",1200,800);
+  //  c11->Divide((nPtBinDraw+1)/2,2);
+  makeMultiPanelCanvas(c11,(nPtBinDraw+1)/2,2);
+  for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
+    c11->cd(ipt - lowPtBin +1);
+    int lowestBin = findLowerBoundBin( theRatio[ipt],4,9);
+    double scaleFact = theRatio[ipt]->GetBinContent(lowestBin) ;
+    theRatio[ipt]->Scale(1./scaleFact);
+    theRatio[ipt]->SetAxisRange(0,9,"Y");
+    theRatio[ipt]->Draw();
+    jumSun(-0.02,1,0.09,1);
+    if ( ipt==lowPtBin)  drawCentrality(kSample, icent, 0.45,0.86,1,24);
+    //    drawText(Form("%dth iteration / 4th",vIter[in]),0.45,0.7,2,14);
+    drawBin(ptBin,ipt,"GeV",0.3,0.78,1,20);
+  }
+  c11->SaveAs(Form("pdfs/mcVsData_coll%d_icent%d_ratio.pdf",kSample,icent));
+  c11->SaveAs(Form("pdfs/mcVsData_coll%d_icent%d_ratio.png",kSample,icent));
+  
   TH1D* hRatio[20][10];  // ipt, iteration
   
   for ( int in = 1 ; in< vIter.size() ; in++)  {//    for (int icent = 1 ; icent<=8 ; icent++)  { 

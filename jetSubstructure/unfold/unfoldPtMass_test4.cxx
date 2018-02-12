@@ -304,7 +304,8 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
     hTruth[i] = (TH2D*)hTruthTemp->Clone(Form("%s_icent%d",hTruthTemp->GetName(),i));
     hReco[i] = (TH2D*)hRecoTemp->Clone(Form("%s_icent%d",hRecoTemp->GetName(),i));
     res[i] = getResponse(kSample, i, optX, optY, hTruth[i], hReco[i], radius, true);
-    
+    res[i]->SetName(Form("resi%d",i));
+
     c01->cd(1);   hTruth[i]->Draw("colz");
     c01->cd(2);   hReco[i]->Draw("colz");
     c01->SaveAs(Form("pdfs/correlation_coll%d_cent%d_radius%.1f.pdf",kSample,i,(float)radius));
@@ -313,6 +314,7 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
     hTruthData[i] = (TH2D*)hTruthTemp->Clone(Form("%s_data_icent%d",hTruthTemp->GetName(),i));
     hRecoData[i] = (TH2D*)hRecoTemp->Clone(Form("%s__dataicent%d",hRecoTemp->GetName(),i));
     resData[i] = getResponse(kSample, i, optX, optY, hTruthData[i], hRecoData[i], radius, false);
+    resData[i]->SetName(Form("resDatai%d",i));
 
     hRatio[i] = (TH2D*)hRecoData[i]->Clone(Form("hWeight_icent%d",icent));
     hRatio[i]->Divide(hReco[i]);
@@ -333,6 +335,8 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
     makeEfficiencyCanvas(c1a,(nXbins+1)/2,  0.05, 0.01, 0.1, 0.3, 0.01);
     makeEfficiencyCanvas(c1b,(nXbins+1)/2,  0.05, 0.01, 0.1, 0.3, 0.01);
     RooUnfoldBayes unfoldMc (res[icent], hReco[icent], nIter);    // OR
+    unfoldMc.SetName(Form("unfoldMc_res%d_hReco",icent));
+    
     hResultMc[icent]  = (TH2D*)unfoldMc.Hreco();
     hResultMc[icent]->SetName( Form("hresultmc_icent%d",icent) );
     //    unfoldMc.PrintTable (cout, hTruth[icent]);
@@ -473,6 +477,7 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
     makeEfficiencyCanvas(c2a,(nXbins+1)/2,  0.05, 0.01, 0.1, 0.3, 0.01);
     makeEfficiencyCanvas(c2b,(nXbins+1)/2,  0.05, 0.01, 0.1, 0.3, 0.01);
     RooUnfoldBayes unfoldData (res[icent], hRecoData[icent], nIter);    // OR
+    unfoldData.SetName(Form("res%d_hRecoData",icent));
     hResultData[icent] = (TH2D*)unfoldData.Hreco();
     hResultData[icent]->SetName( Form("hresultData_icent%d",icent) );
   
@@ -806,7 +811,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   
   
   RooUnfoldResponse* res = new RooUnfoldResponse( hTruthMc, hRecoMc );
-  res->SetName(Form("responseMatrix_icent%d",icent));
+  res->SetName(Form("responseMatrix_icent%d_reweight%d",icent,doReweight));
 
   for ( int ijz =2 ; ijz<=4 ; ijz++) { 
     TTree* tr;
