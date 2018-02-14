@@ -28,7 +28,7 @@ using std::endl;
 
 void getMCspectra(int kSample=kPP, int icent=0, int optX=1, TH1D* hmcRaw=0, TH1D* hmcTruth=0, double radius=0.4);
 
-void unfold1D(int kSample = kPP, int optX =1, double radius= 0.4, int nIter=50) {
+void unfold1D(int kSample = kPP, int optX =1, double radius= 0.4, int nIter=1) {
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -47,8 +47,9 @@ void unfold1D(int kSample = kPP, int optX =1, double radius= 0.4, int nIter=50) 
   TH1D* hdataRaw[7];
   TH1D* hdataTruth[7];
   TH1D* hdataUnf[7];
-
-  TFile* fmatrix = new TFile(Form("spectraFiles/unfoldingMatrix1D_coll%d_optX%d_radius%.1f.root",kSample,optX,(float)radius));
+  
+  int matrixWeight = 1;
+  TFile* fmatrix = new TFile(Form("spectraFiles/unfoldingMatrix1D_coll%d_optX%d_radius%.1f_doReweight%d.root",kSample,optX,(float)radius,matrixWeight));
   
   for ( int i=0 ; i<=6; i++) {
     int icent = i;
@@ -86,20 +87,23 @@ void unfold1D(int kSample = kPP, int optX =1, double radius= 0.4, int nIter=50) 
     hmcRatio[icent] = (TH1D*)hmcUnf[icent]->Clone(Form("hmcRatio_icent%d",icent));
     hmcRatio[icent]->Divide(hmcTruth[icent]);
     
-    TCanvas* c1 = new TCanvas(Form("c1_icent%d",icent),"",600,600);
+    TCanvas* c1 = new TCanvas(Form("c1_icent%d",icent),"",600,800);
     makeEfficiencyCanvas(c1,1,  0.05, 0.01, 0.1, 0.3, 0.01);
     c1->cd(1);
-    cleverRangeLog(hmcTruth[icent],0.0000001);
+    cleverRangeLog(hmcTruth[icent],10,0.000000001);
     handsomeTH1(hmcTruth[icent],1);
     handsomeTH1(hmcUnf[icent],2);
     hmcTruth[icent]->Draw("hist");
     hmcUnf[icent]->Draw("same");
+    gPad->SetLogy();
     c1->cd(2);
     handsomeTH1(hmcRatio[icent],1);
-    hmcRatio[icent]->SetAxisRange(0,2);
+    hmcRatio[icent]->SetAxisRange(0.,2,"Y");
     hmcRatio[icent]->Draw();
     jumSun(20,1,1000,1);
-    
+    drawText(Form("%dth iteration",nIter),0.45,0.75,2,16);
+    c1->SaveAs(Form("mcUnfodling_kSample%d_icent%d_matrixRwt%d_iter%d.pdf",kSample,icent,matrixWeight,nIter));
+    c1->SaveAs(Form("mcUnfodling_kSample%d_icent%d_matrixRwt%d_iter%d.png",kSample,icent,matrixWeight,nIter));
   }
 }
 

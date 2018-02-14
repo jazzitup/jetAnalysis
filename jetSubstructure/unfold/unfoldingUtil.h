@@ -1,15 +1,17 @@
 
 
 
+TString fReweightPP = "reweightFactors/unfoldingResult_coll0_optX1_optY2_radius0.4_nIter4.root";
+TString fReweightPbPb = "reweightFactors/unfoldingResult_coll1_optX1_optY2_radius0.4_nIter4.root";
 
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-  /*  if ( icent ==6 )  return true;
-  if ( icent ==1 )  return true;
-  if ( icent ==2 )  return true;
+  if ( icent ==6 )  return true;
+  //  if ( icent ==1 )  return true;
+  //  if ( icent ==2 )  return true;
   if ( icent ==3 )  return true;
-  if ( icent ==4 )  return true;
-  if ( icent ==5 )  return true;*/
+  //  if ( icent ==4 )  return true;
+  //  if ( icent ==5 )  return true;*/
   return false;
 }
 

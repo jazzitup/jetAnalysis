@@ -41,7 +41,7 @@ bool useFullMC = true;
 RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, TH1D* hTruth=0, TH1D* hReco=0, double radius =0.4,bool doReweight = false);
 
 
-void makeUnfMatrix1D(int kSample = kPP, int optX =1, double radius= 0.4) {
+void makeUnfMatrix1D(int kSample = kPP, int optX =1, double radius= 0.4, bool doReweight=true) {
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -72,7 +72,7 @@ void makeUnfMatrix1D(int kSample = kPP, int optX =1, double radius= 0.4) {
     //    hTruth[i]->Reset();
     //    hReco[i]->Reset();
     
-    res[i] = getResponse(kSample, i, optX, hTruth[i], hReco[i], radius,false);
+    res[i] = getResponse(kSample, i, optX, hTruth[i], hReco[i], radius,doReweight);
 
     TCanvas* c01 = new TCanvas("c01", "",500,500);
     hMatrix[i] = (TH2D*)res[i]->Hresponse();
@@ -80,7 +80,7 @@ void makeUnfMatrix1D(int kSample = kPP, int optX =1, double radius= 0.4) {
     c01->SaveAs(Form("pdfs/correlation_coll%d_cent%d_radius%.1f.pdf",kSample,i,(float)radius));
   }
   
-  TFile* fout = new TFile(Form("spectraFiles/unfoldingMatrix1D_coll%d_optX%d_radius%.1f.root",kSample,optX,(float)radius),"recreate");
+  TFile* fout = new TFile(Form("spectraFiles/unfoldingMatrix1D_coll%d_optX%d_radius%.1f_doReweight%d.root",kSample,optX,(float)radius,(int)doReweight),"recreate");
   for ( int i=0 ; i<=6; i++) {
     int icent = i;
     if ( !selectedCent(icent))      continue;
@@ -118,8 +118,13 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, TH1D* hTruth,
 
   }
 
-  TH1D* hReweight; 
-  TFile* fReweight; 
+  TH2D* hReweight;
+  TFile* fReweight;
+  if ( doReweight ) {
+    if ( kSample == kPP)         fReweight = new TFile(fReweightPP) ;
+    else if ( kSample == kPbPb)  fReweight = new TFile(fReweightPbPb) ;
+    hReweight = (TH2D*)fReweight->Get(Form("hWeight_icent%d",icent));
+  }
 
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
@@ -174,16 +179,23 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, TH1D* hTruth,
 
       // Data/MC reweighting factors 
       double rewFact = 1; 
-      //      if ( doReweight) { 
-      //	int rewBin = hReweight->FindBin(recoVarX,recoVarY); 
-      //	rewFact = hReweight->GetBinContent(rewBin);
-      //      }
-      
+      if ( doReweight) { 
+	double recoM2 = myJetMc.recoMass * myJetMc.recoMass;
+	double recoPt2 = myJetMc.recoPt * myJetMc.recoPt;
+	if ( myJetMc.recoMass < 0 ) recoM2 = - recoM2;
+	double recoVarY =  recoM2 / recoPt2; 
+	
+      	int rewBin = hReweight->FindBin(recoVarX,recoVarY); 
+      	rewFact = hReweight->GetBinContent(rewBin);
+	if ( (icent == 0) && ( kSample==kPbPb) ) { 
+	  rewFact = 63619.9 + 240 * recoVarX ; 
+	}
+      }
       if ( useFullMC || (i%2==0) )  
 	res->Fill(  recoVarX, truthVarX, myJetMc.weight * rewFact * jzNorm);
     }
   }
-  return res;
+    return res;
 }
 
 

@@ -278,7 +278,7 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
   TH2D* hTruth[7];  // 3 MC
   TH2D* hReco[7];
   TH2D* hResultMc[7];
-
+  TH2D* resMatrix[7]; 
   TH2D* hTruthData[7];
   TH2D* hRecoData[7];
   TH2D* hResultData[7];
@@ -291,6 +291,9 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
   TH1D* hRawMC[20][10]; // pT, centrality
   TH1D* hRawData[20][10]; // pT, centrality
   
+  TH1D* hInitialPt[10]; // centrality 
+  TH1D* hFinalPt[10];
+  TH1D* hRatioPt[10];
 
   TCanvas* c01 = new TCanvas("c01", "",1000,500);
   c01->Divide(2,1); 
@@ -300,7 +303,7 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
       continue;
     if ( (kSample == kPP) && ( icent != 0 ) )
       continue;
-
+    
     hTruth[i] = (TH2D*)hTruthTemp->Clone(Form("%s_icent%d",hTruthTemp->GetName(),i));
     hReco[i] = (TH2D*)hRecoTemp->Clone(Form("%s_icent%d",hRecoTemp->GetName(),i));
     res[i] = getResponse(kSample, i, optX, optY, hTruth[i], hReco[i], radius, true);
@@ -310,7 +313,7 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
     c01->cd(2);   hReco[i]->Draw("colz");
     c01->SaveAs(Form("pdfs/correlation_coll%d_cent%d_radius%.1f.pdf",kSample,i,(float)radius));
     
-
+    // Fake data :  
     hTruthData[i] = (TH2D*)hTruthTemp->Clone(Form("%s_data_icent%d",hTruthTemp->GetName(),i));
     hRecoData[i] = (TH2D*)hRecoTemp->Clone(Form("%s__dataicent%d",hRecoTemp->GetName(),i));
     resData[i] = getResponse(kSample, i, optX, optY, hTruthData[i], hRecoData[i], radius, false);
@@ -318,10 +321,11 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
 
     hRatio[i] = (TH2D*)hRecoData[i]->Clone(Form("hWeight_icent%d",icent));
     hRatio[i]->Divide(hReco[i]);
-    //    scaleInt2(hRatio[i]);
+    // pT spectrum before and after unfodling 
+    hInitialPt[i] = (TH1D*)hTruthData[i]->ProjectionX(Form("hInitialPt_icent%d",i)); // centrality
 
   }
-
+  
   cout << "================================ MC UNFOLD ===================================" << endl;
   for ( int icent=0 ; icent<=6; icent++) {
     if ( !selectedCent(icent)) 
@@ -339,6 +343,12 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
     
     hResultMc[icent]  = (TH2D*)unfoldMc.Hreco();
     hResultMc[icent]->SetName( Form("hresultmc_icent%d",icent) );
+
+    resMatrix[icent] = (TH2D*)res[icent]->Hresponse();
+    TCanvas* cResp = new TCanvas(Form("cResp_icent%d",icent),"",500,500);
+    resMatrix[icent]->Draw("colz");
+    cResp->SaveAs(Form("pdfs/responseMatrix_coll%d_icent%d_optX%d_optY%d_radius%.1f_applyMDJ%d.pdf",kSample,icent,optX,optY,(float)radius,(int)applyMDJ));
+    
     //    unfoldMc.PrintTable (cout, hTruth[icent]);
     // MC! 
     for ( int ix = 1 ; ix<= nXbins ; ix++) { 
@@ -410,11 +420,11 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
       //      leg2->AddEntry(rUnf,"Unfolded/Truth","lp");
       //      leg2->Draw();
     }
-
-
+    
+    
     c1a->SaveAs(Form("pdfs/massClosure1_coll%d_icent%d_optX%d_optY%d_radius%.1f_applyMDJ%d.pdf",kSample,icent,optX,optY,(float)radius,(int)applyMDJ));
     c1b->SaveAs(Form("pdfs/massClosure2_coll%d_icent%d_optX%d_optY%d_radius%.1f_applyMDJ%d.pdf",kSample,icent,optX,optY,(float)radius,(int)applyMDJ));
-
+    
     ////////// Beginning of pT closure 
     TCanvas* c1c = new TCanvas(Form("xBin_closure_icent%d",icent),"",500,500);
     makeEfficiencyCanvas(c1c,1,  0.05, 0.01, 0.1, 0.3, 0.01);
@@ -464,8 +474,8 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
     rGen->DrawCopy("hist");
     rRaw->DrawCopy("same");
     rUnf->DrawCopy("same");
-
-
+    
+    
     c1c->SaveAs(Form("pdfs/xBinClosure1_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d_applyMDJ%d.pdf",kSample,icent,optX,optY,(float)radius,nIter,(int)applyMDJ));
     ////////// end of pT closure 
     
@@ -480,7 +490,10 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
     unfoldData.SetName(Form("res%d_hRecoData",icent));
     hResultData[icent] = (TH2D*)unfoldData.Hreco();
     hResultData[icent]->SetName( Form("hresultData_icent%d",icent) );
-  
+    
+
+    
+
     TH1D* hmassUnfSqrtFinal[10];
     TH1D* hmassUnfSqrtInitial[10];
     for ( int ix = 1 ; ix<= nXbins ; ix++) { 
@@ -580,7 +593,7 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
     hxDataRaw->DrawCopy("e same");
     drawCentrality(kSample,icent, 0.7,0.9,1,25);
     gPad->SetLogy();
-
+    
     c2c->cd(2);
     TH1D* rDataRaw = (TH1D*)hxDataRaw->Clone(Form("%s_r",hxDataRaw->GetName()));
     TH1D* rDataUnf = (TH1D*)hxDataUnf->Clone(Form("%s_r",hxDataUnf->GetName()));
@@ -623,9 +636,14 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
       hInitialMass[ix][icent] = (TH1D*)hmassUnfSqrtInitial[ix]->Clone(Form("hmassInitial_ix%d_icent%d",ix,icent));
     }
     c3->SaveAs(Form("pdfs/c3_coll%d_icent%d_optX%d_optY%d_radius%.1f_nIter%d_applyMDJ%d.pdf",kSample,icent,optX,optY,(float)radius,nIter,(int)applyMDJ));
+   
+    
+    hFinalPt[icent] = (TH1D*)(hResultData[icent]->ProjectionX(Form("hFinalPt_icent%d",icent)));
+    hRatioPt[icent] = (TH1D*)hFinalPt[icent]->Clone(Form("hFinIniRatio_icent%d",icent));
+    hRatioPt[icent]->Divide(hInitialPt[icent]);
     
   }
-
+  
   int periBin = 6;
   if ( selectedCent(periBin) && (kSample == kPbPb ) ){
     for ( int icent=0 ; icent<=periBin ;icent++) {
@@ -670,7 +688,8 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
       
     }
   }
-
+  
+  
   
   TFile* fout = new TFile(Form("spectraFiles/unfoldingResult_coll%d_optX%d_optY%d_radius%.1f_nIter%d_test4.root",kSample,optX,optY,(float)radius,nIter),"recreate");
   for ( int i=0 ; i<=6; i++) {
@@ -682,13 +701,20 @@ void unfoldPtMass_test4(int kSample = kPP, int optX =1, int optY = 2, double rad
     hRecoData[i]->Write();
     hRatio[i]->Write();
 
+    hFinalPt[icent]->Write();
+    hInitialPt[icent]->Write();
+    hRatioPt[icent]->Write();
+
+
     for ( int ix = 1 ; ix<= nXbins ; ix++) {
       hFinalMass[ix][icent]->Write();
       hInitialMass[ix][icent]->Write();
       hRawMC[ix][icent]->Write();
       hRawData[ix][icent]->Write();
     }
+
   }
+  fout->Close();
 }
 
 RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, double radius, bool doReweight)
@@ -810,7 +836,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   
   
   
-  RooUnfoldResponse* res = new RooUnfoldResponse( hTruthMc, hRecoMc );
+  //  RooUnfoldResponse* res = new RooUnfoldResponse( hRecoMc, hTruthMc);
+  RooUnfoldResponse* res = new RooUnfoldResponse( hTruthMc, hRecoMc);
   res->SetName(Form("responseMatrix_icent%d_reweight%d",icent,doReweight));
 
   for ( int ijz =2 ; ijz<=4 ; ijz++) { 

@@ -28,7 +28,7 @@ int findLowerBoundBin( TH1* h, int r1=1, int r2=-1 ) {
   return ret;
 }
 
-void getUnfoldingStability_test4(int kSample= kPbPb, int icent = 0, int optY=2) {
+void getUnfoldingStability_test4(int kSample= kPP, int icent = 0, int optY=8) {
   //  double ptBin[9]= {100, 126, 158, 200, 251, 316, 398, 501, 800};
   //  double ptBin[9]= {110, 136, 150, 168, 200, 251, 398, 501, 800};
   //  const int nPtBin = 7;
@@ -53,7 +53,7 @@ void getUnfoldingStability_test4(int kSample= kPbPb, int icent = 0, int optY=2) 
   vIter.push_back (1);
   vIter.push_back (3);
   vIter.push_back (5);
-  vIter.push_back (7);
+  //  vIter.push_back (7);
 
   //  vIter.push_back (8);
   //  vIter.push_back (16);
