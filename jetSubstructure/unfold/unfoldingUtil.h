@@ -60,19 +60,27 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
     }
   }
   else if ( optY == 2) {
-    nBins = 12;
-    double massBin[13] = { -0.15,-0.06,-0.03,0,0.03, 0.06, 0.09, 0.12, 0.15, 0.18, 0.24, 0.3,0.35};
+    nBins = 10;
+    double massBin[11] = { -0.5,-0.05,0,0.05,0.1,0.13,0.16,0.2,0.24,0.3,0.5};
+    
     for ( int i=0 ; i<= nBins ; i++) {
       yBinSqrt[i] = massBin[i];
-    }
-    for ( int i=0 ; i<= nBins ; i++) {
-      if  ( massBin[i] > 0 )
-        yBin[i] = massBin[i]*massBin[i];
-      else
-        yBin[i] = -1.0 * massBin[i]*massBin[i];
+      
+      if  ( massBin[i] > 0 )        yBin[i] = massBin[i]*massBin[i];
+      else                          yBin[i] = -1.0 * massBin[i]*massBin[i];
     }
   }
-
+  else if ( optY == 3) {
+    nBins = 1;
+    double massBin[2] = { -0.5,0.5};
+    
+    for ( int i=0 ; i<= nBins ; i++) {
+      yBinSqrt[i] = massBin[i];
+      if  ( massBin[i] > 0 )        yBin[i] = massBin[i]*massBin[i];
+      else                          yBin[i] = -1.0 * massBin[i]*massBin[i];
+    }
+  }
+  
   else if ( optY == 7)   {
     nBins = 12 ;
     for ( int i=0 ; i<= nBins ; i++) {
@@ -118,7 +126,7 @@ void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int opt
     recoVarY = recoM2;
     truthVarY = genM2;
   }
-  if (optY==2)  {
+  if ( (optY==2) || (optY ==3) )  {
     recoVarY = recoMoverPt2;
     truthVarY = genMoverPt2;
   }
