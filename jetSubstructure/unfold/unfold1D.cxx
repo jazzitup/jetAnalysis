@@ -45,7 +45,7 @@ void unfold1D(int kSample = kPP, int optX =1, double radius= 0.4, int nIter=1) {
   TH1D* hmcRatio[7];  // unf / truth
 
   TH1D* hdataRaw[7];
-  TH1D* hdataTruth[7];
+  //  TH1D* hdataTruth[7];
   TH1D* hdataUnf[7];
   
   int matrixWeight = 1;
@@ -55,7 +55,7 @@ void unfold1D(int kSample = kPP, int optX =1, double radius= 0.4, int nIter=1) {
     int icent = i;
     if ( !selectedCent(i) )  continue;
     if ( (kSample == kPP) && ( i != 0 ) )      continue;
-    res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d_reweight0",icent));
+    res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d_reweight0",icent)); // Ignore reweight0!!!
   }
   
   for ( int i=0 ; i<=6; i++) {

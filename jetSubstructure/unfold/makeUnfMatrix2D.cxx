@@ -78,7 +78,7 @@ void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 
     c01->SaveAs(Form("pdfs/correlation_2dUnf_coll%d_cent%d_radius%.1f.pdf",kSample,i,(float)radius));
   }
   
-  TFile* fout = new TFile(Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_radius%.1f_doReweight%d.root",kSample,optX,(float)radius,(int)doReweight),"recreate");
+  TFile* fout = new TFile(Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",kSample,optX,optY,(float)radius,(int)doReweight),"recreate");
   for ( int i=0 ; i<=6; i++) {
     int icent = i;
     if ( !selectedCent(icent))      continue;
@@ -86,6 +86,7 @@ void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 
     res[i]->Write();
     hMatrix[i]->Write();
   }
+  fout->Close();
 }
 
 RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, double radius, bool doReweight)
@@ -147,7 +148,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TH1D* xBinTemp = new TH1D("xBinTemp","", nXbins, xBin);
 
   RooUnfoldResponse* res = new RooUnfoldResponse( hTruth, hReco );
-  res->SetName(Form("responseMatrix_icent%d_reweight%d",icent,false));
+  res->SetName(Form("responseMatrix_icent%d",icent));
 
   for ( int ijz =2 ; ijz<=4 ; ijz++) { 
     TTree* tr;

@@ -6,7 +6,7 @@ TString fReweightPbPb = "reweightFactors/unfoldingResult_coll1_optX1_optY2_radiu
 
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-  if ( icent ==6 )  return true;
+  //  if ( icent ==6 )  return true;
   //  if ( icent ==1 )  return true;
   //  if ( icent ==2 )  return true;
   if ( icent ==3 )  return true;
@@ -71,8 +71,10 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
     }
   }
   else if ( optY == 3) {
-    nBins = 1;
-    double massBin[2] = { -0.5,0.5};
+    //    nBins = 1;
+    //    double massBin[2] = { -0.5,0.5};
+    nBins = 4;
+    double massBin[5] = { -0.5, 0, 0.16, 0.2, 0.5};
     
     for ( int i=0 ; i<= nBins ; i++) {
       yBinSqrt[i] = massBin[i];
@@ -147,6 +149,7 @@ void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int opt
 }
 
 
+/*
 void transformSqrt (TH1D* h1, TH1D* h2) {
   h2->Reset();
   for ( int i = 0 ; i <=h1->GetNbinsX() ; i++) {
@@ -162,6 +165,7 @@ void transformSqrt (TH1D* h1, TH1D* h2) {
     h2->SetBinError(theBin, yye);
   }
 }
+*/
 
 bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
 
