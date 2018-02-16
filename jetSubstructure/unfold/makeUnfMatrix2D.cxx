@@ -34,6 +34,7 @@ bool useFullMC = true;
 
 RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, double radius =0.4,bool doReweight = false);
 
+bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
 void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=true) {
   TH1::SetDefaultSumw2();
@@ -75,7 +76,7 @@ void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 
     TCanvas* c01 = new TCanvas("c01", "",500,500);
     hMatrix[i] = (TH2D*)res[i]->Hresponse();
     hMatrix[i]->Draw("colz");
-    c01->SaveAs(Form("pdfs/correlation_2dUnf_coll%d_cent%d_radius%.1f.pdf",kSample,i,(float)radius));
+    c01->SaveAs(Form("pdfs/correlation_2dUnf_coll%d_cent%d_radius%.1f_doReweight%d.pdf",kSample,i,(float)radius,doReweight));
   }
   
   TFile* fout = new TFile(Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",kSample,optX,optY,(float)radius,(int)doReweight),"recreate");
@@ -125,6 +126,11 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     hReweight = (TH2D*)fReweight->Get(Form("hWeight_icent%d",icent));
   }
 
+  TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
+  TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
+  TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
+  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
+  
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
   
@@ -132,7 +138,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TFile* fjz2 = new TFile(Form("../ntuples/%s",jz2.Data()));
   TTree* tr2 = (TTree*)fjz2->Get("tr");
   tr2->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
-
+  
+  
   TFile* fjz3 = new TFile(Form("../ntuples/%s",jz3.Data()));
   TTree* tr3 = (TTree*)fjz3->Get("tr");
   tr3->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
@@ -152,18 +159,22 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 
   for ( int ijz =2 ; ijz<=4 ; ijz++) { 
     TTree* tr;
+    TH2D* hRecoEntries;
     double jzNorm=0;
     if ( ijz==2)  {
       tr = tr2;   
       jzNorm = hi9EvtWgtJZ2; 
+      hRecoEntries = recoEntries_jz2;
     }
     else if ( ijz==3)  {
       tr = tr3;   
       jzNorm = hi9EvtWgtJZ3; 
+      hRecoEntries = recoEntries_jz3;
     }
     else if ( ijz==4)  {
       tr = tr4;   
       jzNorm = hi9EvtWgtJZ4; 
+      hRecoEntries = recoEntries_jz4;
     }
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
     for (Int_t i= 0; i<tr->GetEntries() ; i++) {
@@ -178,7 +189,14 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 
       double recoVarY, truthVarY;
       getYvalues( recoVarY, truthVarY, myJetMc, optY);
-
+      
+      // Black list?
+      if ( isTooSmall(hRecoEntries, recoVarX, recoVarY,10) ) {
+	cout << "isTooSmall! " << endl;
+	cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoVarX <<", "<<recoVarY<<endl;
+	continue;
+      }
+      
       // Data/MC reweighting factors 
       double rewFact = 1; 
       if ( doReweight) { 
@@ -189,16 +207,12 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	
       	int rewBin = hReweight->FindBin(recoVarX,recoVarY); 
       	rewFact = hReweight->GetBinContent(rewBin);
-
+	
 	// ONLY FOR 0-10% PbPb
 	if ( (icent == 0) && ( kSample==kPbPb) ) { 
 	  rewFact = 63619.9 + 240 * recoVarX ; 
 	}
       }
-      //      cout << " rew = " << rewFact << endl;
-      //      cout << "myJetMc.weight= " << myJetMc.weight << endl;
-      //      cout << "jzNorm = " << jzNorm << endl;
-      //      cout << recoVarX << ", " << recoVarY << ", "<< truthVarX << ", "<< truthVarY << endl;
 
       if ( useFullMC || (i%2==0) )  {
 
@@ -207,6 +221,15 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     }
   }
   return res;
+}
+
+bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {
+  int theBin = hEntries->FindBin(recoVarX, recoVarY);
+  if (  hEntries->GetBinContent(theBin) < minEntries ) 
+    return true;
+
+  return false;
+  
 }
 
 
