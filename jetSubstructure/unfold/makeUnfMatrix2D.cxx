@@ -209,13 +209,13 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       	rewFact = hReweight->GetBinContent(rewBin);
 	
 	// ONLY FOR 0-10% PbPb
-	if ( (icent == 0) && ( kSample==kPbPb) ) { 
-	  rewFact = 63619.9 + 240 * recoVarX ; 
-	}
+	//	if ( (icent == 0) && ( kSample==kPbPb) ) { 
+	//	  rewFact = 63619.9 + 240 * recoVarX ; 
+	//  }
       }
-
+      
       if ( useFullMC || (i%2==0) )  {
-
+	
 	res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm);
       }
     }
