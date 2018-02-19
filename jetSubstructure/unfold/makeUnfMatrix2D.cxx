@@ -32,7 +32,7 @@ double fracStstData=01;
 
 bool useFullMC = true;
 
-RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, double radius =0.4,bool doReweight = false);
+RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, TH2D* respX=0, TH2D* respY=0, double radius =0.4,bool doReweight = false);
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
@@ -58,9 +58,11 @@ void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 
   TH2D* hReco[7];
   TH2D* hResultMc[7];
   
-  TH2D* hMatrix[7];
+  TH2D* hMatrix[7]; // 4-d matrix unrolled to 2-d
   
-
+  TH2D* hResX[7]; // response matrix for pT ( mass integrated)
+  TH2D* hResY[7]; // response matrix for mass ( pT integrated)
+  TH2D* h2dtempM = new TH2D("h2dtemp",";Truth (m/p_{T})^{2};Reco (m/p_{T})^{2}",100,-0.02,0.12,100,-0.02,0.12);
   for ( int i=0 ; i<=6; i++) {
     int icent = i;
     if ( !selectedCent(icent))       continue;
@@ -71,12 +73,34 @@ void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 
     hTruth[i]->Reset();
     hReco[i]->Reset();
     
-    res[i] = getResponse(kSample, i, optX, optY, hTruth[i], hReco[i], radius,doReweight);
+    hResX[i] = new TH2D(Form("hResPt_icent%d",icent), ";Truth p_{T} (GeV/c);Reco p_{T} (GeV/c)",nXbins,xBin,nXbins,xBin);
+    hResY[i] = new TH2D(Form("hResM_icent%d",icent), ";Truth (m/p_{T})^{2};Reco (m/p_{T})^{2}",nYbins,yBin,nYbins,yBin);
 
-    TCanvas* c01 = new TCanvas("c01", "",500,500);
+    res[i] = getResponse(kSample, i, optX, optY, hTruth[i], hReco[i], hResX[i], hResY[i], radius,doReweight);
+
+    TCanvas* c01 = new TCanvas("c01", "",600,500);
     hMatrix[i] = (TH2D*)res[i]->Hresponse();
+    hMatrix[i]->SetXTitle("Bin # of reco (p_{T}, m/p_{T})");
+    hMatrix[i]->SetYTitle("Bin # of truth (p_{T}, m/p_{T})");
+    hMatrix[i]->SetTitle("MC Response matrix");
+    c01->SetRightMargin(0.2);
     hMatrix[i]->Draw("colz");
-    c01->SaveAs(Form("pdfs/correlation_2dUnf_coll%d_cent%d_radius%.1f_doReweight%d.pdf",kSample,i,(float)radius,doReweight));
+    c01->SaveAs(Form("pdfs/correlation_2dUnf_coll%d_cent%d_radius0%d_doReweight%d.pdf",kSample,i,(int)(radius*10.),doReweight));
+    TCanvas* c02 = new TCanvas("c02","",1000,500);
+    c02->Divide(2,1);
+    c02->cd(1);
+    hResX[i]->SetNdivisions(505,"X");
+    hResX[i]->Draw("colz");
+    c02->cd(1)->SetRightMargin(0.2);
+    gPad->SetLogz();
+    c02->cd(2);
+    h2dtempM->SetNdivisions(505,"X");
+    h2dtempM->Draw();
+    hResY[i]->Draw("colz same");
+    c02->cd(2)->SetRightMargin(0.2);
+    gPad->SetLogz();
+    c02->SaveAs(Form("pdfs/PtMassResp_coll%d_cent%d_radius%.1f_doReweight%d.pdf",kSample,i,(float)radius,doReweight));
+    
   }
   
   TFile* fout = new TFile(Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",kSample,optX,optY,(float)radius,(int)doReweight),"recreate");
@@ -90,7 +114,7 @@ void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 
   fout->Close();
 }
 
-RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, double radius, bool doReweight)
+RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, TH2D* respX, TH2D* respY, double radius, bool doReweight)
 {
 
   TH1::SetDefaultSumw2();
@@ -215,8 +239,10 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       }
       
       if ( useFullMC || (i%2==0) )  {
-	
 	res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm);
+	respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm);
+	respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm);
+
       }
     }
   }

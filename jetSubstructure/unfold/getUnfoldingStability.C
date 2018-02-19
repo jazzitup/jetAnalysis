@@ -138,8 +138,10 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optX=1, int optY
     for (int in = 0; in < int(vIter.size()) ; in++)  {
       hmcRatioSq[ipt][in] = (TH1D*)hmcUnfSq[ipt][in]->Clone(Form("mcRatioSq_ix%d_in%d",ipt,in));
       hmcRatioSq[ipt][in]->Divide(hmcTruthSq[ipt][in]);
-      hmcRatioSq[ipt][in]->SetAxisRange(0.,3,"Y");
+      hmcRatioSq[ipt][in]->SetAxisRange(.5,1.5,"Y");
       hmcRatioSq[ipt][in]->SetAxisRange(0.001,0.299,"X");
+      hmcRatioSq[ipt][in]->SetYTitle("Unfolded/Truth");
+      hmcRatioSq[ipt][in]->SetNdivisions(505,"X");
       if ( in==0)  hmcRatioSq[ipt][in]->Draw();
       else  hmcRatioSq[ipt][in]->Draw("same");
       if ( optY == 2)  jumSun(0,1,0.3,1);
@@ -203,8 +205,10 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optX=1, int optY
     for (int in = 1; in < int(vIter.size()) ; in++)  {
       hdataRatioSq[ipt][in] = (TH1D*)hdataUnfSq[ipt][in]->Clone(Form("dataRatioSq_ix%d_in%d",ipt,in));
       hdataRatioSq[ipt][in]->Divide(hdataUnfSq[ipt][0]);
-      hdataRatioSq[ipt][in]->SetAxisRange(0.0,3,"Y");
+      hdataRatioSq[ipt][in]->SetAxisRange(0.5,1.5,"Y");
       hdataRatioSq[ipt][in]->SetAxisRange(0.001,0.299,"X");
+      hdataRatioSq[ipt][in]->SetYTitle("Ratio to 1st iter.");
+      hdataRatioSq[ipt][in]->SetNdivisions(505,"X");
       if ( drawFirst)  { 	hdataRatioSq[ipt][in]->Draw();
 	drawFirst=false;  
       }
@@ -294,7 +298,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optX=1, int optY
 
 
 void getMCresults(int kSample, int icent, int ix, int nIter,  TH1D* hmcTruthSq, TH1D* hmcRawSq, TH1D* hmcUnfSq) {
-  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt0_spectraRwt1_iter%d.root",kSample,nIter));
+  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt1_spectraRwt1_iter%d.root",kSample,nIter));
   TH1D* hUnf = (TH1D*)fin->Get(Form("hmcUnfSq_icent%d_ix%d",icent,ix));
   TH1D* hTruth = (TH1D*)fin->Get(Form("hmcTruthSq_icent%d_ix%d",icent,ix));
   TH1D* hRaw = (TH1D*)fin->Get(Form("hmcRawSq_icent%d_ix%d",icent,ix));
@@ -308,7 +312,7 @@ void getMCresults(int kSample, int icent, int ix, int nIter,  TH1D* hmcTruthSq, 
 }
 
 void getDATAresults(int kSample, int icent, int ix, int nIter, TH1D* hdataRawSq, TH1D* hdataUnfSq) {
-  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt0_spectraRwt0_iter%d.root",kSample,nIter));
+  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt1_spectraRwt0_iter%d.root",kSample,nIter));
   TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnfSq_icent%d_ix%d",icent,ix));
   TH1D* hRaw = (TH1D*)fin->Get(Form("hdataRawSq_icent%d_ix%d",icent,ix));
 
