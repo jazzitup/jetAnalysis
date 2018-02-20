@@ -47,6 +47,17 @@ TH1D* getInitial_test4( int kSample = kPP, int ipt=0, int icent=0, int nIter=0, 
   return ret;
 }
 
+TH1D* getMCRaw_test4(  int kSample = kPP, int ipt=0, int icent=0, int nIter=0, int optY=2) {
+  TFile* f = new TFile(Form("spectraFiles/unfoldingResult_coll%d_optX1_optY%d_radius0.4_nIter%d_test4.root",kSample,optY,nIter));
+  TH1D* ret = (TH1D*)f->Get(Form("hmassRawMC_ix%d_icent%d",ipt,icent));
+  return ret;
+}
+TH1D* getDataRaw_test4( int kSample = kPP, int ipt=0, int icent=0, int nIter=0, int optY=2) {
+  TFile* f = new TFile(Form("spectraFiles/unfoldingResult_coll%d_optX1_optY%d_radius0.4_nIter%d_test4.root",kSample,optY,    nIter));
+  TH1D* ret = (TH1D*)f->Get(Form("hmassRawData_ix%d_icent%d",ipt,icent));
+  return ret;
+}
+
 
 
 

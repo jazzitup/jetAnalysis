@@ -672,12 +672,12 @@ void handsomeTH1OnlyColor( TH1 *a=0, int col =1)
 }
 
 
-void easyLeg( TLegend *a=0 , TString head="")
+void easyLeg( TLegend *a=0 , TString head="", float textSize=-1)
 {
   a->SetBorderSize(0);
   a->SetHeader(head);
   a->SetTextFont(42);
-  //  a->SetTextSize(17);
+  if ( textSize != -1)   a->SetTextSize(textSize);
   a->SetLineColor(1);
   a->SetLineStyle(1);
   a->SetLineWidth(1);
@@ -685,6 +685,7 @@ void easyLeg( TLegend *a=0 , TString head="")
   a->SetFillStyle(0);
 
 }
+
 
 
 

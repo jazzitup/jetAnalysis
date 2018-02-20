@@ -6,12 +6,12 @@ TString fReweightPbPb = "reweightFactors/unfoldingResult_coll1_optX1_optY2_radiu
 
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-      if ( icent ==1 )  return true;
-      if ( icent ==2 )  return true;
-     if ( icent ==3 )  return true;
-      if ( icent ==4 )  return true;
-      if ( icent ==5 )  return true;
-      if ( icent ==6 )  return true;
+  //      if ( icent ==1 )  return true;
+  //      if ( icent ==2 )  return true;
+  // if ( icent ==3 )  return true;
+  //      if ( icent ==4 )  return true;
+  //      if ( icent ==5 )  return true;
+  //  if ( icent ==6 )  return true;
   return false;
 }
 
@@ -71,6 +71,17 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
     }
   }
   else if ( optY == 3) {
+    nBins = 10;
+    double massBin[11] = { -0.5,-0.05,0,0.05,0.1,0.13,0.16,0.2,0.24,0.3,0.5};
+    
+    for ( int i=0 ; i<= nBins ; i++) {
+      yBinSqrt[i] = massBin[i];
+      
+      if  ( massBin[i] > 0 )        yBin[i] = massBin[i]*massBin[i];
+      else                          yBin[i] = -1.0 * massBin[i]*massBin[i];
+    }
+  }
+  else if ( optY == 4) {
     //    nBins = 1;
     //    double massBin[2] = { -0.5,0.5};
     nBins = 4;
