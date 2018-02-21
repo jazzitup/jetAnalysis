@@ -183,11 +183,21 @@ bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
   double ptCut = 100;
   double ptCutGen = 20;
 
+  double ptCutUp = 1000;
+  double ptCutUpGen = 630.944;
+
   if ( myJetMc.cent != icent )
     return false;
   if ( myJetMc.recoPt < ptCut )
     return false;
-  if ( (isMC) && ( myJetMc.genPt < ptCutGen ) ) // Must be the same to the lowest pT bin
+
+  if ( myJetMc.recoPt > ptCutUp )
+    return false;
+
+  if ( (isMC) && ( myJetMc.genPt < ptCutGen ) ) 
+    return false;
+
+  if ( (isMC) && ( myJetMc.genPt > ptCutUpGen ) ) 
     return false;
 
   return true;

@@ -48,7 +48,7 @@ void unfold1D(int kSample = kPP, int optX =1, double radius= 0.4, int nIter=1) {
   //  TH1D* hdataTruth[7];
   TH1D* hdataUnf[7];
   
-  int matrixWeight = 1;
+  int matrixWeight = 0;
   TFile* fmatrix = new TFile(Form("spectraFiles/unfoldingMatrix1D_coll%d_optX%d_radius%.1f_doReweight%d.root",kSample,optX,(float)radius,matrixWeight));
   
   for ( int i=0 ; i<=6; i++) {
@@ -179,11 +179,10 @@ void getMCspectra(int kSample, int icent, int optX, TH1D* hmcRaw, TH1D* hmcTruth
       getXvalues( recoVarX, truthVarX, myJetMc, optX);
       // Data/MC reweighting factors
       double rewFact = 1;
-      //      if ( doReweight) {
-      //        int rewBin = hReweight->FindBin(recoVarX,recoVarY);
-      //        rewFact = hReweight->GetBinContent(rewBin);
-      //      }
-
+      rewFact = 300 + recoVarX ; 
+      //      int rewBin = hReweight->FindBin(recoVarX,recoVarY);
+      //      rewFact = hReweight->GetBinContent(rewBin);
+      
       hmcRaw->Fill( recoVarX, myJetMc.weight * rewFact * jzNorm);
       hmcTruth->Fill( truthVarX, myJetMc.weight * rewFact * jzNorm );
     }
