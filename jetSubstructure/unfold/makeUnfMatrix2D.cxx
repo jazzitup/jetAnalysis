@@ -213,13 +213,13 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 
       double recoVarY, truthVarY;
       getYvalues( recoVarY, truthVarY, myJetMc, optY);
-      
+    
       // Black list?
-      if ( isTooSmall(hRecoEntries, recoVarX, recoVarY,10) ) {
-	cout << "isTooSmall! " << endl;
-	cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoVarX <<", "<<recoVarY<<endl;
-	continue;
-      }
+      //      if ( isTooSmall(hRecoEntries, recoVarX, recoVarY,10) ) {
+      //	cout << "isTooSmall! " << endl;
+      //	cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoVarX <<", "<<recoVarY<<endl;
+      //	continue;
+      //      }
       
       // Data/MC reweighting factors 
       double rewFact = 1; 

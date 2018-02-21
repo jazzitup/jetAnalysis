@@ -38,11 +38,11 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optX=1, int op
 
   vector<int> vIter;  //2 3 4 6 8 10
   vIter.push_back (1);
+  vIter.push_back (2);
+  vIter.push_back (4);
+  vIter.push_back (6);
   vIter.push_back (8);
-  vIter.push_back (20);
-  vIter.push_back (50);
-  vIter.push_back (100);
-  vIter.push_back (200);
+  //  vIter.push_back (100);
   
   vector<int> color;  //2 3 4 6 8 10
   color.push_back (1);

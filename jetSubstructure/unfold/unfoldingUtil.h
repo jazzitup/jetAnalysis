@@ -37,7 +37,9 @@ void getXbin(int &nBins, double* xBin, int optX) {
 void getXvalues( double &recoVarX, double &truthVarX, jetSubStr myJetMc, int optX) {
   if ( optX == 1 ) {
     truthVarX = myJetMc.genPt;
-    recoVarX = myJetMc.recoPt;
+    //    recoVarX = myJetMc.recoPt;
+    recoVarX = truthVarX;
+
   }
   if ( optX == 2 )  {
     recoVarX = myJetMc.nTrkRaw - myJetMc.nTrkBkg;
@@ -140,8 +142,9 @@ void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int opt
     truthVarY = genM2;
   }
   if ( (optY==2) || (optY ==3) )  {
-    recoVarY = recoMoverPt2;
     truthVarY = genMoverPt2;
+    recoVarY = recoMoverPt2;
+    //recoVarY = truthVarY;
   }
   else if ( optY == 7) { // charge assisted mass
     truthVarY = genM2;
