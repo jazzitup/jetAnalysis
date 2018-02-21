@@ -59,7 +59,7 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
         yBin[i] = - yBin[i];
     }
   }
-  else if ( optY == 2) {
+  else if ( (optY==2) || (optY==8) ) {
     nBins = 10;
     double massBin[11] = { -0.5,-0.05,0,0.05,0.1,0.13,0.16,0.2,0.24,0.3,0.5};
     
@@ -100,21 +100,6 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
       yBin[i] = -2000 + (2000+2000) * float(i)/nBins ;
     }
   }
-
-  else if ( optY == 8)   {
-    nBins = 12 ;
-    double massBin[13] = { -0.3,-0.2,-0.1,0,0.03,0.06,0.09,0.12,0.15,0.2,0.25, 0.3,0.5};
-    for ( int i=0 ; i<= nBins ; i++) {
-      yBinSqrt[i] = massBin[i];
-    }
-    for ( int i=0 ; i<= nBins ; i++) {
-      if  ( massBin[i] > 0 )
-        yBin[i] = massBin[i]*massBin[i];
-      else
-        yBin[i] = -1.0 * massBin[i]*massBin[i];
-    }
-  }
-
 
 
 }
