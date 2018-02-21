@@ -9,7 +9,7 @@
 void getMCresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  TH1D* hmcTruthSq=0, TH1D* hmcRawSq=0, TH1D* hmcUnfSq=0);
 void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
 
-void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optX=1, int optY=2) {
+void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optX=1, int optY=8) {
   
   bool doMC = false; 
   bool doDATA = false; 
@@ -24,7 +24,7 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optX=1, int op
   getYbin(nYbins, yBin, yBinSqrt, optY);
   TH1D* tempHistYsq;
   if ( optY == 1 ) tempHistYsq = new TH1D("tempHistY",";mass(GeV);",nYbins,yBinSqrt);
-  if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m/p_{T};",nYbins,yBinSqrt);
+  if ( (optY==2)||(optY==8) ) tempHistYsq = new TH1D("tempHistY",";m/p_{T};",nYbins,yBinSqrt);
   
   
   if ( (kSample == kPP) && (icent!=0) ) {
@@ -38,11 +38,11 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optX=1, int op
 
   vector<int> vIter;  //2 3 4 6 8 10
   vIter.push_back (1);
+  vIter.push_back (2);
+  vIter.push_back (4);
+  vIter.push_back (6);
   vIter.push_back (8);
-  vIter.push_back (20);
-  vIter.push_back (50);
-  vIter.push_back (100);
-  vIter.push_back (200);
+
   
   vector<int> color;  //2 3 4 6 8 10
   color.push_back (1);
@@ -92,9 +92,9 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optX=1, int op
     
     for (int in = 0; in < int(vIter.size()) ; in++)  {
       if ( optY==1)  hmcTruthSq[ipt][in]->SetAxisRange(-300,2000,"X");
-      else if ( optY==2) hmcTruthSq[ipt][in]->SetAxisRange(0.001,0.2999,"X");
+      else if ( (optY==2)||(optY==8) ) hmcTruthSq[ipt][in]->SetAxisRange(0.001,0.2999,"X");
       if ( optY==1)    hmcTruthSq[ipt][in]->SetXTitle("m^{2} GeV^{2}");
-      else if ( optY==2)    hmcTruthSq[ipt][in]->SetXTitle("m/p_{T}");
+      else if ( (optY==2)||(optY==8) )    hmcTruthSq[ipt][in]->SetXTitle("m/p_{T}");
       if ( hmcTruthSq[ipt][in]->Integral()>0) cleverRangeLog(hmcTruthSq[ipt][in],100,0.000001);
       hmcTruthSq[ipt][in]->SetYTitle("Entries");
       handsomeTH1(hmcTruthSq[ipt][in],1);
@@ -145,7 +145,7 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optX=1, int op
       hmcRatioSq[ipt][in]->SetNdivisions(505,"X");
       if ( in==0)  hmcRatioSq[ipt][in]->Draw();
       else  hmcRatioSq[ipt][in]->Draw("same");
-      if ( optY == 2)  jumSun(0,1,0.3,1);
+      if ( (optY==2)||(optY==8) )  jumSun(0,1,0.3,1);
     }
   }
   c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d.pdf",kSample,icent));
@@ -161,9 +161,9 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optX=1, int op
 
     for (int in = 0; in < int(vIter.size()) ; in++)  {
       if ( optY==1)  hdataRawSq[ipt][in]->SetAxisRange(-300,2000,"X");
-      else if ( optY==2) hdataRawSq[ipt][in]->SetAxisRange(0.001,0.2999,"X");
+      else if ( (optY==2)||(optY==8) ) hdataRawSq[ipt][in]->SetAxisRange(0.001,0.2999,"X");
       if ( optY==1)    hdataRawSq[ipt][in]->SetXTitle("m^{2} GeV^{2}");
-      else if ( optY==2)    hdataRawSq[ipt][in]->SetXTitle("m/p_{T}");
+      else if ( (optY==2)||(optY==8) )    hdataRawSq[ipt][in]->SetXTitle("m/p_{T}");
       if ( hdataRawSq[ipt][in]->Integral()>0) cleverRangeLog(hdataRawSq[ipt][in],100,0.000001);
       hdataRawSq[ipt][in]->SetYTitle("Entries");
       handsomeTH1(hdataRawSq[ipt][in],1);
@@ -214,7 +214,7 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, int optX=1, int op
 	drawFirst=false;  
       }
       else   hdataRatioSq[ipt][in]->Draw("same");
-      if ( optY == 2)  jumSun(0,1,0.3,1);
+      if ( (optY==2)||(optY==8) )  jumSun(0,1,0.3,1);
     }
   }
   c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d.pdf",kSample,icent));
