@@ -30,7 +30,6 @@ using std::endl;
 double fracStst=0001;
 double fracStstData=01;
 
-bool useFullMC = true;
 
 RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, TH2D* respX=0, TH2D* respY=0, double radius =0.4,bool doReweight = false);
 
@@ -238,12 +237,14 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	//  }
       }
       
-      if ( useFullMC || (i%2==0) )  {
+      if (i%2==0)   {
 	res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm);
+      }
+      else {
 	respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm);
 	respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm);
-
       }
+      
     }
   }
   return res;
@@ -253,7 +254,7 @@ bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {
   int theBin = hEntries->FindBin(recoVarX, recoVarY);
   if (  hEntries->GetBinContent(theBin) < minEntries ) 
     return true;
-
+  
   return false;
   
 }
