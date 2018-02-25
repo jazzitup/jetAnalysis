@@ -1,0 +1,210 @@
+#include <iostream>
+using std::cout;
+using std::endl;
+
+#include "TRandom.h"
+#include "TH1D.h"
+
+#include "../getSdHists.C"
+#include "../ntupleDefinition.h"
+#include "../commonUtility.h"
+#include "../jzWeight.h"
+#include "unfoldingUtil.h"
+
+#include "../JssUtils.h"
+#include <TPaletteAxis.h>
+
+double statFrac = 001;
+double fracStstData = 001;
+bool doUnfData = true ;
+
+int lowPtBin = 1;  int highPtBin = 13;
+//int lowPtBin = 6;   int highPtBin = 11;
+
+int nPtPannels = highPtBin-lowPtBin+1;
+
+void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0);
+void getDATAspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hdataRaw=0);
+
+//bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
+
+void getMcWeights(int kSample = kPP, int icent=0, int opt=1) {   // opt1 : mass,   opt2 : m/pT  
+  TH1::SetDefaultSumw2();
+  
+  const int nXbins = 90;
+  double lowestX = 100;
+  double highestX= 1000;
+
+  int nYbins = 20;
+  double lowestY(0);
+  double highestY(0);
+
+  if ( opt == 1 ) { 
+    lowestY = -50;
+    highestY = 200;
+  }
+  if ( opt == 2 ) { 
+    lowestY = -.5;
+    highestY = .5;
+  }
+  
+  TH2D* hTemp = new TH2D("hptTemp","",nXbins, lowestX, highestX, nYbins, lowestY, highestY);
+  
+  int i = icent;
+
+  // MC 
+  TH2D* hmcRaw   = (TH2D*)hTemp->Clone(Form("hmcRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
+  TH2D* hmcTruth = (TH2D*)hTemp->Clone(Form("hmcTruth_kSample%d_icent%d_opt%d",kSample,i,opt));
+  TH2D* hdataRaw = (TH2D*)hTemp->Clone(Form("hdataRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
+
+  //void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0); 
+  getMCspectra   ( kSample, icent, opt, hmcRaw, hmcTruth);
+  getDATAspectra ( kSample, icent, opt, hdataRaw);
+
+  TH2D* hmcRawSmooth = (TH2D*)hmcRaw->Clone(Form("%s_smooth",hmcRaw->GetName()));
+  TH2D* hdataRawSmooth = (TH2D*)hdataRaw->Clone(Form("%s_smooth",hdataRaw->GetName()));
+  
+  hmcRawSmooth->Smooth();
+  hdataRawSmooth->Smooth();
+  TH2D* hratioSmooth = (TH2D*)hdataRawSmooth->Clone(Form("hRatioSmooth_kSample%d_icent%d_opt%d",kSample,i,opt));
+  hratioSmooth->Divide(hmcRawSmooth);
+
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_v1.root"),"update");
+  hmcRaw->Write();
+  hmcTruth->Write();
+  hdataRaw->Write();
+  hmcRawSmooth->Write();
+  hdataRawSmooth->Write();
+  hdataRawSmooth->Write();
+  hratioSmooth->Write();
+  fout->Close();
+
+}
+
+
+void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth) {
+  
+  TH1::SetDefaultSumw2();
+  hmcRaw->Reset();
+  hmcTruth->Reset();
+
+  TString jz2;
+  TString jz3;
+  TString jz4;
+  if ( kSample == kPbPb ) {
+    jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+    jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+    jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+  }
+  else if ( kSample == kPP ) {
+    jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+    jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+    jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+  }
+  
+  TH1D* hReweight;
+  TFile* fReweight;
+
+  jetSubStr  myJetMc;
+  TBranch  *b_myJetSubMc;
+
+  cout << " Setting tree branch address..." << endl;
+  TFile* fjz2 = new TFile(Form("../ntuples/%s",jz2.Data()));
+  TTree* tr2 = (TTree*)fjz2->Get("tr");
+  tr2->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+
+  TFile* fjz3 = new TFile(Form("../ntuples/%s",jz3.Data()));
+  TTree* tr3 = (TTree*)fjz3->Get("tr");
+  tr3->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+
+  TFile* fjz4 = new TFile(Form("../ntuples/%s",jz4.Data()));
+  TTree* tr4 = (TTree*)fjz4->Get("tr");
+  tr4->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+
+  for ( int ijz =2 ; ijz<=4 ; ijz++) {
+    TTree* tr;
+    //    TH2D* hRecoEntries;
+    double jzNorm=0;
+    if ( ijz==2)  {
+      tr = tr2;
+      jzNorm = hi9EvtWgtJZ2;
+      //      hRecoEntries = recoEntries_jz2;
+    }
+    else if ( ijz==3)  {
+      tr = tr3;
+      jzNorm = hi9EvtWgtJZ3;
+      //      hRecoEntries = recoEntries_jz3;
+    }
+    else if ( ijz==4)  {
+      tr = tr4;
+      jzNorm = hi9EvtWgtJZ4;
+      //      hRecoEntries = recoEntries_jz4;
+    }
+    
+    cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
+    for (Int_t i= 0; i<tr->GetEntries() ; i++) {
+      if ( i > tr->GetEntries() * statFrac ) continue;
+      if (i%2==0)  continue;
+
+      tr->GetEntry(i);
+
+      if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
+        continue;
+      
+      double genX = myJetMc.genPt; 
+      double genY = myJetMc.genMass;
+
+      double recoX  = -10000; 
+      double recoY  = -10000; 
+      if ( opt == 1 ) {
+	recoX = myJetMc.recoPt;
+	recoY = myJetMc.recoMass;
+      }
+      
+      hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm);
+      hmcTruth->Fill( genX, genY, myJetMc.weight * jzNorm);
+    }
+  }
+  
+}
+
+void getDATAspectra(int kSample, int icent, int opt, TH2D* hdataRaw) { 
+
+  TH1::SetDefaultSumw2();
+  hdataRaw->Reset();
+  TString fname;
+  if ( kSample == kPbPb ) {
+    fname = "jetSubstructure_Data_HION9_v4.7_r4_pbpb_Jan23_ptCut90Eta2.1.root"; }
+  else if ( kSample == kPP) {
+    fname = "jetSubstructure_data_HION9_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root"; }
+  
+  TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));
+  TTree* tr = (TTree*)fData->Get("tr");
+  jetSubStr myJet;
+  TBranch       *b_myJet;
+  tr->SetBranchAddress("jets", &(myJet.cent), &b_myJet);
+  if ( kSample == kPP )  cout << " pp " ;
+  else if ( kSample == kPbPb) cout << " PbPb " ;
+  cout << "data entries = " << tr->GetEntries() << endl;
+  
+  for (Int_t i= 0; i<tr->GetEntries() ; i++) {
+    tr->GetEntry(i);
+    if ( i > tr->GetEntries() * fracStstData) continue;
+
+    if ( ! passEvent(myJet, icent, false) ) // isMC = false
+      continue;
+
+    double recoX  = -10000;
+    double recoY  = -10000;
+    if ( opt == 1 ) {
+      recoX = myJet.recoPt;
+      recoY = myJet.recoMass;
+    }
+    
+    hdataRaw->Fill ( recoX, recoY);
+  }
+  
+}
+
+
+
