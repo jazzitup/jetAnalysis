@@ -3,6 +3,8 @@
 
 TString fReweightPP = "reweightFactors/unfoldingResult_coll0_optX1_optY2_radius0.4_nIter4.root";
 TString fReweightPbPb = "reweightFactors/unfoldingResult_coll1_optX1_optY2_radius0.4_nIter4.root";
+TString fReweightName = "reweightFactors/reweightingFactor_v1.root";
+
 
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;

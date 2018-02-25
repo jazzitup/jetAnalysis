@@ -32,7 +32,7 @@ double fracStstData=01;
 
 bool useFullMC = true;
 
-RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, TH2D* respX=0, TH2D* respY=0, double radius =0.4,bool doReweight = false);
+RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, TH2D* respX=0, TH2D* respY=0, double radius =0.4,bool doReweight = true);
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
@@ -145,11 +145,10 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TH2D* hReweight;
   TFile* fReweight;
   if ( doReweight ) {
-    if ( kSample == kPP)         fReweight = new TFile(fReweightPP) ;
-    else if ( kSample == kPbPb)  fReweight = new TFile(fReweightPbPb) ;
-    hReweight = (TH2D*)fReweight->Get(Form("hWeight_icent%d",icent));
+    fReweight = new TFile(fReweightName);
+    hReweight = (TH2D*)fReweight->Get(Form("hRatioSmooth_kSample%d_icent%d_opt1",kSample,icent));
   }
-
+  
   TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
   TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
   TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
@@ -224,12 +223,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       // Data/MC reweighting factors 
       double rewFact = 1; 
       if ( doReweight) { 
-	double recoM2 = myJetMc.recoMass * myJetMc.recoMass;
-	double recoPt2 = myJetMc.recoPt * myJetMc.recoPt;
-	if ( myJetMc.recoMass < 0 ) recoM2 = - recoM2;
-	double recoVarY =  recoM2 / recoPt2; 
 	
-      	int rewBin = hReweight->FindBin(recoVarX,recoVarY); 
+      	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
       	rewFact = hReweight->GetBinContent(rewBin);
 	
 	// ONLY FOR 0-10% PbPb
