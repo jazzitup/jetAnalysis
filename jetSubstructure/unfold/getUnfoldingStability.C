@@ -6,10 +6,10 @@
 #include "../JssUtils.h"
 #include "unfoldingUtil.h"
 
-void getMCresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  TH1D* hmcTruthSq=0, TH1D* hmcRawSq=0, TH1D* hmcUnfSq=0);
-void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
+void getMCresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0,  TH1D* hmcTruthSq=0, TH1D* hmcRawSq=0, TH1D* hmcUnfSq=0);
+void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
 
-void getUnfoldingStability(int kSample= kPP, int icent = 0, int optX=1, int optY=2) {
+void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool specRwt=0, int optX=1, int optY=2) {
   
   bool doDATA = true; 
 
@@ -33,18 +33,18 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optX=1, int optY
   
   //  int lowPtBin = 6;
   //  int highPtBin = 11;
-  int lowPtBin = 3;
-  int highPtBin = nXbins-1;
+  int lowPtBin = 6;
+  int highPtBin = nXbins-2;
   int nPtPannels = highPtBin-lowPtBin+1;
 
   vector<int> vIter;  //2 3 4 6 8 10
-  vIter.push_back (8);
-  vIter.push_back (1);
-  vIter.push_back (4);
-  vIter.push_back (12);
-  vIter.push_back (20);
-  vIter.push_back (40);
-  
+  vIter.push_back(4);
+  vIter.push_back(1);
+  vIter.push_back(8);
+  vIter.push_back(12);
+  //  vIter.push_back(20);
+  //  vIter.push_back(40);
+
   vector<int> color;  //2 3 4 6 8 10
   color.push_back (1);
   color.push_back (30);
@@ -72,12 +72,12 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optX=1, int optY
       hmcUnfSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("mcUnfSq_ix%d_in%d",ix,in));
       hmcTruthSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("mcTruthSq_ix%d_in%d",ix,in));
       hmcRawSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("mcRawSq_ix%d_in%d",ix,in));
-      getMCresults(kSample, icent, ix, vIter.at(in), hmcTruthSq[ix][in], hmcRawSq[ix][in], hmcUnfSq[ix][in]);
+      getMCresults(kSample, icent, ix, vIter.at(in), matRwt, specRwt , hmcTruthSq[ix][in], hmcRawSq[ix][in], hmcUnfSq[ix][in]);
 
       if ( doDATA) { 
 	hdataUnfSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("dataUnfSq_ix%d_in%d",ix,in));
 	hdataRawSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("dataRawSq_ix%d_in%d",ix,in));
-	getDATAresults(kSample, icent, ix, vIter.at(in),  hdataRawSq[ix][in], hdataUnfSq[ix][in]);
+	getDATAresults(kSample, icent, ix, vIter.at(in), matRwt, specRwt ,  hdataRawSq[ix][in], hdataUnfSq[ix][in]);
       }  
       cout << hmcUnfSq[ix][in]->GetName() << " : " << hmcUnfSq[ix][in]->Integral(1, hmcUnfSq[ix][in]->GetNbinsX(), "width") << endl;
       cout << hmcTruthSq[ix][in]->GetName() << " : " <<  hmcTruthSq[ix][in]->Integral(1, hmcTruthSq[ix][in]->GetNbinsX(),"width")  << endl;
@@ -124,8 +124,8 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optX=1, int optY
     }
     
     if ( ipt == lowPtBin+1 ) {
-      TLegend * leg1 = new TLegend(0.1467083,0.2631472,0.6655156,0.4348713,NULL,"brNDC");
-      easyLeg(leg1,"Unfolded",0.15);
+      TLegend * leg1 = new TLegend(0.1467083,0.0631472,0.6655156,0.4348713,NULL,"brNDC");
+      easyLeg(leg1,"Unfolded",0.10);
       for (int in = 0; in < int(vIter.size()) ; in++)  {
 	if ( vIter[in] == 1 ) leg1->AddEntry(hmcUnfSq[ipt][in], Form("%dst iter.",vIter[in]));
 	else if ( vIter[in] == 2 ) leg1->AddEntry(hmcUnfSq[ipt][in], Form("%dnd iter.",vIter[in]));
@@ -140,7 +140,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optX=1, int optY
       double mig = hmcUnfSq[ipt][in]->Integral(1, hmcUnfSq[ipt][in]->GetNbinsX(), "width") -  hmcTruthSq[ipt][in]->Integral(1, hmcTruthSq[ipt][in]->GetNbinsX(),"width" ) ;
       leg2->AddEntry(hmcUnfSq[ipt][in],Form("%.3f",(float)mig));
     }
-    leg2->Draw();
+    //    leg2->Draw();
 
     c1->cd(ipt - lowPtBin + 1 + nPtPannels);
     for (int in = 0; in < int(vIter.size()) ; in++)  {
@@ -165,8 +165,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optX=1, int optY
 
 }
   
-  c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d.pdf",kSample,icent));
-  c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d.png",kSample,icent));
+  c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
   
   
   if (doDATA) {
@@ -235,8 +234,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optX=1, int optY
 	if ( optY == 2)  jumSun(0,1,0.3,1);
       }
     }
-    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d.pdf",kSample,icent));
-    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d.png",kSample,icent));
+    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
   }
   
 }  
@@ -316,9 +314,9 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, int optX=1, int optY
 
 
 
-void getMCresults(int kSample, int icent, int ix, int nIter,  TH1D* hmcTruthSq, TH1D* hmcRawSq, TH1D* hmcUnfSq) {
-  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt1_spectraRwt1_iter%d.root",kSample,nIter));
-  TH1D* hUnf = (TH1D*)fin->Get(Form("hmcUnfSq_icent%d_ix%d",icent,ix));
+void getMCresults(int kSample, int icent, int ix, int nIter, bool matRwt, bool specRwt,  TH1D* hmcTruthSq, TH1D* hmcRawSq, TH1D* hmcUnfSq) {
+  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d.root",kSample, (int)matRwt, (int)specRwt));
+  TH1D* hUnf = (TH1D*)fin->Get(Form("hmcUnfSq_icent%d_ix%d_iter%d",icent,ix,nIter));
   TH1D* hTruth = (TH1D*)fin->Get(Form("hmcTruthSq_icent%d_ix%d",icent,ix));
   TH1D* hRaw = (TH1D*)fin->Get(Form("hmcRawSq_icent%d_ix%d",icent,ix));
   
@@ -332,9 +330,9 @@ void getMCresults(int kSample, int icent, int ix, int nIter,  TH1D* hmcTruthSq, 
 
 }
 
-void getDATAresults(int kSample, int icent, int ix, int nIter, TH1D* hdataRawSq, TH1D* hdataUnfSq) {
-  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt1_spectraRwt1_iter%d.root",kSample,nIter));
-  TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnfSq_icent%d_ix%d",icent,ix));
+void getDATAresults(int kSample, int icent, int ix, int nIter,  bool matRwt, bool specRwt, TH1D* hdataRawSq, TH1D* hdataUnfSq) {
+  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d.root",kSample, (int)matRwt, (int)specRwt));
+  TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnfSq_icent%d_ix%d_iter%d",icent,ix,nIter));
   TH1D* hRaw = (TH1D*)fin->Get(Form("hdataRawSq_icent%d_ix%d",icent,ix));
 
   hdataUnfSq->Reset();

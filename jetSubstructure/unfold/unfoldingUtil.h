@@ -1,9 +1,9 @@
 
 
 
-TString fReweightPP = "reweightFactors/unfoldingResult_coll0_optX1_optY2_radius0.4_nIter4.root";
-TString fReweightPbPb = "reweightFactors/unfoldingResult_coll1_optX1_optY2_radius0.4_nIter4.root";
-TString fReweightName = "reweightFactors/reweightingFactor_v1.root";
+//TString fReweightPP = "reweightFactors/unfoldingResult_coll0_optX1_optY2_radius0.4_nIter4.root";
+//TString fReweightPbPb = "reweightFactors/unfoldingResult_coll1_optX1_optY2_radius0.4_nIter4.root";
+TString fReweightName = "reweightFactors/reweightingFactor_weightCut2_v1.root";
 
 
 bool selectedCent(int icent=0) {
@@ -31,6 +31,14 @@ void getXbin(int &nBins, double* xBin, int optX) {
     nBins = 6;
     for ( int i=0 ; i<= nBins ; i++) {
       xBin[i] = -10 + ( 35 + 10 ) * float(i)/nBins;
+    }
+  }
+
+  else if ( optX == 77) {// reweighting 
+    nBins = 9;  // default
+    double ptBin[10]={100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944, 999.970};
+    for ( int i=0 ; i<= nBins ; i++) {
+      xBin[i] = ptBin[i] ;
     }
   }
 }
@@ -102,8 +110,20 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
       yBin[i] = -2000 + (2000+2000) * float(i)/nBins ;
     }
   }
-
-
+  
+  else if ( optY == 77) {
+    nBins = 6;
+    double massBin[9] = { -50, -25,0,25,50,75,100,300};
+    for ( int i=0 ; i<= nBins ; i++) {
+      yBinSqrt[i] = massBin[i];
+    }
+    for ( int i=0 ; i<= nBins ; i++) {
+      yBin[i] = massBin[i]*massBin[i];
+      if ( massBin[i] < 0 )
+        yBin[i] = - yBin[i];
+    }
+  }
+  
 }
 
 

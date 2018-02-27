@@ -28,27 +28,22 @@ void getDATAspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hdataRaw=0);
 
 //bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-void getMcWeights(int kSample = kPP, int icent=0, int opt=1) {   // opt1 : mass,   opt2 : m/pT  
+void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 1, int opt=1) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
   
-  const int nXbins = 90;
-  double lowestX = 100;
-  double highestX= 1000;
+  int nXbins;
+  double xBin[30];
+  getXbin(nXbins, xBin, 77);
+  cout << " nXbins = " << nXbins << endl;
+  cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
 
-  int nYbins = 20;
-  double lowestY(0);
-  double highestY(0);
 
-  if ( opt == 1 ) { 
-    lowestY = -50;
-    highestY = 200;
-  }
-  if ( opt == 2 ) { 
-    lowestY = -.5;
-    highestY = .5;
-  }
+  int nYbins ;
+  double y2Bin[30] ;
+  double yBin[30] ;
+  getYbin(nYbins, y2Bin, yBin, 77);
   
-  TH2D* hTemp = new TH2D("hptTemp","",nXbins, lowestX, highestX, nYbins, lowestY, highestY);
+  TH2D* hTemp = new TH2D("hptTemp","", nXbins, xBin, nYbins, yBin);
   
   int i = icent;
 
@@ -64,18 +59,33 @@ void getMcWeights(int kSample = kPP, int icent=0, int opt=1) {   // opt1 : mass,
   TH2D* hmcRawSmooth = (TH2D*)hmcRaw->Clone(Form("%s_smooth",hmcRaw->GetName()));
   TH2D* hdataRawSmooth = (TH2D*)hdataRaw->Clone(Form("%s_smooth",hdataRaw->GetName()));
   
+  scaleInt(hmcRawSmooth);
+  scaleInt(hdataRawSmooth);
+
   hmcRawSmooth->Smooth();
   hdataRawSmooth->Smooth();
-  TH2D* hratioSmooth = (TH2D*)hdataRawSmooth->Clone(Form("hRatioSmooth_kSample%d_icent%d_opt%d",kSample,i,opt));
-  hratioSmooth->Divide(hmcRawSmooth);
+  TH2D* hratioSmoothRaw = (TH2D*)hdataRawSmooth->Clone(Form("hRatioSmoothRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
+  hratioSmoothRaw->Divide(hmcRawSmooth);
 
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_v1.root"),"update");
+  TH2D* hratioSmooth = (TH2D*)hratioSmoothRaw->Clone(Form("hRatioSmooth_kSample%d_icent%d_opt%d",kSample,i,opt));
+
+  for ( int ix= 1 ; ix<= nXbins; ix++) {
+    for ( int iy= 1 ; iy<= nYbins; iy++) {
+      if ( hratioSmooth->GetBinContent( ix, iy ) > weightCut ) 
+	hratioSmooth->SetBinContent(ix, iy, weightCut ); 
+      if ( hratioSmooth->GetBinContent( ix, iy ) < 0.2 ) 
+	hratioSmooth->SetBinContent(ix, iy, 0.2 ); 
+    }
+  }
+  
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_v1.root",(int)weightCut),"update");
   hmcRaw->Write();
   hmcTruth->Write();
   hdataRaw->Write();
   hmcRawSmooth->Write();
   hdataRawSmooth->Write();
   hdataRawSmooth->Write();
+  hratioSmoothRaw->Write();
   hratioSmooth->Write();
   fout->Close();
 
@@ -176,7 +186,7 @@ void getDATAspectra(int kSample, int icent, int opt, TH2D* hdataRaw) {
   if ( kSample == kPbPb ) {
     fname = "jetSubstructure_Data_HION9_v4.7_r4_pbpb_Jan23_ptCut90Eta2.1.root"; }
   else if ( kSample == kPP) {
-    fname = "jetSubstructure_data_HION9_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root"; }
+    fname = "jetSubstructure_data_HION9_v4.7_r4_pp_Feb26_ptCut90Eta2.1_fullLumi.root"; }
   
   TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));
   TTree* tr = (TTree*)fData->Get("tr");
