@@ -40,7 +40,7 @@ void toy() {
   TF1 *fgen = new TF1("fgen","100 - x*x",-10,10);
   for (int  i = 0 ; i<=10000000; i++) {
     double genVal = fgen->GetRandom();
-    double fluc = ran.Gaus(0, fabs(genVal)*0.1+ 0.1);
+    double fluc = ran.Gaus(0,0.5);   //ran.Gaus(0, fabs(genVal)*0.1+ 0.1);
     double recoVal = genVal * (1. + fluc );
     
     if ( i%2 ==0 ) { 
@@ -48,13 +48,14 @@ void toy() {
       hRec->Fill(recoVal);
     }
     else { 
-      res->Fill(  recoVal, genVal, fabs(recoVal)+40 );
+      res->Fill(  recoVal, genVal, 1. + fabs(recoVal)*0.05  );
+      res->Fill(  recoVal, genVal);
     }
   }
   
   vector<int> iter;
   iter.push_back(1);  iter.push_back(2);  iter.push_back(4);  iter.push_back(8);  iter.push_back(12);  iter.push_back(20);
-  iter.push_back(100); 
+  //  iter.push_back(100); 
 
   TH1D* hUnf[20]; 
   for ( int in = 0 ; in < iter.size() ; in++)  {
@@ -89,7 +90,7 @@ void toy() {
   for ( int in = 0 ; in < iter.size() ; in++)  {
     ratio[in] = (TH1D*)hUnf[in]->Clone(Form("hratio%d",in));
     ratio[in]->Divide(hGen);
-    ratio[in]->SetAxisRange(0,2,"Y");
+    ratio[in]->SetAxisRange(0.7,1.3,"Y");
    if ( in==0) ratio[in]->Draw();
     else ratio[in]->Draw("same");
   }
