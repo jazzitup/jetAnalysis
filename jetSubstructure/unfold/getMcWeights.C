@@ -23,17 +23,20 @@ int lowPtBin = 1;  int highPtBin = 13;
 
 int nPtPannels = highPtBin-lowPtBin+1;
 
+bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
+
 void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0);
 void getDATAspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hdataRaw=0);
 
 //bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=1) {   // opt1 : mass,   opt2 : m/pT  
+void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=2) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
   
   int nXbins;
   double xBin[30];
-  getXbin(nXbins, xBin, 78);
+  if ( opt==1 ) getXbin(nXbins, xBin, 78);
+  if ( opt==2 ) getXbin(nXbins, xBin, 1);
   cout << " nXbins = " << nXbins << endl;
   cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
 
@@ -41,7 +44,8 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   int nYbins ;
   double y2Bin[30] ;
   double yBin[30] ;
-  getYbin(nYbins, y2Bin, yBin, 78);
+  if ( opt==1)  getYbin(nYbins, y2Bin, yBin, 78);
+  else if ( opt==2)  getYbin(nYbins, y2Bin, yBin, 2);
   
   TH2D* hTemp = new TH2D("hptTemp","", nXbins, xBin, nYbins, yBin);
   
@@ -86,7 +90,17 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
     }
   }
   
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_v2.root",(int)weightCut),"update");
+  TCanvas* cm = new TCanvas("cm","",1200,800);
+  cm->Divide(4,3);
+  for ( int ix= 1 ; ix<= nXbins; ix++) {
+    cm->cd(ix);
+    TH1D* h1Raw = (TH1D*)hRatioRaw->Projection(Form("h1raw_ix%d",ix),ix,ix);
+    h1Raw->Draw();
+  }
+  
+  
+  
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_v3.root",(int)weightCut),"update");
   hmcRaw->Write();
   hmcTruth->Write();
   hdataRaw->Write();
@@ -128,6 +142,12 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
 
+  TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX1_optY2.root",kSample,icent));
+  TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
+  TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
+  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
+  TH2D* hRecoEntries;
+
   cout << " Setting tree branch address..." << endl;
   TFile* fjz2 = new TFile(Form("../ntuples/%s",jz2.Data()));
   TTree* tr2 = (TTree*)fjz2->Get("tr");
@@ -148,17 +168,17 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
     if ( ijz==2)  {
       tr = tr2;
       jzNorm = hi9EvtWgtJZ2;
-      //      hRecoEntries = recoEntries_jz2;
+      hRecoEntries = recoEntries_jz2;
     }
     else if ( ijz==3)  {
       tr = tr3;
       jzNorm = hi9EvtWgtJZ3;
-      //      hRecoEntries = recoEntries_jz3;
+      hRecoEntries = recoEntries_jz3;
     }
     else if ( ijz==4)  {
       tr = tr4;
       jzNorm = hi9EvtWgtJZ4;
-      //      hRecoEntries = recoEntries_jz4;
+      hRecoEntries = recoEntries_jz4;
     }
     
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
@@ -171,14 +191,35 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
       if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
         continue;
       
-      double genX = myJetMc.genPt; 
-      double genY = myJetMc.genMass;
-
+      double genX;
+      double genY;
+      if ( opt ==1 ) {
+	genX = myJetMc.genPt; 
+	genY = myJetMc.genMass;
+      }
+      else  if ( opt ==2 ) {
+	genX = myJetMc.genPt;
+	genY = myJetMc.genMass / myJetMc.genPt;
+      }
+      
+      
       double recoX  = -10000; 
       double recoY  = -10000; 
       if ( opt == 1 ) {
 	recoX = myJetMc.recoPt;
-	recoY = myJetMc.recoMass;
+	recoY = myJetMc.recoMass ;
+      }
+      else if ( opt == 2 ) {
+	recoX = myJetMc.recoPt;
+	recoY = myJetMc.recoMass / myJetMc.recoPt ;
+      }
+
+      if ( opt==2) {  
+	if ( isTooSmall(hRecoEntries, recoX, recoY,10) ) {
+	  cout << "isTooSmall! " << endl;
+	  cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoX <<", "<<recoY<<endl;
+	  continue;
+	}
       }
       
       hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm);
@@ -220,11 +261,24 @@ void getDATAspectra(int kSample, int icent, int opt, TH2D* hdataRaw) {
       recoX = myJet.recoPt;
       recoY = myJet.recoMass;
     }
+    else if ( opt == 2 ) {
+      recoX = myJet.recoPt;
+      recoY = myJet.recoMass / myJet.recoPt;
+    }
     
     hdataRaw->Fill ( recoX, recoY);
   }
   
 }
 
+
+bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {
+  int theBin = hEntries->FindBin(recoVarX, recoVarY);
+  if (  hEntries->GetBinContent(theBin) < minEntries )
+    return true;
+
+  return false;
+
+}
 
 
