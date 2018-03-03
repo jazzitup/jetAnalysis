@@ -146,7 +146,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TFile* fReweight;
   if ( doReweight ) {
     fReweight = new TFile(fReweightName);
-    hReweight = (TH2D*)fReweight->Get(Form("hRatioSmooth1_kSample%d_icent%d_opt1",kSample,icent));
+    hReweight = (TH2D*)fReweight->Get(Form("hRatioFit_kSample%d_icent%d_opt2",kSample,icent));
+    //    hReweight = (TH2D*)fReweight->Get(Form("hRatioFit_kSample%d_icent%d_opt2",kSample,icent));
   }
   
   TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
@@ -224,7 +225,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       double rewFact = 1; 
       if ( doReweight) { 
 	
-      	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
+        int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass / myJetMc.recoPt);
+      	//int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
       	rewFact = hReweight->GetBinContent(rewBin);
 	
 	// ONLY FOR 0-10% PbPb

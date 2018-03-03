@@ -8,7 +8,7 @@
 
 void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
 
-void getRAA(int icent=0, int nIter =1, int optX=1, int optY=2 ) {
+void getRAA(int icent=0, int nIter =4, int optX=1, int optY=2 ) {
   //  double ptBin[9]= {100, 126, 158, 200, 251, 316, 398, 501, 800};
   //  double ptBin[9]= {110, 136, 150, 168, 200, 251, 398, 501, 800};
   //  const int nPtBin = 7;
@@ -109,14 +109,14 @@ void getRAA(int icent=0, int nIter =1, int optX=1, int optY=2 ) {
 
 
 void getDATAresults(int kSample, int icent, int ix, int nIter, TH1D* hdataRawSq, TH1D* hdataUnfSq) {
-  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt1_spectraRwt0_iter%d.root",kSample,nIter));
-  TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnfSq_icent%d_ix%d",icent,ix));
-  TH1D* hRaw = (TH1D*)fin->Get(Form("hdataRawSq_icent%d_ix%d",icent,ix));
+  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt1_spectraRwt0.root",kSample));
+  TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnfSq_icent%d_ix%d_iter%d",icent,ix,nIter));
+  TH1D* hRaw = (TH1D*)fin->Get(Form("hdataRawSq_icent%d_ix%d_iter%d",icent,ix,nIter));
 
   hdataUnfSq->Reset();
   hdataUnfSq->Add(hUnf);
-  hdataRawSq->Reset();
-  hdataRawSq->Add(hRaw);
+  //  hdataRawSq->Reset();
+  //  hdataRawSq->Add(hRaw);
 
 
 }

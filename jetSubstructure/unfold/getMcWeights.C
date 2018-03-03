@@ -30,13 +30,13 @@ void getDATAspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hdataRaw=0);
 
 //bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=2) {   // opt1 : mass,   opt2 : m/pT  
+void getMcWeights(int kSample = kPbPb, int icent=0, float weightCut = 10, int opt=2) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
   
   int nXbins;
   double xBin[30];
   if ( opt==1 ) getXbin(nXbins, xBin, 78);
-  if ( opt==2 ) getXbin(nXbins, xBin, 1);
+  if ( opt==2 ) getXbin(nXbins, xBin, 78);
   cout << " nXbins = " << nXbins << endl;
   cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
 
@@ -45,7 +45,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   double y2Bin[30] ;
   double yBin[30] ;
   if ( opt==1)  getYbin(nYbins, y2Bin, yBin, 78);
-  else if ( opt==2)  getYbin(nYbins, y2Bin, yBin, 2);
+  else if ( opt==2)  getYbin(nYbins, y2Bin, yBin, 78);
   
   TH2D* hTemp = new TH2D("hptTemp","", nXbins, xBin, nYbins, yBin);
   
@@ -59,6 +59,14 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   //void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0); 
   getMCspectra   ( kSample, icent, opt, hmcRaw, hmcTruth);
   getDATAspectra ( kSample, icent, opt, hdataRaw);
+  
+  
+  for ( int ix= 1 ; ix<= nXbins; ix++) {
+    for ( int iy= 1 ; iy<= nYbins; iy++) {
+      if ( hmcRaw->GetBinContent(ix,iy) == 0 )  cout << "MC :found a null bin ix, iy = " << ix<<", "<<iy<< endl;
+      if ( hdataRaw->GetBinContent(ix,iy) == 0 )  cout << "DATA :found a null bin ix, iy = " << ix<<", "<<iy<< endl;
+    }
+  }
   
   scaleInt(hmcRaw);
   scaleInt(hdataRaw);
@@ -90,17 +98,9 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
     }
   }
   
-  TCanvas* cm = new TCanvas("cm","",1200,800);
-  cm->Divide(4,3);
-  for ( int ix= 1 ; ix<= nXbins; ix++) {
-    cm->cd(ix);
-    TH1D* h1Raw = (TH1D*)hRatioRaw->Projection(Form("h1raw_ix%d",ix),ix,ix);
-    h1Raw->Draw();
-  }
   
   
-  
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_v3.root",(int)weightCut),"update");
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_v4.root",(int)weightCut),"update");
   hmcRaw->Write();
   hmcTruth->Write();
   hdataRaw->Write();
@@ -213,14 +213,14 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 	recoX = myJetMc.recoPt;
 	recoY = myJetMc.recoMass / myJetMc.recoPt ;
       }
-
-      if ( opt==2) {  
-	if ( isTooSmall(hRecoEntries, recoX, recoY,10) ) {
-	  cout << "isTooSmall! " << endl;
-	  cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoX <<", "<<recoY<<endl;
-	  continue;
-	}
-      }
+      
+      //      if ( opt==2) {  
+      //	if ( isTooSmall(hRecoEntries, recoX, recoY,10) ) {
+      //	  cout << "isTooSmall! " << endl;
+      //  cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoX <<", "<<recoY<<endl;
+      //	  continue;
+      //	}
+      //      }
       
       hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm);
       hmcTruth->Fill( genX, genY, myJetMc.weight * jzNorm);
@@ -276,7 +276,7 @@ bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {
   int theBin = hEntries->FindBin(recoVarX, recoVarY);
   if (  hEntries->GetBinContent(theBin) < minEntries )
     return true;
-
+  
   return false;
 
 }
