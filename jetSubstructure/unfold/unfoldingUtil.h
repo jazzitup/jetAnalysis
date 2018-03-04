@@ -1,10 +1,43 @@
 //TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_v2.root";
 TString fReweightName = "reweightFactors/reweightingFactor_v4_fit.root";
 
+bool applyMDJ = true;
+
+struct jesHists {
+  TH2D* hgTheta;
+  TH2D* hgK;
+  TH2D* hgMean;
+  TH2D* hJES;
+} ;
+
+
+jesHists getGammaFunction(int kSample, int icent) {
+  TFile* f1 = new TFile("../massDependentJES/JMS.root");
+  int sampleID;
+  if ( kSample == kPP) sampleID =0 ;
+  else if ( kSample == kPbPb) {
+    sampleID = icent + 1 ;
+  }
+
+  jesHists ret;
+  cout << Form("h2_gammaTheta_c%d",sampleID)<< endl;
+  cout << Form("h2_gammaKc%d",sampleID) << endl;
+  cout << Form("h2_gammaMean_c%d",sampleID) << endl;
+  TH2D* tempTheta = (TH2D*)f1->Get(Form("h2_gammaTheta_c%d",sampleID));
+  TH2D* tempK = (TH2D*)f1->Get(Form("h2_gammaK_c%d",sampleID));
+  TH2D* tempMean = (TH2D*)f1->Get(Form("h2_gammaMean_c%d",sampleID));
+  TH2D* tempJES = (TH2D*)f1->Get(Form("h2_JES_c%d",sampleID));
+  ret.hgTheta = tempTheta;
+  ret.hgK = tempK;
+  ret.hgMean = tempMean;
+  ret.hJES = tempJES;
+  return ret;
+}
+ 
 
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-  //  else return false; 
+  else return false; 
   if ( icent ==1 )  return true;
   if ( icent ==2 )  return true;
   if ( icent ==3 )  return true;
@@ -53,6 +86,9 @@ void getXvalues( double &recoVarX, double &truthVarX, jetSubStr myJetMc, int opt
   if ( optX == 1 ) {
     truthVarX = myJetMc.genPt;
     recoVarX = myJetMc.recoPt;
+
+
+
   }
   if ( optX == 2 )  {
     recoVarX = myJetMc.nTrkRaw - myJetMc.nTrkBkg;

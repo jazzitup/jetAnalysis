@@ -50,6 +50,8 @@ void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 
   getYbin(nYbins, yBin, yBinSqrt, optY);
 
 
+
+
   TH2D* hTruthTemp = new TH2D("hTruth","",nXbins,xBin,nYbins,yBin);
   TH2D* hRecoTemp = (TH2D*)hTruthTemp->Clone("hReco");
   RooUnfoldResponse* res[7];
@@ -116,6 +118,20 @@ void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 
 
 RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, TH2D* respX, TH2D* respY, double radius, bool doReweight)
 {
+  
+
+  jesHists myJes;
+  
+  if ( applyMDJ)  {
+    myJes = getGammaFunction( kSample, icent);
+    TCanvas* cTemp1 = new TCanvas("cTemp1","",800,800);
+    cTemp1->Divide(2,2);
+    cTemp1->cd(1);     myJes.hgTheta->Draw("colz");
+    cTemp1->cd(2);     myJes.hgK->Draw("colz");
+    cTemp1->cd(3);     myJes.hgMean->Draw("colz");
+    cTemp1->cd(4);     myJes.hJES->Draw("colz");
+    cTemp1->SaveAs("cTemp1.pdf");
+  }
 
   TH1::SetDefaultSumw2();
   TString jz2;
@@ -214,13 +230,14 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       double recoVarY, truthVarY;
       getYvalues( recoVarY, truthVarY, myJetMc, optY);
       
+
       // Black list?
       if ( isTooSmall(hRecoEntries, recoVarX, recoVarY,10) ) {
 	cout << "isTooSmall! " << endl;
 	cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoVarX <<", "<<recoVarY<<endl;
 	continue;
       }
-      
+
       // Data/MC reweighting factors 
       double rewFact = 1; 
       if ( doReweight) { 
@@ -234,15 +251,28 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	//	  rewFact = 63619.9 + 240 * recoVarX ; 
 	//  }
       }
+
+
+      if ( (applyMDJ) &&  (optX == 1) && ( optY ==2 ))  {
+	double tempY = recoVarY;
+	if ( recoVarY< 0 )
+	  tempY = 0.00001;
+	int theBin = myJes.hJES->FindBin( recoVarX, sqrt(tempY) );
+	double scaleFactor = myJes.hJES->GetBinContent(theBin);
+	recoVarX =  recoVarX / scaleFactor;
+      }
       
       if ( useFullMC || (i%2==0) )  {
 	res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm);
 	respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm);
 	respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm);
-
+	
       }
     }
   }
+  
+  
+
   return res;
 }
 
