@@ -42,7 +42,7 @@ void getDATAspectra(int kSample=kPP, int icent=0, int optX=1, int optY=3, TH2D* 
 void transformSqrt( TH1D* h1=0, TH1D* h2=0);
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=false) {
+void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=false) {
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -66,7 +66,7 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
   TH2D* hdataRaw[7];
   TH2D* hdataUnf[7][20]; // unfolding iter
 
-  int matrixWeight = 0;
+  int matrixWeight = 1;
   TFile* fmatrix = new TFile(Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",
 				  kSample,optX,optY,(float)radius,(int)matrixWeight));
   cout << " matrix name : "  << fmatrix->GetName() << endl;
@@ -164,21 +164,15 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
 	hmcUnfSq[icent][ix][it] = new TH1D(Form("hmcUnfSq_icent%d_ix%d_iter%d",icent,ix,nIter[it]),";m/p_{T};",nYbins,yBinSqrt);
       }
 
-      int nRebin;
-      double yRebin[20];
-      getRebinMpt(nRebin, yRebin, icent, ix);
 
       transformSqrt( hmcTruth1d[icent][ix], hmcTruthSq[icent][ix]) ; 
-      hmcTruthSq[icent][ix] = (TH1D*)hmcTruthSq[icent][ix]->Rebin(nRebin,"",yRebin);
       TH1ScaleByWidth(hmcTruthSq[icent][ix]);
 
       transformSqrt( hmcRaw1d[icent][ix], hmcRawSq[icent][ix]) ; 
-      hmcRawSq[icent][ix] = (TH1D*)hmcRawSq[icent][ix]->Rebin(nRebin,"",yRebin);
       TH1ScaleByWidth(hmcRawSq[icent][ix]);
 
       for ( int it = 0 ; it< int(nIter.size()) ; it++) {      
 	transformSqrt( hmcUnf1d[icent][ix][it], hmcUnfSq[icent][ix][it]) ; 
-	hmcUnfSq[icent][ix][it]  =	(TH1D*)hmcUnfSq[icent][ix][it]->Rebin(nRebin,"",yRebin);
 	TH1ScaleByWidth(hmcUnfSq[icent][ix][it]);
       }
       
@@ -195,12 +189,10 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
 	}	
 	
 	transformSqrt( hdataRaw1d[icent][ix], hdataRawSq[icent][ix]) ; 
-	hdataRawSq[icent][ix] = 	(TH1D*)hdataRawSq[icent][ix]->Rebin(nRebin,"",yRebin);
  TH1ScaleByWidth(hdataRawSq[icent][ix]);
 	
 	for ( int it = 0 ; it< int(nIter.size()) ; it++) {
 	  transformSqrt( hdataUnf1d[icent][ix][it], hdataUnfSq[icent][ix][it]) ; 
-	  hdataUnfSq[icent][ix][it] = 	  (TH1D*)hdataUnfSq[icent][ix][it]->Rebin(nRebin,"",yRebin);
  TH1ScaleByWidth(hdataUnfSq[icent][ix][it]);
 	}	
 	
@@ -441,7 +433,7 @@ bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {
 
 
 #ifndef __CINT__
-int main2 () { unfold2D_matrixWeight0(); return 0; }  // Main program when run stand-alone
+int main2 () { unfold2D(); return 0; }  // Main program when run stand-alone
 #endif
 
 

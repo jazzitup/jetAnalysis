@@ -4,7 +4,7 @@ TString fReweightName = "reweightFactors/reweightingFactor_v4_fit.root";
 
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-  //  else return false; 
+  //else return false; 
   if ( icent ==1 )  return true;
   if ( icent ==2 )  return true;
   if ( icent ==3 )  return true;
@@ -144,6 +144,28 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
   
 }
 
+
+void getRebinMpt(int &nYbins, double* yBin, int icent, int ptBin) {
+
+  double yBinSqrt[20];
+
+  if ( (icent ==0) && ( ptBin <= 9 ) ) {
+    getYbin(nYbins, yBin, yBinSqrt, 2);
+  }
+  else if ( (icent ==0) && ( ptBin >= 10 ) ) {
+    cout << "rebinning" << endl;
+    nYbins = 8;
+    double ytemp[9] = { -0.5,-0.05,0,0.05,0.1,0.13,0.2,0.3,0.5};
+    for ( int i =0 ; i<=8 ; i++) { 
+      yBin[i] = ytemp[i];
+    }
+  }
+  else  {
+    getYbin(nYbins, yBin, yBinSqrt, 2);
+  }
+  
+  
+}
 
 
 const Double_t cutdummy= -99999.0;
