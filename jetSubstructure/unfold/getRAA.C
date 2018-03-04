@@ -100,8 +100,8 @@ void getRAA(int icent=0, int nIter =4, int optX=1, int optY=2 ) {
     //    drawText("Ratio of per-jet distribution",0.3,0.78,2,16);
 
   }
-  c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d.pdf",optX,optY,icent));
-  c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d.png",optX,optY,icent));
+  c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_iter%d.pdf",optX,optY,icent,nIter));
+  //  c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_iter%d.png",optX,optY,icent));
   
   c1->Update();
 }
