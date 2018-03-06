@@ -147,7 +147,8 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, bool matRwt=1, boo
     for (int in = 0; in < int(vIter.size()) ; in++)  {
       hmcRatioSq[ipt][in] = (TH1D*)hmcUnfSq[ipt][in]->Clone(Form("mcRatioSq_ix%d_in%d",ipt,in));
       hmcRatioSq[ipt][in]->Divide(hmcTruthSq[ipt][in]);
-      hmcRatioSq[ipt][in]->SetAxisRange(.5,1.5,"Y");
+      //      hmcRatioSq[ipt][in]->SetAxisRange(.5,1.5,"Y");
+      hmcRatioSq[ipt][in]->SetAxisRange(.8,1.2,"Y");
       hmcRatioSq[ipt][in]->SetAxisRange(0.001,0.299,"X");
       hmcRatioSq[ipt][in]->SetYTitle("Unfolded/Truth");
       hmcRatioSq[ipt][in]->SetNdivisions(505,"X");
@@ -224,7 +225,8 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, bool matRwt=1, boo
       for (int in = 1; in < int(vIter.size()) ; in++)  {
 	hdataRatioSq[ipt][in] = (TH1D*)hdataUnfSq[ipt][in]->Clone(Form("dataRatioSq_ix%d_in%d",ipt,in));
 	hdataRatioSq[ipt][in]->Divide(hdataUnfSq[ipt][0]);
-	hdataRatioSq[ipt][in]->SetAxisRange(0.5,1.5,"Y");
+	//	hdataRatioSq[ipt][in]->SetAxisRange(0.5,1.5,"Y");
+	hdataRatioSq[ipt][in]->SetAxisRange(0.8,1.2,"Y");
 	hdataRatioSq[ipt][in]->SetAxisRange(0.001,0.299,"X");
 	hdataRatioSq[ipt][in]->SetYTitle("Ratio to 4th iter.");
 	hdataRatioSq[ipt][in]->SetNdivisions(505,"X");

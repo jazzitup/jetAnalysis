@@ -36,7 +36,7 @@ RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, in
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=true) {
+void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=true, int shiftOpt = 1) {
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -76,7 +76,7 @@ void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 
     hResX[i] = new TH2D(Form("hResPt_icent%d",icent), ";Truth p_{T} (GeV/c);Reco p_{T} (GeV/c)",nXbins,xBin,nXbins,xBin);
     hResY[i] = new TH2D(Form("hResM_icent%d",icent), ";Truth (m/p_{T})^{2};Reco (m/p_{T})^{2}",nYbins,yBin,nYbins,yBin);
 
-    res[i] = getResponse(kSample, i, optX, optY, hTruth[i], hReco[i], hResX[i], hResY[i], radius,doReweight);
+    res[i] = getResponse(kSample, i, optX, optY, hTruth[i], hReco[i], hResX[i], hResY[i], radius,doReweight, shiftOpt);
 
     TCanvas* c01 = new TCanvas("c01", "",600,500);
     hMatrix[i] = (TH2D*)res[i]->Hresponse();
@@ -114,7 +114,7 @@ void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 
   fout->Close();
 }
 
-RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, TH2D* respX, TH2D* respY, double radius, bool doReweight)
+RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, TH2D* respX, TH2D* respY, double radius, bool doReweight, int shiftOpt)
 {
 
   TH1::SetDefaultSumw2();
