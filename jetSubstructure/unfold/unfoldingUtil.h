@@ -1,6 +1,6 @@
 //TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_v2.root";
 //TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_v4.root";
-TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_vSpecialMass.root";
+TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_opt771.root";
 
 
 bool selectedCent(int icent=0) {
@@ -120,6 +120,18 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
   else if ( optY == 77) {
     nBins = 7;
     double massBin[8] = { -50, -25,0,25,50,75,100,300};
+    for ( int i=0 ; i<= nBins ; i++) {
+      yBinSqrt[i] = massBin[i];
+    }
+    for ( int i=0 ; i<= nBins ; i++) {
+      yBin[i] = massBin[i]*massBin[i];
+      if ( massBin[i] < 0 )
+        yBin[i] = - yBin[i];
+    }
+  }
+  else if ( optY == 771) {
+    nBins = 12;
+    double massBin[13] = { -50, -30,-10,0,10,20,30,40,50,75,100,200,300};
     for ( int i=0 ; i<= nBins ; i++) {
       yBinSqrt[i] = massBin[i];
     }

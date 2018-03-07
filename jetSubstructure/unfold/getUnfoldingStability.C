@@ -167,6 +167,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
 }
   
   c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
+  c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d_matrixRwt%d_spectraRwt%d.png",kSample,icent,(int)matRwt, (int)specRwt));
   
   
   if (doDATA) {
@@ -237,6 +238,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
       }
     }
     c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
+    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.png",kSample,icent,(int)matRwt, (int)specRwt));
   }
   
 }  

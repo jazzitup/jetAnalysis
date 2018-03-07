@@ -108,6 +108,7 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
   nIter.push_back(20);
   nIter.push_back(40);
   nIter.push_back(100);
+  nIter.push_back(200);
   
   cout << "================================ UNFOLD ===================================" << endl;
   for ( int icent=0 ; icent<=6; icent++) {
@@ -308,7 +309,8 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
     if ( doReweight ) {
       fReweight = new TFile(fReweightName);
       //      hReweight = (TH2D*)fReweight->Get(Form("hRatioSmooth_kSample%d_icent%d_opt1",kSample,icent));
-      hReweight = (TH2D*)fReweight->Get(Form("hRatioFit_kSample%d_icent%d_opt2",kSample,icent));
+      //      hReweight = (TH2D*)fReweight->Get(Form("hRatioFit_kSample%d_icent%d_opt2",kSample,icent));
+      hReweight = (TH2D*)fReweight->Get(Form("hRatioFit_kSample%d_icent%d_opt771",kSample,icent));
     }
 
 
