@@ -30,13 +30,13 @@ void getDATAspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hdataRaw=0);
 
 //bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-void getMcWeights(int kSample = kPbPb, int icent=0, float weightCut = 10, int opt=2) {   // opt1 : mass,   opt2 : m/pT  
+void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=2) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
   
   int nXbins;
   double xBin[30];
-  if ( opt==1 ) getXbin(nXbins, xBin, 78);
-  if ( opt==2 ) getXbin(nXbins, xBin, 78);
+  if ( opt==1 ) getXbin(nXbins, xBin, 77);
+  if ( opt==2 ) getXbin(nXbins, xBin, 77);
   cout << " nXbins = " << nXbins << endl;
   cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
 
@@ -44,8 +44,8 @@ void getMcWeights(int kSample = kPbPb, int icent=0, float weightCut = 10, int op
   int nYbins ;
   double y2Bin[30] ;
   double yBin[30] ;
-  if ( opt==1)  getYbin(nYbins, y2Bin, yBin, 78);
-  else if ( opt==2)  getYbin(nYbins, y2Bin, yBin, 78);
+  if ( opt==1)  getYbin(nYbins, y2Bin, yBin, 77);
+  else if ( opt==2)  getYbin(nYbins, y2Bin, yBin, 77);
   
   TH2D* hTemp = new TH2D("hptTemp","", nXbins, xBin, nYbins, yBin);
   
@@ -100,7 +100,7 @@ void getMcWeights(int kSample = kPbPb, int icent=0, float weightCut = 10, int op
   
   
   
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_v4.root",(int)weightCut),"update");
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_vSpecialMass.root",(int)weightCut),"update");
   hmcRaw->Write();
   hmcTruth->Write();
   hdataRaw->Write();
@@ -199,7 +199,7 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
       }
       else  if ( opt ==2 ) {
 	genX = myJetMc.genPt;
-	genY = myJetMc.genMass / myJetMc.genPt;
+	genY = myJetMc.genMass;
       }
       
       
@@ -211,7 +211,7 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
       }
       else if ( opt == 2 ) {
 	recoX = myJetMc.recoPt;
-	recoY = myJetMc.recoMass / myJetMc.recoPt ;
+	recoY = myJetMc.recoMass;
       }
       
       //      if ( opt==2) {  
@@ -263,7 +263,7 @@ void getDATAspectra(int kSample, int icent, int opt, TH2D* hdataRaw) {
     }
     else if ( opt == 2 ) {
       recoX = myJet.recoPt;
-      recoY = myJet.recoMass / myJet.recoPt;
+      recoY = myJet.recoMass;
     }
     
     hdataRaw->Fill ( recoX, recoY);
