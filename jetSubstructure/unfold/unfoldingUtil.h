@@ -5,7 +5,7 @@ TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_opt771.ro
 
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-  //else return false; 
+  else return false; 
   if ( icent ==1 )  return true;
   if ( icent ==2 )  return true;
   if ( icent ==3 )  return true;
