@@ -1,6 +1,6 @@
 //TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_v2.root";
 //TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_v4.root";
-TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_opt771.root";
+TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_opt771_removeFluc.root";
 
 
 bool selectedCent(int icent=0) {
@@ -19,8 +19,10 @@ bool selectedCent(int icent=0) {
 void getXbin(int &nBins, double* xBin, int optX) {
   if ( optX == 1 ) {
 
-    nBins = 13;  // default
-    double ptBin[14]={20,40,63.096, 82., 100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944, 999.970};
+    //    nBins = 13;  // default
+    //    double ptBin[14]={20,40,63.096, 82., 100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944, 999.970};
+    nBins = 12;  // default
+    double ptBin[13]={20,40,63.096, 82., 100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944};
     for ( int i=0 ; i<= nBins ; i++) {
       xBin[i] = ptBin[i] ;
     }

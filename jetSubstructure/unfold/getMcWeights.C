@@ -30,6 +30,19 @@ void getDATAspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hdataRaw=0);
 
 //bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
+void removeFluc2(TH2* h) {
+  for ( int i =1 ;  i<=h->GetNbinsX() ; i++) {
+    for ( int j =1 ;  j<=h->GetNbinsY() ; j++) {
+      double val  = h->GetBinContent(i,j);
+      double error  = h->GetBinError(i,j);
+      if ( error > val * 0.3 )   {
+	h->SetBinContent(i,j,0);
+	h->SetBinError(i,j,0);
+      }
+    }
+  }
+}
+
 void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=771) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
   
@@ -75,6 +88,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
 
   TH2D* hRatioRaw = (TH2D*)hdataRaw->Clone(Form("hRatioRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
   hRatioRaw->Divide(hmcRaw);
+  removeFluc2(hRatioRaw);
   TH2D* hRatioSmooth2 = (TH2D*)hRatioRaw->Clone(Form("hRatioSmooth2_kSample%d_icent%d_opt%d",kSample,i,opt));
   hRatioSmooth2->Smooth();
 
@@ -99,10 +113,9 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
 	hRatioSmooth->SetBinContent(ix, iy, 0.2 ); 
     }
   }
+
   
-  
-  
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d.root",(int)weightCut,opt),"update");
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_removeFluc.root",(int)weightCut,opt),"update");
   hmcRaw->Write();
   hmcTruth->Write();
   hdataRaw->Write();
