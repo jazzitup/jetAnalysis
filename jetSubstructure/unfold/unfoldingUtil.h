@@ -66,8 +66,10 @@ void getXvalues( double &recoVarX, double &truthVarX, jetSubStr myJetMc, int opt
 void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
 
   if ( optY == 1) {
-    nBins = 18;
-    double massBin[19] = { -35,-19,-17,-15, -13,-10,0,10,13,15,17,19,21,24,28,35,50,100,200};
+    //    nBins = 18;
+    //    double massBin[19] = { -35,-19,-17,-15, -13,-10,0,10,13,15,17,19,21,24,28,35,50,100,200};
+    nBins = 13;
+    double massBin[14] = { -35,-15,0,10,15,20,25,30,40,50,70,100,150,300};
     for ( int i=0 ; i<= nBins ; i++) {
       yBinSqrt[i] = massBin[i];
     }

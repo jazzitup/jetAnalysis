@@ -3,11 +3,6 @@
 #include "TH1D.h"
 #include "TH2D.h"
 
-#include "RooUnfoldResponse.h"
-#include "RooUnfoldBayes.h"
-//#include "RooUnfoldSvd.h"
-//#include "RooUnfoldTUnfold.h"
-
 #include "../getSdHists.C"
 #include "../ntupleDefinition.h"
 #include "../commonUtility.h"
@@ -23,7 +18,7 @@ double minPt = 100;
 double minPtMcTruth = 20;
 TString prefix = ""; //Form("ptCut_%d_%d",(int)minPt,(int)minPtMcTruth);
 
-void checkEntries(int kSample= kPP, int icent = 0, int optX =1, int optY=2) {
+void checkEntries(int kSample= kPP, int icent = 0, int optX =1, int optY=1) {
   
   double radius=0.4;
   TH1::SetDefaultSumw2();

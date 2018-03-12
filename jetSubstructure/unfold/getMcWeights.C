@@ -43,7 +43,7 @@ void removeFluc2(TH2* h) {
   }
 }
 
-void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=771) {   // opt1 : mass,   opt2 : m/pT  
+void getMcWeights(int kSample = kPbPb, int icent=0, float weightCut = 10, int opt=771) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
   
   int nXbins;

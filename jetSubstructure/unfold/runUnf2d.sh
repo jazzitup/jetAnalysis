@@ -9,7 +9,7 @@ for kSample in 0 1 # 0 = pp,  1 = pbpb
 do
     for optX in 1  # 1
     do
-	for optY in 2  # 1
+	for optY in 1  # 1
 	do
 	    for radius in 0.4
 	    do

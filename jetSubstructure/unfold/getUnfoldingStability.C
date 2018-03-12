@@ -9,7 +9,7 @@
 void getMCresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0,  TH1D* hmcTruthSq=0, TH1D* hmcRawSq=0, TH1D* hmcUnfSq=0);
 void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
 
-void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool specRwt=0, int optX=1, int optY=2, bool applyMDJ=false) {
+void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool specRwt=0, int optX=1, int optY=1, bool applyMDJ=false) {
   
   bool doDATA = true; 
 
@@ -149,6 +149,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
       hmcRatioSq[ipt][in]->Divide(hmcTruthSq[ipt][in]);
       hmcRatioSq[ipt][in]->SetAxisRange(.5,1.5,"Y");
       hmcRatioSq[ipt][in]->SetAxisRange(0.001,0.299,"X");
+      if ( optY==1) hmcRatioSq[ipt][in]->SetAxisRange(0.00,100,"X");
       hmcRatioSq[ipt][in]->SetYTitle("Unfolded/Truth");
       hmcRatioSq[ipt][in]->SetNdivisions(505,"X");
       hmcRatioSq[ipt][in]->SetTitleSize(.15,"X");
@@ -179,7 +180,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
       c2->cd(ipt - lowPtBin + 1);
       
       for (int in = 0; in < int(vIter.size()) ; in++)  {
-	if ( optY==1)  hdataRawSq[ipt][in]->SetAxisRange(-300,2000,"X");
+	if ( optY==1) hdataRawSq[ipt][in]->SetAxisRange(0.00,100,"X");
 	else if ( optY==2) hdataRawSq[ipt][in]->SetAxisRange(0.001,0.2999,"X");
 	if ( optY==1)    hdataRawSq[ipt][in]->SetXTitle("m^{2} GeV^{2}");
 	else if ( optY==2)    hdataRawSq[ipt][in]->SetXTitle("m/p_{T}");
@@ -228,6 +229,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
 	hdataRatioSq[ipt][in]->Divide(hdataUnfSq[ipt][0]);
 	hdataRatioSq[ipt][in]->SetAxisRange(0.5,1.5,"Y");
 	hdataRatioSq[ipt][in]->SetAxisRange(0.001,0.299,"X");
+	if ( optY==1)  hdataRatioSq[ipt][in]->SetAxisRange(0.00,100,"X");
 	hdataRatioSq[ipt][in]->SetYTitle("Ratio to 4th iter.");
 	hdataRatioSq[ipt][in]->SetNdivisions(505,"X");
 	if ( drawFirst)  { 	hdataRatioSq[ipt][in]->Draw();
