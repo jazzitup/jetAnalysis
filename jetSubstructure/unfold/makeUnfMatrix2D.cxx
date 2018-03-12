@@ -229,7 +229,6 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	
 	//        int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass / myJetMc.recoPt);
 	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
-
       	rewFact = hReweight->GetBinContent(rewBin);
 	
 	// ONLY FOR 0-10% PbPb

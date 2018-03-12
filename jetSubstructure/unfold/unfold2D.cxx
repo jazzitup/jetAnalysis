@@ -346,7 +346,8 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 	if ( myJetMc.recoMass < 0 ) recoM2 = - recoM2;
         double recoVarY =  recoM2 / recoPt2;
 
-	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass / myJetMc.recoPt);
+	//	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass / myJetMc.recoPt);
+	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
         rewFact = hReweight->GetBinContent(rewBin);
 	
 	//	rewFact = 3000 + recoVarX ;
