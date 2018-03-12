@@ -307,8 +307,10 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
     TFile* fReweight;
     if ( doReweight ) {
       fReweight = new TFile(fReweightName);
-      //      hReweight = (TH2D*)fReweight->Get(Form("hRatioSmooth_kSample%d_icent%d_opt1",kSample,icent));
-      hReweight = (TH2D*)fReweight->Get(Form("hRatioFit_kSample%d_icent%d_opt781",kSample,icent));
+      hReweight = (TH2D*)fReweight->Get(Form("hRatioSmooth2_kSample%d_icent%d_opt771",kSample,icent));
+      //      hReweight = (TH2D*)fReweight->Get(Form("hRatioFit_kSample%d_icent%d_opt781",kSample,icent));
+
+
     }
 
 

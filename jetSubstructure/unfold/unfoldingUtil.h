@@ -1,7 +1,8 @@
 //TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_v2.root";
 //TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_v4.root";
 //TString fReweightName = "reweightFactors/reweightingFactor_v4_fit.root";
-TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_opt781.root";
+//TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_opt781.root";
+TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_opt771_removeFluc.root";
 
 
 bool selectedCent(int icent=0) {
