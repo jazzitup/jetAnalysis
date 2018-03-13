@@ -142,14 +142,10 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 
   }
 
+
   TH2D* hReweight;
-  TFile* fReweight;
   if ( doReweight ) {
-    fReweight = new TFile(fReweightName);
-    //    hReweight = (TH2D*)fReweight->Get(Form("hRatioSmooth_kSample%d_icent%d_opt2",kSample,icent));
-    //    hReweight = (TH2D*)fReweight->Get(Form("hRatioFit_kSample%d_icent%d_opt2",kSample,icent));
-    //    hReweight = (TH2D*)fReweight->Get(Form("hRatioSmooth_kSample%d_icent%d_opt771",kSample,icent));
-    hReweight = (TH2D*)fReweight->Get(Form("hRatioSmooth2_kSample%d_icent%d_opt771",kSample,icent));
+    hReweight = getRewTable(kSample, icent);
   }
   
   TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
@@ -217,11 +213,11 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       getYvalues( recoVarY, truthVarY, myJetMc, optY);
       
       // Black list?
-      if ( isTooSmall(hRecoEntries, recoVarX, recoVarY,10) ) {
-	cout << "isTooSmall! " << endl;
-	cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoVarX <<", "<<recoVarY<<endl;
-	continue;
-      }
+      //      if ( isTooSmall(hRecoEntries, recoVarX, recoVarY,10) ) {
+      //	cout << "isTooSmall! " << endl;
+      //	cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoVarX <<", "<<recoVarY<<endl;
+      //	continue;
+      //      }
       
       // Data/MC reweighting factors 
       double rewFact = 1; 

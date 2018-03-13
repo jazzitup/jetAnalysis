@@ -1,17 +1,25 @@
 //TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_v2.root";
 //TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_v4.root";
-TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3.root";
+//TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3.root";
+TH2D* getRewTable(int kSample, int icent)  { 
+  TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_set1.root";
+  TFile* fReweight = new TFile(fReweightName);
+  TH2D* hTemp = (TH2D*)fReweight->Get(Form("hRatioRaw_kSample%d_icent%d_opt771",kSample,icent));
+  //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("hRatioSmooth2_kSample%d_icent%d_opt771",kSample,icent));
+  return hTemp;
+}
+
 
 
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
+  if ( icent ==3 )  return true;
+  if ( icent ==6 )  return true;
   else return false; 
   if ( icent ==1 )  return true;
   if ( icent ==2 )  return true;
-  if ( icent ==3 )  return true;
   if ( icent ==4 )  return true;
   if ( icent ==5 )  return true;
-  if ( icent ==6 )  return true;
   return false;
 }
 

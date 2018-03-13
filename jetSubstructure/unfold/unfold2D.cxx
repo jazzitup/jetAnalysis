@@ -262,8 +262,6 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 
   }
   
-  TH1D* hReweight;
-  TFile* fReweight;
 
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
@@ -301,20 +299,11 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
       //      hRecoEntries = recoEntries_jz4;
     }
     
-  
-
 
     TH2D* hReweight;
-    TFile* fReweight;
     if ( doReweight ) {
-      fReweight = new TFile(fReweightName);
-      //      hReweight = (TH2D*)fReweight->Get(Form("hRatioSmooth_kSample%d_icent%d_opt1",kSample,icent));
-      //      hReweight = (TH2D*)fReweight->Get(Form("hRatioFit_kSample%d_icent%d_opt2",kSample,icent));
-      //      hReweight = (TH2D*)fReweight->Get(Form("hRatioFit_kSample%d_icent%d_opt771",kSample,icent));
-      hReweight = (TH2D*)fReweight->Get(Form("hRatioSmooth2_kSample%d_icent%d_opt771",kSample,icent));
+      hReweight = getRewTable(kSample, icent);
     }
-
-
 
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
     for (Int_t i= 0; i<tr->GetEntries() ; i++) {
