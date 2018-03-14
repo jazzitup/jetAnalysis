@@ -58,13 +58,15 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
 
   TH2D* hTemp = new TH2D("hptTemp","",nXbins,xBin,nYbins, yBin);
   RooUnfoldResponse* res[7];
+
+  const int maxIter = 60;
   
   TH2D* hmcRaw[7];
   TH2D* hmcTruth[7];
-  TH2D* hmcUnf[7][20]; // unfolding iter
+  TH2D* hmcUnf[7][maxIter]; // unfolding iter
 
   TH2D* hdataRaw[7];
-  TH2D* hdataUnf[7][20]; // unfolding iter
+  TH2D* hdataUnf[7][maxIter]; // unfolding iter
 
   int matrixWeight = 1;
   TFile* fmatrix = new TFile(Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",
@@ -98,17 +100,10 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
   }
   
   vector<int> nIter;
-  nIter.push_back(1);
-  nIter.push_back(2);
-  nIter.push_back(4);
-  nIter.push_back(6);
-  nIter.push_back(8);
-  nIter.push_back(12);
-  nIter.push_back(16);
-  nIter.push_back(20);
-  nIter.push_back(40);
-  nIter.push_back(100);
-  nIter.push_back(200);
+  for ( int it = 1 ; it<=50 ; it++) { 
+    nIter.push_back(it);
+    if ( it > maxIter -1 )   cout << " The size of array is not enough! " << endl;
+  }
   
   cout << "================================ UNFOLD ===================================" << endl;
   for ( int icent=0 ; icent<=6; icent++) {
@@ -132,18 +127,18 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
   }
   
   // Let's draw.
-  TH1D* hmcUnf1d[7][30][20]; // cent, pT bin
+  TH1D* hmcUnf1d[7][30][maxIter]; // cent, pT bin
   TH1D* hmcTruth1d[7][30]; // cent, pT bin
   TH1D* hmcRaw1d[7][30]; // cent, pT bin
   
-  TH1D* hmcUnfSq[7][30][20]; // cent, pT bin
+  TH1D* hmcUnfSq[7][30][maxIter]; // cent, pT bin
   TH1D* hmcTruthSq[7][30]; // cent, pT bin
   TH1D* hmcRawSq[7][30]; // cent, pT bin
   
-  TH1D* hdataUnf1d[7][30][20]; // cent, pT bin
+  TH1D* hdataUnf1d[7][30][maxIter]; // cent, pT bin
   TH1D* hdataRaw1d[7][30]; // cent, pT bin
   
-  TH1D* hdataUnfSq[7][30][20]; // cent, pT bin
+  TH1D* hdataUnfSq[7][30][maxIter]; // cent, pT bin
   TH1D* hdataRawSq[7][30]; // cent, pT bin
 
   for ( int icent=0 ; icent<=6; icent++) {
@@ -207,24 +202,28 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
   for ( int icent=0 ; icent<=6; icent++) {
     if ( !selectedCent(icent) )  continue;
     if ( (kSample == kPP) && ( icent != 0 ) )      continue;
+    
     for ( int ix = 1 ; ix<= nXbins ; ix++) {
       
-      hmcTruthSq[icent][ix]->Write();
-      hmcRawSq[icent][ix]->Write();
-
+      hmcTruthSq[icent][ix]->Write("",TObject::kOverwrite);
+      hmcRawSq[icent][ix]->Write("",TObject::kOverwrite);
+      
       for ( int it = 0 ; it< int(nIter.size()) ; it++) {
-	hmcUnfSq[icent][ix][it]->Write();
+	hmcUnfSq[icent][ix][it]->Write("",TObject::kOverwrite);
       }
+      
       if ( doUnfData )  {
-	hdataRawSq[icent][ix]->Write();
+	hdataRawSq[icent][ix]->Write("",TObject::kOverwrite);
 	for ( int it = 0 ; it< int(nIter.size()) ; it++) {
-	  hdataUnfSq[icent][ix][it]->Write();
+	  hdataUnfSq[icent][ix][it]->Write("",TObject::kOverwrite);
 	}
 	
       }
+      
     }
   }
   fout->Close();
+
   
 }
 
