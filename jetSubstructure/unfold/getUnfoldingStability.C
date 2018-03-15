@@ -37,33 +37,38 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, bool matRwt=1, boo
   int highPtBin = nXbins-2;
   int nPtPannels = highPtBin-lowPtBin+1;
 
+  const int maxIter = 50;
   vector<int> vIter;  //2 3 4 6 8 10
-  vIter.push_back(4);
-  vIter.push_back(1);
-  vIter.push_back(2);
-  vIter.push_back(6);
-  vIter.push_back(8);
-  //  vIter.push_back(40);
-
   vector<int> color;  //2 3 4 6 8 10
-  color.push_back (1);
-  color.push_back (30);
-  color.push_back (28);
-  color.push_back (6);
-  color.push_back (2);
-  color.push_back (4);
 
+  vIter.push_back(4);   color.push_back (1);
+  vIter.push_back(1);   color.push_back (30);
+  vIter.push_back(2);   color.push_back (28);
+  vIter.push_back(6);    color.push_back (6);
+  vIter.push_back(7);   color.push_back (2);
+  vIter.push_back(8);   color.push_back (4);
+  vIter.push_back(9);     color.push_back (kBlue+1);
+  vIter.push_back(10);   color.push_back (kBlue+2);
+  vIter.push_back(11);   color.push_back (kBlue+3);
+  vIter.push_back(12);  color.push_back (kBlue+4);
+  vIter.push_back(13);  color.push_back (kBlue+5);
+  vIter.push_back(14);  color.push_back (kBlue+6);
+  vIter.push_back(15);  color.push_back (kBlue+7);
   
-  
 
-  TH1D* hmcUnfSq[20][10]; //  pT, iteration
-  TH1D* hmcTruthSq[20][10]; 
-  TH1D* hmcRawSq[20][10]; 
-  TH1D* hmcRatioSq[20][10];
+  if ( vIter.size() > maxIter)   {
+    cout << "Not enough room in the array" << endl;
+    return; 
+  }
 
-  TH1D* hdataUnfSq[30][10]; 
-  TH1D* hdataRawSq[30][10]; 
-  TH1D* hdataRatioSq[30][10];
+  TH1D* hmcUnfSq[20][maxIter]; //  pT, iteration
+  TH1D* hmcTruthSq[20][maxIter]; 
+  TH1D* hmcRawSq[20][maxIter]; 
+  TH1D* hmcRatioSq[20][maxIter];
+
+  TH1D* hdataUnfSq[30][maxIter]; 
+  TH1D* hdataRawSq[30][maxIter]; 
+  TH1D* hdataRatioSq[30][maxIter];
   
 
   
@@ -124,8 +129,8 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, bool matRwt=1, boo
     }
     
     if ( ipt == lowPtBin+1 ) {
-      TLegend * leg1 = new TLegend(0.1467083,0.0631472,0.6655156,0.4348713,NULL,"brNDC");
-      easyLeg(leg1,"Unfolded",0.10);
+      TLegend * leg1 = new TLegend(0.2067083,0.0631472,0.6655156,0.6348713,NULL,"brNDC");
+      easyLeg(leg1,"Unfolded",0.06);
       for (int in = 0; in < int(vIter.size()) ; in++)  {
 	if ( vIter[in] == 1 ) leg1->AddEntry(hmcUnfSq[ipt][in], Form("%dst iter.",vIter[in]));
 	else if ( vIter[in] == 2 ) leg1->AddEntry(hmcUnfSq[ipt][in], Form("%dnd iter.",vIter[in]));
@@ -166,7 +171,7 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, bool matRwt=1, boo
 
 }
   
-  c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
+  //  c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
   c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d_matrixRwt%d_spectraRwt%d.png",kSample,icent,(int)matRwt, (int)specRwt));
   
   
@@ -238,7 +243,7 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, bool matRwt=1, boo
 	if ( optY == 2)  jumSun(0,1,0.3,1);
       }
     }
-    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
+    //    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
     c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.png",kSample,icent,(int)matRwt, (int)specRwt));
   }
   

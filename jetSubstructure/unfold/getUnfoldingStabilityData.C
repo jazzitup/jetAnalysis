@@ -102,7 +102,7 @@ void getUnfoldingStabilityData(int kSample= kPP, int icent = 0, int nIter=1, int
     jumSun(0,1,0.3,1);
     
   }
-  c2->SaveAs(Form("stabilitiy/dataRatioRWTtoNORWT_coll%d_icent%d_nIter%d.pdf",kSample,icent,nIter));
+  //  c2->SaveAs(Form("stabilitiy/dataRatioRWTtoNORWT_coll%d_icent%d_nIter%d.pdf",kSample,icent,nIter));
   c2->SaveAs(Form("stabilitiy/dataRatioRWTtoNORWT_coll%d_icent%d_nIter%d.png",kSample,icent,nIter));
 }
 
