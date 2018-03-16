@@ -6,7 +6,7 @@ using std::endl;
 #include "TH1D.h"
 
 #include "../getSdHists.C"
-#include "../ntupleDefinition.h"
+#include "../ntupleDefinition_v50.h"
 #include "../commonUtility.h"
 #include "../jzWeight.h"
 #include "unfoldingUtil.h"
@@ -30,8 +30,8 @@ void getDATAspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hdataRaw=0);
 
 //bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-//float flucCut = 0.3;
-float flucCut = 1.0;
+float flucCut = 0.3;
+//float flucCut = 1.0;
 void removeFluc2(TH2* h) {
   for ( int i =1 ;  i<=h->GetNbinsX() ; i++) {
     for ( int j =1 ;  j<=h->GetNbinsY() ; j++) {
@@ -117,7 +117,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   }
 
   
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_set1.root",(int)weightCut,opt,(float)flucCut),"update");
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_fcalWeighted.root",(int)weightCut,opt,(float)flucCut),"update");
   hmcRaw->Write();
   hmcTruth->Write();
   hdataRaw->Write();
@@ -143,18 +143,22 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
   TString jz3;
   TString jz4;
   if ( kSample == kPbPb ) {
-    jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-    jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-    jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+    jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2.root";
+    jz3 = "jetSubstructure_MC_HION9_pbpb_v50_jz3.root";
+    jz4 = "jetSubstructure_MC_HION9_pbpb_v50_jz4.root";
   }
   else if ( kSample == kPP ) {
-    jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-    jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-    jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+    jz2 = "jetSubstructure_MC_HION9_pp_v50_jz2.root";
+    jz3 = "jetSubstructure_MC_HION9_pp_v50_jz3.root";
+    jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4.root";
   }
   
-  TH1D* hReweight;
-  TFile* fReweight;
+  
+  TH1D* hFcalReweight;
+  if ( kSample == kPbPb ) {
+    TFile* fcal = new TFile("reweightFactors/FCal_HP_v_MB_weights.root");
+    hFcalReweight = (TH1D*)fcal->Get("FCal_HP_v_MBOV_weights");
+  }
 
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
@@ -239,8 +243,14 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
       //	}
       //      }
       
-      hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm);
-      hmcTruth->Fill( genX, genY, myJetMc.weight * jzNorm);
+      double fcalWeight = 1.0;
+      if ( kSample==kPbPb) {
+        fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
+        //      cout <<" fcal, weight = "<<myJetMc.fcalet<<", "<<fcalWeight<<endl;
+      }
+
+      hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm * fcalWeight);
+      hmcTruth->Fill( genX, genY, myJetMc.weight * jzNorm * fcalWeight);
     }
   }
   

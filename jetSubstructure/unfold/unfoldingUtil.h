@@ -3,7 +3,8 @@
 //TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3.root";
 TH2D* getRewTable(int kSample, int icent)  { 
 
-  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_set1.root");
+  //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_set1.root");
+  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_fcalWeighted.root");
   TH2D* hTemp = (TH2D*)fReweight->Get(Form("hRatioSmooth2_kSample%d_icent%d_opt771",kSample,icent));
   
   //  TFile* fReweight = new TFile("reweightFactors/martin_jet_mass_weights.root");

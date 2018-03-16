@@ -13,7 +13,7 @@ using std::endl;
 //#include "RooUnfoldTUnfold.h"
 
 #include "../getSdHists.C"
-#include "../ntupleDefinition.h"
+#include "../ntupleDefinition_v50.h"
 #include "../commonUtility.h"
 #include "../jzWeight.h"
 #endif
@@ -234,32 +234,38 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
   hmcRaw->Reset();
   hmcTruth->Reset();
 
-
-
   
   //  TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
   //  TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
   //  TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
   //  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
 
+
   TString jz2;
   TString jz3;
   TString jz4;
   if ( kSample == kPbPb ) {
     if ( radius==0.4 ) {
-      jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-      jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-      jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+      jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2.root";
+      jz3 = "jetSubstructure_MC_HION9_pbpb_v50_jz3.root";
+      jz4 = "jetSubstructure_MC_HION9_pbpb_v50_jz4.root";
     }
   }
   else if ( kSample == kPP ) {
     if ( radius==0.4 ) {
-      jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-      jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-      jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+      jz2 = "jetSubstructure_MC_HION9_pp_v50_jz2.root";
+      jz3 = "jetSubstructure_MC_HION9_pp_v50_jz3.root";
+      jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4.root";
     }
 
   }
+
+  TH1D* hFcalReweight;
+  if ( kSample == kPbPb ) {
+    TFile* fcal = new TFile("reweightFactors/FCal_HP_v_MB_weights.root");
+    hFcalReweight = (TH1D*)fcal->Get("FCal_HP_v_MBOV_weights");
+  }
+
   
 
   jetSubStr  myJetMc;
@@ -338,24 +344,17 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
         rewFact = hReweight->GetBinContent(rewBin);
 	
-	//	rewFact = 3000 + recoVarX ;
-
-	
-        // ONLY FOR 0-10% PbPb
-	//        if ( (icent == 0) && ( kSample==kPbPb) ) {
-	//          rewFact = 63619.9 + 240 * recoVarX ;
-	//        }
       }
       
-      
-      //      rewFact = 600 + recoVarX ;
-      //      if ( doReweight) {
-      //        int rewBin = hReweight->FindBin(recoVarX,recoVarY);
-      //        rewFact = hReweight->GetBinContent(rewBin);
-      //      }
+      // FCAL reweighting factors 
+      double fcalWeight = 1.0;
+      if ( kSample==kPbPb) {
+        fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
+        //      cout <<" fcal, weight = "<<myJetMc.fcalet<<", "<<fcalWeight<<endl;
+      }
 
-      hmcRaw->Fill( recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm);
-      hmcTruth->Fill( truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm );
+      hmcRaw->Fill( recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+      hmcTruth->Fill( truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
     }
   }
   

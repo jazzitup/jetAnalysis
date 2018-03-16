@@ -14,7 +14,7 @@ using std::endl;
 //#include "RooUnfoldTUnfold.h"
 
 #include "../getSdHists.C"
-#include "../ntupleDefinition.h"
+#include "../ntupleDefinition_v50.h"
 #include "../commonUtility.h"
 #include "../jzWeight.h"
 #endif
@@ -36,7 +36,7 @@ RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, in
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=true) {
+void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius= 0.4, bool doReweight=true) {
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -116,16 +116,16 @@ void makeUnfMatrix2D(int kSample = kPP, int optX =1, int optY=2, double radius= 
 
 RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, TH2D* respX, TH2D* respY, double radius, bool doReweight)
 {
-
+  
   TH1::SetDefaultSumw2();
   TString jz2;
   TString jz3;
   TString jz4;
   if ( kSample == kPbPb ) {
     if ( radius==0.4 ) { 
-      jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-      jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-      jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+      jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2.root";
+      jz3 = "jetSubstructure_MC_HION9_pbpb_v50_jz3.root";
+      jz4 = "jetSubstructure_MC_HION9_pbpb_v50_jz4.root";
     }
     else if ( radius==0.6) { 
       //      jz2 = "jetSubstructure_MC_HION9_jz2_r6_Jan11.root";
@@ -135,14 +135,20 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   }
   else if ( kSample == kPP ) {
     if ( radius==0.4 ) {
-      jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-      jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-      jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+      jz2 = "jetSubstructure_MC_HION9_pp_v50_jz2.root";
+      jz3 = "jetSubstructure_MC_HION9_pp_v50_jz3.root";
+      jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4.root";
     }
 
   }
-
-
+  
+  TH1D* hFcalReweight;
+  if ( kSample == kPbPb ) {
+    TFile* fcal = new TFile("reweightFactors/FCal_HP_v_MB_weights.root");
+    hFcalReweight = (TH1D*)fcal->Get("FCal_HP_v_MBOV_weights");
+  }
+  
+  
   TH2D* hReweight;
   if ( doReweight ) {
     hReweight = getRewTable(kSample, icent);
@@ -175,7 +181,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   getXbin(nXbins, xBin, optX);
 
   TH1D* xBinTemp = new TH1D("xBinTemp","", nXbins, xBin);
-
+  
   RooUnfoldResponse* res = new RooUnfoldResponse( hTruth, hReco );
   res->SetName(Form("responseMatrix_icent%d",icent));
 
@@ -219,24 +225,23 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       //	continue;
       //      }
       
+      double fcalWeight = 1.0; 
+      if ( kSample==kPbPb) {
+	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
+	//	cout <<" fcal, weight = "<<myJetMc.fcalet<<", "<<fcalWeight<<endl;
+      }
+      
       // Data/MC reweighting factors 
       double rewFact = 1; 
       if ( doReweight) { 
-	
-	//        int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass / myJetMc.recoPt);
 	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
       	rewFact = hReweight->GetBinContent(rewBin);
-	
-	// ONLY FOR 0-10% PbPb
-	//	if ( (icent == 0) && ( kSample==kPbPb) ) { 
-	//	  rewFact = 63619.9 + 240 * recoVarX ; 
-	//  }
       }
       
       if ( useFullMC || (i%2==0) )  {
-	res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm);
-	respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm);
-	respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm);
+	res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+	respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+	respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
 
       }
     }
