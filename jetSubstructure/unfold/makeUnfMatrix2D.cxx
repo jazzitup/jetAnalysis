@@ -14,7 +14,8 @@ using std::endl;
 //#include "RooUnfoldTUnfold.h"
 
 #include "../getSdHists.C"
-#include "../ntupleDefinition_v50.h"
+#include "../ntupleDefinition.h"
+//#include "../ntupleDefinition_v50.h"
 #include "../commonUtility.h"
 #include "../jzWeight.h"
 #endif
@@ -144,8 +145,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   
   TH1D* hFcalReweight;
   if ( kSample == kPbPb ) {
-    TFile* fcal = new TFile("reweightFactors/FCal_HP_v_MB_weights.root");
-    hFcalReweight = (TH1D*)fcal->Get("FCal_HP_v_MBOV_weights");
+    //    TFile* fcal = new TFile("reweightFactors/FCal_HP_v_MB_weights.root");
+    //    hFcalReweight = (TH1D*)fcal->Get("FCal_HP_v_MBOV_weights");
   }
   
   
@@ -227,8 +228,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       
       double fcalWeight = 1.0; 
       if ( kSample==kPbPb) {
-	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
-	//	cout <<" fcal, weight = "<<myJetMc.fcalet<<", "<<fcalWeight<<endl;
+	//	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
       }
       
       // Data/MC reweighting factors 

@@ -43,7 +43,7 @@ void getDATAspectra(int kSample=kPP, int icent=0, int optX=1, int optY=3, TH2D* 
 void transformSqrt( TH1D* h1=0, TH1D* h2=0);
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=false) {
+void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=false) {
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -69,7 +69,7 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
   TH2D* hdataRaw[7];
   TH2D* hdataUnf[7][maxIter]; // unfolding iter
 
-  int matrixWeight = 1;
+  int matrixWeight = 0;
   TFile* fmatrix = new TFile(Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",
 				  kSample,optX,optY,(float)radius,(int)matrixWeight));
   cout << " matrix name : "  << fmatrix->GetName() << endl;
@@ -424,7 +424,7 @@ bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {
 
 
 #ifndef __CINT__
-int main2 () { unfold2D(); return 0; }  // Main program when run stand-alone
+int main2 () { unfold2D_matrixWeight0(); return 0; }  // Main program when run stand-alone
 #endif
 
 
