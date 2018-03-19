@@ -240,6 +240,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       }
       
       if ( useFullMC || (i%2==0) )  {
+	
+	
 	res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
 	respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
 	respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);

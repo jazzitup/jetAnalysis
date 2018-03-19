@@ -5,7 +5,7 @@
 #include "../commonUtility.h"
 #include "../JssUtils.h"
 #include "unfoldingUtil.h"
-
+#include "../TAA.h"
 void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
 void getErrorHist(TH1D* hh=0, int kSample=kPP, int icent =0, int ipt =0 ){
   int nbins = hh->GetNbinsX();
@@ -62,7 +62,7 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
   }
   
   TCanvas* c1=  new TCanvas("c1","",1200,550);
-  makeMultiPanelCanvas(c1,nPtPannels, 2);
+  makeMultiPanelCanvas(c1,nPtPannels, 2, 0.0, 0.01, 0.3, 0.2, 0.05);
 
   for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
     c1->cd(ipt - lowPtBin + 1);
@@ -72,16 +72,23 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
     if ( optY==1)    hPPUnfSq[ipt]->SetXTitle("m (GeV)");
     else if ( optY==2)    hPPUnfSq[ipt]->SetXTitle("m/p_{T}");
     
-    hPPUnfSq[ipt]->SetYTitle("dN/d(m/p_{T})");
+    hPPUnfSq[ipt]->SetYTitle("Cross section (#mub^{-1} GeV^{-1})");
     handsomeTH1(hPPUnfSq[ipt],1);
     handsomeTH1(hPbPbUnfSq[ipt],2);
-    scaleInt(hPPUnfSq[ipt]);
-    scaleInt(hPbPbUnfSq[ipt]);
-    cleverRangeLog(hPPUnfSq[ipt],100,0.0000002);
+    //    scaleInt(hPPUnfSq[ipt]);
+    //    scaleInt(hPbPbUnfSq[ipt]);
+    CsScalePP(hPPUnfSq[ipt]);
+    CsScalePbPb(hPbPbUnfSq[ipt],icent);
+    double maxY = cleverRange(hPPUnfSq[ipt],2.0,0.00000001);
+    hPPUnfSq[ipt]->SetAxisRange(maxY *-0.05, maxY,"Y");
     hPPUnfSq[ipt]->SetNdivisions(505,"X");
+    hPPUnfSq[ipt]->SetNdivisions(505,"Y");
+ 
+    fixedFontHist(hPPUnfSq[ipt],2,2.2,20);
     hPPUnfSq[ipt]->Draw();
     hPbPbUnfSq[ipt]->Draw("same");
-    gPad->SetLogy();
+    onSun(0,0,0.3,0);
+//    gPad->SetLogy();
     
  
     hPPUnfSys[ipt] = (TH1D*)hPPUnfSq[ipt]->Clone(Form("hPPSys_ipt%d",ipt));
@@ -96,19 +103,21 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
       
     drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], 2, 1);
     drawSys( hPPUnfSq[ipt], hPPUnfSys[ipt], 1, 1);
+    hPPUnfSq[ipt]->SetFillStyle(1);
+    hPbPbUnfSq[ipt]->SetFillStyle(1);
     hPPUnfSq[ipt]->Draw("same");
     hPbPbUnfSq[ipt]->Draw("same");
     
 
     if ( ipt == lowPtBin ) {
-      drawCentrality(kPbPb, icent, 0.3,0.83,1,20);
-      TLegend *leg1 = new TLegend(0.2714489,0.09583328,0.7891275,0.3791666,NULL,"brNDC");
-      easyLeg(leg1,"Per-jet distribution",0.08);
-      leg1->AddEntry(hPPUnfSq[ipt], "pp","pl");
-      leg1->AddEntry(hPbPbUnfSq[ipt], "PbPb","pl");
+      TLegend *leg1 = new TLegend(0.5043845,0.5860943,0.9997715,0.8591246,NULL,"brNDC");
+      easyLeg(leg1," ");
+      leg1->AddEntry(hPPUnfSq[ipt], "pp","pf"); // #frac{d#sigma}{dp_{T}}","pl");
+      leg1->AddEntry(hPbPbUnfSq[ipt], "PbPb","pf");// #frac{dN}{dp_{T}}#frac{1}{T_{AA}}","pl");
       leg1->Draw();
     }
-    drawBin(xBin,ipt,"GeV",0.3,0.75,1,20);
+    if ( ipt==lowPtBin)  drawBin(xBin,ipt,"GeV",0.35,0.83,1,18);
+    else drawBin(xBin,ipt,"GeV",0.35,0.83,1,18);
 
     gPad->RedrawAxis();
 
@@ -122,10 +131,10 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
     else if ( optY==2)    hRAA[ipt]->SetXTitle("m/p_{T}");
     
     hRAA[ipt]->SetNdivisions(505,"X");
-    hRAA[ipt]->SetAxisRange( 0,3,"Y");
+    hRAA[ipt]->SetAxisRange( -0.05,1.99,"Y");
     
-    hRAA[ipt]->SetYTitle("PbPb/pp");
-    fixedFontHist(hRAA[ipt],2,2,20);
+    hRAA[ipt]->SetYTitle("R_{AA}");
+    fixedFontHist(hRAA[ipt],2,2.2,20);
 
     hRAA[ipt]->Draw();
     drawSys( hRAA[ipt], hRAAUnfSys[ipt], kYellow);
@@ -133,6 +142,9 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
     //    drawText("Ratio of per-jet distribution",0.3,0.78,2,16);
     gPad->RedrawAxis();
     jumSun(0,1,0.3,1);
+    if ( ipt == lowPtBin ) {
+      drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
+    }
   }
   c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_iter%d.pdf",optX,optY,icent,nIter));
   //  c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_iter%d.png",optX,optY,icent));
