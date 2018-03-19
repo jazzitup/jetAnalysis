@@ -9,7 +9,7 @@
 void getMCresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0,  TH1D* hmcTruthSq=0, TH1D* hmcRawSq=0, TH1D* hmcUnfSq=0);
 void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
 
-void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool matRwt=1, bool specRwt=0, int optX=1, int optY=2, bool applyMDJ=false) {
+void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool matRwt=1, bool specRwt=1, int optX=1, int optY=2, bool applyMDJ=false) {
   
   bool doDATA = true; 
 
@@ -41,19 +41,19 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
   vector<int> vIter;  //2 3 4 6 8 10
   vector<int> color;  //2 3 4 6 8 10
 
-  vIter.push_back(4);   color.push_back (1);
-  vIter.push_back(1);   color.push_back (30);
-  vIter.push_back(2);   color.push_back (28);
-  vIter.push_back(6);    color.push_back (6);
-  vIter.push_back(7);   color.push_back (2);
-  vIter.push_back(8);   color.push_back (4);
-  vIter.push_back(9);     color.push_back (kBlue+1);
-  vIter.push_back(10);   color.push_back (kBlue+2);
-  vIter.push_back(11);   color.push_back (kBlue+3);
-  vIter.push_back(12);  color.push_back (kBlue+4);
-  vIter.push_back(13);  color.push_back (kBlue+5);
-  vIter.push_back(14);  color.push_back (kBlue+6);
-  vIter.push_back(15);  color.push_back (kBlue+7);
+  vIter.push_back(1);   color.push_back (40);
+  vIter.push_back(2);   color.push_back (41);
+  vIter.push_back(3);   color.push_back (43);
+  vIter.push_back(4);    color.push_back (45);
+  vIter.push_back(9);   color.push_back (32);
+  vIter.push_back(10);   color.push_back (47);
+  vIter.push_back(11);     color.push_back (46);
+  vIter.push_back(12);   color.push_back (2);
+  int refIt = vIter.size() -1;
+  //  vIter.push_back(12);  color.push_back (kBlue+4);
+  //  vIter.push_back(13);  color.push_back (kBlue+5);
+  //  vIter.push_back(14);  color.push_back (kBlue+6);
+  //  vIter.push_back(15);  color.push_back (kBlue+7);
   
 
   if ( vIter.size() > maxIter)   {
@@ -90,9 +90,7 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
   }
   
   
-  TCanvas* c1=  new TCanvas("c1","",1200,550);
-  if ( nPtPannels == 1 )  
-    c1=  new TCanvas("c1","",500,500);
+  TCanvas* c1=  new TCanvas("c1","",500,500);
 
   makeEfficiencyCanvas(c1,nPtPannels, 0.05, 0.01, 0.1, 0.3, 0.01);
   
@@ -120,19 +118,20 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
       
       gPad->SetLogy();
     }
-    drawBin(xBin,ipt,"GeV",0.16 + (0.05* (ipt==lowPtBin)), 0.78,1,16);
+    drawBin(xBin,ipt,"GeV",0.20,0.78,1,16);
   
     if ( ipt == lowPtBin ) {
-      drawCentrality(kSample, icent, 0.45,0.86,1,24);
-      TLegend *leg1 = new TLegend(0.2386514,0.2288023,0.7574586,0.4411159,NULL,"brNDC");
-      easyLeg(leg1,"MC",0.13);
-      leg1->AddEntry(hmcTruthSq[ipt][0], "Truth","l");
-      leg1->AddEntry(hmcRawSq[ipt][0], "Raw (Reco)","l");
-      leg1->Draw();
+      drawCentrality(kSample, icent, 0.20,0.86,1,24);
+      if ( ipt == lowPtBin ) {
+	TLegend *leg1 = new TLegend(0.6222575,0.7273776,1,0.9378835,NULL,"brNDC");
+        easyLeg(leg1,"MC");
+	leg1->AddEntry(hmcTruthSq[ipt][refIt], "Truth","l");
+	leg1->AddEntry(hmcRawSq[ipt][refIt], "Raw","l");
+        leg1->Draw();
+      }
     }
-    
     if ( (nPtPannels ==1 ) || ( ipt == lowPtBin+1 ) ) {
-      TLegend * leg1 = new TLegend(0.2067083,0.0631472,0.6655156,0.6348713,NULL,"brNDC");
+      /*      TLegend * leg1 = new TLegend(0.2067083,0.0631472,0.6655156,0.6348713,NULL,"brNDC");
       //      easyLeg(leg1,"Unfolded",0.06);
       easyLeg(leg1,"Unfolded");
       for (int in = 0; in < int(vIter.size()) ; in++)  {
@@ -140,7 +139,7 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
 	else if ( vIter[in] == 2 ) leg1->AddEntry(hmcUnfSq[ipt][in], Form("%dnd iter.",vIter[in]));
 	else  leg1->AddEntry(hmcUnfSq[ipt][in], Form("%dth iter.",vIter[in]));
       }
-      leg1->Draw();
+      leg1->Draw();*/
     }
     TLegend* leg2 = new TLegend(0.2060963,0.02083363,0.8352797,0.2113352,NULL,"brNDC");
     easyLeg(leg2,"N_{Unf.} - N_{Truth}",0.13);
@@ -160,7 +159,7 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
       if ( optY==1) hmcRatioSq[ipt][in]->SetAxisRange(0.00,100,"X");
       hmcRatioSq[ipt][in]->SetYTitle("Unfolded/Truth");
       hmcRatioSq[ipt][in]->SetNdivisions(505,"X");
-      hmcRatioSq[ipt][in]->SetTitleSize(.15,"X");
+      hmcRatioSq[ipt][in]->SetTitleSize(.12,"X");
       hmcRatioSq[ipt][in]->SetTitleSize(0.1,"Y");
       hmcRatioSq[ipt][in]->SetTitleOffset(.5,"X");
       hmcRatioSq[ipt][in]->SetTitleOffset(.7,"Y");
@@ -175,12 +174,12 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
 
 }
   
-  //  c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
-  c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d_matrixRwt%d_spectraRwt%d.png",kSample,icent,(int)matRwt, (int)specRwt));
+  //  c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d_matrixRwt%d_spectraRwt%d_singlePt.pdf",kSample,icent,(int)matRwt, (int)specRwt));
+  c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d_matrixRwt%d_spectraRwt%d_singlePt.pdf",kSample,icent,(int)matRwt, (int)specRwt));
   
   
   if (doDATA) {
-    TCanvas* c2 =  new TCanvas("c2","",1200,550);
+    TCanvas* c2 =  new TCanvas("c2","",500,500);
     //  c2->Divide((nPtBinDraw+1)/2,2);
     makeEfficiencyCanvas(c2,nPtPannels, 0.05, 0.01, 0.1, 0.3, 0.01);
     
@@ -196,29 +195,33 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
 	hdataRawSq[ipt][in]->SetYTitle("Entries");
 	handsomeTH1(hdataRawSq[ipt][in],1);
 	handsomeTH1(hdataUnfSq[ipt][in],color[in]);
-	
+
+	hdataRawSq[ipt][in]->SetNdivisions(505,"X");
+        hdataRawSq[ipt][in]->SetTitleSize(.12,"X");
+        hdataRawSq[ipt][in]->SetTitleSize(0.07,"Y");
+        hdataRawSq[ipt][in]->SetTitleOffset(.5,"X");
+	hdataRawSq[ipt][in]->SetTitleOffset(.9,"Y");
+
 	if ( in == 0 )  {
 	  hdataRawSq[ipt][in]->Draw("hist");
 	}
 	hdataUnfSq[ipt][in]->Draw("same e");
-	
-	if ( ipt==lowPtBin)  drawCentrality(kSample, icent, 0.45,0.86,1,24);
+     
 	//	if ( ipt==lowPtBin+1)  drawText(Form("Iteration: %d"iter), 0.45,0.86,1,24);
-	drawBin(xBin,ipt,"GeV",0.2,0.78,1,18);
+	drawBin(xBin,ipt,"GeV",0.20,0.78,1,18);
 	gPad->SetLogy();
 	
       }
       
       if ( ipt == lowPtBin ) {
-	drawCentrality(kSample, icent, 0.45,0.86,1,24);
-	TLegend *leg1 = new  TLegend(0.2396099,0.1195233,0.7575544,0.3318368,NULL,"brNDC");
-	easyLeg(leg1,"Data",0.08);
-	leg1->AddEntry(hmcRawSq[ipt][0], "Reco","l");
+	TLegend *leg1 = new TLegend(0.6222575,0.7273776,1,0.9378835,NULL,"brNDC");
+	easyLeg(leg1,"Data");
+	leg1->AddEntry(hmcRawSq[ipt][0], "Raw","l");
 	leg1->Draw();
       }
       
       if ( (nPtPannels ==1 ) || ( ipt == lowPtBin+1 ) ) {
-	drawCentrality(kSample, icent, 0.45,0.86,1,24);
+	drawCentrality(kSample, icent, 0.2,0.86,1,24);
 	TLegend *leg1 = new TLegend(0.1372267,0.04771138,0.6589362,0.4161378,NULL,"brNDC");
 	easyLeg(leg1,"Unfolded",0.08);
 	for (int in = 0; in < int(vIter.size()) ; in++)  {
@@ -226,31 +229,50 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
 	  else if ( vIter[in] == 2 ) leg1->AddEntry(hmcUnfSq[ipt][in], Form("%dnd iter.",vIter[in]));
 	else  leg1->AddEntry(hmcUnfSq[ipt][in], Form("%dth iter.",vIter[in]));
 	}
-      leg1->Draw();
+	//      leg1->Draw();
       }
       
       
       c2->cd(ipt - lowPtBin + 1 + nPtPannels);
       bool drawFirst=true; 
-      for (int in = 1; in < int(vIter.size()) ; in++)  {
+      
+      for (int in = 0; in < int(vIter.size()) ; in++)  {
 	hdataRatioSq[ipt][in] = (TH1D*)hdataUnfSq[ipt][in]->Clone(Form("dataRatioSq_ix%d_in%d",ipt,in));
-	hdataRatioSq[ipt][in]->Divide(hdataUnfSq[ipt][0]);
+	hdataRatioSq[ipt][in]->Divide(hdataUnfSq[ipt][refIt]);
 	hdataRatioSq[ipt][in]->SetAxisRange(0.5,1.5,"Y");
 	hdataRatioSq[ipt][in]->SetAxisRange(0.001,0.299,"X");
 	if ( optY==1)  hdataRatioSq[ipt][in]->SetAxisRange(0.00,100,"X");
-	hdataRatioSq[ipt][in]->SetYTitle("Ratio to 4th iter.");
+	//	hdataRatioSq[ipt][in]->SetYTitle(Form("Ratio to Iter. %d",vIter.at(refIt) ));
+	hdataRatioSq[ipt][in]->SetYTitle("Ratio");
 	hdataRatioSq[ipt][in]->SetNdivisions(505,"X");
+	hdataRatioSq[ipt][in]->SetTitleSize(.12,"X");
+	hdataRatioSq[ipt][in]->SetTitleSize(0.1,"Y");
+	hdataRatioSq[ipt][in]->SetTitleOffset(.5,"X");
+	hdataRatioSq[ipt][in]->SetTitleOffset(.6,"Y");
+
+	
 	if ( drawFirst)  { 	hdataRatioSq[ipt][in]->Draw();
 	  drawFirst=false;  
 	}
 	else   hdataRatioSq[ipt][in]->Draw("same");
 	if ( optY == 2)  jumSun(0,1,0.3,1);
+	drawText(Form("Ratio to Iter. %d",vIter.at(refIt)), 0.25, 0.9);
       }
     }
-    //    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
-    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.png",kSample,icent,(int)matRwt, (int)specRwt));
+    //    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d_singlePt.pdf",kSample,icent,(int)matRwt, (int)specRwt));
+    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d_singlePt.pdf",kSample,icent,(int)matRwt, (int)specRwt));
   }
   
+  TCanvas* labelCanvas =  new TCanvas("tlegend","",497,54,228,327); 
+  TLegend* leg1 = new TLegend(0.1372267,0.04771138,1.0589362,0.9561378,NULL,"brNDC");
+  easyLeg(leg1,"Unfolded",0.08);
+  for (int in = 0; in < int(vIter.size()) ; in++)  {
+    if ( vIter[in] == 1 ) leg1->AddEntry(hmcUnfSq[lowPtBin][in], Form("%dst iter.",vIter[in]));
+    else if ( vIter[in] == 2 ) leg1->AddEntry(hmcUnfSq[lowPtBin][in], Form("%dnd iter.",vIter[in]));
+    else  leg1->AddEntry(hmcUnfSq[lowPtBin][in], Form("%dth iter.",vIter[in]));
+  }
+  leg1->Draw();
+  labelCanvas->SaveAs("stabilitiy/iterationLabel.pdf");
 }  
 
 /*
@@ -269,7 +291,7 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
     //    drawText(Form("%dth iteration / 4th",vIter[in]),0.45,0.7,2,14);
     drawBin(ptBin,ipt,"GeV",0.3,0.78,1,20);
   }
-  c11->SaveAs(Form("pdfs/mcVsData_coll%d_icent%d_ratio.pdf",kSample,icent));
+  c11->SaveAs(Form("pdfs/mcVsData_coll%d_icent%d_ratio_singlePt.pdf",kSample,icent));
   c11->SaveAs(Form("pdfs/mcVsData_coll%d_icent%d_ratio.png",kSample,icent));
   
   TH1D* hRatio[20][10];  // ipt, iteration
@@ -299,7 +321,7 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
       hRatio[ipt][in]  = (TH1D*)hmass[ipt][in]->Clone(Form("hmass_ipt%d_in%d",ipt,in));
       
     }
-    c2->SaveAs(Form("pdfs/unfoldingStability_coll%d_icent%d_nIter%d.pdf",kSample,icent,vIter[in]));
+    c2->SaveAs(Form("pdfs/unfoldingStability_coll%d_icent%d_nIter%d_singlePt.pdf",kSample,icent,vIter[in]));
   }
   TCanvas* cOverlay=  new TCanvas("cOverlay","",1200,800);
   makeMultiPanelCanvas(cOverlay,(nPtBinDraw+1)/2,2);
@@ -321,7 +343,7 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
     }
     if ( ipt == lowPtBin)  leg->Draw();
   }
-  cOverlay->SaveAs(Form("pdfs/unfoldingStability_coll%d_icent%d_Overlay.pdf",kSample,icent));
+  cOverlay->SaveAs(Form("pdfs/unfoldingStability_coll%d_icent%d_Overlay_singlePt.pdf",kSample,icent));
   cOverlay->SaveAs(Form("pdfs/unfoldingStability_coll%d_icent%d_Overlay.png",kSample,icent));
 }
   */
