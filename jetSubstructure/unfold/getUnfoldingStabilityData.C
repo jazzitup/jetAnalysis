@@ -8,7 +8,7 @@
 
 void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
 
-void getUnfoldingStabilityData(int kSample= kPP, int icent = 0, int nIter=1, int optX=1, int optY=2) {
+void getUnfoldingStabilityData(int kSample= kPP, int icent = 0, int nIter=10, int optX=1, int optY=2) {
 
   bool specRwt=0;
 
@@ -45,7 +45,7 @@ void getUnfoldingStabilityData(int kSample= kPP, int icent = 0, int nIter=1, int
   TH1D* hdataRawSqRw[30]; 
 
   TH1D* hdataRatioSq[30]; // Rw/Unrw
-  
+  TH1D* hUncert[30];
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  { 
 
     hdataUnfSq[ix] = (TH1D*)tempHistYsq->Clone(Form("dataUnfSq_ix%d_in%d",ix,nIter));
@@ -55,6 +55,9 @@ void getUnfoldingStabilityData(int kSample= kPP, int icent = 0, int nIter=1, int
     getDATAresults(kSample, icent, ix, nIter, 0, specRwt ,  hdataRawSq[ix], hdataUnfSq[ix]);
     getDATAresults(kSample, icent, ix, nIter, 1, specRwt ,  hdataRawSqRw[ix], hdataUnfSqRw[ix]);
   }
+  TH1D* hUnit= (TH1D*)hdataUnfSq[lowPtBin]->Clone("hUnit");
+  hUnit->Divide(hdataUnfSq[lowPtBin]);
+  
   
   
   TCanvas* c2 =  new TCanvas("c2","",1200,550);
@@ -71,6 +74,7 @@ void getUnfoldingStabilityData(int kSample= kPP, int icent = 0, int nIter=1, int
     if ( hdataUnfSq[ipt]->Integral()>0) cleverRangeLog(hdataUnfSq[ipt],100,0.000001);
     hdataUnfSq[ipt]->SetYTitle("Entries");
     handsomeTH1(hdataUnfSq[ipt],1);
+    hdataUnfSq[ipt]->SetMarkerStyle(21);
     handsomeTH1(hdataUnfSqRw[ipt],2);
     hdataUnfSq[ipt]->Draw("");
     hdataUnfSqRw[ipt]->Draw("same e");
@@ -91,19 +95,38 @@ void getUnfoldingStabilityData(int kSample= kPP, int icent = 0, int nIter=1, int
     
     c2->cd(ipt - lowPtBin + 1 + nPtPannels);
     bool drawFirst=true; 
-    hdataRatioSq[ipt] = (TH1D*)hdataUnfSqRw[ipt]->Clone(Form("dataRatioSq_ix%d",ipt));
-    hdataRatioSq[ipt]->Divide(hdataUnfSq[ipt]);
-    hdataRatioSq[ipt]->SetAxisRange(0.5,1.5,"Y");
+    //    hdataRatioSq[ipt] = (TH1D*)hdataUnfSqRw[ipt]->Clone(Form("dataRatioSq_ix%d",ipt));
+    //    hdataRatioSq[ipt]->Divide(hdataUnfSq[ipt]);
+    hdataRatioSq[ipt] = (TH1D*)hdataUnfSq[ipt]->Clone(Form("dataRatioSq_ix%d",ipt));
+    hdataRatioSq[ipt]->Divide(hdataUnfSqRw[ipt]);
+    hdataRatioSq[ipt]->SetAxisRange(0.,1.99,"Y");
     hdataRatioSq[ipt]->SetAxisRange(0.001,0.299,"X");
     if ( optY==1) hdataRatioSq[ipt]->SetAxisRange(0.0,100,"X");
-    hdataRatioSq[ipt]->SetYTitle("Rwt'd/Un-Rwt");
+    hdataRatioSq[ipt]->SetYTitle("Ratio");
     hdataRatioSq[ipt]->SetNdivisions(505,"X");
     hdataRatioSq[ipt]->Draw();
-    jumSun(0,1,0.3,1);
+    jumSun(0,1,0.3,1,2);
     
   }
   //  c2->SaveAs(Form("stabilitiy/dataRatioRWTtoNORWT_coll%d_icent%d_nIter%d.pdf",kSample,icent,nIter));
-  c2->SaveAs(Form("stabilitiy/dataRatioRWTtoNORWT_coll%d_icent%d_nIter%d.png",kSample,icent,nIter));
+  c2->SaveAs(Form("stabilitiy/dataRatioRWTtoNORWT_coll%d_icent%d_nIter%d.pdf",kSample,icent,nIter));
+  
+  for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
+    hUncert[ipt] = (TH1D*)hdataRatioSq[ipt]->Clone(Form("unc_ipt%d",ipt));
+    hUncert[ipt]->Add(hUnit,-1);
+    for ( int ii= 1 ; ii<= hUncert[ipt]->GetNbinsX() ; ii++) {
+      if ( hUncert[ipt]->GetBinContent(ii) < 0 )
+	hUncert[ipt]->SetBinContent(ii,  hUncert[ipt]->GetBinContent(ii)* -1);
+    }
+  }
+  
+  TFile* fout = new TFile(Form("uncertainty/unc_unfold_kSample%d_icent%d.root",kSample,icent),"recreate");
+  for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
+    hUncert[ipt]->Write();
+  }
+  fout->Close();
+  
+  
 }
 
 void getDATAresults(int kSample, int icent, int ix, int nIter,  bool matRwt, bool specRwt, TH1D* hdataRawSq, TH1D* hdataUnfSq) {

@@ -7,15 +7,20 @@
 #include "unfoldingUtil.h"
 
 void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
+void getErrorHist(TH1D* hh=0, int kSample=kPP, int icent =0, int ipt =0 ){
+  int nbins = hh->GetNbinsX();
+  TFile* fsys = new TFile(Form("uncertainty/unc_unfold_kSample%d_icent%d.root",kSample,icent));
+  TH1D* histsys = (TH1D*)fsys->Get(Form("unc_ipt%d",ipt));
+  for (int ii = 1 ; ii<=nbins; ii++) {
+    hh->SetBinContent( ii,fabs(histsys->GetBinContent(ii))); 
+    if ( ii == nbins ) 
+      hh->SetBinContent( ii,0);
+  }
+}
+
 
 void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
-  //  double ptBin[9]= {100, 126, 158, 200, 251, 316, 398, 501, 800};
-  //  double ptBin[9]= {110, 136, 150, 168, 200, 251, 398, 501, 800};
-  //  const int nPtBin = 7;
-  //  double ptBin[nPtBin+1] = {158, 200, 251, 316, 398, 501, 800};
-  //  double ptBin[nPtBin+1] = {126, 158, 200, 251, 316, 398, 501, 800};
   
-
   int nXbins;
   double xBin[30];
   getXbin(nXbins, xBin, optX);
@@ -37,8 +42,15 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
   TH1D* hPbPbRawSq[30]; // 
   TH1D* hPbPbUnfSq[30]; // 
 
+  TH1D* hPPUnfSys[30]; // 
+  TH1D* hPbPbUnfSys[30]; // 
+  TH1D* hRAAUnfSys[30]; // 
+  
+
+
   TH1D* hRAA[30]; 
   
+
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     hPPRawSq[ix] = (TH1D*)tempHistYsq->Clone(Form("hPPRawSq_ix%d",ix));
     hPPUnfSq[ix] = (TH1D*)tempHistYsq->Clone(Form("hPPUnfSq_ix%d",ix));
@@ -46,9 +58,9 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
     hPbPbUnfSq[ix] = (TH1D*)tempHistYsq->Clone(Form("hPbPbUnfSq_ix%d",ix));
     getDATAresults(kPP,   0, ix, nIter,  hPPRawSq[ix], hPPUnfSq[ix]);
     getDATAresults(kPbPb, icent, ix, nIter,  hPbPbRawSq[ix], hPbPbUnfSq[ix]);
+
   }
   
-
   TCanvas* c1=  new TCanvas("c1","",1200,550);
   makeMultiPanelCanvas(c1,nPtPannels, 2);
 
@@ -71,6 +83,23 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
     hPbPbUnfSq[ipt]->Draw("same");
     gPad->SetLogy();
     
+ 
+    hPPUnfSys[ipt] = (TH1D*)hPPUnfSq[ipt]->Clone(Form("hPPSys_ipt%d",ipt));
+    hPbPbUnfSys[ipt] = (TH1D*)hPbPbUnfSq[ipt]->Clone(Form("hPbPbSys_ipt%d",ipt));
+    hRAAUnfSys[ipt] = (TH1D*)hPPUnfSys[ipt]->Clone(Form("hRAASys_ipt%d",ipt));
+    hPPUnfSys[ipt]->Reset(); 
+    hPbPbUnfSys[ipt]->Reset(); 
+    hRAAUnfSys[ipt]->Reset(); 
+    getErrorHist(hPPUnfSys[ipt], kPP, 0,ipt);
+    getErrorHist(hPbPbUnfSys[ipt], kPbPb, icent,ipt);
+    quadraticSum(hRAAUnfSys[ipt], hPPUnfSys[ipt], hPbPbUnfSys[ipt]);
+      
+    drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], 2, 1);
+    drawSys( hPPUnfSq[ipt], hPPUnfSys[ipt], 1, 1);
+    hPPUnfSq[ipt]->Draw("same");
+    hPbPbUnfSq[ipt]->Draw("same");
+    
+
     if ( ipt == lowPtBin ) {
       drawCentrality(kPbPb, icent, 0.3,0.83,1,20);
       TLegend *leg1 = new TLegend(0.2714489,0.09583328,0.7891275,0.3791666,NULL,"brNDC");
@@ -81,6 +110,7 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
     }
     drawBin(xBin,ipt,"GeV",0.3,0.75,1,20);
 
+    gPad->RedrawAxis();
 
     c1->cd(ipt - lowPtBin + 1 + nPtPannels);
     hRAA[ipt] = (TH1D*)hPbPbUnfSq[ipt]->Clone(Form("hRAA_icent%d_ipt%d",icent,ipt));
@@ -92,13 +122,17 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
     else if ( optY==2)    hRAA[ipt]->SetXTitle("m/p_{T}");
     
     hRAA[ipt]->SetNdivisions(505,"X");
-    hRAA[ipt]->SetAxisRange( 0,2,"Y");
+    hRAA[ipt]->SetAxisRange( 0,3,"Y");
     
     hRAA[ipt]->SetYTitle("PbPb/pp");
+    fixedFontHist(hRAA[ipt],2,2,20);
+
     hRAA[ipt]->Draw();
-
+    drawSys( hRAA[ipt], hRAAUnfSys[ipt], kYellow);
+    hRAA[ipt]->Draw("same");
     //    drawText("Ratio of per-jet distribution",0.3,0.78,2,16);
-
+    gPad->RedrawAxis();
+    jumSun(0,1,0.3,1);
   }
   c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_iter%d.pdf",optX,optY,icent,nIter));
   //  c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_iter%d.png",optX,optY,icent));
