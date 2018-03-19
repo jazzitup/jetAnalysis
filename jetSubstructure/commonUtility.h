@@ -184,6 +184,23 @@ void drawSys(TGraph *h, double *sys, double width=5, int theColor= kYellow, int 
 
 
 
+void drawSys(TH1 *h,TH1 *sys, int theColor= kYellow, int fillStyle = -1, int lineStyle = -1)
+{
+  for (int i=1;i<=h->GetNbinsX();i++)
+    {
+      double val = h->GetBinContent(i);
+      double err = val* fabs(sys->GetBinContent(i));
+      if (err == 0  ) continue;
+      TBox *b = new TBox(h->GetBinLowEdge(i),val-err,h->GetBinLowEdge(i+1),val+err);
+      b->SetLineColor(theColor);
+      b->SetFillColor(theColor);
+      if ( fillStyle > -1 ) b->SetFillStyle(fillStyle);
+      if ( lineStyle > -1 ) b->SetLineStyle(lineStyle);
+
+      b->Draw();
+    }
+}
+
 void drawSysAbs(TH1 *h,TH1 *sys, int theColor= kYellow, int fillStyle = -1, int lineStyle = -1)
 {
    for (int i=1;i<=h->GetNbinsX();i++)
@@ -558,6 +575,24 @@ void fixedFontHist(TH1 * h, Float_t xoffset=1.3, Float_t yoffset=1.2, int fontSi
    h->SetTitleOffset(yoffset,"Y");
    h->GetXaxis()->CenterTitle();
    h->GetYaxis()->CenterTitle();
+}
+
+void quadraticSum( TH1* h0, TH1* h1, TH1*  h2) {
+  
+  if ( h0->GetNbinsX() != h2->GetNbinsX() ) {
+    cout << " different bin numbers!!" << endl;
+    return;
+  }
+  if ( h1->GetNbinsX() != h2->GetNbinsX() ) {
+    cout << " different bin numbers!!" << endl;
+    return;
+  }
+  for ( int ii = 1 ; ii <=h0->GetNbinsX() ; ii++) {
+    double y1 = h1->GetBinContent(ii);
+    double y2 = h2->GetBinContent(ii);
+    h0->SetBinContent( ii, sqrt( y1*y1 +y2*y2) );
+  }
+  
 }
 
 void handsomeTH1Fill( TH1 *a=0, int nFill=1) {
