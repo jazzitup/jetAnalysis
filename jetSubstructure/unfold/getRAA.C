@@ -8,7 +8,7 @@
 
 void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
 
-void getRAA(int icent=0, int nIter =4, int optX=1, int optY=2 ) {
+void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
   //  double ptBin[9]= {100, 126, 158, 200, 251, 316, 398, 501, 800};
   //  double ptBin[9]= {110, 136, 150, 168, 200, 251, 398, 501, 800};
   //  const int nPtBin = 7;

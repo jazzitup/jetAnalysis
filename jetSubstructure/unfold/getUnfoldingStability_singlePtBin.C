@@ -102,13 +102,13 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
       else if ( optY==2) hmcTruthSq[ipt][in]->SetAxisRange(0.001,0.2999,"X");
       if ( optY==1)    hmcTruthSq[ipt][in]->SetXTitle("m^{2} GeV^{2}");
       else if ( optY==2)    hmcTruthSq[ipt][in]->SetXTitle("m/p_{T}");
-      if ( hmcTruthSq[ipt][in]->Integral()>0) cleverRangeLog(hmcTruthSq[ipt][in],100,0.000001);
+      if ( hmcTruthSq[ipt][in]->Integral()>0) cleverRangeLog(hmcTruthSq[ipt][in],100,0.000002);
       hmcTruthSq[ipt][in]->SetYTitle("Entries");
       handsomeTH1(hmcTruthSq[ipt][in],1);
       handsomeTH1(hmcRawSq[ipt][in],1);
       handsomeTH1(hmcUnfSq[ipt][in],color[in]);
       
-      
+      fixedFontHist(hmcTruthSq[ipt][in],2,2,20);
       if ( in == 0 )  {
 	hmcTruthSq[ipt][in]->SetLineStyle(2);
 	hmcTruthSq[ipt][in]->Draw("hist");
@@ -164,6 +164,7 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
       hmcRatioSq[ipt][in]->SetTitleOffset(.5,"X");
       hmcRatioSq[ipt][in]->SetTitleOffset(.7,"Y");
       
+      fixedFontHist(hmcRatioSq[ipt][in],2,2,20);
       if ( in==0)  hmcRatioSq[ipt][in]->Draw();
       else  hmcRatioSq[ipt][in]->Draw("same");
       if ( optY == 2)  jumSun(0,1,0.3,1);
@@ -201,17 +202,18 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
         hdataRawSq[ipt][in]->SetTitleSize(0.07,"Y");
         hdataRawSq[ipt][in]->SetTitleOffset(.5,"X");
 	hdataRawSq[ipt][in]->SetTitleOffset(.9,"Y");
-
+	
+	fixedFontHist(hdataRawSq[ipt][in],2,2,20);
 	if ( in == 0 )  {
 	  hdataRawSq[ipt][in]->Draw("hist");
 	}
 	hdataUnfSq[ipt][in]->Draw("same e");
      
 	//	if ( ipt==lowPtBin+1)  drawText(Form("Iteration: %d"iter), 0.45,0.86,1,24);
-	drawBin(xBin,ipt,"GeV",0.20,0.78,1,18);
-	gPad->SetLogy();
 	
       }
+      gPad->SetLogy();
+      drawBin(xBin,ipt,"GeV",0.20,0.78,1,18);
       
       if ( ipt == lowPtBin ) {
 	TLegend *leg1 = new TLegend(0.6222575,0.7273776,1,0.9378835,NULL,"brNDC");
@@ -239,25 +241,26 @@ void getUnfoldingStability_singlePtBin(int kSample= kPbPb, int icent = 0, bool m
       for (int in = 0; in < int(vIter.size()) ; in++)  {
 	hdataRatioSq[ipt][in] = (TH1D*)hdataUnfSq[ipt][in]->Clone(Form("dataRatioSq_ix%d_in%d",ipt,in));
 	hdataRatioSq[ipt][in]->Divide(hdataUnfSq[ipt][refIt]);
-	hdataRatioSq[ipt][in]->SetAxisRange(0.5,1.5,"Y");
+	hdataRatioSq[ipt][in]->SetAxisRange(0.45,1.55,"Y");
 	hdataRatioSq[ipt][in]->SetAxisRange(0.001,0.299,"X");
 	if ( optY==1)  hdataRatioSq[ipt][in]->SetAxisRange(0.00,100,"X");
 	//	hdataRatioSq[ipt][in]->SetYTitle(Form("Ratio to Iter. %d",vIter.at(refIt) ));
 	hdataRatioSq[ipt][in]->SetYTitle("Ratio");
+	hdataRatioSq[ipt][in]->SetNdivisions(505,"Y");
 	hdataRatioSq[ipt][in]->SetNdivisions(505,"X");
 	hdataRatioSq[ipt][in]->SetTitleSize(.12,"X");
 	hdataRatioSq[ipt][in]->SetTitleSize(0.1,"Y");
 	hdataRatioSq[ipt][in]->SetTitleOffset(.5,"X");
 	hdataRatioSq[ipt][in]->SetTitleOffset(.6,"Y");
-
 	
+	fixedFontHist(hdataRatioSq[ipt][in],2,2,20);
 	if ( drawFirst)  { 	hdataRatioSq[ipt][in]->Draw();
 	  drawFirst=false;  
 	}
 	else   hdataRatioSq[ipt][in]->Draw("same");
 	if ( optY == 2)  jumSun(0,1,0.3,1);
-	drawText(Form("Ratio to Iter. %d",vIter.at(refIt)), 0.25, 0.9);
       }
+	drawText(Form("Ratio to Iter. %d",vIter.at(refIt)), 0.25, 0.9);
     }
     //    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d_singlePt.pdf",kSample,icent,(int)matRwt, (int)specRwt));
     c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d_singlePt.pdf",kSample,icent,(int)matRwt, (int)specRwt));

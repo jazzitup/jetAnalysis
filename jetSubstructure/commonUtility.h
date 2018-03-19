@@ -541,19 +541,19 @@ void fixedFontAxis(TGaxis * ax)
    ax->SetTitleOffset(2);
 }
 
-void fixedFontHist(TH1 * h, Float_t xoffset=1.3, Float_t yoffset=1.2)
+void fixedFontHist(TH1 * h, Float_t xoffset=1.3, Float_t yoffset=1.2, int fontSize=20)
 {
    h->SetLabelFont(43,"X");
    h->SetLabelFont(43,"Y");
    h->SetLabelOffset(0.01);
-   h->SetLabelSize(22);
+   h->SetLabelSize(fontSize-2);
    h->SetTitleFont(43);
-   h->SetTitleSize(16);
-   h->SetLabelSize(20,"Y");
-   h->SetLabelSize(20,"X");
+   h->SetTitleSize(fontSize);
+   h->SetLabelSize(fontSize-2,"Y");
+   h->SetLabelSize(fontSize-2,"X");
    h->SetTitleFont(43,"Y");
-   h->SetTitleSize(20,"Y");
-   h->SetTitleSize(20,"X");
+   h->SetTitleSize(fontSize,"Y");
+   h->SetTitleSize(fontSize,"X");
    h->SetTitleOffset(xoffset,"X");
    h->SetTitleOffset(yoffset,"Y");
    h->GetXaxis()->CenterTitle();

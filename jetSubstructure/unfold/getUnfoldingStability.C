@@ -31,10 +31,10 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, bool matRwt=1, boo
     return;
   }
   
-  //  int lowPtBin = 6;
-  //  int highPtBin = 11;
-  int lowPtBin = 6;
-  int highPtBin = nXbins-2;
+    int lowPtBin = 6;
+    int highPtBin = nXbins-2;
+    //int lowPtBin = 7;
+    //  int highPtBin = 7;
   int nPtPannels = highPtBin-lowPtBin+1;
 
   const int maxIter = 50;
@@ -91,6 +91,9 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, bool matRwt=1, boo
   
   
   TCanvas* c1=  new TCanvas("c1","",1200,550);
+  if ( nPtPannels == 1 )  
+    c1=  new TCanvas("c1","",500,500);
+
   makeEfficiencyCanvas(c1,nPtPannels, 0.05, 0.01, 0.1, 0.3, 0.01);
   
   for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
@@ -128,9 +131,10 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, bool matRwt=1, boo
       leg1->Draw();
     }
     
-    if ( ipt == lowPtBin+1 ) {
+    if ( (nPtPannels ==1 ) || ( ipt == lowPtBin+1 ) ) {
       TLegend * leg1 = new TLegend(0.2067083,0.0631472,0.6655156,0.6348713,NULL,"brNDC");
-      easyLeg(leg1,"Unfolded",0.06);
+      //      easyLeg(leg1,"Unfolded",0.06);
+      easyLeg(leg1,"Unfolded");
       for (int in = 0; in < int(vIter.size()) ; in++)  {
 	if ( vIter[in] == 1 ) leg1->AddEntry(hmcUnfSq[ipt][in], Form("%dst iter.",vIter[in]));
 	else if ( vIter[in] == 2 ) leg1->AddEntry(hmcUnfSq[ipt][in], Form("%dnd iter.",vIter[in]));
@@ -213,7 +217,7 @@ void getUnfoldingStability(int kSample= kPbPb, int icent = 0, bool matRwt=1, boo
 	leg1->Draw();
       }
       
-      if ( ipt == lowPtBin+1 ) {
+      if ( (nPtPannels ==1 ) || ( ipt == lowPtBin+1 ) ) {
 	drawCentrality(kSample, icent, 0.45,0.86,1,24);
 	TLegend *leg1 = new TLegend(0.1372267,0.04771138,0.6589362,0.4161378,NULL,"brNDC");
 	easyLeg(leg1,"Unfolded",0.08);
