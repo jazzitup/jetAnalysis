@@ -112,7 +112,7 @@ void getUnfoldingStabilityData(int kSample= kPP, int icent = 0, int nIter=10, in
   c2->SaveAs(Form("stabilitiy/dataRatioRWTtoNORWT_coll%d_icent%d_nIter%d.pdf",kSample,icent,nIter));
   
   for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
-    hUncert[ipt] = (TH1D*)hdataRatioSq[ipt]->Clone(Form("unc_ipt%d",ipt));
+    hUncert[ipt] = (TH1D*)hdataRatioSq[ipt]->Clone(Form("unc_ipt%d_nIter%d",ipt,nIter));
     hUncert[ipt]->Add(hUnit,-1);
     for ( int ii= 1 ; ii<= hUncert[ipt]->GetNbinsX() ; ii++) {
       if ( hUncert[ipt]->GetBinContent(ii) < 0 )
@@ -120,9 +120,9 @@ void getUnfoldingStabilityData(int kSample= kPP, int icent = 0, int nIter=10, in
     }
   }
   
-  TFile* fout = new TFile(Form("uncertainty/unc_unfold_kSample%d_icent%d.root",kSample,icent),"recreate");
+  TFile* fout = new TFile(Form("uncertainty/unc_unfold_kSample%d_icent%d.root",kSample,icent),"update");
   for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
-    hUncert[ipt]->Write();
+    hUncert[ipt]->Write("",TObject::kOverwrite);
   }
   fout->Close();
   

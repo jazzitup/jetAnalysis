@@ -13,9 +13,9 @@ struct valErr {
 
 //void getMCresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0,  TH1D* hmcTruthSq=0, TH1D* hmcRawSq=0, TH1D* hmcUnfSq=0);
 
-valErr  getDATApoint(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, double massVal=-100);
+valErr  getDATApoint(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, float massVal=-100);
 
-void checkFluctuation(int kSample= kPP,  int icent = 0, bool matRwt=1, bool specRwt=0, int optX=1, int optY=2, double massVal=0.1){ 
+void checkFluctuation(int kSample= kPP,  int icent = 0, bool matRwt=1, bool specRwt=0, int optX=1, int optY=2, float massVal=0.051){ 
   
   const int nIter = 40;
   
@@ -70,7 +70,7 @@ void checkFluctuation(int kSample= kPP,  int icent = 0, bool matRwt=1, bool spec
 
     int fScale = 5;
     if ( ipt > lowPtBin + 2)  hStat[ipt]->Scale(1./fScale);
-    hStat[ipt]->SetAxisRange(-0.05,0.05,"Y");
+    hStat[ipt]->SetAxisRange(-0.11,0.11,"Y");
     hStat[ipt]->Draw();
     hDevi[ipt]->Draw("same");
 
@@ -78,7 +78,7 @@ void checkFluctuation(int kSample= kPP,  int icent = 0, bool matRwt=1, bool spec
     if ( ipt == lowPtBin ) {
       drawCentrality(kSample, icent, 0.25,0.86,1,24);
       TLegend *leg1 = new TLegend(0.2386514,0.2288023,0.7574586,0.4411159,NULL,"brNDC");
-      easyLeg(leg1,Form("m/p_{T} = %.2f point",massVal));
+      easyLeg(leg1,Form("m/p_{T} = %.2f point",(float)massVal));
       leg1->AddEntry(hStat[ipt], "Stat. uncertainty","p");
       leg1->AddEntry(hDevi[ipt], "(y_{N+1} - y_{N}) / y_{N}","p");
       leg1->Draw();
@@ -88,7 +88,7 @@ void checkFluctuation(int kSample= kPP,  int icent = 0, bool matRwt=1, bool spec
       drawText(Form("Stat. Unc scaled by 1/%d",fScale), 0.16 + (0.05* (ipt==lowPtBin)), 0.3,1,16);
     jumSun(0,0,49,0);
   }
-  c1->SaveAs(Form("choiceIter/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.png",kSample,icent,(int)matRwt, (int)specRwt));
+  c1->SaveAs(Form("choiceIter/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d_mass%.2f.pdf",kSample,icent,(int)matRwt, (int)specRwt,(float)massVal));
 }
 
 /*
@@ -250,7 +250,7 @@ void getMCresults(int kSample, int icent, int ix, int nIter, bool matRwt, bool s
 
   */
 
-valErr getDATApoint(int kSample, int icent, int ix, int nIter,  bool matRwt, bool specRwt, double massVal) {
+valErr getDATApoint(int kSample, int icent, int ix, int nIter,  bool matRwt, bool specRwt, float massVal) {
   TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d.root",kSample, (int)matRwt, (int)specRwt));
   TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnfSq_icent%d_ix%d_iter%d",icent,ix,nIter));
   valErr ret ; 

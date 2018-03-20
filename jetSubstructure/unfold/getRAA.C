@@ -7,10 +7,10 @@
 #include "unfoldingUtil.h"
 #include "../TAA.h"
 void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
-void getErrorHist(TH1D* hh=0, int kSample=kPP, int icent =0, int ipt =0 ){
+void getErrorHist(TH1D* hh=0, int kSample=kPP, int icent =0, int ipt =0, int nIter=-1 ){
   int nbins = hh->GetNbinsX();
   TFile* fsys = new TFile(Form("uncertainty/unc_unfold_kSample%d_icent%d.root",kSample,icent));
-  TH1D* histsys = (TH1D*)fsys->Get(Form("unc_ipt%d",ipt));
+  TH1D* histsys = (TH1D*)fsys->Get(Form("unc_ipt%d_nIter%d",ipt,nIter));
   for (int ii = 1 ; ii<=nbins; ii++) {
     hh->SetBinContent( ii,fabs(histsys->GetBinContent(ii))); 
     if ( ii == nbins ) 
@@ -74,7 +74,7 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
     
     hPPUnfSq[ipt]->SetYTitle("Cross section (#mub^{-1} GeV^{-1})");
     handsomeTH1(hPPUnfSq[ipt],1);
-    handsomeTH1(hPbPbUnfSq[ipt],2);
+    handsomeTH1(hPbPbUnfSq[ipt],kGreen);
     //    scaleInt(hPPUnfSq[ipt]);
     //    scaleInt(hPbPbUnfSq[ipt]);
     CsScalePP(hPPUnfSq[ipt]);
@@ -97,11 +97,11 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
     hPPUnfSys[ipt]->Reset(); 
     hPbPbUnfSys[ipt]->Reset(); 
     hRAAUnfSys[ipt]->Reset(); 
-    getErrorHist(hPPUnfSys[ipt], kPP, 0,ipt);
-    getErrorHist(hPbPbUnfSys[ipt], kPbPb, icent,ipt);
+    getErrorHist(hPPUnfSys[ipt], kPP, 0,ipt,nIter);
+    getErrorHist(hPbPbUnfSys[ipt], kPbPb, icent,ipt,nIter);
     quadraticSum(hRAAUnfSys[ipt], hPPUnfSys[ipt], hPbPbUnfSys[ipt]);
       
-    drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], 2, 1);
+    drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], 4, 1);
     drawSys( hPPUnfSq[ipt], hPPUnfSys[ipt], 1, 1);
     hPPUnfSq[ipt]->SetFillStyle(1);
     hPbPbUnfSq[ipt]->SetFillStyle(1);
@@ -145,11 +145,34 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
     if ( ipt == lowPtBin ) {
       drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
     }
+    
+    c1->cd(ipt - lowPtBin + 1);
+
+    hPPUnfSq[ipt]->Draw();
+    hPbPbUnfSq[ipt]->Draw("same");
+    drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], kGreen, 1);
+    drawSys( hPPUnfSq[ipt], hPPUnfSys[ipt], 1, 1);
+    if ( ipt == lowPtBin ) {
+      drawText("#bf{#it{ATLAS}} Preliminary",0.33,0.85,1,20);
+      TLegend *leg1 = new TLegend(0.7043845,0.4860943,0.9997715,0.7591246,NULL,"brNDC");
+      easyLeg(leg1," ");
+      leg1->AddEntry(hPPUnfSq[ipt], "pp","pf"); // #frac{d#sigma}{dp_{T}}","pl");
+      leg1->AddEntry(hPbPbUnfSq[ipt], "PbPb","pf");// #frac{dN}{dp_{T}}#frac{1}{T_{AA}}","pl");
+      leg1->Draw();
+    }
+    if ( ipt == lowPtBin+1 ) {
+    drawText("#it{pp} 25 pb^{-1}, PbPb 0.49 nb^{-1}",0.05,0.83,1,18);
+    //    drawText("PbPb 0.49 nb^{-1}",0.4,0.78,1,15);
+    }
+    if ( ipt==lowPtBin)  drawBin(xBin,ipt,"GeV",0.35,0.73,1,16);
+    else drawBin(xBin,ipt,"GeV",0.35,0.73,1,16);
+    gPad->RedrawAxis();
+    
   }
-  c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_iter%d.pdf",optX,optY,icent,nIter));
   //  c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_iter%d.png",optX,optY,icent));
   
   c1->Update();
+  c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_iter%d.pdf",optX,optY,icent,nIter));
 }
 
 
