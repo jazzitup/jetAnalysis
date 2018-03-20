@@ -32,16 +32,17 @@ void toy() {
   TH1::SetDefaultSumw2();
   TRandom ran(100);
  
-  TH1D* hGen  = new TH1D("hgen","",100,-20,20);
-  TH1D* hRec  = new TH1D("hreco","",100,-20,20);
+  TH1D* hGen  = new TH1D("hgen","",300,-50,50);
+  TH1D* hRec  = new TH1D("hreco","",300,-50,50);
 
   RooUnfoldResponse* res = new RooUnfoldResponse( hGen, hRec );
 
-  TF1 *fgen = new TF1("fgen","100 - x*x",-10,10);
+  TF1 *fgen = new TF1("fgen","10 + x",-10,10);
   for (int  i = 0 ; i<=10000000; i++) {
     double genVal = fgen->GetRandom();
-    double fluc = ran.Gaus(0,0.5);   //ran.Gaus(0, fabs(genVal)*0.1+ 0.1);
-    double recoVal = genVal * (1. + fluc );
+    double fluc = ran.Gaus(0,1.5);   //ran.Gaus(0, fabs(genVal)*0.1+ 0.1);
+    //double fluc = 0.5 ; //
+    double recoVal =  genVal + fluc ;
     
     if ( i%2 ==0 ) { 
       hGen->Fill(genVal);
@@ -49,12 +50,12 @@ void toy() {
     }
     else { 
       res->Fill(  recoVal, genVal, 1. + fabs(recoVal)*0.05  );
-      res->Fill(  recoVal, genVal);
+      //      res->Fill(  recoVal, genVal);
     }
   }
   
   vector<int> iter;
-  iter.push_back(1);  iter.push_back(2);  iter.push_back(4);  iter.push_back(8);  iter.push_back(12);  iter.push_back(20);
+  iter.push_back(1); iter.push_back(2);  iter.push_back(4);  iter.push_back(8);  iter.push_back(12);  iter.push_back(20);
   //  iter.push_back(100); 
 
   TH1D* hUnf[20]; 
@@ -75,6 +76,7 @@ void toy() {
   TCanvas* c2 = new TCanvas("c2","",600,600);
   makeEfficiencyCanvas(c2,1, 0.05, 0.01, 0.1, 0.3, 0.01);
   c2->cd(1);
+  hGen->SetAxisRange(0.-20,20,"X");
   hGen->Draw("hist");
   TLegend *leg1 = new TLegend(0.2386514,0.2288023,0.7574586,0.4411159,NULL,"brNDC");
   easyLeg(leg1,"");
@@ -90,6 +92,7 @@ void toy() {
   for ( int in = 0 ; in < iter.size() ; in++)  {
     ratio[in] = (TH1D*)hUnf[in]->Clone(Form("hratio%d",in));
     ratio[in]->Divide(hGen);
+    ratio[in]->SetAxisRange(0.-20,20,"X");
     ratio[in]->SetAxisRange(0.7,1.3,"Y");
    if ( in==0) ratio[in]->Draw();
     else ratio[in]->Draw("same");

@@ -74,7 +74,7 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
     
     hPPUnfSq[ipt]->SetYTitle("Cross section (#mub^{-1} GeV^{-1})");
     handsomeTH1(hPPUnfSq[ipt],1);
-    handsomeTH1(hPbPbUnfSq[ipt],kGreen);
+    handsomeTH1(hPbPbUnfSq[ipt],kRed);
     //    scaleInt(hPPUnfSq[ipt]);
     //    scaleInt(hPbPbUnfSq[ipt]);
     CsScalePP(hPPUnfSq[ipt]);
@@ -140,17 +140,22 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
     drawSys( hRAA[ipt], hRAAUnfSys[ipt], kYellow);
     hRAA[ipt]->Draw("same");
     //    drawText("Ratio of per-jet distribution",0.3,0.78,2,16);
-    gPad->RedrawAxis();
     jumSun(0,1,0.3,1);
     if ( ipt == lowPtBin ) {
       drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
     }
+    // lumi uncertainty 
+    double lumiUnc = getLumiRelErr(icent);
+    drawErrorBox( 0, 1-lumiUnc, 0.025, 1+lumiUnc, 1);
+
+    
+    gPad->RedrawAxis();
     
     c1->cd(ipt - lowPtBin + 1);
 
     hPPUnfSq[ipt]->Draw();
     hPbPbUnfSq[ipt]->Draw("same");
-    drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], kGreen, 1);
+    drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], kRed, 1);
     drawSys( hPPUnfSq[ipt], hPPUnfSys[ipt], 1, 1);
     if ( ipt == lowPtBin ) {
       drawText("#bf{#it{ATLAS}} Preliminary",0.33,0.85,1,20);

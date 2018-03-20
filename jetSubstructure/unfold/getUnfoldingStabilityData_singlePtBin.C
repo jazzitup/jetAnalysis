@@ -33,7 +33,7 @@ void getUnfoldingStabilityData_singlePtBin(int kSample= kPP, int icent = 0, int 
   }
   
   //  int lowPtBin = 6;
-  //  int highPtBin = 11;
+  //  int highPtBn = 11;
   int lowPtBin = 7;
   int highPtBin =7;
   int nPtPannels = highPtBin-lowPtBin+1;

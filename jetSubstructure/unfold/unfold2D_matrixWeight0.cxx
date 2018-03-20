@@ -32,6 +32,8 @@ double statFrac = 001;
 double fracStstData = 001;
 bool doUnfData = true ;
 
+bool useFullMC = false;
+
 int lowPtBin = 1;  int highPtBin = 13;
 //int lowPtBin = 6;   int highPtBin = 11;
 
@@ -321,9 +323,12 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
     for (Int_t i= 0; i<tr->GetEntries() ; i++) {
       if ( i > tr->GetEntries() * statFrac ) continue;
-      if (i%2==0)  continue;
 
       tr->GetEntry(i);
+
+      if ( useFullMC && (i%2!=0) )
+	continue;
+
 
       if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
         continue;
@@ -359,7 +364,7 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
       if ( kSample==kPbPb) {
 	//        fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
       }
-
+      
       hmcRaw->Fill( recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
       hmcTruth->Fill( truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
     }

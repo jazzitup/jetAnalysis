@@ -41,16 +41,21 @@ void getUnfoldingStability_singlePtBin(int kSample= kPP, int icent = 0, bool mat
   vector<int> vIter;  //2 3 4 6 8 10
   vector<int> color;  //2 3 4 6 8 10
 
-  /*  vIter.push_back(1);   color.push_back (40);
-  vIter.push_back(2);   color.push_back (41);
-  vIter.push_back(3);   color.push_back (43);
-  vIter.push_back(4);    color.push_back (45);
-  vIter.push_back(9);   color.push_back (32);
-  vIter.push_back(10);   color.push_back (47);
-  vIter.push_back(11);     color.push_back (46);
-  vIter.push_back(12);   color.push_back (2);
-  */
-  vIter.push_back(1);   color.push_back (0);
+  vIter.push_back(1);   color.push_back (40);
+  if ( 1==1) { 
+    vIter.push_back(2);   color.push_back (41);
+    vIter.push_back(3);   color.push_back (43);
+    vIter.push_back(4);    color.push_back (45);
+    //  vIter.push_back(12);   color.push_back (32);
+    //  vIter.push_back(16);   color.push_back (47);
+    //  vIter.push_back(20);     color.push_back (46);
+    //  vIter.push_back(40);   color.push_back (2);
+    vIter.push_back(9);   color.push_back (32);
+    vIter.push_back(10);   color.push_back (47);
+    vIter.push_back(11);     color.push_back (46);
+    vIter.push_back(12);   color.push_back (2);
+  }
+  /*  vIter.push_back(1);   color.push_back (0);
   vIter.push_back(2);   color.push_back (0);
   vIter.push_back(3);   color.push_back (0);
   vIter.push_back(4);    color.push_back (0);
@@ -58,6 +63,7 @@ void getUnfoldingStability_singlePtBin(int kSample= kPP, int icent = 0, bool mat
   vIter.push_back(10);   color.push_back (0);
   vIter.push_back(11);     color.push_back (0);
   vIter.push_back(12);   color.push_back (0);
+  */
 
   int refIt = vIter.size() -1;
   
@@ -203,7 +209,7 @@ void getUnfoldingStability_singlePtBin(int kSample= kPP, int icent = 0, bool mat
 	handsomeTH1(hdataRawSq[ipt][in],1);
 	handsomeTH1(hdataUnfSq[ipt][in],color[in]);
 
-	hdataUnfSq[ipt][in]->SetMarkerSize(0);
+	//	hdataUnfSq[ipt][in]->SetMarkerSize(0);
 
 	hdataRawSq[ipt][in]->SetNdivisions(505,"X");
         hdataRawSq[ipt][in]->SetTitleSize(.12,"X");
@@ -247,7 +253,7 @@ void getUnfoldingStability_singlePtBin(int kSample= kPP, int icent = 0, bool mat
       bool drawFirst=true; 
       
       for (int in = 0; in < int(vIter.size()) ; in++)  {
-	if ( in == refIt ) continue;
+	//	if ( in == refIt ) continue;
 	hdataRatioSq[ipt][in] = (TH1D*)hdataUnfSq[ipt][in]->Clone(Form("dataRatioSq_ix%d_in%d",ipt,in));
 	hdataRatioSq[ipt][in]->Divide(hdataUnfSq[ipt][refIt]);
 	hdataRatioSq[ipt][in]->SetAxisRange(0.45,1.55,"Y");
