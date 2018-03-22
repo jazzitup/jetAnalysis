@@ -28,13 +28,35 @@ using std::endl;
 void toy2() { 
   TH1::SetDefaultSumw2();
   TRandom ran(100);
-  TFile* fmc = new TFile("/Users/yongsunkim/Dropbox/unfolding_toys/out_2_10e7.root");
+  //  TFile* fmc = new TFile("out_n2.0_res2.0.root_reweight_from_n2.0_res2.0_ton2.0_res2.5.root");
+  TFile* fmc = new TFile("out_20_res100_10e7.root");
+  //  TFile* fmc = new TFile("out_n2.0_res2.0_nr.root");
+  //  TFile* fmc = new TFile("out_n2.0_res2.0.root_reweight_from_n2.0_res2.0_ton2.0_res2.5_by_truthVariable.root");
+  //  TFile* fmc = new TFile("out_n2.0_res2.0_nr1000.root");
+  //  TFile* fmc = new TFile("out_n2.0_res1.0_reweight_from_n2res1.0_to_n2.5res1.0_applyTruth.root");
+  //  TFile* fmc = new TFile("out_n2.0_res1.0_reweight_from_n2res1.0_to_n2.5res1.0.root");
+  //  TFile* fmc = new TFile("out_n2.0_res1.0_noRwt.root");
+  //  TFile* fmc = new TFile("out_n2.0_res0.500000.root");
+  //  TFile* fmc = new TFile("out_n2.0_res0.500000_reweightedBy_reweight_from_n2res0.5_to_n2.5res0.5_applyTruth.root");
+  //  TFile* fmc = new TFile("out_n2.0_res0.500000_reweightedBy_reweight_from_n2res0.5_to_n2.5res0.5.root");
+  //  TFile* fmc = new TFile("/Users/yongsunkim/uiucAnalysis/jetAnalysis/jetSubstructure/unfold/out_n2.0_res1.0_reweighted_by_from_n2res1_to_n2.5res1_FIT.root");
+  //  TFile* fmc = new TFile("/Users/yongsunkim/uiucAnalysis/jetAnalysis/jetSubstructure/unfold/out_n2.0_res1.0_reweighted_by_from_n2res1_to_n2.5res1.root");
+  //  TFile* fmc = new TFile("/Users/yongsunkim/uiucAnalysis/jetAnalysis/jetSubstructure/unfold/out_n2.0_res1.0.root");
+  //  TFile* fmc = new TFile("/Users/yongsunkim/Dropbox/unfolding_toys/out_2_10e7.root");
   //  TFile* fmc = new TFile("out_2_reweighted-to-2.5.root");
   TH1D* mcTruth = (TH1D*)fmc->Get("htrue");
   TH1D* mcReco = (TH1D*)fmc->Get("hmeas");
   TH2D* hmcRes = (TH2D*)fmc->Get("hres");
 
-  TFile* fdata = new TFile("/Users/yongsunkim/Dropbox/unfolding_toys/out_25_10e7_2.root");
+  TFile* fdata = new TFile("out_25_res100_10e7.root");
+  //  TFile* fdata = new TFile("out_n2.5_res2.0_nr_ptCut10.root");
+  //  TFile* fdata = new TFile("out_n2.5_res2.0_nr1000.root");
+
+  //TFile* fdata = new TFile("out_n2.500000_res0.500000.root");
+  //  TFile* fdata = new TFile("out_n2.500000_res1.0_noRwt.root");
+
+  //  TFile* fdata = new TFile("/Users/yongsunkim/uiucAnalysis/jetAnalysis/jetSubstructure/unfold/out_n2.500000_res1.0.root");
+  //  TFile* fdata = new TFile("/Users/yongsunkim/Dropbox/unfolding_toys/out_25_10e7_2.root");
   TH1D* dataTruth = (TH1D*)fdata->Get("htrue");
   TH1D* dataReco = (TH1D*)fdata->Get("hmeas");
   TH2D* dataRes = (TH2D*)fdata->Get("hres");
@@ -46,10 +68,14 @@ void toy2() {
   hr->Write();
   hout->Close();
   
-  RooUnfoldResponse* res = new RooUnfoldResponse(0, 0, hmcRes);
+
+  //  RooUnfoldResponse* res = new RooUnfoldResponse(0, 0, hmcRes);
+  RooUnfoldResponse* res = new RooUnfoldResponse(mcReco, mcTruth, hmcRes);
+
     
   vector<int> iter;
-  iter.push_back(1); iter.push_back(2);  iter.push_back(4);  iter.push_back(8);  iter.push_back(12);  iter.push_back(20);
+  iter.push_back(1); iter.push_back(2);  iter.push_back(4);  iter.push_back(40);  
+  //  iter.push_back(20); //iter.push_back(40);  iter.push_back(100);
 
   TH1D* mcUnf[50]; 
   TH1D* dataUnf[50]; 
@@ -67,9 +93,12 @@ void toy2() {
   makeEfficiencyCanvas(c2,2, 0.05, 0.01, 0.1, 0.3, 0.01);
   c2->cd(1);
   mcTruth->Draw("hist");
-  TLegend *leg1 = new TLegend(0.4386514,0.2288023,0.7574586,0.8411159,NULL,"brNDC");
-  easyLeg(leg1,"(n=2.5), Unfolded by n=2.5");
+  handsomeTH1(mcReco,4);
+  mcReco->Draw("same hist");
+  TLegend *leg1 = new TLegend(0.5384286,0.5098167,1,0.9309817,NULL,"brNDC");
+  easyLeg(leg1,"");
   leg1->AddEntry(mcTruth,"Truth (n=2)","l");
+  leg1->AddEntry(mcTruth,"Raw   (n=2)","l");
   for ( int in = 0 ; in < iter.size() ; in++)  {
     mcUnf[in]->Draw("same");
     leg1->AddEntry(mcUnf[in],Form("Iteration %d",iter[in]));
@@ -83,25 +112,25 @@ void toy2() {
     ratio[in] = (TH1D*)mcUnf[in]->Clone(Form("hratio%d",in));
     ratio[in]->Divide(mcTruth);
     //    ratio[in]->SetAxisRange(0.-20,20,"X");
-    ratio[in]->SetAxisRange(0,2,"Y");
+    ratio[in]->SetAxisRange(0,3,"Y");
    if ( in==0) ratio[in]->Draw();
     else ratio[in]->Draw("same");
-   jumSun(0,1,100,1);
+   jumSun(-500,1,1000,1);
   }
   
   c2->cd(2);
-  int reBin = 10;
-  dataTruth->Rebin(10);
-  dataReco->Rebin(10);
+  int reBin = 1;
+  dataTruth->Rebin(reBin);
+  dataReco->Rebin(reBin);
   dataTruth->Draw("hist");
   handsomeTH1(dataReco,kBlue);
   dataReco->Draw("same hist");
-  TLegend *leg2 = new TLegend(0.4386514,0.2288023,0.7574586,0.8411159,NULL,"brNDC");
+  TLegend *leg2 = new TLegend(0.5384286,0.5098167,1,0.9309817,NULL,"brNDC");
   easyLeg(leg2,"Data");
-  leg2->AddEntry(dataTruth,"Truth","l");
-  leg2->AddEntry(dataReco,"Raw","l");
+  leg2->AddEntry(dataTruth,"Truth n=2.5","l");
+  leg2->AddEntry(dataReco,"Raw n=2.5","l");
   for ( int in = 0 ; in < iter.size() ; in++)  {
-    dataUnf[in]->Rebin(10);
+    dataUnf[in]->Rebin(reBin);
     dataUnf[in]->Draw("same");
     leg2->AddEntry(dataUnf[in],Form("Iteration %d",iter[in]));
   }
@@ -116,10 +145,11 @@ void toy2() {
     ratioData[in] = (TH1D*)dataUnf[in]->Clone(Form("hratioData%d",in));
     ratioData[in]->Divide(dataTruth);
     //    ratioData[in]->SetAxisRange(0.-20,20,"X");
-    ratioData[in]->SetAxisRange(0,2,"Y");
+    ratioData[in]->SetAxisRange(0,3,"Y");
    if ( in==0) ratioData[in]->Draw();
     else ratioData[in]->Draw("same");
-   jumSun(0,1,100,1);
+   jumSun(-500,1,1000,1);
+
   }
   ratioRaw->Draw("same");
 
