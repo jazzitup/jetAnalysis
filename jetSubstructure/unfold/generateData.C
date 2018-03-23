@@ -1,12 +1,17 @@
 #include "../commonUtility.h"
 #include "TRandom3.h"
 #include "TCanvas.h"
+
+
+#include "RooUnfoldResponse.h"
+#include "RooUnfoldBayes.h"
+
 void generateData(){
 
   TRandom *rand = new TRandom();
   rand->SetSeed(0);
   double norm = 1;
-  double n = 2.;
+  double n = 2.0;
   double res = 2.0;
 
   TF1 *ftrue = new TF1("ftrue","[0]/pow(x,[1])",1,1000);
@@ -16,12 +21,13 @@ void generateData(){
   //  for ( int i =1 ; i<=hcurve->GetNbinsX() ; i++) {
   //    hcurve->SetBinContent( i , ftrue->Eval( hcurve->GetBinCenter(i)) );
   //  }
-  TH1D *htrue = new TH1D("htrue","htrue",150,-500,1000);
-  TH1D *hmeas = new TH1D("hmeas","hmeas",150,-500,1000);
-  TH2D *hres = new TH2D("hres","hres",150,-500,1000,150,-500,1000);
+  TH1D *htrue = new TH1D("htrue","htrue",150,0,1000);
+  TH1D *hmeas = new TH1D("hmeas","hmeas",150,000,1000);
+  TH2D *h2Res = new TH2D("h2Res","h2Res",150,000,1000,150,0,1000);
+
 
   //double res = 1.0;  // originially it was 0.5
-  double min_true = 0;
+  double min_true = 1;
   double min_reco = 10;
   
 
@@ -50,14 +56,33 @@ void generateData(){
     //    double reFac = hr->GetBinContent( hr->FindBin(smeared));
     //    double reFac = hr->GetBinContent( hr->FindBin(val));
     
+    
+    //    if (val > min_true ) 
     htrue->Fill(val,reFac);
     
-    if(val > min_true && smeared > min_reco){
-      hres->Fill(smeared,val, reFac);
+    //    if(val > min_true && smeared > min_reco){
+    if (  (val > min_true ) && (smeared > min_reco) ) {
+      //      hres->Fill(smeared,val, reFac);
       hmeas->Fill(smeared, reFac);
     }
     
   }
+  
+
+  RooUnfoldResponse* hres = new RooUnfoldResponse( htrue, hmeas);
+  hres->SetName("res");
+
+  cout << "generating " << npts << " points" << endl;
+  for(int i=0; i<npts; i++){
+    double val = ftrue->GetRandom();
+    double smeared = val*rand->Gaus(1,res);
+    double reFac=  1;
+    if (  (val > min_true ) && (smeared > min_reco) ) {
+      hres->Fill(smeared,val, reFac);
+      h2Res->Fill(smeared,val, reFac);
+    }
+  }
+  TH2D* hhres = (TH2D*)hres->Hresponse();
   
   TCanvas *c2 = new TCanvas("c2","c2",1000,300);
   c2->Divide(3,1);
@@ -69,11 +94,13 @@ void generateData(){
   c2->cd(2);
   hmeas->Draw();
   c2->cd(3);
-  hres->Draw("colz");
-  TFile *fout = new TFile(Form("out_n%.1f_res%.1f.root",(float)n,(float)res),"RECREATE");
+  //  hres->Draw("colz");
+  TFile *fout = new TFile(Form("outResponse_n%.1f_res%.1f.root",(float)n,(float)res),"RECREATE");
   //  TFile *fout = new TFile(Form("out_n%f_res%f_reweighted_by_from_n2res1_to_n2.5res1_FIT.root",(float)n,(float)res),"RECREATE");
   //  TFile *fout = new TFile(Form("out_n%f_res%f_reweighted_by_from_n2res1_to_n2.5res1.root",(float)n,(float)res),"RECREATE");
   htrue->Write();
   hmeas->Write();
   hres->Write();
+  hhres->Write();
+  h2Res->Write();
 }
