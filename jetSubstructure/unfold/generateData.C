@@ -11,7 +11,7 @@ void generateData(){
   TRandom *rand = new TRandom();
   rand->SetSeed(0);
   double norm = 1;
-  double n = 2.0;
+  double n = 2.5;
   double res = 2.0;
 
   TF1 *ftrue = new TF1("ftrue","[0]/pow(x,[1])",1,1000);
@@ -69,7 +69,8 @@ void generateData(){
   }
   
 
-  RooUnfoldResponse* hres = new RooUnfoldResponse( htrue, hmeas);
+  RooUnfoldResponse* hres = new RooUnfoldResponse( hmeas,htrue);
+  //  RooUnfoldResponse* hres = new RooUnfoldResponse( htrue, hmeas);
   hres->SetName("res");
 
   cout << "generating " << npts << " points" << endl;
@@ -83,7 +84,7 @@ void generateData(){
     }
   }
   TH2D* hhres = (TH2D*)hres->Hresponse();
-  
+   
   TCanvas *c2 = new TCanvas("c2","c2",1000,300);
   c2->Divide(3,1);
   c2->cd(1);

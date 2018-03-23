@@ -75,20 +75,20 @@ void toy2() {
   hr->Write();
   hout->Close();
   
-  //  RooUnfoldResponse* res = hmcRes ;
+  RooUnfoldResponse* res = hmcRes ;
   //  RooUnfoldResponse* res = new RooUnfoldResponse(0, 0, hmcRes);
   // RooUnfoldResponse* res = new RooUnfoldResponse(mcReco, mcTruth, hmcRes);
-  TH2D* matrix2d = (TH2D*)hmcRes->Hresponse();
-
+  //  TH2D* matrix2d = (TH2D*)hmcRes->Hresponse();
+  
   //  RooUnfoldResponse* res = new RooUnfoldResponse(mcReco, mcTruth, h2McRes);
-  RooUnfoldResponse* res = new RooUnfoldResponse(mcReco, mcTruth, matrix2d);
+  //  RooUnfoldResponse* res = new RooUnfoldResponse(mcReco, mcTruth, matrix2d);
   //  RooUnfoldResponse* res = new RooUnfoldResponse(dataReco, dataTruth, matrix2d);
   res->SetName("newRes");
-    
+  
   vector<int> iter;
   iter.push_back(1); iter.push_back(2);  iter.push_back(4);  iter.push_back(100);  
   //  iter.push_back(20); //iter.push_back(40);  iter.push_back(100);
-
+  
   TH1D* mcUnf[50]; 
   TH1D* dataUnf[50]; 
   for ( int in = 0 ; in < iter.size() ; in++)  {
