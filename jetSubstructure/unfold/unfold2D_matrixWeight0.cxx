@@ -76,12 +76,6 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
 				  kSample,optX,optY,(float)radius,(int)matrixWeight));
   cout << " matrix name : "  << fmatrix->GetName() << endl;
   
-  for ( int i=0 ; i<=6; i++) {
-    int icent = i;
-    if ( !selectedCent(i) )  continue;
-    if ( (kSample == kPP) && ( i != 0 ) )      continue;
-    res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent));// ignore reweight0 !
-  }
   
   for ( int i=0 ; i<=6; i++) {
     int icent = i;
@@ -101,6 +95,20 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
     }
     
   }
+
+  for ( int i=0 ; i<=6; i++) {
+    int icent = i;
+    if ( !selectedCent(i) )  continue;
+    if ( (kSample == kPP) && ( i != 0 ) )      continue;
+    //    res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
+    TH2D* h2ResMatrix = (TH2D*)fmatrix->Get(Form("hTruth_icent%d_hReco_icent%d",icent,icent)); //
+    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
+    //    TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
+    //    TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
+    //    res[i] = new RooUnfoldResponse(h2Reco, h2Truth, h2ResMatrix);
+  }
+  
+  
   
   vector<int> nIter;
   for ( int it = 1 ; it<=50 ; it++) { 

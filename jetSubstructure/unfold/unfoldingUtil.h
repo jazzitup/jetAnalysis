@@ -18,9 +18,9 @@ TH2D* getRewTable(int kSample, int icent)  {
 
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
+  else return false; 
   if ( icent ==1 )  return true;
   if ( icent ==2 )  return true;
-  //  else return false; 
   if ( icent ==3 )  return true;
   if ( icent ==4 )  return true;
   if ( icent ==5 )  return true;

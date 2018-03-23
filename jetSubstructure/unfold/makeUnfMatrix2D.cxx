@@ -111,6 +111,9 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
     if ( (kSample == kPP) && ( icent !=0 ) )      continue;
     res[i]->Write();
     hMatrix[i]->Write();
+    hReco[i]->Write();
+    hTruth[i]->Write();
+
   }
   fout->Close();
 }
@@ -184,70 +187,85 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 
   TH1D* xBinTemp = new TH1D("xBinTemp","", nXbins, xBin);
   
-  RooUnfoldResponse* res = new RooUnfoldResponse( hTruth, hReco );
-  res->SetName(Form("responseMatrix_icent%d",icent));
+  RooUnfoldResponse* res;
+  
+  for ( int iloop = 0 ; iloop =1 ; iloop++) {  
+    // iloop =0 : fill histogram 
+    // iloop =1 : fill response matrix 
+    
+    if ( iloop == 1) {   
+      res = new RooUnfoldResponse( hTruth, hReco );
+      res->SetName(Form("responseMatrix_icent%d",icent));
+    }
 
-  for ( int ijz =2 ; ijz<=4 ; ijz++) { 
-    TTree* tr;
-    TH2D* hRecoEntries;
-    double jzNorm=0;
-    if ( ijz==2)  {
-      tr = tr2;   
-      jzNorm = hi9EvtWgtJZ2; 
-      hRecoEntries = recoEntries_jz2;
-    }
-    else if ( ijz==3)  {
-      tr = tr3;   
-      jzNorm = hi9EvtWgtJZ3; 
-      hRecoEntries = recoEntries_jz3;
-    }
-    else if ( ijz==4)  {
-      tr = tr4;   
-      jzNorm = hi9EvtWgtJZ4; 
-      hRecoEntries = recoEntries_jz4;
-    }
-    cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
-    for (Int_t i= 0; i<tr->GetEntries() ; i++) {
-      if ( i > tr->GetEntries() * fracStst ) continue;
-      tr->GetEntry(i);
+    for ( int ijz =2 ; ijz<=4 ; ijz++) { 
+      TTree* tr;
+      TH2D* hRecoEntrie qs;
+      double jzNorm=0;
+      if ( ijz==2)  {
+	tr = tr2;   
+	jzNorm = hi9EvtWgtJZ2; 
+	hRecoEntries = recoEntries_jz2;
+      }
+      else if ( ijz==3)  {
+	tr = tr3;   
+	jzNorm = hi9EvtWgtJZ3; 
+	hRecoEntries = recoEntries_jz3;
+      }
+      else if ( ijz==4)  {
+	tr = tr4;   
+	jzNorm = hi9EvtWgtJZ4; 
+	hRecoEntries = recoEntries_jz4;
+      }
+      cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
 
-      if ( useFullMC && (i%2==0) )
-	continue;
+      for (Int_t i= 0; i<tr->GetEntries() ; i++) {
+	if ( i > tr->GetEntries() * fracStst ) continue;
+	tr->GetEntry(i);
 	
-      
-      if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
-	continue;
+	if ( useFullMC && (i%2==0) )
+	  continue;
+	
+	
+	if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
+	  continue;
+	
+	double recoVarX, truthVarX;
+	getXvalues( recoVarX, truthVarX, myJetMc, optX);
+	
+	double recoVarY, truthVarY;
+	getYvalues( recoVarY, truthVarY, myJetMc, optY);
+	
+	// Black list?
+	//      if ( isTooSmall(hRecoEntries, recoVarX, recoVarY,10) ) {
+	//	cout << "isTooSmall! " << endl;
+	//	cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoVarX <<", "<<recoVarY<<endl;
+	//	continue;
+	//      }
+	
+	double fcalWeight = 1.0; 
+	if ( kSample==kPbPb) {
+	  //	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
+	}
+	
+	// Data/MC reweighting factors 
+	double rewFact = 1; 
+	if ( doReweight) { 
+	  int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
+	  rewFact = hReweight->GetBinContent(rewBin);
+	}
+	
+	if ( iloop ==0 ) {
+	  hTruth->Fill(truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+	  hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+	  respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+	  respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+	}
+	else if ( iloop ==1 ) { 
+	  res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+	}
 
-      double recoVarX, truthVarX;
-      getXvalues( recoVarX, truthVarX, myJetMc, optX);
-
-      double recoVarY, truthVarY;
-      getYvalues( recoVarY, truthVarY, myJetMc, optY);
-      
-      // Black list?
-      //      if ( isTooSmall(hRecoEntries, recoVarX, recoVarY,10) ) {
-      //	cout << "isTooSmall! " << endl;
-      //	cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoVarX <<", "<<recoVarY<<endl;
-      //	continue;
-      //      }
-      
-      double fcalWeight = 1.0; 
-      if ( kSample==kPbPb) {
-	//	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
       }
-      
-      // Data/MC reweighting factors 
-      double rewFact = 1; 
-      if ( doReweight) { 
-	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
-      	rewFact = hReweight->GetBinContent(rewBin);
-      }
-      
-      
-      res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-      respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
-      respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
-      
       
     }
   }
