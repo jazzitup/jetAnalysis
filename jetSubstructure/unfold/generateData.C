@@ -6,15 +6,14 @@
 #include "RooUnfoldResponse.h"
 #include "RooUnfoldBayes.h"
 
-void generateData(){
+void generateData(double n = 2.0){
 
   TRandom *rand = new TRandom();
   rand->SetSeed(0);
   double norm = 1;
-  double n = 2.5;
   double res = 2.0;
 
-  TF1 *ftrue = new TF1("ftrue","[0]/pow(x,[1])",1,1000);
+  TF1 *ftrue = new TF1("ftrue","[0]/pow(x,[1])",0.5,1000);
   ftrue->SetParameters(norm,n);
 
   //  TH1D *hcurve = new TH1D("hcurve","hcurve",1000,0,100);
@@ -57,7 +56,7 @@ void generateData(){
     //    double reFac = hr->GetBinContent( hr->FindBin(val));
     
     
-    //    if (val > min_true ) 
+    if (val > min_true ) 
     htrue->Fill(val,reFac);
     
     //    if(val > min_true && smeared > min_reco){

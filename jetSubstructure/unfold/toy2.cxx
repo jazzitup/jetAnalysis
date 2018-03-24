@@ -48,6 +48,7 @@ void toy2() {
   TH1D* mcTruth = (TH1D*)fmc->Get("htrue");
   TH1D* mcReco = (TH1D*)fmc->Get("hmeas");
   TH2D* h2McRes  = (TH2D*)fmc->Get("h2Res");
+  TH2D* hmeas_htrue  = (TH2D*)fmc->Get("hmeas_htrue");
   RooUnfoldResponse* hmcRes = (RooUnfoldResponse*)fmc->Get("res");
   //  TH2D* hmcRes = (TH2D*)fmc->Get("hres");
   hmcRes->SetName("hmcRes");
@@ -75,18 +76,19 @@ void toy2() {
   hr->Write();
   hout->Close();
   
-  RooUnfoldResponse* res = hmcRes ;
+  //  RooUnfoldResponse* res = hmcRes ;
   //  RooUnfoldResponse* res = new RooUnfoldResponse(0, 0, hmcRes);
-  // RooUnfoldResponse* res = new RooUnfoldResponse(mcReco, mcTruth, hmcRes);
+  //  RooUnfoldResponse* res = new RooUnfoldResponse(mcReco, mcTruth, hmcRes);
   //  TH2D* matrix2d = (TH2D*)hmcRes->Hresponse();
   
-  //  RooUnfoldResponse* res = new RooUnfoldResponse(mcReco, mcTruth, h2McRes);
+  RooUnfoldResponse* res = new RooUnfoldResponse(mcReco, mcTruth, hmeas_htrue);
+  //RooUnfoldResponse* res = new RooUnfoldResponse(mcReco, mcTruth, h2McRes);
   //  RooUnfoldResponse* res = new RooUnfoldResponse(mcReco, mcTruth, matrix2d);
   //  RooUnfoldResponse* res = new RooUnfoldResponse(dataReco, dataTruth, matrix2d);
   res->SetName("newRes");
   
   vector<int> iter;
-  iter.push_back(1); iter.push_back(2);  iter.push_back(4);  iter.push_back(100);  
+  iter.push_back(1); iter.push_back(2);  iter.push_back(4);  iter.push_back(10);  
   //  iter.push_back(20); //iter.push_back(40);  iter.push_back(100);
   
   TH1D* mcUnf[50]; 
@@ -102,12 +104,10 @@ void toy2() {
   }
   
   TCanvas* c2 = new TCanvas("c2","",800,500);
-  cout << "here 1 "<< endl;
   makeEfficiencyCanvas(c2,2, 0.05, 0.01, 0.1, 0.3, 0.01);
   c2->cd(1);
   mcTruth->Draw("hist");
   handsomeTH1(mcReco,4);
-  cout << "here 1 "<< endl;
   mcReco->Draw("same hist");
   TLegend *leg1 = new TLegend(0.5384286,0.5098167,1,0.9309817,NULL,"brNDC");
   easyLeg(leg1,"");
