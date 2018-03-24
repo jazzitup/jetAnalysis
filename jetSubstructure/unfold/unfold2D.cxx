@@ -101,11 +101,15 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     if ( !selectedCent(i) )  continue;
     if ( (kSample == kPP) && ( i != 0 ) )      continue;
     //    res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
-    TH2D* h2ResMatrix = (TH2D*)fmatrix->Get(Form("hTruth_icent%d_hReco_icent%d",icent,icent)); //
+    //    TH2D* h2ResMatrix = (TH2D*)fmatrix->Get(Form("hReco_icent%d_hTruth_icent%d",icent,icent)); //
     //    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
     TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
     TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
+    RooUnfoldResponse* tempRes  = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
+    TH2D* h2ResMatrix = (TH2D*)tempRes->Hresponse(); 
     res[i] = new RooUnfoldResponse(h2Reco, h2Truth, h2ResMatrix);
+    //res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); 
+    
   }
   
   

@@ -47,8 +47,8 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=0, bool 
     vIter.push_back(4);    color.push_back (45);
     vIter.push_back(5);   color.push_back (32);
     vIter.push_back(6);   color.push_back (47);
-    //    vIter.push_back(30);     color.push_back (46);
-    //    vIter.push_back(40);   color.push_back (2);
+    vIter.push_back(30);     color.push_back (46);
+    vIter.push_back(40);   color.push_back (2);
     
 
   int refIt = vIter.size() -1;
@@ -180,7 +180,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=0, bool 
       if ( optY == 2)  jumSun(0,1,0.3,1);
       
     }
-    drawText(Form("Ratio to Iter. %d",vIter.at(refIt)), 0.25, 0.9);
+    //    drawText(Form("Ratio to Iter. %d",vIter.at(refIt)), 0.25, 0.9);
   
 
 }

@@ -1,4 +1,9 @@
 #void unfold1D(int kSample = kPP, int optX =1, double radius= 0.4, int nIter=1) {
+cp unfold2D.cxx temp.cxx
+more temp.cxx | sed s/unfold2D/unfold2D_matrixWeight0/g | sed s/'int matrixWeight = 1'/'int matrixWeight = 0'/g >& unfold2D_matrixWeight0.cxx
+rm temp.cxx
+
+
 root -l <<EOF
 gSystem->Load("libRooUnfold");
 .L unfold2D.cxx++

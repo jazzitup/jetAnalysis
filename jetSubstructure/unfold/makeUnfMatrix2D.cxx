@@ -189,18 +189,19 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   
   RooUnfoldResponse* res;
   
-  for ( int iloop = 0 ; iloop =1 ; iloop++) {  
+  for ( int iloop = 0 ; iloop <=1 ; iloop++) {  
     // iloop =0 : fill histogram 
     // iloop =1 : fill response matrix 
     
     if ( iloop == 1) {   
-      res = new RooUnfoldResponse( hTruth, hReco );
+      //      res = new RooUnfoldResponse( hTruth, hReco );
+      res = new RooUnfoldResponse( hReco, hTruth );
       res->SetName(Form("responseMatrix_icent%d",icent));
     }
-
+    
     for ( int ijz =2 ; ijz<=4 ; ijz++) { 
       TTree* tr;
-      TH2D* hRecoEntrie qs;
+      TH2D* hRecoEntries;
       double jzNorm=0;
       if ( ijz==2)  {
 	tr = tr2;   

@@ -137,8 +137,8 @@ void getUnfoldingStability_singlePtBin(int kSample= kPP, int icent = 0, bool mat
       if ( ipt == lowPtBin ) {
 	TLegend *leg1 = new TLegend(0.6222575,0.7273776,1,0.9378835,NULL,"brNDC");
         easyLeg(leg1,"MC");
-	leg1->AddEntry(hmcTruthSq[ipt][refIt], "Truth","l");
-	leg1->AddEntry(hmcRawSq[ipt][refIt], "Raw","l");
+	leg1->AddEntry(hmcTruthSq[ipt][0], "Truth","l");
+	leg1->AddEntry(hmcRawSq[ipt][0], "Raw","l");
         leg1->Draw();
       }
     }
