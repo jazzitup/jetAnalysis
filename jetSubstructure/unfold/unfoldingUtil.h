@@ -76,7 +76,7 @@ void getXvalues( double &recoVarX, double &truthVarX, jetSubStr myJetMc, int opt
   }
 }
 
-void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
+void getYbin(int &nBins, double* yBin, int optY) {
 
   if ( optY == 1) {
     //    nBins = 18;
@@ -84,49 +84,32 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
     nBins = 13;
     double massBin[14] = { -35,-15,0,10,15,20,25,30,40,50,70,100,150,300};
     for ( int i=0 ; i<= nBins ; i++) {
-      yBinSqrt[i] = massBin[i];
-    }
-    for ( int i=0 ; i<= nBins ; i++) {
-      yBin[i] = massBin[i]*massBin[i];
-      if ( massBin[i] < 0 )
-        yBin[i] = - yBin[i];
+      yBin[i] = massBin[i];
     }
   }
   else if ( (optY==2) || (optY==8) ) {
     nBins = 10;
     double massBin[11] = { -0.5,-0.05,0,0.05,0.1,0.13,0.16,0.2,0.24,0.3,0.5};
-    
     for ( int i=0 ; i<= nBins ; i++) {
-      yBinSqrt[i] = massBin[i];
-      
-      if  ( massBin[i] > 0 )        yBin[i] = massBin[i]*massBin[i];
-      else                          yBin[i] = -1.0 * massBin[i]*massBin[i];
+      yBin[i] = massBin[i];
     }
   }
   else if ( optY == 3) {
     nBins = 10;
     double massBin[11] = { -0.5,-0.05,0,0.05,0.1,0.13,0.16,0.2,0.24,0.3,0.5};
-    
     for ( int i=0 ; i<= nBins ; i++) {
-      yBinSqrt[i] = massBin[i];
-      
-      if  ( massBin[i] > 0 )        yBin[i] = massBin[i]*massBin[i];
-      else                          yBin[i] = -1.0 * massBin[i]*massBin[i];
+      yBin[i] = massBin[i];
     }
+    
   }
   else if ( optY == 4) {
-    //    nBins = 1;
-    //    double massBin[2] = { -0.5,0.5};
     nBins = 4;
     double massBin[5] = { -0.5, 0, 0.16, 0.2, 0.5};
     
     for ( int i=0 ; i<= nBins ; i++) {
-      yBinSqrt[i] = massBin[i];
-      if  ( massBin[i] > 0 )        yBin[i] = massBin[i]*massBin[i];
-      else                          yBin[i] = -1.0 * massBin[i]*massBin[i];
+      yBin[i] = massBin[i];
     }
   }
-  
   else if ( optY == 7)   {
     nBins = 12 ;
     for ( int i=0 ; i<= nBins ; i++) {
@@ -138,24 +121,14 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
     nBins = 7;
     double massBin[8] = { -50, -25,0,25,50,75,100,300};
     for ( int i=0 ; i<= nBins ; i++) {
-      yBinSqrt[i] = massBin[i];
-    }
-    for ( int i=0 ; i<= nBins ; i++) {
-      yBin[i] = massBin[i]*massBin[i];
-      if ( massBin[i] < 0 )
-        yBin[i] = - yBin[i];
+      yBin[i] = massBin[i];
     }
   }
   else if ( optY == 771) {
     nBins = 12;
     double massBin[13] = { -50, -30,-10,0,10,20,30,40,50,75,100,200,300};
     for ( int i=0 ; i<= nBins ; i++) {
-      yBinSqrt[i] = massBin[i];
-    }
-    for ( int i=0 ; i<= nBins ; i++) {
-      yBin[i] = massBin[i]*massBin[i];
-      if ( massBin[i] < 0 )
-        yBin[i] = - yBin[i];
+      yBin[i] = massBin[i];
     }
   }
 
@@ -163,12 +136,7 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
     nBins = 6;
     double massBin[7] = { -0.5,0,0.1,0.13,0.16,0.2,0.5};
     for ( int i=0 ; i<= nBins ; i++) {
-      yBinSqrt[i] = massBin[i];
-    }
-    for ( int i=0 ; i<= nBins ; i++) {
-      yBin[i] = massBin[i]*massBin[i];
-      if ( massBin[i] < 0 )
-        yBin[i] = - yBin[i];
+      yBin[i] = massBin[i];
     }
   }
   
@@ -177,10 +145,8 @@ void getYbin(int &nBins, double* yBin, double *yBinSqrt, int optY) {
 
 void getRebinMpt(int &nYbins, double* yBin, int icent, int ptBin) {
 
-  double yBinSqrt[20];
-
   if ( (icent ==0) && ( ptBin <= 9 ) ) {
-    getYbin(nYbins, yBin, yBinSqrt, 2);
+    getYbin(nYbins, yBin, 2);
   }
   else if ( (icent ==0) && ( ptBin >= 10 ) ) {
     cout << "rebinning" << endl;
@@ -191,7 +157,7 @@ void getRebinMpt(int &nYbins, double* yBin, int icent, int ptBin) {
     }
   }
   else  {
-    getYbin(nYbins, yBin, yBinSqrt, 2);
+    getYbin(nYbins, yBin, 2);
   }
   
   
@@ -202,58 +168,33 @@ const Double_t cutdummy= -99999.0;
 
 void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int optY) {
 
-  double genM2 = myJetMc.genMass* myJetMc.genMass;
-  double recoM2 = myJetMc.recoMass * myJetMc.recoMass;
-  double genPt2 = myJetMc.genPt* myJetMc.genPt;
-  double recoPt2 = myJetMc.recoPt * myJetMc.recoPt;
+  double genM = myJetMc.genMass;
+  double recoM = myJetMc.recoMass;
+  double genPt = myJetMc.genPt;
+  double recoPt = myJetMc.recoPt;
 
-
-  if ( myJetMc.recoMass < 0 ) recoM2 = - recoM2;
-  double genMoverPt2 = genM2 / genPt2;
-  double recoMoverPt2 = recoM2 / recoPt2;
+  double genMoverPt = genM / genPt;
+  double recoMoverPt = recoM / recoPt;
 
   if (optY==1)  {
-    recoVarY = recoM2;
-    truthVarY = genM2;
+    recoVarY = recoM;
+    truthVarY = genM;
   }
   if ( (optY==2) || (optY ==3) )  {
-    recoVarY = recoMoverPt2;
-    truthVarY = genMoverPt2;
+    recoVarY = recoMoverPt;
+    truthVarY = genMoverPt;
   }
   else if ( optY == 7) { // charge assisted mass
-    truthVarY = genM2;
-    float recoVarYsqrt = myJetMc.recoChMassRcSubt * myJetMc.recoPt / myJetMc.recoChPtRcSubt ;
-    recoVarY = recoVarYsqrt * recoVarYsqrt;
-    if ( recoVarYsqrt < 0)   recoVarY = - recoVarY ;
+    truthVarY = genM;
+    recoVarY = myJetMc.recoChMassRcSubt * myJetMc.recoPt / myJetMc.recoChPtRcSubt ;
   }
-
+  
   else if ( optY == 8) { // charge assisted mass
-    truthVarY = genMoverPt2;
-    float recoVarYsqrt = myJetMc.recoChMassRcSubt / myJetMc.recoChPtRcSubt ;
-    recoVarY = recoVarYsqrt * recoVarYsqrt;
-    if ( recoVarYsqrt < 0)   recoVarY = - recoVarY ;
+    truthVarY = genMoverPt;
+    recoVarY = myJetMc.recoChMassRcSubt / myJetMc.recoChPtRcSubt ;
   }
 
 }
-
-
-/*
-void transformSqrt (TH1D* h1, TH1D* h2) {
-  h2->Reset();
-  for ( int i = 0 ; i <=h1->GetNbinsX() ; i++) {
-    double xx = h1->GetBinCenter(i);
-    double yy = h1->GetBinContent(i);
-    double yye = h1->GetBinError(i);
-    //    if ( yy < 0 )
-    //      continue;
-    int theBin;
-    if ( xx >= 0 )    theBin = h2->FindBin( sqrt(xx) );
-    else    theBin = h2->FindBin( - sqrt(-xx) );
-    h2->SetBinContent(theBin, yy);
-    h2->SetBinError(theBin, yye);
-  }
-}
-*/
 
 bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
 

@@ -39,10 +39,9 @@ int lowPtBin = 1;  int highPtBin = 13;
 
 int nPtPannels = highPtBin-lowPtBin+1;
 
-void getMCspectra(int kSample=kPP, int icent=0, int optX=1, int optY=3, TH2D* hmcRaw=0, TH2D* hmcTruth=0, double radius=0.4, bool doReweight=true);
-void getDATAspectra(int kSample=kPP, int icent=0, int optX=1, int optY=3, TH2D* hdataRaw=0, double radius=0.4);
+void getMCspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH2D* hmcRaw=0, TH2D* hmcTruth=0, double radius=0.4, bool doReweight=true);
+void getDATAspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH2D* hdataRaw=0, double radius=0.4);
 
-void transformSqrt( TH1D* h1=0, TH1D* h2=0);
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
 void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=false) {
@@ -55,8 +54,7 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
 
   int nYbins ;
   double yBin[30] ;
-  double yBinSqrt[30] ;
-  getYbin(nYbins, yBin, yBinSqrt, optY);
+  getYbin(nYbins, yBin, optY);
 
 
   TH2D* hTemp = new TH2D("hptTemp","",nXbins,xBin,nYbins, yBin);
@@ -155,15 +153,15 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
   TH1D* hmcTruth1d[7][30]; // cent, pT bin
   TH1D* hmcRaw1d[7][30]; // cent, pT bin
   
-  TH1D* hmcUnfSq[7][30][maxIter]; // cent, pT bin
-  TH1D* hmcTruthSq[7][30]; // cent, pT bin
-  TH1D* hmcRawSq[7][30]; // cent, pT bin
+  //  TH1D* hmcUnfSq[7][30][maxIter]; // cent, pT bin
+  //  TH1D* hmcTruthSq[7][30]; // cent, pT bin
+  //  TH1D* hmcRawSq[7][30]; // cent, pT bin
   
   TH1D* hdataUnf1d[7][30][maxIter]; // cent, pT bin
   TH1D* hdataRaw1d[7][30]; // cent, pT bin
   
-  TH1D* hdataUnfSq[7][30][maxIter]; // cent, pT bin
-  TH1D* hdataRawSq[7][30]; // cent, pT bin
+  //  TH1D* hdataUnfSq[7][30][maxIter]; // cent, pT bin
+  //  TH1D* hdataRawSq[7][30]; // cent, pT bin
 
   for ( int icent=0 ; icent<=6; icent++) {
     if ( !selectedCent(icent) )  continue;
@@ -178,22 +176,10 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
 	hmcUnf1d[icent][ix][it] = (TH1D*)hmcUnf[icent][it]->ProjectionY(Form("hmcUnf1d_icent%d_ix%d_iter%d",icent,ix,nIter[it]),ix,ix);
       }
 
-      hmcTruthSq[icent][ix] = new TH1D(Form("hmcTruthSq_icent%d_ix%d",icent,ix),";m/p_{T};",nYbins,yBinSqrt);
-      hmcRawSq[icent][ix] = new TH1D(Form("hmcRawSq_icent%d_ix%d",icent,ix),";m/p_{T};",nYbins,yBinSqrt);
-      for ( int it = 0 ; it< int(nIter.size()) ; it++) {
-	hmcUnfSq[icent][ix][it] = new TH1D(Form("hmcUnfSq_icent%d_ix%d_iter%d",icent,ix,nIter[it]),";m/p_{T};",nYbins,yBinSqrt);
-      }
-
-
-      transformSqrt( hmcTruth1d[icent][ix], hmcTruthSq[icent][ix]) ; 
-      TH1ScaleByWidth(hmcTruthSq[icent][ix]);
-
-      transformSqrt( hmcRaw1d[icent][ix], hmcRawSq[icent][ix]) ; 
-      TH1ScaleByWidth(hmcRawSq[icent][ix]);
-
+      TH1ScaleByWidth(hmcTruth1d[icent][ix]);
+      TH1ScaleByWidth(hmcRaw1d[icent][ix]);
       for ( int it = 0 ; it< int(nIter.size()) ; it++) {      
-	transformSqrt( hmcUnf1d[icent][ix][it], hmcUnfSq[icent][ix][it]) ; 
-	TH1ScaleByWidth(hmcUnfSq[icent][ix][it]);
+	TH1ScaleByWidth(hmcUnf1d[icent][ix][it]);
       }
       
       // data
@@ -203,17 +189,9 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
 	}
 	hdataRaw1d[icent][ix] = (TH1D*)hdataRaw[icent]->ProjectionY(Form("hdataRaw1d_icent%d_ix%d",icent,ix),ix,ix);
 	
-	hdataRawSq[icent][ix] = new TH1D(Form("hdataRawSq_icent%d_ix%d",icent,ix),";m/p_{T};",nYbins,yBinSqrt);
+	TH1ScaleByWidth(hdataRaw1d[icent][ix]);
 	for ( int it = 0 ; it< int(nIter.size()) ; it++) {
-	  hdataUnfSq[icent][ix][it] = new TH1D(Form("hdataUnfSq_icent%d_ix%d_iter%d",icent,ix,nIter[it]),";m/p_{T};",nYbins,yBinSqrt);
-	}	
-	
-	transformSqrt( hdataRaw1d[icent][ix], hdataRawSq[icent][ix]) ; 
- TH1ScaleByWidth(hdataRawSq[icent][ix]);
-	
-	for ( int it = 0 ; it< int(nIter.size()) ; it++) {
-	  transformSqrt( hdataUnf1d[icent][ix][it], hdataUnfSq[icent][ix][it]) ; 
- TH1ScaleByWidth(hdataUnfSq[icent][ix][it]);
+	  TH1ScaleByWidth(hdataUnf1d[icent][ix][it]);
 	}	
 	
       }
@@ -229,17 +207,17 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
     
     for ( int ix = 1 ; ix<= nXbins ; ix++) {
       
-      hmcTruthSq[icent][ix]->Write("",TObject::kOverwrite);
-      hmcRawSq[icent][ix]->Write("",TObject::kOverwrite);
+      hmcTruth1d[icent][ix]->Write("",TObject::kOverwrite);
+      hmcRaw1d[icent][ix]->Write("",TObject::kOverwrite);
       
       for ( int it = 0 ; it< int(nIter.size()) ; it++) {
-	hmcUnfSq[icent][ix][it]->Write("",TObject::kOverwrite);
+	hmcUnf1d[icent][ix][it]->Write("",TObject::kOverwrite);
       }
       
       if ( doUnfData )  {
-	hdataRawSq[icent][ix]->Write("",TObject::kOverwrite);
+	hdataRaw1d[icent][ix]->Write("",TObject::kOverwrite);
 	for ( int it = 0 ; it< int(nIter.size()) ; it++) {
-	  hdataUnfSq[icent][ix][it]->Write("",TObject::kOverwrite);
+	  hdataUnf1d[icent][ix][it]->Write("",TObject::kOverwrite);
 	}
 	
       }
@@ -247,7 +225,7 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
     }
   }
   fout->Close();
-
+  
   
 }
 
@@ -359,25 +337,22 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
       double recoVarY, truthVarY;
       getYvalues( recoVarY, truthVarY, myJetMc, optY);
 
-      
       // Black list?
       //      if ( isTooSmall(hRecoEntries, recoVarX, recoVarY,10) ) {
 	//        cout << "isTooSmall! " << endl;
 	//        cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoVarX <<", "<<recoVarY<<endl;
       //        continue;
       //      }
-    
+      
       double rewFact = 1;
       if ( doReweight) {
-	double recoM2 = myJetMc.recoMass * myJetMc.recoMass;
-        double recoPt2 = myJetMc.recoPt * myJetMc.recoPt;
-	if ( myJetMc.recoMass < 0 ) recoM2 = - recoM2;
-        double recoVarY =  recoM2 / recoPt2;
-
+	//	double recoM2 = myJetMc.recoMass * myJetMc.recoMass;
+	//        double recoPt2 = myJetMc.recoPt * myJetMc.recoPt;
+	//	if ( myJetMc.recoMass < 0 ) recoM2 = - recoM2;
+	//        double recoVarY =  recoM2 / recoPt2;
 	//	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass / myJetMc.recoPt);
 	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
         rewFact = hReweight->GetBinContent(rewBin);
-	
       }
       
       // FCAL reweighting factors 
@@ -397,10 +372,6 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, double radius) {
   TH1::SetDefaultSumw2();
   hdataRaw->Reset();
-
-
-
-
 
   TString fname;
   if ( radius == 0.4 ) {
@@ -431,20 +402,10 @@ void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, 
     double recoVarY, truthVarY;
     getYvalues( recoVarY, truthVarY, myJet, optY);
     
-
     hdataRaw->Fill ( recoVarX, recoVarY); 
   }
   
 }
-
-void transformSqrt( TH1D* h1, TH1D* h2) { 
-  h2->Reset();
-  for ( int i = 1 ; i <=h1->GetNbinsX() ; i++) {
-    h2->SetBinContent(i,  h1->GetBinContent(i) );
-    h2->SetBinError(i,  h1->GetBinError(i) );
-  }
-}
-
 
 bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {
   int theBin = hEntries->FindBin(recoVarX, recoVarY);

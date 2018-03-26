@@ -47,8 +47,7 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
   
   int nYbins ;
   double yBin[30] ;
-  double yBinSqrt[30] ;
-  getYbin(nYbins, yBin, yBinSqrt, optY);
+  getYbin(nYbins, yBin, optY);
 
 
   TH2D* hTruthTemp = new TH2D("hTruth","",nXbins,xBin,nYbins,yBin);
@@ -63,7 +62,7 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
   
   TH2D* hResX[7]; // response matrix for pT ( mass integrated)
   TH2D* hResY[7]; // response matrix for mass ( pT integrated)
-  TH2D* h2dtempM = new TH2D("h2dtemp",";Truth (m/p_{T})^{2};Reco (m/p_{T})^{2}",100,-0.02,0.12,100,-0.02,0.12);
+  TH2D* h2dtempM = new TH2D("h2dtemp",";Truth m/p_{T};Reco m/p_{T}",100,-0.5,0.5,100,-0.5,0.5);
   for ( int i=0 ; i<=6; i++) {
     int icent = i;
     if ( !selectedCent(icent))       continue;
@@ -75,7 +74,7 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
     hReco[i]->Reset();
     
     hResX[i] = new TH2D(Form("hResPt_icent%d",icent), ";Truth p_{T} (GeV/c);Reco p_{T} (GeV/c)",nXbins,xBin,nXbins,xBin);
-    hResY[i] = new TH2D(Form("hResM_icent%d",icent), ";Truth (m/p_{T})^{2};Reco (m/p_{T})^{2}",nYbins,yBin,nYbins,yBin);
+    hResY[i] = new TH2D(Form("hResM_icent%d",icent), ";Truth m/p_{T};Reco m/p_{T}",nYbins,yBin,nYbins,yBin);
 
     res[i] = getResponse(kSample, i, optX, optY, hTruth[i], hReco[i], hResX[i], hResY[i], radius,doReweight);
 
