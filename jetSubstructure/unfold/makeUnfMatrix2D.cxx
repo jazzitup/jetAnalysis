@@ -8,14 +8,11 @@ using std::endl;
 #include "TH1D.h"
 #include "TH2D.h"
 
-#include "RooUnfoldResponse.h"
-#include "RooUnfoldBayes.h"
-//#include "RooUnfoldSvd.h"
-//#include "RooUnfoldTUnfold.h"
+//#include "RooUnfoldResponse.h"
+//#include "RooUnfoldBayes.h"
 
 #include "../getSdHists.C"
 #include "../ntupleDefinition.h"
-//#include "../ntupleDefinition_v50.h"
 #include "../commonUtility.h"
 #include "../jzWeight.h"
 #endif
@@ -33,7 +30,7 @@ double fracStstData=01;
 
 bool useFullMC = false;
 
-RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, TH2D* respX=0, TH2D* respY=0, double radius =0.4,bool doReweight = true);
+void getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, TH2D* hMatrix=0, TH2D* respX=0, TH2D* respY=0, double radius =0.4,bool doReweight = true);
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
@@ -117,7 +114,7 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
   fout->Close();
 }
 
-RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, TH2D* respX, TH2D* respY, double radius, bool doReweight)
+RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, TH2D* hMatrix, TH2D* respX, TH2D* respY, double radius, bool doReweight)
 {
   
   TH1::SetDefaultSumw2();
