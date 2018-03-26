@@ -16,6 +16,28 @@ TH2D* getRewTable(int kSample, int icent)  {
 
 
 
+const int maxBin1d = 300;
+const int maxXbins = 15;
+const int maxYbins = 15;
+
+int get1dBin( int xBin, int yBin) {
+  if ( (xBin >= maxXbins-1 ) || ( yBin >= maxYbins-1)) {
+    cout << " not enough bin numbers" << endl;
+    return -1;
+  }
+  return xBin * maxXbins + yBin ;
+}
+
+int getXBinFrom2d( int bin1d) {
+  return bin1d%maxXbins;
+}
+int getYBinFrom2d( int bin1d) {
+  return bin1d/maxXbins;
+}
+
+
+
+
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
   else return false; 

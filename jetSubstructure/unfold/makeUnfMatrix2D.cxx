@@ -30,7 +30,7 @@ double fracStstData=01;
 
 bool useFullMC = false;
 
-void getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, TH2D* hMatrix=0, TH2D* respX=0, TH2D* respY=0, double radius =0.4,bool doReweight = true);
+void getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH1D* hTruth1d=0, TH1D* hReco1d=0, TH2D* hMatrix=0, TH2D* respX=0, TH2D* respY=0, double radius =0.4,bool doReweight = true);
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
@@ -42,20 +42,25 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
   cout << " nXbins = " << nXbins << endl; 
   cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
   
+  TH1D* histXbin = new TH1D("histXbin","",nXbins, xBin);
+
   int nYbins ;
   double yBin[30] ;
   getYbin(nYbins, yBin, optY);
 
+  TH1D* histYbin = new TH1D("histYbin","",nYbins, yBin);
 
   TH2D* hTruthTemp = new TH2D("hTruth","",nXbins,xBin,nYbins,yBin);
   TH2D* hRecoTemp = (TH2D*)hTruthTemp->Clone("hReco");
-  RooUnfoldResponse* res[7];
+
   
-  TH2D* hTruth[7];
-  TH2D* hReco[7];
-  TH2D* hResultMc[7];
+  //  TH2D* hTruth[7];
+  //  TH2D* hReco[7];
   
-  TH2D* hMatrix[7]; // 4-d matrix unrolled to 2-d
+  TH1D* hTruth1d[7];
+  TH1D* hReco1d[7];
+  TH2D* hMatrix[7];   
+  
   
   TH2D* hResX[7]; // response matrix for pT ( mass integrated)
   TH2D* hResY[7]; // response matrix for mass ( pT integrated)
@@ -65,18 +70,21 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
     if ( !selectedCent(icent))       continue;
     if ( (kSample == kPP) && ( icent != 0 ) )      continue;
 
-    hTruth[i] = (TH2D*)hTruthTemp->Clone(Form("%s_icent%d",hTruthTemp->GetName(),i));
-    hReco[i] = (TH2D*)hRecoTemp->Clone(Form("%s_icent%d",hRecoTemp->GetName(),i));
-    hTruth[i]->Reset();
-    hReco[i]->Reset();
+    //    hTruth[i] = (TH2D*)hTruthTemp->Clone(Form("%s_icent%d",hTruthTemp->GetName(),i));
+    //    hReco[i] = (TH2D*)hRecoTemp->Clone(Form("%s_icent%d",hRecoTemp->GetName(),i));
+    //    hTruth[i]->Reset();
+    //    hReco[i]->Reset();
+    
+    hTruth1d[i] = new TH1D(Form("hTruth1d_icent%d",i),"",maxBin1d,0.5,maxBin1d+0.5);
+    hReco1d[i] = new TH1D(Form("hReco1d_icent%d",i),"",maxBin1d,0.5,maxBin1d+0.5);
+    hMatrix[i] = new TH2D(Form("hMatrix1d_icent%d",i),"",maxBin1d,0.5,maxBin1d+0.5, maxBin1d,0.5,maxBin1d+0.5);
     
     hResX[i] = new TH2D(Form("hResPt_icent%d",icent), ";Truth p_{T} (GeV/c);Reco p_{T} (GeV/c)",nXbins,xBin,nXbins,xBin);
     hResY[i] = new TH2D(Form("hResM_icent%d",icent), ";Truth m/p_{T};Reco m/p_{T}",nYbins,yBin,nYbins,yBin);
 
-    res[i] = getResponse(kSample, i, optX, optY, hTruth[i], hReco[i], hResX[i], hResY[i], radius,doReweight);
+    getResponse(kSample, i, optX, optY, hTruth1d[i], hReco1d[i], hMatrix[i], hResX[i], hResY[i], radius,doReweight);
 
     TCanvas* c01 = new TCanvas("c01", "",600,500);
-    hMatrix[i] = (TH2D*)res[i]->Hresponse();
     hMatrix[i]->SetXTitle("Bin # of reco (p_{T}, m/p_{T})");
     hMatrix[i]->SetYTitle("Bin # of truth (p_{T}, m/p_{T})");
     hMatrix[i]->SetTitle("MC Response matrix");
@@ -105,19 +113,28 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
     int icent = i;
     if ( !selectedCent(icent))      continue;
     if ( (kSample == kPP) && ( icent !=0 ) )      continue;
-    res[i]->Write();
     hMatrix[i]->Write();
-    hReco[i]->Write();
-    hTruth[i]->Write();
-
+    hReco1d[i]->Write();
+    hTruth1d[i]->Write();
+    
   }
   fout->Close();
 }
 
-RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, TH2D* hMatrix, TH2D* respX, TH2D* respY, double radius, bool doReweight)
+void getResponse(int kSample,  int icent,  int optX, int optY, TH1D* hTruth1d, TH1D* hReco1d, TH2D* hMatrix, TH2D* respX, TH2D* respY, double radius, bool doReweight)
 {
-  
   TH1::SetDefaultSumw2();
+  int nXbins;
+  double xBin[30];
+  getXbin(nXbins, xBin, optX);
+  TH1D* histXbin = new TH1D("histXbin","",nXbins, xBin);
+
+  int nYbins ;
+  double yBin[30] ;
+  getYbin(nYbins, yBin, optY);
+  TH1D* histYbin = new TH1D("histYbin","",nYbins, yBin);
+
+
   TString jz2;
   TString jz3;
   TString jz4;
@@ -177,103 +194,82 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TTree* tr4 = (TTree*)fjz4->Get("tr");
   tr4->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
 
-  int nXbins;
-  double xBin[30];
-  getXbin(nXbins, xBin, optX);
 
-  TH1D* xBinTemp = new TH1D("xBinTemp","", nXbins, xBin);
-  
-  RooUnfoldResponse* res;
-  
-  for ( int iloop = 0 ; iloop <=1 ; iloop++) {  
-    // iloop =0 : fill histogram 
-    // iloop =1 : fill response matrix 
-    
-    if ( iloop == 1) {   
-      //      res = new RooUnfoldResponse( hTruth, hReco );
-      res = new RooUnfoldResponse( hReco, hTruth );
-      res->SetName(Form("responseMatrix_icent%d",icent));
+  for ( int ijz =2 ; ijz<=4 ; ijz++) { 
+    TTree* tr;
+    TH2D* hRecoEntries;
+    double jzNorm=0;
+    if ( ijz==2)  {
+      tr = tr2;   
+      jzNorm = hi9EvtWgtJZ2; 
+      hRecoEntries = recoEntries_jz2;
     }
+    else if ( ijz==3)  {
+      tr = tr3;   
+      jzNorm = hi9EvtWgtJZ3; 
+      hRecoEntries = recoEntries_jz3;
+    }
+    else if ( ijz==4)  {
+      tr = tr4;   
+      jzNorm = hi9EvtWgtJZ4; 
+      hRecoEntries = recoEntries_jz4;
+    }
+    cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
     
-    for ( int ijz =2 ; ijz<=4 ; ijz++) { 
-      TTree* tr;
-      TH2D* hRecoEntries;
-      double jzNorm=0;
-      if ( ijz==2)  {
-	tr = tr2;   
-	jzNorm = hi9EvtWgtJZ2; 
-	hRecoEntries = recoEntries_jz2;
+    for (Int_t i= 0; i<tr->GetEntries() ; i++) {
+      if ( i > tr->GetEntries() * fracStst ) continue;
+      tr->GetEntry(i);
+      
+      if ( useFullMC && (i%2==0) )
+	continue;
+      
+      if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
+	continue;
+      
+      double recoVarX, truthVarX;
+      getXvalues( recoVarX, truthVarX, myJetMc, optX);
+      
+      double recoVarY, truthVarY;
+      getYvalues( recoVarY, truthVarY, myJetMc, optY);
+      
+      double fcalWeight = 1.0; 
+      if ( kSample==kPbPb) {
+	//	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
       }
-      else if ( ijz==3)  {
-	tr = tr3;   
-	jzNorm = hi9EvtWgtJZ3; 
-	hRecoEntries = recoEntries_jz3;
+      
+      // Data/MC reweighting factors 
+      double rewFact = 1; 
+      if ( doReweight) { 
+	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
+	rewFact = hReweight->GetBinContent(rewBin);
       }
-      else if ( ijz==4)  {
-	tr = tr4;   
-	jzNorm = hi9EvtWgtJZ4; 
-	hRecoEntries = recoEntries_jz4;
-      }
-      cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
 
-      for (Int_t i= 0; i<tr->GetEntries() ; i++) {
-	if ( i > tr->GetEntries() * fracStst ) continue;
-	tr->GetEntry(i);
-	
-	if ( useFullMC && (i%2==0) )
-	  continue;
-	
-	
-	if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
-	  continue;
-	
-	double recoVarX, truthVarX;
-	getXvalues( recoVarX, truthVarX, myJetMc, optX);
-	
-	double recoVarY, truthVarY;
-	getYvalues( recoVarY, truthVarY, myJetMc, optY);
-	
-	// Black list?
-	//      if ( isTooSmall(hRecoEntries, recoVarX, recoVarY,10) ) {
-	//	cout << "isTooSmall! " << endl;
-	//	cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoVarX <<", "<<recoVarY<<endl;
-	//	continue;
-	//      }
-	
-	double fcalWeight = 1.0; 
-	if ( kSample==kPbPb) {
-	  //	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
-	}
-	
-	// Data/MC reweighting factors 
-	double rewFact = 1; 
-	if ( doReweight) { 
-	  int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
-	  rewFact = hReweight->GetBinContent(rewBin);
-	}
-	
-	if ( iloop ==0 ) {
-	  hTruth->Fill(truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-	  hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-	  respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
-	  respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
-	}
-	else if ( iloop ==1 ) { 
-	  res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-	}
-
-      }
+      int truthXbin = histXbin->FindBin( truthVarX) ;
+      int recoXbin = histXbin->FindBin( recoVarX) ;
+      int truthYbin = histYbin->FindBin( truthVarY) ;
+      int recoYbin = histYbin->FindBin( recoVarY) ;
+      
+      int truth1dBin = get1dBin( truthXbin,truthYbin);
+      int reco1dBin = get1dBin( recoXbin, recoYbin);
+      
+      hTruth1d->Fill( truth1dBin, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+      hReco1d->Fill( reco1dBin, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+      hMatrix->Fill( reco1dBin, truth1dBin, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+      
+      respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+      respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+      
       
     }
   }
-  return res;
+
 }
 
 bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {
   int theBin = hEntries->FindBin(recoVarX, recoVarY);
   if (  hEntries->GetBinContent(theBin) < minEntries ) 
     return true;
-
+  
   return false;
   
 }
