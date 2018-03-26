@@ -325,7 +325,7 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 
       tr->GetEntry(i);
 
-      if ( useFullMC && (i%2 != 0) )
+      if ( useFullMC && (i%2 != 1) )
 	continue;
 
 
