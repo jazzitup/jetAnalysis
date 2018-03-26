@@ -101,13 +101,22 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
     if ( !selectedCent(i) )  continue;
     if ( (kSample == kPP) && ( i != 0 ) )      continue;
     //    res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
-    //    TH2D* h2ResMatrix = (TH2D*)fmatrix->Get(Form("hReco_icent%d_hTruth_icent%d",icent,icent)); //
+    TH2D* h2ResMatrix = (TH2D*)fmatrix->Get(Form("hReco_icent%d_hTruth_icent%d",icent,icent)); //
     //    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
+    //    TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
+    //    TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
+    //RooUnfoldResponse* tempRes  = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
+    //    TH2D* h2ResMatrix = (TH2D*)tempRes->Hresponse(); 
+    //    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
+    //    res[i] = new RooUnfoldResponse(0,0, h2ResMatrix);
     TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
     TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
-    RooUnfoldResponse* tempRes  = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
-    TH2D* h2ResMatrix = (TH2D*)tempRes->Hresponse(); 
-    res[i] = new RooUnfoldResponse(h2Reco, h2Truth, h2ResMatrix);
+    TH2D* h2RecoTemp = (TH2D*)h2Reco->Clone("h2RecoTemp");
+    TH2D* h2TruthTemp = (TH2D*)h2Truth->Clone("h2TruthTemp");
+    h2RecoTemp->Reset();
+    h2TruthTemp->Reset();
+    res[i] = new RooUnfoldResponse(h2RecoTemp, h2TruthTemp, h2ResMatrix);
+    //    res[i] = new RooUnfoldResponse(h2Reco, h2Truth, h2ResMatrix);
     //res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); 
     
   }
@@ -115,7 +124,7 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
   
   
   vector<int> nIter;
-  for ( int it = 1 ; it<=50 ; it++) { 
+  for ( int it = 1 ; it<=15 ; it++) { 
     nIter.push_back(it);
     if ( it > maxIter -1 )   cout << " The size of array is not enough! " << endl;
   }
@@ -140,7 +149,7 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
     }
     
   }
-  
+
   // Let's draw.
   TH1D* hmcUnf1d[7][30][maxIter]; // cent, pT bin
   TH1D* hmcTruth1d[7][30]; // cent, pT bin
@@ -338,7 +347,7 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 
       tr->GetEntry(i);
 
-      if ( useFullMC && (i%2!=0) )
+      if ( useFullMC && (i%2 != 0) )
 	continue;
 
 
