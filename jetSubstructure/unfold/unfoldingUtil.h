@@ -25,14 +25,14 @@ int get1dBin( int xBin, int yBin) {
     cout << " not enough bin numbers" << endl;
     return -1;
   }
-  return xBin * maxXbins + yBin ;
+  return xBin * maxYbins + yBin ;
 }
 
 int getXBinFrom2d( int bin1d) {
-  return bin1d%maxXbins;
+  return bin1d/maxXbins;
 }
 int getYBinFrom2d( int bin1d) {
-  return bin1d/maxXbins;
+  return bin1d%maxXbins;
 }
 
 

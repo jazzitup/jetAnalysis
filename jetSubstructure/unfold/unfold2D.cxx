@@ -30,7 +30,7 @@ int mFlag = 0 ;
 
 double statFrac = 001;
 double fracStstData = 001;
-bool doUnfData = true ;
+bool doUnfData = false ;
 
 bool useFullMC = false;
 
@@ -39,8 +39,10 @@ int lowPtBin = 1;  int highPtBin = 13;
 
 int nPtPannels = highPtBin-lowPtBin+1;
 
-void getMCspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH2D* hmcRaw=0, TH2D* hmcTruth=0, double radius=0.4, bool doReweight=true);
+void getMCspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH1D* hmcRawFlat=0, TH1D* hmcTruthFlat=0, double radius=0.4, bool doReweight=true);
 void getDATAspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH2D* hdataRaw=0, double radius=0.4);
+
+void unflatten( TH1D* hFlat=0, TH2D* h2d=0) ;
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
@@ -58,6 +60,8 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
 
 
   TH2D* hTemp = new TH2D("hptTemp","",nXbins,xBin,nYbins, yBin);
+  TH1D* hTempFlat =  new TH1D("hTempFlat","",maxBin1d,0.5,maxBin1d+0.5);
+
   RooUnfoldResponse* res[7];
 
   const int maxIter = 60;
@@ -66,8 +70,15 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
   TH2D* hmcTruth[7];
   TH2D* hmcUnf[7][maxIter]; // unfolding iter
 
+  TH1D* hmcRawFlat[7];
+  TH1D* hmcTruthFlat[7];
+  TH1D* hmcUnfFlat[7][maxIter]; // unfolding iter
+
   TH2D* hdataRaw[7];
   TH2D* hdataUnf[7][maxIter]; // unfolding iter
+
+  TH1D* hdataRawFlat[7];
+  TH1D* hdataUnfFlat[7][maxIter]; // unfolding iter
 
   int matrixWeight = 1;
   TFile* fmatrix = new TFile(Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",
@@ -81,9 +92,9 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     if ( (kSample == kPP) && ( icent != 0 ) )      continue;
 
     // MC 
-    hmcRaw[i] = (TH2D*)hTemp->Clone(Form("hmcRaw_icent%d",i));
-    hmcTruth[i] = (TH2D*)hTemp->Clone(Form("hmcTruth_icent%d",i));
-    getMCspectra(kSample, icent, optX, optY, hmcRaw[i], hmcTruth[i], radius, doReweight) ;
+    hmcRawFlat[i] = (TH1D*)hTempFlat->Clone(Form("hmcRawFlat_icent%d",i));
+    hmcTruthFlat[i] = (TH1D*)hTempFlat->Clone(Form("hmcTruthFlat_icent%d",i));
+    getMCspectra(kSample, icent, optX, optY, hmcRawFlat[i], hmcTruthFlat[i], radius, doReweight) ;
 
         
     // Data
@@ -99,7 +110,6 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     if ( !selectedCent(i) )  continue;
     if ( (kSample == kPP) && ( i != 0 ) )      continue;
     //    res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
-    TH2D* h2ResMatrix = (TH2D*)fmatrix->Get(Form("hReco_icent%d_hTruth_icent%d",icent,icent)); //
     //    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
     //    TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
     //    TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
@@ -107,13 +117,19 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     //    TH2D* h2ResMatrix = (TH2D*)tempRes->Hresponse(); 
     //    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
     //    res[i] = new RooUnfoldResponse(0,0, h2ResMatrix);
-    TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
-    TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
-    TH2D* h2RecoTemp = (TH2D*)h2Reco->Clone("h2RecoTemp");
-    TH2D* h2TruthTemp = (TH2D*)h2Truth->Clone("h2TruthTemp");
-    h2RecoTemp->Reset();
-    h2TruthTemp->Reset();
-    res[i] = new RooUnfoldResponse(h2RecoTemp, h2TruthTemp, h2ResMatrix);
+    //    TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
+    //    TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
+    //    TH2D* h2RecoTemp = (TH2D*)h2Reco->Clone("h2RecoTemp");
+    //    TH2D* h2TruthTemp = (TH2D*)h2Truth->Clone("h2TruthTemp");
+    //    h2RecoTemp->Reset();
+    //    h2TruthTemp->Reset();
+    
+    TH2D* h2ResMatrix = (TH2D*)fmatrix->Get(Form("hMatrix1d_icent%d",icent));
+    //    TH1D* hReco1d =     (TH1D*)fmatrix->Get(Form("hReco1d_icent%d",icent));
+    //    TH1D* hTruth1d = (TH1D*)fmatrix->Get(Form("hTruth1d_icent%d",icent));
+    res[i] = new RooUnfoldResponse(hmcRawFlat[icent], hmcTruthFlat[icent], h2ResMatrix);
+    //    res[i] = new RooUnfoldResponse(0, 0, h2ResMatrix);
+    //    res[i] = new RooUnfoldResponse(hmcRawFlat[i], hmcTruthFlat[i], h2ResMatrix);
     //    res[i] = new RooUnfoldResponse(h2Reco, h2Truth, h2ResMatrix);
     //res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); 
     
@@ -133,10 +149,19 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     if ( (kSample == kPP) && ( icent != 0 ) )      continue;
     
     for ( int it = 0 ; it< int(nIter.size()) ; it++) {  
-      RooUnfoldBayes unfoldMc (res[icent], hmcRaw[icent], nIter[it]);    
-      hmcUnf[icent][it] = (TH2D*)unfoldMc.Hreco();
-      hmcUnf[icent][it]->SetName( Form("hmcUnf_icent%d_iter%d",icent,nIter[it]));
+      RooUnfoldBayes unfoldMc (res[icent], hmcRawFlat[icent], nIter[it]);    
+      hmcUnfFlat[icent][it] = (TH1D*)unfoldMc.Hreco();
+      hmcUnfFlat[icent][it]->SetName( Form("hmcUnfFlat_icent%d_iter%d",icent,nIter[it]));
+      // Unflatten 2d -> 1d 
+      hmcUnf[icent][it] = (TH2D*)hTemp->Clone(Form("hmcUnf_icent%d_iter%d",icent,it));
+      unflatten(hmcUnfFlat[icent][it], hmcUnf[icent][it]);
     }
+    // Unflatten 2d -> 1d 
+    hmcRaw[icent] = (TH2D*)hTemp->Clone(Form("hmcRaw_icent%d",icent));
+    hmcTruth[icent] = (TH2D*)hTemp->Clone(Form("hmcTruth_icent%d",icent));
+    unflatten(hmcRawFlat[icent], hmcRaw[icent]);
+    unflatten(hmcTruthFlat[icent], hmcTruth[icent]);
+    
     // Data
     if ( doUnfData )  {
       for ( int it = 0 ; it< int(nIter.size()) ; it++) {      
@@ -147,8 +172,10 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     }
     
   }
+  
 
   // Let's draw.
+
   TH1D* hmcUnf1d[7][30][maxIter]; // cent, pT bin
   TH1D* hmcTruth1d[7][30]; // cent, pT bin
   TH1D* hmcRaw1d[7][30]; // cent, pT bin
@@ -230,19 +257,23 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
 }
 
 
-void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D* hmcTruth, double radius, bool doReweight) {
+void getMCspectra(int kSample, int icent, int optX, int optY, TH1D* hmcRawFlat, TH1D* hmcTruthFlat, double radius, bool doReweight) {
   
   TH1::SetDefaultSumw2();
-  hmcRaw->Reset();
-  hmcTruth->Reset();
+  hmcRawFlat->Reset();
+  hmcTruthFlat->Reset();
+
+  int nXbins;
+  double xBin[30];
+  getXbin(nXbins, xBin, optX);
+  TH1D* histXbin = new TH1D("histXbin","",nXbins, xBin);
+
+  int nYbins ;
+  double yBin[30] ;
+  getYbin(nYbins, yBin, optY);
+  TH1D* histYbin = new TH1D("histYbin","",nYbins, yBin);
 
   
-  //  TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
-  //  TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
-  //  TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
-  //  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
-
-
   TString jz2;
   TString jz3;
   TString jz4;
@@ -360,9 +391,15 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
       if ( kSample==kPbPb) {
 	//        fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
       }
-      
-      hmcRaw->Fill( recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-      hmcTruth->Fill( truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+      int truthXbin = histXbin->FindBin( truthVarX) ;
+      int recoXbin = histXbin->FindBin( recoVarX) ;
+      int truthYbin = histYbin->FindBin( truthVarY) ;
+      int recoYbin = histYbin->FindBin( recoVarY) ;
+      int truth1dBin = get1dBin( truthXbin,truthYbin);
+      int reco1dBin = get1dBin( recoXbin, recoYbin);
+            
+      hmcRawFlat->Fill(   reco1dBin,  myJetMc.weight * rewFact * jzNorm * fcalWeight);
+      hmcTruthFlat->Fill( truth1dBin,  myJetMc.weight * rewFact * jzNorm * fcalWeight);
     }
   }
   
@@ -406,6 +443,37 @@ void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, 
   }
   
 }
+
+void unflatten(TH1D* hFlat, TH2D* h2d) {
+  for (int ii = 1 ; ii<= hFlat->GetNbinsX() ; ii++) {
+    double theVal = hFlat->GetBinContent(ii);
+    double theErr = hFlat->GetBinError(ii);
+    int ix = getXBinFrom2d(ii);
+    int iy = getYBinFrom2d(ii);
+    if ( ix >= maxXbins-1 ) 
+      continue;
+    if ( iy >= maxYbins-1 ) 
+      continue;
+
+    if ( get1dBin( ix, iy) != ii ) {
+      cout << " get1dBin and get2d bin are incompatible!!!" << endl;
+      cout << "ix = " << ix << endl;
+      cout << "iy = " << iy << endl;
+      cout << "ii = " << ii << endl;
+      cout << "get1dBin( ix, iy) = " << get1dBin( ix, iy) << endl;
+
+    }
+
+    h2d->SetBinContent( ix, iy, theVal);
+    h2d->SetBinError  ( ix, iy, theErr);
+    
+  }
+}
+
+
+
+
+
 
 bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {
   int theBin = hEntries->FindBin(recoVarX, recoVarY);
