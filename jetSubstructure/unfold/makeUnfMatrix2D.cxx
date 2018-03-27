@@ -227,14 +227,15 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	  continue;
 	
 	
-	if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
-	  continue;
+	//	if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
+	//	  continue;
 	
 	double recoVarX, truthVarX;
 	getXvalues( recoVarX, truthVarX, myJetMc, optX);
 	
 	double recoVarY, truthVarY;
 	getYvalues( recoVarY, truthVarY, myJetMc, optY);
+	
 	
 	// Black list?
 	//      if ( isTooSmall(hRecoEntries, recoVarX, recoVarY,10) ) {
@@ -256,15 +257,19 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	}
 	
 	if ( iloop ==0 ) {
-	  hTruth->Fill(truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-	  hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-	  respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
-	  respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+	  if ( passGenEvent(myJetMc, icent) )
+	    hTruth->Fill(truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+	  if ( passRecoEvent(myJetMc, icent) )
+	    hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
 	}
 	else if ( iloop ==1 ) { 
-	  res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+	  if ( passEvent(myJetMc, icent, true))  { // true = isMC
+	    res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+	    respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+	    respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+	  }
 	}
-
+	
       }
       
     }

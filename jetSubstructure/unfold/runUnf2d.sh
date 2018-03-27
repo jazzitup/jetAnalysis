@@ -10,7 +10,7 @@ gSystem->Load("libRooUnfold");
 .L unfold2D_matrixWeight0.cxx++
 EOF
 
-for kSample in 1 # 0 = pp,  1 = pbpb
+for kSample in 0 # 0 = pp,  1 = pbpb
 do
     for optX in 1  # 1
     do

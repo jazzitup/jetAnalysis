@@ -327,10 +327,6 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 
       if ( useFullMC && (i%2 != 1) )
 	continue;
-
-
-      if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
-        continue;
       
       double recoVarX, truthVarX;
       getXvalues( recoVarX, truthVarX, myJetMc, optX);
@@ -361,8 +357,11 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 	//        fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
       }
       
-      hmcRaw->Fill( recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-      hmcTruth->Fill( truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+      if ( passRecoEvent(myJetMc, icent) )
+	hmcRaw->Fill( recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+      if ( passGenEvent(myJetMc, icent) )
+	hmcTruth->Fill( truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+      
     }
   }
   

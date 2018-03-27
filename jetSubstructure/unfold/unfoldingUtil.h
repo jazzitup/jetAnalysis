@@ -88,10 +88,10 @@ void getYbin(int &nBins, double* yBin, int optY) {
     }
   }
   else if ( (optY==2) || (optY==8) ) {
-    //    nBins = 10;
-    //    double massBin[11] = { -0.5,-0.05,0,0.05,0.1,0.13,0.16,0.2,0.24,0.3,0.5};
-    nBins = 9;
-    double massBin[10] = { -0.5,0,0.03,0.06,0.09,0.12,0.15,0.18,0.24,0.5};
+    nBins = 10;
+    double massBin[11] = { -0.5,-0.05,0,0.05,0.1,0.13,0.16,0.2,0.24,0.3,0.5};
+    //    nBins = 9;
+    //    double massBin[10] = { -0.5,0,0.03,0.06,0.09,0.12,0.15,0.18,0.24,0.5};
     for ( int i=0 ; i<= nBins ; i++) {
       yBin[i] = massBin[i];
     }
@@ -198,30 +198,52 @@ void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int opt
 
 }
 
-bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
+
+bool passGenEvent( jetSubStr myJetMc, int icent)  {
+
+  double ptCutGen = 20;
+  double ptCutUpGen = 630.944;
+  
+  if ( myJetMc.cent != icent )
+    return false;
+  
+  if ( myJetMc.genPt < ptCutGen ) 
+    return false;
+  
+  if ( myJetMc.genPt > ptCutUpGen ) 
+    return false;
+  
+  return true;
+  
+}
+
+
+bool passRecoEvent( jetSubStr myJetMc, int icent)  {
 
   double ptCut = 100;
-  double ptCutGen = 20;
-
   double ptCutUp = 1000;
-  double ptCutUpGen = 630.944;
 
   if ( myJetMc.cent != icent )
     return false;
+
   if ( myJetMc.recoPt < ptCut )
     return false;
 
   if ( myJetMc.recoPt > ptCutUp )
     return false;
-
-  if ( (isMC) && ( myJetMc.genPt < ptCutGen ) ) 
-    return false;
-
-  if ( (isMC) && ( myJetMc.genPt > ptCutUpGen ) ) 
-    return false;
-
+  
   return true;
 
 }
 
+
+bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
+  if ( !passRecoEvent(myJetMc, icent) )
+    return false;
+  if ( (isMC) && !passGenEvent(myJetMc, icent) )
+    return false;
+  
+  return true;
+  
+} 
 
