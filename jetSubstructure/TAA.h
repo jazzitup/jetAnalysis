@@ -21,6 +21,12 @@ double getTaaRelErr(int icent) {
   else return 0;
 }
 
+double getLumiRelErr(int icent) { 
+  float ppUnc = 0.054;
+  float pbpbUnc = getTaaRelErr(icent);
+  return sqrt ( ppUnc*ppUnc + pbpbUnc*pbpbUnc );
+}
+
 double getNEvent(int icent, double lumi = 0.49) { // 0.49 nb
   double scaleFac = lumi/0.49;
   if ( icent < 6)
