@@ -88,8 +88,10 @@ void getYbin(int &nBins, double* yBin, int optY) {
     }
   }
   else if ( (optY==2) || (optY==8) ) {
-    nBins = 10;
-    double massBin[11] = { -0.5,-0.05,0,0.05,0.1,0.13,0.16,0.2,0.24,0.3,0.5};
+    //    nBins = 10;
+    //    double massBin[11] = { -0.5,-0.05,0,0.05,0.1,0.13,0.16,0.2,0.24,0.3,0.5};
+    nBins = 9;
+    double massBin[10] = { -0.5,0,0.03,0.06,0.09,0.12,0.15,0.18,0.24,0.5};
     for ( int i=0 ; i<= nBins ; i++) {
       yBin[i] = massBin[i];
     }
