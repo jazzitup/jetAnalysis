@@ -6,7 +6,7 @@ using std::endl;
 #include "TH1D.h"
 
 #include "../getSdHists.C"
-#include "../ntupleDefinition_v50.h"
+#include "../ntupleDefinition.h"
 #include "../commonUtility.h"
 #include "../jzWeight.h"
 #include "unfoldingUtil.h"
@@ -58,11 +58,10 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
 
 
   int nYbins ;
-  double y2Bin[30] ;
   double yBin[30] ;
-  if ( opt==1)  getYbin(nYbins, y2Bin, yBin, 77);
-  else if ( opt==2)  getYbin(nYbins, y2Bin, yBin, 77);
-  else if ( opt==771)  getYbin(nYbins, y2Bin, yBin, 771);
+  if ( opt==1)  getYbin(nYbins, yBin, 77);
+  else if ( opt==2)  getYbin(nYbins, yBin, 77);
+  else if ( opt==771)  getYbin(nYbins, yBin, 771);
   
   TH2D* hTemp = new TH2D("hptTemp","", nXbins, xBin, nYbins, yBin);
   
@@ -72,14 +71,14 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   TH2D* hmcRaw   = (TH2D*)hTemp->Clone(Form("hmcRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
   TH2D* hmcTruth = (TH2D*)hTemp->Clone(Form("hmcTruth_kSample%d_icent%d_opt%d",kSample,i,opt));
   TH2D* hdataRaw = (TH2D*)hTemp->Clone(Form("hdataRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
-
+  //  TH3D* hPtMassGenMass = new TH3D("hPtMassGenMass","",nXbins, xBin, nYbins, yBin,nYbins, yBin);
   //void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0); 
   getMCspectra   ( kSample, icent, opt, hmcRaw, hmcTruth);
   getDATAspectra ( kSample, icent, opt, hdataRaw);
   
   
-  for ( int ix= 1 ; ix<= nXbins; ix++) {
-    for ( int iy= 1 ; iy<= nYbins; iy++) {
+  for ( int ix= 1 ; ix <= nXbins; ix++) {
+    for ( int iy= 1 ; iy <= nYbins; iy++) {
       if ( hmcRaw->GetBinContent(ix,iy) == 0 )  cout << "MC :found a null bin ix, iy = " << ix<<", "<<iy<< endl;
       if ( hdataRaw->GetBinContent(ix,iy) == 0 )  cout << "DATA :found a null bin ix, iy = " << ix<<", "<<iy<< endl;
     }
@@ -115,9 +114,24 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
 	hRatioSmooth->SetBinContent(ix, iy, 0.2 ); 
     }
   }
-
   
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_fcalWeighted.root",(int)weightCut,opt,(float)flucCut),"update");
+  TCanvas* c1=  new TCanvas("c1","",1200,600);
+  c1->Divide(5,2);
+  for ( int ix = 1 ; ix<= nXbins ; ix++) {
+    c1->cd(ix);
+    TH1D* h1mc = (TH1D*)hmcRaw->ProjectionY(Form("hmcRaw_%d",ix),ix,ix);
+    TH1D* h1data = (TH1D*)hdataRaw->ProjectionY(Form("hdataRaw_%d",ix),ix,ix);
+    scaleInt(h1data);
+    scaleInt(h1mc);
+    handsomeTH1(h1mc,1);
+    handsomeTH1(h1data,2);
+    cleverRangeLog(h1mc);
+    h1mc->Draw();
+    h1data->Draw("same");
+    gPad->SetLogy();
+  }
+  
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_test.root",(int)weightCut,opt,(float)flucCut),"update");
   hmcRaw->Write();
   hmcTruth->Write();
   hdataRaw->Write();
@@ -143,14 +157,14 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
   TString jz3;
   TString jz4;
   if ( kSample == kPbPb ) {
-    jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2.root";
-    jz3 = "jetSubstructure_MC_HION9_pbpb_v50_jz3.root";
-    jz4 = "jetSubstructure_MC_HION9_pbpb_v50_jz4.root";
+    jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+    jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+    jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
   }
   else if ( kSample == kPP ) {
-    jz2 = "jetSubstructure_MC_HION9_pp_v50_jz2.root";
-    jz3 = "jetSubstructure_MC_HION9_pp_v50_jz3.root";
-    jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4.root";
+    jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+    jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+    jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
   }
   
   
@@ -245,10 +259,10 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
       
       double fcalWeight = 1.0;
       if ( kSample==kPbPb) {
-        fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
+	//        fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
         //      cout <<" fcal, weight = "<<myJetMc.fcalet<<", "<<fcalWeight<<endl;
       }
-
+      
       hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm * fcalWeight);
       hmcTruth->Fill( genX, genY, myJetMc.weight * jzNorm * fcalWeight);
     }
