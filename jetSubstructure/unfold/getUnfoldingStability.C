@@ -19,8 +19,8 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=0, bool 
 
   int nYbins ;
   double yBin[30] ;
-  double yBinSqrt[30] ;
-  getYbin(nYbins, yBin, yBinSqrt, optY);
+  //  double yBinSqrt[30] ;
+  getYbin(nYbins, yBin, optY);
   TH1D* tempHistYsq;
   if ( optY == 1 ) tempHistYsq = new TH1D("tempHistY",";mass(GeV);",nYbins,yBinSqrt);
   if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m/p_{T};",nYbins,yBinSqrt);

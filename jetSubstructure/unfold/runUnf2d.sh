@@ -10,7 +10,7 @@ gSystem->Load("libRooUnfold");
 .L unfold2D_matrixWeight0.cxx++
 EOF
 
-for kSample in 0 # 0 = pp,  1 = pbpb
+for kSample in 1 0 # 0 = pp,  1 = pbpb
 do
     for optX in 1  # 1
     do
@@ -18,10 +18,10 @@ do
 	do
 	    for radius in 0.4
 	    do
-		for specRwt in 0 1
+		for specRwt in 1 0
 		do
-   	            root -l -b -q  'unfold2D_matrixWeight0.cxx+('$kSample','$optX','$optY','$radius','$specRwt')'
 		    root -l -b -q  'unfold2D.cxx+('$kSample','$optX','$optY','$radius','$specRwt')'
+   	            root -l -b -q  'unfold2D_matrixWeight0.cxx+('$kSample','$optX','$optY','$radius','$specRwt')'
 		done
 	    done
 	done

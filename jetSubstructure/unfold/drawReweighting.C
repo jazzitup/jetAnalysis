@@ -62,6 +62,7 @@ void drawReweighting(int kSample=1, int icent=0) {
   float fineEnd = xBin[nXbins];
   float fineBegin = xBin[0];
   TH2D* hout = new TH2D(Form("hRatioFit_kSample%d_icent%d_opt2",kSample,icent),";pT;m/pT",nFineBins,fineBegin,fineEnd, nYbins,yBin);
+
   TCanvas* cm2 = new TCanvas("cm2","",900,600);
   cm2->Divide(3,2);
   for ( int iy= 1 ; iy<= raw2->GetNbinsY(); iy++) {

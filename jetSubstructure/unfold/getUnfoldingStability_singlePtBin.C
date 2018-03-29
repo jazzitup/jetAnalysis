@@ -252,7 +252,7 @@ void getUnfoldingStability_singlePtBin(int kSample= kPP, int icent = 0, bool mat
       bool drawFirst=true; 
       
       for (int in = 0; in < int(vIter.size()) ; in++)  {
-	//	if ( in == refIt ) continue;
+	if ( in == refIt ) continue;
 	hdataRatio1d[ipt][in] = (TH1D*)hdataUnf1d[ipt][in]->Clone(Form("dataRatio1d_ix%d_in%d",ipt,in));
 	hdataRatio1d[ipt][in]->Divide(hdataUnf1d[ipt][refIt]);
 	hdataRatio1d[ipt][in]->SetAxisRange(0.45,1.55,"Y");

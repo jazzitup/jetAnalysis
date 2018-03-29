@@ -31,7 +31,7 @@ using std::endl;
 double fracStst=0001;
 double fracStstData=01;
 
-bool useFullMC = false;
+bool useFullMC = true; 
 
 RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, TH2D* respX=0, TH2D* respY=0, double radius =0.4,bool doReweight = true);
 
@@ -187,31 +187,23 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TH1D* xBinTemp = new TH1D("xBinTemp","", nXbins, xBin);
   
   RooUnfoldResponse* res;
-  
-  for ( int iloop = 0 ; iloop <=1 ; iloop++) {  
-    // iloop =0 : fill histogram 
-    // iloop =1 : fill response matrix 
+  res = new RooUnfoldResponse( hReco, hTruth );
+  res->SetName(Form("responseMatrix_icent%d",icent));
     
-    if ( iloop == 1) {   
-      //      res = new RooUnfoldResponse( hTruth, hReco );
-      res = new RooUnfoldResponse( hReco, hTruth );
-      res->SetName(Form("responseMatrix_icent%d",icent));
+  for ( int ijz =2 ; ijz<=4 ; ijz++) { 
+    TTree* tr;
+    TH2D* hRecoEntries;
+    double jzNorm=0;
+    if ( ijz==2)  {
+      tr = tr2;   
+      jzNorm = hi9EvtWgtJZ2; 
+      hRecoEntries = recoEntries_jz2;
+      }
+    else if ( ijz==3)  {
+      tr = tr3;   
+      jzNorm = hi9EvtWgtJZ3; 
+      hRecoEntries = recoEntries_jz3;
     }
-    
-    for ( int ijz =2 ; ijz<=4 ; ijz++) { 
-      TTree* tr;
-      TH2D* hRecoEntries;
-      double jzNorm=0;
-      if ( ijz==2)  {
-	tr = tr2;   
-	jzNorm = hi9EvtWgtJZ2; 
-	hRecoEntries = recoEntries_jz2;
-      }
-      else if ( ijz==3)  {
-	tr = tr3;   
-	jzNorm = hi9EvtWgtJZ3; 
-	hRecoEntries = recoEntries_jz3;
-      }
       else if ( ijz==4)  {
 	tr = tr4;   
 	jzNorm = hi9EvtWgtJZ4; 
@@ -223,9 +215,11 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	if ( i > tr->GetEntries() * fracStst ) continue;
 	tr->GetEntry(i);
 	
-	if ( useFullMC && (i%2==0) )
+	if ( (!useFullMC) && (i%2 == 0) )
 	  continue;
 	
+	if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
+	  continue;
 	
 	//	if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
 	//	  continue;
@@ -236,7 +230,11 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	double recoVarY, truthVarY;
 	getYvalues( recoVarY, truthVarY, myJetMc, optY);
 	
-	
+	if ( truthVarY < 0 )
+	  {// cout <<"  truthVarY < 0!!! "<< endl;
+	    //	    cout << " pt = " << myJetMc.genPt << endl;
+	    //	    cout << " m = " << myJetMc.genMass << endl;
+	  }
 	// Black list?
 	//      if ( isTooSmall(hRecoEntries, recoVarX, recoVarY,10) ) {
 	//	cout << "isTooSmall! " << endl;
@@ -252,29 +250,27 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	// Data/MC reweighting factors 
 	double rewFact = 1; 
 	if ( doReweight) { 
-	  int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
+	  //	  int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
+	  int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass/myJetMc.recoPt);
 	  rewFact = hReweight->GetBinContent(rewBin);
 	}
 	
-	if ( iloop ==0 ) {
-	  if ( passGenEvent(myJetMc, icent) )
-	    hTruth->Fill(truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-	  if ( passRecoEvent(myJetMc, icent) )
-	    hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-	}
-	else if ( iloop ==1 ) { 
-	  if ( passEvent(myJetMc, icent, true))  { // true = isMC
-	    res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-	    respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
-	    respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
-	  }
-	}
+	//	if ( passGenEvent(myJetMc, icent) )
+	//	if ( passRecoEvent(myJetMc, icent) )
+	  hTruth->Fill(truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+	  hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+	  
+	  res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+	  respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+	  respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+	
+	
 	
       }
       
-    }
   }
-  return res;
+
+return res;
 }
 
 bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {

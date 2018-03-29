@@ -19,7 +19,7 @@ void getErrorHist(TH1D* hh=0, int kSample=kPP, int icent =0, int ipt =0, int nIt
 }
 
 
-void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
+void getRAA(int icent=0, int nIter =4, int optX=1, int optY=2 ) {
   
   int nXbins;
   double xBin[30];
@@ -27,11 +27,10 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
 
   int nYbins ;
   double yBin[30] ;
-  double yBinSqrt[30] ;
-  getYbin(nYbins, yBin, yBinSqrt, optY);
+  getYbin(nYbins, yBin, optY);
   TH1D* tempHistYsq;
-  if ( optY == 1 ) tempHistYsq = new TH1D("tempHistY",";mass(GeV);",nYbins,yBinSqrt);
-  if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m/p_{T};",nYbins,yBinSqrt);
+  if ( optY == 1 ) tempHistYsq = new TH1D("tempHistY",";mass(GeV);",nYbins,yBin);
+  if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m/p_{T};",nYbins,yBin);
 
   int lowPtBin = 6;
   int highPtBin = 11;
@@ -91,18 +90,17 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
 //    gPad->SetLogy();
     
  
-    hPPUnfSys[ipt] = (TH1D*)hPPUnfSq[ipt]->Clone(Form("hPPSys_ipt%d",ipt));
-    hPbPbUnfSys[ipt] = (TH1D*)hPbPbUnfSq[ipt]->Clone(Form("hPbPbSys_ipt%d",ipt));
-    hRAAUnfSys[ipt] = (TH1D*)hPPUnfSys[ipt]->Clone(Form("hRAASys_ipt%d",ipt));
-    hPPUnfSys[ipt]->Reset(); 
-    hPbPbUnfSys[ipt]->Reset(); 
-    hRAAUnfSys[ipt]->Reset(); 
-    getErrorHist(hPPUnfSys[ipt], kPP, 0,ipt,nIter);
-    getErrorHist(hPbPbUnfSys[ipt], kPbPb, icent,ipt,nIter);
-    quadraticSum(hRAAUnfSys[ipt], hPPUnfSys[ipt], hPbPbUnfSys[ipt]);
-      
-    drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], 4, 1);
-    drawSys( hPPUnfSq[ipt], hPPUnfSys[ipt], 1, 1);
+//    hPPUnfSys[ipt] = (TH1D*)hPPUnfSq[ipt]->Clone(Form("hPPSys_ipt%d",ipt));
+//    hPbPbUnfSys[ipt] = (TH1D*)hPbPbUnfSq[ipt]->Clone(Form("hPbPbSys_ipt%d",ipt));
+//    hRAAUnfSys[ipt] = (TH1D*)hPPUnfSys[ipt]->Clone(Form("hRAASys_ipt%d",ipt));
+//    hPPUnfSys[ipt]->Reset(); 
+//    hPbPbUnfSys[ipt]->Reset(); 
+//    hRAAUnfSys[ipt]->Reset(); 
+    //    getErrorHist(hPPUnfSys[ipt], kPP, 0,ipt,nIter);
+    //    getErrorHist(hPbPbUnfSys[ipt], kPbPb, icent,ipt,nIter);
+    //    quadraticSum(hRAAUnfSys[ipt], hPPUnfSys[ipt], hPbPbUnfSys[ipt]);
+    //    drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], 4, 1);
+    //    drawSys( hPPUnfSq[ipt], hPPUnfSys[ipt], 1, 1);
     hPPUnfSq[ipt]->SetFillStyle(1);
     hPbPbUnfSq[ipt]->SetFillStyle(1);
     hPPUnfSq[ipt]->Draw("same");
@@ -137,7 +135,7 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
     fixedFontHist(hRAA[ipt],2,2.2,20);
 
     hRAA[ipt]->Draw();
-    drawSys( hRAA[ipt], hRAAUnfSys[ipt], kYellow);
+    //    drawSys( hRAA[ipt], hRAAUnfSys[ipt], kYellow);
     hRAA[ipt]->Draw("same");
     //    drawText("Ratio of per-jet distribution",0.3,0.78,2,16);
     jumSun(0,1,0.3,1);
@@ -155,8 +153,8 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
 
     hPPUnfSq[ipt]->Draw();
     hPbPbUnfSq[ipt]->Draw("same");
-    drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], kRed, 1);
-    drawSys( hPPUnfSq[ipt], hPPUnfSys[ipt], 1, 1);
+    //    drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], kRed, 1);
+    //    drawSys( hPPUnfSq[ipt], hPPUnfSys[ipt], 1, 1);
     if ( ipt == lowPtBin ) {
       drawText("#bf{#it{ATLAS}} Preliminary",0.33,0.85,1,20);
       TLegend *leg1 = new TLegend(0.7043845,0.4860943,0.9997715,0.7591246,NULL,"brNDC");
@@ -183,9 +181,9 @@ void getRAA(int icent=0, int nIter =10, int optX=1, int optY=2 ) {
 
 
 void getDATAresults(int kSample, int icent, int ix, int nIter, TH1D* hdataRawSq, TH1D* hdataUnfSq) {
-  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt1_spectraRwt0.root",kSample));
-  TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnfSq_icent%d_ix%d_iter%d",icent,ix,nIter));
-  TH1D* hRaw = (TH1D*)fin->Get(Form("hdataRawSq_icent%d_ix%d_iter%d",icent,ix,nIter));
+  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt1_spectraRwt1.root",kSample));
+  TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnf1d_icent%d_ix%d_iter%d",icent,ix,nIter));
+  //  TH1D* hRaw = (TH1D*)fin->Get(Form("hdataRaw1d_icent%d_ix%d_iter%d",icent,ix,nIter));
 
   hdataUnfSq->Reset();
   hdataUnfSq->Add(hUnf);

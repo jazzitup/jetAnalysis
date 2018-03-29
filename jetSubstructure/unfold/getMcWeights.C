@@ -25,7 +25,7 @@ int nPtPannels = highPtBin-lowPtBin+1;
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0);
+void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0, TF1* ptScale=0);
 void getDATAspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hdataRaw=0);
 
 //bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
@@ -45,7 +45,7 @@ void removeFluc2(TH2* h) {
   }
 }
 
-void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=771) {   // opt1 : mass,   opt2 : m/pT  
+void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=772) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
   
   int nXbins;
@@ -53,19 +53,25 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   if ( opt==1 ) getXbin(nXbins, xBin, 77);
   if ( opt==2 ) getXbin(nXbins, xBin, 77);
   if ( opt==771 ) getXbin(nXbins, xBin, 77);
+  if ( opt==772 ) getXbin(nXbins, xBin, 77);
   cout << " nXbins = " << nXbins << endl;
   cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
 
 
   int nYbins ;
-  double yBin[30] ;
+  double yBin[200] ;
   if ( opt==1)  getYbin(nYbins, yBin, 77);
   else if ( opt==2)  getYbin(nYbins, yBin, 77);
   else if ( opt==771)  getYbin(nYbins, yBin, 771);
+  //  else if ( opt==772)  getYbin(nYbins, yBin, 2);
+  else if ( opt==772)  getYbin(nYbins, yBin, 772);
+  cout << " nYbins = " << nYbins << endl;
+  cout << " yBin = " << yBin[0] << ",   " << yBin[1] << ",   " <<yBin[2] << ", ..." <<endl;
   
   TH2D* hTemp = new TH2D("hptTemp","", nXbins, xBin, nYbins, yBin);
   
   int i = icent;
+
 
   // MC 
   TH2D* hmcRaw   = (TH2D*)hTemp->Clone(Form("hmcRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
@@ -75,17 +81,17 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   //void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0); 
   getMCspectra   ( kSample, icent, opt, hmcRaw, hmcTruth);
   getDATAspectra ( kSample, icent, opt, hdataRaw);
-  
+
   
   for ( int ix= 1 ; ix <= nXbins; ix++) {
     for ( int iy= 1 ; iy <= nYbins; iy++) {
-      if ( hmcRaw->GetBinContent(ix,iy) == 0 )  cout << "MC :found a null bin ix, iy = " << ix<<", "<<iy<< endl;
-      if ( hdataRaw->GetBinContent(ix,iy) == 0 )  cout << "DATA :found a null bin ix, iy = " << ix<<", "<<iy<< endl;
+      //      if ( hmcRaw->GetBinContent(ix,iy) == 0 )  cout << "MC :found a null bin ix, iy = " << ix<<", "<<iy<< endl;
+      //      if ( hdataRaw->GetBinContent(ix,iy) == 0 )  cout << "DATA :found a null bin ix, iy = " << ix<<", "<<iy<< endl;
     }
   }
   
-  scaleInt(hmcRaw);
-  scaleInt(hdataRaw);
+  //  scaleInt(hmcRaw);
+  //  scaleInt(hdataRaw);
 
   TH2D* hRatioRaw = (TH2D*)hdataRaw->Clone(Form("hRatioRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
   hRatioRaw->Divide(hmcRaw);
@@ -115,24 +121,135 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
     }
   }
   
-  TCanvas* c1=  new TCanvas("c1","",1200,600);
-  c1->Divide(5,2);
+  TCanvas* c1=  new TCanvas("c1","",500,500);
+  makeEfficiencyCanvas(c1,1, 0.05, 0.01, 0.1, 0.3, 0.01);
+  c1->cd(1);
+  TH1D* ptmc = (TH1D*)hmcRaw->ProjectionX("ptmc");
+  TH1D* ptdata = (TH1D*)hdataRaw->ProjectionX("ptdata");
+  handsomeTH1(ptmc,1);
+  handsomeTH1(ptdata,2);
+  cleverRangeLog(ptmc,10,1e-7);
+  ptmc->Draw();
+  ptdata->Draw("same");
+  gPad->SetLogy();
+  c1->cd(2);
+  TH1D* hptRatio = (TH1D*)ptdata->Clone("hptRatio");
+  hptRatio->Divide(ptmc);
+  hptRatio->Draw();
+  
+  TF1* fit;
+  
+  if ( kSample == kPP ) {
+    hptRatio->Fit("pol2","","",100,900);
+    fit = new TF1("myFit","[0]+ [1]*x + [2]*x*x",100,900);
+    fit->SetParameter(0, hptRatio->GetFunction("pol2")->GetParameter(0));
+    fit->SetParameter(1, hptRatio->GetFunction("pol2")->GetParameter(1));
+    fit->SetParameter(2, hptRatio->GetFunction("pol2")->GetParameter(2));
+  }
+  else {
+    hptRatio->Fit("pol1","","",100,700);
+    fit = new TF1("myFit","[0]+ [1]*x",100,900);
+    fit->SetParameter(0, hptRatio->GetFunction("pol1")->GetParameter(0));
+    fit->SetParameter(1, hptRatio->GetFunction("pol1")->GetParameter(1));
+  }
+  fit->SetName("fitFunction");
+
+  TH2D* hmcPtCorr   = (TH2D*)hTemp->Clone(Form("hmcRawPtCorr_kSample%d_icent%d_opt%d",kSample,i,opt));
+  TH2D* hmcTruthPtCorr = (TH2D*)hTemp->Clone(Form("hmcTruthPtCorr_kSample%d_icent%d_opt%d",kSample,i,opt));
+  getMCspectra   ( kSample, icent, opt, hmcPtCorr, hmcTruthPtCorr,fit);
+  TCanvas* c1ptCorr=  new TCanvas("c1ptCorr","",500,500);
+  makeEfficiencyCanvas(c1ptCorr,1, 0.05, 0.01, 0.1, 0.3, 0.01);
+  c1ptCorr->cd(1);
+  TH1D* ptmcCorr = (TH1D*)hmcPtCorr->ProjectionX("ptmcCorr");
+  handsomeTH1(ptmcCorr,1);
+  cleverRangeLog(ptmcCorr,10,1e-7);
+  ptmcCorr->Draw();
+  ptdata->Draw("same");
+  gPad->SetLogy();
+  c1ptCorr->cd(2);
+  TH1D* hptRatioPtCorr = (TH1D*)ptdata->Clone("hptRatioPtcorr");
+  hptRatioPtCorr->Divide(ptmcCorr);
+  hptRatioPtCorr->Draw();
+
+  
+
+  TCanvas* c15=  new TCanvas("c15","",600,500);
+  makeEfficiencyCanvas(c15,1, 0.05, 0.01, 0.1, 0.3, 0.01);
+  c15->cd(1);
+  TH1D* h1mcAllPt = (TH1D*)hmcPtCorr->ProjectionY("hmcPtCorrAllPt");
+  TH1D* h1dataAllPt = (TH1D*)hdataRaw->ProjectionY("hdataRawAllPt");
+  cleverRangeLog(h1mcAllPt,100,1e-8);
+  handsomeTH1(h1mcAllPt,1);
+  handsomeTH1(h1dataAllPt,2);
+  h1mcAllPt->Draw();
+  h1dataAllPt->Draw("same");
+  gPad->SetLogy();
+  c15->cd(2);
+  TH1D* hmptRatioPtAll = (TH1D*)h1dataAllPt->Clone("hmptRatioPtAll");
+  hmptRatioPtAll->Divide(h1mcAllPt);
+  hmptRatioPtAll->Smooth();
+  hmptRatioPtAll->Draw();
+
+  TH2D* hFacRatio = new TH2D("hFacRatio","", nXbins, xBin, nYbins, yBin);
+  TH1D* hTemp1x  = (TH1D*)hFacRatio->ProjectionX("htemp1x");
+  TH1D* hTemp1y  = (TH1D*)hFacRatio->ProjectionY("htemp1y");
+  for ( int ii = 1 ; ii<=hFacRatio->GetNbinsX() ; ii++) {
+    for ( int jj = 1 ; jj<=hFacRatio->GetNbinsY() ; jj++) {
+      double recoPt = hTemp1x->GetBinCenter(ii);
+      double ptWeight = fit->Eval(recoPt);
+
+      double recoM  = hTemp1y->GetBinCenter(jj);
+      int theYBin = hmptRatioPtAll->FindBin( recoM);
+      double mWeight = hmptRatioPtAll->GetBinContent(theYBin);
+      
+      hFacRatio->SetBinContent(ii,jj, ptWeight * mWeight);
+    }
+  }
+
+  //  return;
+  
+  TH1D* hRatio[20];
+  TCanvas* c2=  new TCanvas("c2","",1200,600);
+  c2->Divide(5,2);
   for ( int ix = 1 ; ix<= nXbins ; ix++) {
-    c1->cd(ix);
-    TH1D* h1mc = (TH1D*)hmcRaw->ProjectionY(Form("hmcRaw_%d",ix),ix,ix);
+    c2->cd(ix);
+    TH1D* h1mc = (TH1D*)hmcPtCorr->ProjectionY(Form("hmcPtCorr_%d",ix),ix,ix);
     TH1D* h1data = (TH1D*)hdataRaw->ProjectionY(Form("hdataRaw_%d",ix),ix,ix);
-    scaleInt(h1data);
-    scaleInt(h1mc);
+    //    scaleInt(h1data);
+    //    scaleInt(h1mc);
     handsomeTH1(h1mc,1);
     handsomeTH1(h1data,2);
-    cleverRangeLog(h1mc);
+    cleverRangeLog(h1mc,10,1e-7);
     h1mc->Draw();
     h1data->Draw("same");
     gPad->SetLogy();
+
+    if ( ix==1)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
+    drawBin(xBin,ix,"GeV",0.4,0.78,49,16);
+    //    drawBin(xBin,ix,"GeV",0.16 + (0.05* (ix==lowPtBin)), 0.78,1,16);
+    
+    hRatio[ix] = (TH1D*)h1data->Clone(Form("hRatio_ix%d",ix));
+    hRatio[ix]->Divide(h1mc);
   }
   
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_test.root",(int)weightCut,opt,(float)flucCut),"update");
-  hmcRaw->Write();
+  TCanvas* c3=  new TCanvas("c3","",1200,600);
+  c3->Divide(5,2);
+  for ( int ix = 1 ; ix<= nXbins ; ix++) {
+    c3->cd(ix);
+    hRatio[ix]->SetYTitle("Data/MC");
+    //    cleverRangeLog(hRatio[ix],1000,1e-9);
+    hRatio[ix]->SetAxisRange(0,5,"Y");
+    hRatio[ix]->Draw();
+    if ( ix==1)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
+    drawBin(xBin,ix,"GeV",0.4,0.78,49,16);
+    jumSun(-0.5,1,0.5,1);
+    //    drawBin(xBin,ix,"GeV",0.16 + (0.05* (ix==lowPtBin)), 0.78,1,16);
+    //    hRatio[ix]->Fit("gaus");
+    //    gPad->SetLogy();
+  }
+  
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized.root",(int)weightCut,opt,(float)flucCut),"update");
+  hmcPtCorr->Write();
   hmcTruth->Write();
   hdataRaw->Write();
   hmcRawSmooth->Write();
@@ -142,12 +259,14 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   hRatioSmooth->Write();
   hRatioRaw->Write();
   hRatioSmooth2->Write();
+  hFacRatio->Write(Form("factorizedRatio_kSample%d_icent%d",kSample,i));
+
   fout->Close();
   
 }
 
 
-void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth) {
+void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth, TF1* ptScale) {
   
   TH1::SetDefaultSumw2();
   hmcRaw->Reset();
@@ -196,6 +315,7 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
   TTree* tr4 = (TTree*)fjz4->Get("tr");
   tr4->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
 
+
   for ( int ijz =2 ; ijz<=4 ; ijz++) {
     TTree* tr;
     //    TH2D* hRecoEntries;
@@ -218,7 +338,7 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
     
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
     for (Int_t i= 0; i<tr->GetEntries() ; i++) {
-      if ( i > tr->GetEntries() * statFrac ) continue;
+      if ( i > tr->GetEntries() * statFrac ) break;
       if (i%2==0)  continue;
 
       tr->GetEntry(i);
@@ -228,6 +348,9 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
       
       double genX;
       double genY;
+      double recoX  = -10000; 
+      double recoY  = -10000; 
+
       if ( opt ==1 ) {
 	genX = myJetMc.genPt; 
 	genY = myJetMc.genMass;
@@ -236,10 +359,9 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 	genX = myJetMc.genPt;
 	genY = myJetMc.genMass;
       }
+
       
       
-      double recoX  = -10000; 
-      double recoY  = -10000; 
       if ( opt == 1 ) {
 	recoX = myJetMc.recoPt;
 	recoY = myJetMc.recoMass ;
@@ -248,14 +370,15 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 	recoX = myJetMc.recoPt;
 	recoY = myJetMc.recoMass;
       }
-      
-      //      if ( opt==2) {  
-      //	if ( isTooSmall(hRecoEntries, recoX, recoY,10) ) {
-      //	  cout << "isTooSmall! " << endl;
-      //  cout << "jz"<<ijz<<":   pT, (m/pT)^2 =" << recoX <<", "<<recoY<<endl;
-      //	  continue;
-      //	}
-      //      }
+
+      if (opt==772)  {
+	genX = myJetMc.genPt;
+	genY = myJetMc.genMass /  myJetMc.genPt;
+	recoX = myJetMc.recoPt;
+	recoY = myJetMc.recoMass / myJetMc.recoPt;
+      }
+
+
       
       double fcalWeight = 1.0;
       if ( kSample==kPbPb) {
@@ -263,8 +386,13 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
         //      cout <<" fcal, weight = "<<myJetMc.fcalet<<", "<<fcalWeight<<endl;
       }
       
-      hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm * fcalWeight);
-      hmcTruth->Fill( genX, genY, myJetMc.weight * jzNorm * fcalWeight);
+      double ptWeight = 1;
+      if ( ptScale != 0) {
+	ptWeight = ptScale->Eval(recoX);
+      }
+
+      hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);
+      hmcTruth->Fill( genX, genY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);
     }
   }
   
@@ -291,7 +419,7 @@ void getDATAspectra(int kSample, int icent, int opt, TH2D* hdataRaw) {
   
   for (Int_t i= 0; i<tr->GetEntries() ; i++) {
     tr->GetEntry(i);
-    if ( i > tr->GetEntries() * fracStstData) continue;
+    if ( i > tr->GetEntries() * fracStstData) break;
 
     if ( ! passEvent(myJet, icent, false) ) // isMC = false
       continue;
@@ -307,6 +435,12 @@ void getDATAspectra(int kSample, int icent, int opt, TH2D* hdataRaw) {
       recoY = myJet.recoMass;
     }
     
+    if (opt==772)  {
+      recoX = myJet.recoPt;
+      recoY = myJet.recoMass / myJet.recoPt;
+    }
+
+
     hdataRaw->Fill ( recoX, recoY);
   }
   

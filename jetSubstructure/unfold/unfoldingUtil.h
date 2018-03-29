@@ -3,9 +3,9 @@
 //TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3.root";
 TH2D* getRewTable(int kSample, int icent)  { 
 
-  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_set1.root");
+  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized.root");
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_fcalWeighted.root");
-  TH2D* hTemp = (TH2D*)fReweight->Get(Form("hRatioSmooth2_kSample%d_icent%d_opt771",kSample,icent));
+  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent));
   //TH2D* hTemp = (TH2D*)fReweight->Get(Form("hRatioRaw_kSample%d_icent%d_opt771",kSample,icent));
   
   //  TFile* fReweight = new TFile("reweightFactors/martin_jet_mass_weights.root");
@@ -18,13 +18,13 @@ TH2D* getRewTable(int kSample, int icent)  {
 
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-  else return false; 
+  if ( icent ==3 )  return true;
+  if ( icent ==6 )  return true;
   if ( icent ==1 )  return true;
   if ( icent ==2 )  return true;
-  if ( icent ==3 )  return true;
   if ( icent ==4 )  return true;
   if ( icent ==5 )  return true;
-  if ( icent ==6 )  return true;
+  else return false; 
   return false;
 }
 
@@ -88,8 +88,8 @@ void getYbin(int &nBins, double* yBin, int optY) {
     }
   }
   else if ( (optY==2) || (optY==8) ) {
-    nBins = 10;
-    double massBin[11] = { -0.5,-0.05,0,0.05,0.1,0.13,0.16,0.2,0.24,0.3,0.5};
+    nBins = 9;
+    double massBin[10] = { -0.1,0,0.03,0.06,0.09,0.12,0.15,0.18,0.24,0.3};
     //    nBins = 9;
     //    double massBin[10] = { -0.5,0,0.03,0.06,0.09,0.12,0.15,0.18,0.24,0.5};
     for ( int i=0 ; i<= nBins ; i++) {
@@ -133,7 +133,27 @@ void getYbin(int &nBins, double* yBin, int optY) {
       yBin[i] = massBin[i];
     }
   }
+  else if ( optY == 772) {
+    // /*
+    nBins = 50;
+    double highY = 0.35;
+    double lowY = -0.2;
+    double massBin[101];
+    for ( int i=0 ; i<= nBins ; i++) {
+      massBin[i] = lowY + (highY-lowY)*i/nBins;
+      yBin[i] = massBin[i];
+    }
+    //  */
 
+    /*
+      nBins = 8;
+      double massBin[9] = { -0.2, -0.1, 0, 0.05,0.1,0.15,0.2,0.25,0.35};
+      for ( int i=0 ; i<= nBins ; i++) {
+      yBin[i] = massBin[i];
+      }
+    */
+  }
+  
   else if ( optY == 78) {
     nBins = 6;
     double massBin[7] = { -0.5,0,0.1,0.13,0.16,0.2,0.5};
@@ -182,27 +202,26 @@ void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int opt
     recoVarY = recoM;
     truthVarY = genM;
   }
-  if ( (optY==2) || (optY ==3) )  {
-    recoVarY = recoMoverPt;
+  else if ( (optY==2) || (optY ==3) )  {
     truthVarY = genMoverPt;
+    recoVarY = recoMoverPt;
   }
   else if ( optY == 7) { // charge assisted mass
     truthVarY = genM;
     recoVarY = myJetMc.recoChMassRcSubt * myJetMc.recoPt / myJetMc.recoChPtRcSubt ;
   }
-  
   else if ( optY == 8) { // charge assisted mass
     truthVarY = genMoverPt;
     recoVarY = myJetMc.recoChMassRcSubt / myJetMc.recoChPtRcSubt ;
   }
-
+  
 }
 
 
 bool passGenEvent( jetSubStr myJetMc, int icent)  {
 
   double ptCutGen = 20;
-  double ptCutUpGen = 630.944;
+  double ptCutUpGen = 1000;
   
   if ( myJetMc.cent != icent )
     return false;
@@ -211,6 +230,11 @@ bool passGenEvent( jetSubStr myJetMc, int icent)  {
     return false;
   
   if ( myJetMc.genPt > ptCutUpGen ) 
+    return false;
+
+  if ( (myJetMc.recoMass / myJetMc.recoPt) > 0.3  )
+    return false;
+  if ( (myJetMc.recoMass / myJetMc.recoPt) < -0.1 )
     return false;
   
   return true;
@@ -231,6 +255,13 @@ bool passRecoEvent( jetSubStr myJetMc, int icent)  {
 
   if ( myJetMc.recoPt > ptCutUp )
     return false;
+
+  if ( (myJetMc.recoMass / myJetMc.recoPt) > 0.3  )
+    return false;
+  if ( (myJetMc.recoMass / myJetMc.recoPt) < -0.1 )
+    return false;
+  
+  
   
   return true;
 

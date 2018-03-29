@@ -32,7 +32,7 @@ double statFrac = 001;
 double fracStstData = 001;
 bool doUnfData = true ;
 
-bool useFullMC = false;
+bool useFullMC = true;
 
 int lowPtBin = 1;  int highPtBin = 13;
 //int lowPtBin = 6;   int highPtBin = 11;
@@ -99,7 +99,7 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     if ( !selectedCent(i) )  continue;
     if ( (kSample == kPP) && ( i != 0 ) )      continue;
     //    res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
-    TH2D* h2ResMatrix = (TH2D*)fmatrix->Get(Form("hReco_icent%d_hTruth_icent%d",icent,icent)); //
+    //    TH2D* h2ResMatrix = (TH2D*)fmatrix->Get(Form("hReco_icent%d_hTruth_icent%d",icent,icent)); //
     //    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
     //    TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
     //    TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
@@ -107,22 +107,22 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     //    TH2D* h2ResMatrix = (TH2D*)tempRes->Hresponse(); 
     //    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
     //    res[i] = new RooUnfoldResponse(0,0, h2ResMatrix);
-    TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
-    TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
-    TH2D* h2RecoTemp = (TH2D*)h2Reco->Clone("h2RecoTemp");
-    TH2D* h2TruthTemp = (TH2D*)h2Truth->Clone("h2TruthTemp");
-    h2RecoTemp->Reset();
-    h2TruthTemp->Reset();
-    res[i] = new RooUnfoldResponse(h2RecoTemp, h2TruthTemp, h2ResMatrix);
+    //    TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
+    //    TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
+    //    TH2D* h2RecoTemp = (TH2D*)h2Reco->Clone("h2RecoTemp");
+    //    TH2D* h2TruthTemp = (TH2D*)h2Truth->Clone("h2TruthTemp");
+    //    h2RecoTemp->Reset();
+    //    h2TruthTemp->Reset();
+    //    res[i] = new RooUnfoldResponse(h2RecoTemp, h2TruthTemp, h2ResMatrix);
     //    res[i] = new RooUnfoldResponse(h2Reco, h2Truth, h2ResMatrix);
-    //res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); 
+    res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); 
     
   }
   
   
   
   vector<int> nIter;
-  for ( int it = 1 ; it<=15 ; it++) { 
+  for ( int it = 1 ; it<=30 ; it++) { 
     nIter.push_back(it);
     if ( it > maxIter -1 )   cout << " The size of array is not enough! " << endl;
   }
@@ -325,7 +325,10 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 
       tr->GetEntry(i);
 
-      if ( useFullMC && (i%2 != 1) )
+      if ( (!useFullMC) && (i%2 != 1) )
+	continue;
+
+      if ( passEvent(myJetMc, icent, true) == false )
 	continue;
       
       double recoVarX, truthVarX;
@@ -346,8 +349,8 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 	//        double recoPt2 = myJetMc.recoPt * myJetMc.recoPt;
 	//	if ( myJetMc.recoMass < 0 ) recoM2 = - recoM2;
 	//        double recoVarY =  recoM2 / recoPt2;
-	//	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass / myJetMc.recoPt);
-	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
+	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass / myJetMc.recoPt);
+	//	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
         rewFact = hReweight->GetBinContent(rewBin);
       }
       
@@ -357,11 +360,9 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 	//        fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
       }
       
-      if ( passRecoEvent(myJetMc, icent) )
 	hmcRaw->Fill( recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-      if ( passGenEvent(myJetMc, icent) )
 	hmcTruth->Fill( truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-      
+
     }
   }
   
@@ -393,9 +394,9 @@ void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, 
     tr->GetEntry(i);
     if ( i > tr->GetEntries() * fracStstData) continue;
 
-    if ( ! passEvent(myJet, icent, false) ) // isMC = false
+    if ( passEvent(myJet, icent, false) == false ) // isMC = false
       continue;
-
+    
     double recoVarX, truthVarX;
     getXvalues( recoVarX, truthVarX, myJet, optX);
     double recoVarY, truthVarY;
