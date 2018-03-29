@@ -67,7 +67,7 @@ void getRAA(int icent=0, int nIter =4, int optX=1, int optY=2 ) {
     c1->cd(ipt - lowPtBin + 1);
     
     if ( optY==1)  hPPUnfSq[ipt]->SetAxisRange(-300,2000,"X");
-    else if ( optY==2) hPPUnfSq[ipt]->SetAxisRange(0.001,0.299,"X");
+    else if ( optY==2) hPPUnfSq[ipt]->SetAxisRange(0.001,0.239,"X");
     if ( optY==1)    hPPUnfSq[ipt]->SetXTitle("m (GeV)");
     else if ( optY==2)    hPPUnfSq[ipt]->SetXTitle("m/p_{T}");
     
@@ -124,7 +124,7 @@ void getRAA(int icent=0, int nIter =4, int optX=1, int optY=2 ) {
     hRAA[ipt]->Divide(hPPUnfSq[ipt]);
     
     if ( optY==1)  hRAA[ipt]->SetAxisRange(-300,2000,"X");
-    else if ( optY==2) hRAA[ipt]->SetAxisRange(0.001,0.299,"X");
+    else if ( optY==2) hRAA[ipt]->SetAxisRange(0.001,0.239,"X");
     if ( optY==1)    hRAA[ipt]->SetXTitle("m (GeV)");
     else if ( optY==2)    hRAA[ipt]->SetXTitle("m/p_{T}");
     

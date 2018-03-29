@@ -122,7 +122,7 @@ void unfold2D_matrixWeight0(int kSample = kPP, int optX =1, int optY=2, double r
   
   
   vector<int> nIter;
-  for ( int it = 1 ; it<=30 ; it++) { 
+  for ( int it = 1 ; it<=50 ; it++) { 
     nIter.push_back(it);
     if ( it > maxIter -1 )   cout << " The size of array is not enough! " << endl;
   }

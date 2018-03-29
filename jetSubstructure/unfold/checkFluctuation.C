@@ -15,9 +15,11 @@ struct valErr {
 
 valErr  getDATApoint(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, float massVal=-100);
 
-void checkFluctuation(int kSample= kPP,  int icent = 0, bool matRwt=1, bool specRwt=0, int optX=1, int optY=2, float massVal=0.051){ 
+void checkFluctuation(int kSample= kPP,  int icent = 0, float massVal=0.051){ 
   
-  const int nIter = 40;
+  bool matRwt=1; bool specRwt=1; 
+int optX=1; int optY=2;
+  const int nIter = 25;
   
   int nXbins;
   double xBin[30];
@@ -25,8 +27,7 @@ void checkFluctuation(int kSample= kPP,  int icent = 0, bool matRwt=1, bool spec
   
   int nYbins ;
   double yBin[30] ;
-  double yBinSqrt[30] ;
-  getYbin(nYbins, yBin, yBinSqrt, optY);
+  getYbin(nYbins, yBin, optY);
 
   if ( (kSample == kPP) && (icent!=0) ) {
     cout << " pp sample must have cent = 0" << endl;
@@ -40,7 +41,7 @@ void checkFluctuation(int kSample= kPP,  int icent = 0, bool matRwt=1, bool spec
   TH1D* hStat[30];
   TH1D* hDevi[30];
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  { 
-    hStat[ix] = new TH1D(Form("hstat_ix%d",ix),";Numberof iteration;Relative uncertainty",49,0.5,49.1);
+    hStat[ix] = new TH1D(Form("hstat_ix%d",ix),";Numberof iteration;Relative uncertainty",29,0.5,29.5);
     hDevi[ix] = (TH1D*)hStat[ix]->Clone(Form("hdevi_ix%d",ix));
   }
 
@@ -56,12 +57,12 @@ void checkFluctuation(int kSample= kPP,  int icent = 0, bool matRwt=1, bool spec
     valErr nullVal;   nullVal.val = 0 ;  nullVal.err = 0 ;
     vPair.push_back(nullVal);
     
-    for (int in = 1; in <= nIter ; in++) {
+    for (int in = 1; in <= nIter+1 ; in++) {
       vPair.push_back( getDATApoint(kSample, icent, ipt, in, matRwt, specRwt, massVal) ) ; 
     }
     for (int in = 1; in <= nIter ; in++) {
       hStat[ipt]->SetBinContent( in, vPair.at(in).err / vPair.at(in).val) ;
-      hDevi[ipt]->SetBinContent( in, (vPair.at(in).val - vPair.at(in-1).val)/vPair.at(in).val ) ;
+      hDevi[ipt]->SetBinContent( in, (vPair.at(in+1).val - vPair.at(in).val)/vPair.at(in).val ) ;
       hStat[ipt]->SetBinError( in, 0.0000001);
       hDevi[ipt]->SetBinError( in, 0.0000001);
     }    
@@ -252,7 +253,7 @@ void getMCresults(int kSample, int icent, int ix, int nIter, bool matRwt, bool s
 
 valErr getDATApoint(int kSample, int icent, int ix, int nIter,  bool matRwt, bool specRwt, float massVal) {
   TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d.root",kSample, (int)matRwt, (int)specRwt));
-  TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnfSq_icent%d_ix%d_iter%d",icent,ix,nIter));
+  TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnf1d_icent%d_ix%d_iter%d",icent,ix,nIter));
   valErr ret ; 
   ret.val = hUnf->GetBinContent( hUnf->FindBin( massVal ) );
   ret.err = hUnf->GetBinError( hUnf->FindBin( massVal ) );

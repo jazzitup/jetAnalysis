@@ -28,6 +28,7 @@ bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries
 void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0, TF1* ptScale=0);
 void getDATAspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hdataRaw=0);
 
+TH1D* getVariedHist(TH1D* hin=0, double variation=0);
 //bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
 float flucCut = 0.3;
@@ -187,28 +188,25 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   c15->cd(2);
   TH1D* hmptRatioPtAll = (TH1D*)h1dataAllPt->Clone("hmptRatioPtAll");
   hmptRatioPtAll->Divide(h1mcAllPt);
-  hmptRatioPtAll->Smooth();
+  TH1D* hmptRatioPtAllsmooth = (TH1D*)hmptRatioPtAll->Clone("hmptRatioPtAllsmooth");
+
+  hmptRatioPtAllsmooth->Smooth();
+  hmptRatioPtAll->SetAxisRange(0,6,"Y");
   hmptRatioPtAll->Draw();
-
-  TH2D* hFacRatio = new TH2D("hFacRatio","", nXbins, xBin, nYbins, yBin);
-  TH1D* hTemp1x  = (TH1D*)hFacRatio->ProjectionX("htemp1x");
-  TH1D* hTemp1y  = (TH1D*)hFacRatio->ProjectionY("htemp1y");
-  for ( int ii = 1 ; ii<=hFacRatio->GetNbinsX() ; ii++) {
-    for ( int jj = 1 ; jj<=hFacRatio->GetNbinsY() ; jj++) {
-      double recoPt = hTemp1x->GetBinCenter(ii);
-      double ptWeight = fit->Eval(recoPt);
-
-      double recoM  = hTemp1y->GetBinCenter(jj);
-      int theYBin = hmptRatioPtAll->FindBin( recoM);
-      double mWeight = hmptRatioPtAll->GetBinContent(theYBin);
-      
-      hFacRatio->SetBinContent(ii,jj, ptWeight * mWeight);
-    }
-  }
-
-  //  return;
+  hmptRatioPtAllsmooth->Draw("same hist");
+  jumSun(0,1,0.3,1);
   
+  TH1D* hsmooVarP = getVariedHist(hmptRatioPtAllsmooth,0.5);
+  TH1D* hsmooVarM = getVariedHist(hmptRatioPtAllsmooth,-0.5);
+
+  handsomeTH1( hsmooVarP,4);
+  handsomeTH1( hsmooVarM,5);
+
+  hsmooVarP->Draw("same hist");
+  hsmooVarM->Draw("same hist");
+
   TH1D* hRatio[20];
+  TH1D* hRatioSmoPtBin[20];
   TCanvas* c2=  new TCanvas("c2","",1200,600);
   c2->Divide(5,2);
   for ( int ix = 1 ; ix<= nXbins ; ix++) {
@@ -230,6 +228,8 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
     
     hRatio[ix] = (TH1D*)h1data->Clone(Form("hRatio_ix%d",ix));
     hRatio[ix]->Divide(h1mc);
+    hRatioSmoPtBin[ix] = (TH1D*)hRatio[ix]->Clone(Form("hRatioSmoPtBin_ix%d",ix));
+    hRatioSmoPtBin[ix]->Smooth();
   }
   
   TCanvas* c3=  new TCanvas("c3","",1200,600);
@@ -240,6 +240,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
     //    cleverRangeLog(hRatio[ix],1000,1e-9);
     hRatio[ix]->SetAxisRange(0,5,"Y");
     hRatio[ix]->Draw();
+    hRatioSmoPtBin[ix]->Draw("same hist");
     if ( ix==1)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
     drawBin(xBin,ix,"GeV",0.4,0.78,49,16);
     jumSun(-0.5,1,0.5,1);
@@ -247,20 +248,54 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
     //    hRatio[ix]->Fit("gaus");
     //    gPad->SetLogy();
   }
-  
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized.root",(int)weightCut,opt,(float)flucCut),"update");
-  hmcPtCorr->Write();
-  hmcTruth->Write();
-  hdataRaw->Write();
-  hmcRawSmooth->Write();
-  hdataRawSmooth->Write();
-  hdataRawSmooth->Write();
-  hRatioSmoothRaw->Write();
-  hRatioSmooth->Write();
-  hRatioRaw->Write();
-  hRatioSmooth2->Write();
-  hFacRatio->Write(Form("factorizedRatio_kSample%d_icent%d",kSample,i));
 
+
+  TH2D* hFacRatio = new TH2D(Form("factorizedRatio_kSample%d_icent%d",kSample,i),"", nXbins, xBin, nYbins, yBin);
+  TH2D* hFacRatioVarP = new TH2D(Form("factorizedRatioVarP_kSample%d_icent%d",kSample,i),"", nXbins, xBin, nYbins, yBin);
+  TH2D* hFacRatioVarM = new TH2D(Form("factorizedRatioVarM_kSample%d_icent%d",kSample,i),"", nXbins, xBin, nYbins, yBin);
+  TH2D* hFacRatio2 = new TH2D(Form("factorizedRatio2_kSample%d_icent%d",kSample,i),"", nXbins, xBin, nYbins, yBin);
+  TH1D* hTemp1x  = (TH1D*)hFacRatio->ProjectionX("htemp1x");
+  TH1D* hTemp1y  = (TH1D*)hFacRatio->ProjectionY("htemp1y");
+  for ( int ii = 1 ; ii<=hFacRatio->GetNbinsX() ; ii++) {
+    for ( int jj = 1 ; jj<=hFacRatio->GetNbinsY() ; jj++) {
+      double recoPt = hTemp1x->GetBinCenter(ii);
+      double ptWeight = fit->Eval(recoPt);
+
+      double recoM  = hTemp1y->GetBinCenter(jj);
+
+      int theYBin = hmptRatioPtAll->FindBin( recoM);
+      double mWeight = hmptRatioPtAll->GetBinContent(theYBin);
+      hFacRatio->SetBinContent(ii,jj, ptWeight * mWeight);
+
+      double mWeightVarP = hsmooVarP->GetBinContent(theYBin);
+      hFacRatioVarP->SetBinContent(ii,jj, ptWeight * mWeightVarP);
+
+      double mWeightVarM = hsmooVarM->GetBinContent(theYBin);
+      hFacRatioVarM->SetBinContent(ii,jj, ptWeight * mWeightVarM);
+
+      int theYBin2 = hRatioSmoPtBin[ii]->FindBin(recoM);
+      double mWeight2 = hRatioSmoPtBin[ii]->GetBinContent(theYBin2);
+      hFacRatio2->SetBinContent(ii,jj, ptWeight * mWeight2);
+    }
+  }
+
+  
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v-2.root",(int)weightCut,opt,(float)flucCut),"update");
+  hmcPtCorr->Write("",TObject::kOverwrite);
+  hmcTruth->Write("",TObject::kOverwrite);
+  hdataRaw->Write("",TObject::kOverwrite);
+  hmcRawSmooth->Write("",TObject::kOverwrite);
+  hdataRawSmooth->Write("",TObject::kOverwrite);
+  hdataRawSmooth->Write("",TObject::kOverwrite);
+  hRatioSmoothRaw->Write("",TObject::kOverwrite);
+  hRatioSmooth->Write("",TObject::kOverwrite);
+  hRatioRaw->Write("",TObject::kOverwrite);
+  hRatioSmooth2->Write("",TObject::kOverwrite);
+  hFacRatio->Write("",TObject::kOverwrite);
+  hFacRatioVarP->Write("",TObject::kOverwrite);
+  hFacRatioVarM->Write("",TObject::kOverwrite);
+  hFacRatio2->Write("",TObject::kOverwrite);
+  
   fout->Close();
   
 }
@@ -457,3 +492,17 @@ bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {
 }
 
 
+TH1D* getVariedHist(TH1D* hin, double variation)  {
+  
+  TH1D* hout = (TH1D*)hin->Clone(Form("%s_var%.2f",hin->GetName(),variation));
+  hout->Reset();
+  for ( int i = 1 ; i<= hin->GetNbinsX() ; i++) {
+    double yin = hin->GetBinContent(i);
+    double newY = (yin - 1 ) * (1+variation) + 1; 
+    hout->SetBinContent(i, newY);
+  }
+  
+  return hout;
+  
+  
+}

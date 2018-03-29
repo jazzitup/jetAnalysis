@@ -9,7 +9,7 @@
 void getMCresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0,  TH1D* hmcTruthSq=0, TH1D* hmcRawSq=0, TH1D* hmcUnfSq=0);
 void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
 
-void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=0, bool specRwt=1, int optX=1, int optY=2, bool applyMDJ=false) {
+void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool specRwt=1, int optX=1, int optY=2, bool applyMDJ=false) {
   
   bool doDATA = true; 
 
@@ -19,11 +19,10 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=0, bool 
 
   int nYbins ;
   double yBin[30] ;
-  //  double yBinSqrt[30] ;
   getYbin(nYbins, yBin, optY);
   TH1D* tempHistYsq;
-  if ( optY == 1 ) tempHistYsq = new TH1D("tempHistY",";mass(GeV);",nYbins,yBinSqrt);
-  if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m/p_{T};",nYbins,yBinSqrt);
+  if ( optY == 1 ) tempHistYsq = new TH1D("tempHistY",";mass(GeV);",nYbins,yBin);
+  if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m/p_{T};",nYbins,yBin);
   
   
   if ( (kSample == kPP) && (icent!=0) ) {
@@ -37,7 +36,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=0, bool 
     //  int highPtBin = 7;
   int nPtPannels = highPtBin-lowPtBin+1;
 
-  const int maxIter = 50;
+  const int maxIter = 20;
   vector<int> vIter;  //2 3 4 6 8 10
   vector<int> color;  //2 3 4 6 8 10
 
@@ -47,8 +46,8 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=0, bool 
     vIter.push_back(4);    color.push_back (45);
     vIter.push_back(5);   color.push_back (32);
     vIter.push_back(6);   color.push_back (47);
-    vIter.push_back(30);     color.push_back (46);
-    vIter.push_back(40);   color.push_back (2);
+    vIter.push_back(10);     color.push_back (46);
+    vIter.push_back(12);   color.push_back (2);
     
 
   int refIt = vIter.size() -1;
@@ -343,9 +342,9 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=0, bool 
 
 void getMCresults(int kSample, int icent, int ix, int nIter, bool matRwt, bool specRwt,  TH1D* hmcTruthSq, TH1D* hmcRawSq, TH1D* hmcUnfSq) {
   TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d.root",kSample, (int)matRwt, (int)specRwt));
-  TH1D* hUnf = (TH1D*)fin->Get(Form("hmcUnfSq_icent%d_ix%d_iter%d",icent,ix,nIter));
-  TH1D* hTruth = (TH1D*)fin->Get(Form("hmcTruthSq_icent%d_ix%d",icent,ix));
-  TH1D* hRaw = (TH1D*)fin->Get(Form("hmcRawSq_icent%d_ix%d",icent,ix));
+  TH1D* hUnf = (TH1D*)fin->Get(Form("hmcUnf1d_icent%d_ix%d_iter%d",icent,ix,nIter));
+  TH1D* hTruth = (TH1D*)fin->Get(Form("hmcTruth1d_icent%d_ix%d",icent,ix));
+  TH1D* hRaw = (TH1D*)fin->Get(Form("hmcRaw1d_icent%d_ix%d",icent,ix));
   
   hmcTruthSq->Reset();
   hmcTruthSq->Add(hTruth);
@@ -359,8 +358,8 @@ void getMCresults(int kSample, int icent, int ix, int nIter, bool matRwt, bool s
 
 void getDATAresults(int kSample, int icent, int ix, int nIter,  bool matRwt, bool specRwt, TH1D* hdataRawSq, TH1D* hdataUnfSq) {
   TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d.root",kSample, (int)matRwt, (int)specRwt));
-  TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnfSq_icent%d_ix%d_iter%d",icent,ix,nIter));
-  TH1D* hRaw = (TH1D*)fin->Get(Form("hdataRawSq_icent%d_ix%d",icent,ix));
+  TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnf1d_icent%d_ix%d_iter%d",icent,ix,nIter));
+  TH1D* hRaw = (TH1D*)fin->Get(Form("hdataRaw1d_icent%d_ix%d",icent,ix));
 
   hdataUnfSq->Reset();
   hdataUnfSq->Add(hUnf);

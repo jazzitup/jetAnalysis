@@ -5,7 +5,7 @@ EOF
 
 for kSample in 1 0  # 0 = pp,  1 = pbpb
 do
-    for doReweight in 1 0 
+    for doReweight in 1 
     do
 	for optX in 1  # 1
 	do
