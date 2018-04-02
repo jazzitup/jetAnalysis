@@ -19,8 +19,14 @@ void getErrorHist(TH1D* hh=0, int kSample=kPP, int icent =0, int ipt =0, int nIt
 }
 
 
-void getRAA(int icent=0, int nIter =4, int optX=1, int optY=2 ) {
+void getRAA(int icent=0, int optX=1, int optY=2 ) {
+
+  int nIterPP = getRefIter(0,0);
+  int nIterAA = getRefIter(1,icent);
   
+  //   nIterPP = 1 ;
+   // nIterAA = 1 ;
+
   int nXbins;
   double xBin[30];
   getXbin(nXbins, xBin, optX);
@@ -49,14 +55,14 @@ void getRAA(int icent=0, int nIter =4, int optX=1, int optY=2 ) {
 
   TH1D* hRAA[30]; 
   
-
+  
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     hPPRawSq[ix] = (TH1D*)tempHistYsq->Clone(Form("hPPRawSq_ix%d",ix));
     hPPUnfSq[ix] = (TH1D*)tempHistYsq->Clone(Form("hPPUnfSq_ix%d",ix));
     hPbPbRawSq[ix] = (TH1D*)tempHistYsq->Clone(Form("hPbPbRawSq_ix%d",ix));
     hPbPbUnfSq[ix] = (TH1D*)tempHistYsq->Clone(Form("hPbPbUnfSq_ix%d",ix));
-    getDATAresults(kPP,   0, ix, nIter,  hPPRawSq[ix], hPPUnfSq[ix]);
-    getDATAresults(kPbPb, icent, ix, nIter,  hPbPbRawSq[ix], hPbPbUnfSq[ix]);
+    getDATAresults(kPP,   0, ix, nIterPP,  hPPRawSq[ix], hPPUnfSq[ix]);
+    getDATAresults(kPbPb, icent, ix, nIterAA,  hPbPbRawSq[ix], hPbPbUnfSq[ix]);
 
   }
   
@@ -156,7 +162,7 @@ void getRAA(int icent=0, int nIter =4, int optX=1, int optY=2 ) {
     //    drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], kRed, 1);
     //    drawSys( hPPUnfSq[ipt], hPPUnfSys[ipt], 1, 1);
     if ( ipt == lowPtBin ) {
-      drawText("#bf{#it{ATLAS}} Preliminary",0.33,0.85,1,20);
+      //      drawText("#bf{#it{ATLAS}}",0.33,0.85,1,20);
       TLegend *leg1 = new TLegend(0.7043845,0.4860943,0.9997715,0.7591246,NULL,"brNDC");
       easyLeg(leg1," ");
       leg1->AddEntry(hPPUnfSq[ipt], "pp","pf"); // #frac{d#sigma}{dp_{T}}","pl");
@@ -175,7 +181,7 @@ void getRAA(int icent=0, int nIter =4, int optX=1, int optY=2 ) {
   //  c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_iter%d.png",optX,optY,icent));
   
   c1->Update();
-  c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_iter%d.pdf",optX,optY,icent,nIter));
+  c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_NominalIter.pdf",optX,optY,icent));
 }
 
 

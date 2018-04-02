@@ -13,9 +13,9 @@ struct valErr {
 
 //void getMCresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0,  TH1D* hmcTruthSq=0, TH1D* hmcRawSq=0, TH1D* hmcUnfSq=0);
 
-valErr  getDATApoint(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, float massVal=-100);
+valErr  getDATApoint(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, int massBin = 2);
 
-void checkFluctuation(int kSample= kPP,  int icent = 0, float massVal=0.051){ 
+void checkFluctuation(int kSample= kPP,  int icent = 0, int massBin = 2){
   
   bool matRwt=1; bool specRwt=1; 
 int optX=1; int optY=2;
@@ -35,7 +35,7 @@ int optX=1; int optY=2;
   }
   
   int lowPtBin = 6;
-  int highPtBin = nXbins-2;
+  int highPtBin = nXbins-1;
   int nPtPannels = highPtBin-lowPtBin+1;
 
   TH1D* hStat[30];
@@ -58,38 +58,38 @@ int optX=1; int optY=2;
     vPair.push_back(nullVal);
     
     for (int in = 1; in <= nIter+1 ; in++) {
-      vPair.push_back( getDATApoint(kSample, icent, ipt, in, matRwt, specRwt, massVal) ) ; 
+      vPair.push_back( getDATApoint(kSample, icent, ipt, in, matRwt, specRwt, massBin) ) ; 
     }
-    for (int in = 1; in <= nIter ; in++) {
+    for (int in = 2; in <= nIter ; in++) {
       hStat[ipt]->SetBinContent( in, vPair.at(in).err / vPair.at(in).val) ;
-      hDevi[ipt]->SetBinContent( in, (vPair.at(in+1).val - vPair.at(in).val)/vPair.at(in).val ) ;
+      hDevi[ipt]->SetBinContent( in, fabs(vPair.at(in-1).val - vPair.at(in).val)/vPair.at(in).val ) ;
       hStat[ipt]->SetBinError( in, 0.0000001);
       hDevi[ipt]->SetBinError( in, 0.0000001);
     }    
     handsomeTH1(hStat[ipt],4,1,24);
     handsomeTH1(hDevi[ipt],2,1,24);
 
-    int fScale = 5;
-    if ( ipt > lowPtBin + 2)  hStat[ipt]->Scale(1./fScale);
-    hStat[ipt]->SetAxisRange(-0.11,0.11,"Y");
+    //    int fScale = 5;
+    //    if ( ipt > lowPtBin + 2)  hStat[ipt]->Scale(1./fScale);
+    hStat[ipt]->SetAxisRange(-0.05,0.21,"Y");
     hStat[ipt]->Draw();
     hDevi[ipt]->Draw("same");
 
 
     if ( ipt == lowPtBin ) {
       drawCentrality(kSample, icent, 0.25,0.86,1,24);
-      TLegend *leg1 = new TLegend(0.2386514,0.2288023,0.7574586,0.4411159,NULL,"brNDC");
-      easyLeg(leg1,Form("m/p_{T} = %.2f point",(float)massVal));
+      TLegend *leg1 = new TLegend(0.2041735,0.52576,0.7232587,0.7405867,NULL,"brNDC");
+      easyLeg(leg1,Form("%.2f < m/p_{T} < %.2f",(float)yBin[massBin-1], (float)yBin[massBin]));
       leg1->AddEntry(hStat[ipt], "Stat. uncertainty","p");
-      leg1->AddEntry(hDevi[ipt], "(y_{N+1} - y_{N}) / y_{N}","p");
+      leg1->AddEntry(hDevi[ipt], "|y_{N} - y_{N-1}| / y_{N}","p");
       leg1->Draw();
     }
     drawBin(xBin,ipt,"GeV",0.16 + (0.05* (ipt==lowPtBin)), 0.78,1,16);
-    if ( ipt > lowPtBin + 2) 
-      drawText(Form("Stat. Unc scaled by 1/%d",fScale), 0.16 + (0.05* (ipt==lowPtBin)), 0.3,1,16);
+    //    if ( ipt > lowPtBin + 2) 
+      //      drawText(Form("Stat. Unc scaled by 1/%d",fScale), 0.16 + (0.05* (ipt==lowPtBin)), 0.3,1,16);
     jumSun(0,0,49,0);
   }
-  c1->SaveAs(Form("choiceIter/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d_mass%.2f.pdf",kSample,icent,(int)matRwt, (int)specRwt,(float)massVal));
+  c1->SaveAs(Form("choiceIter/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d_massBin%d.pdf",kSample,icent,(int)matRwt, (int)specRwt,massBin));
 }
 
 /*
@@ -251,12 +251,12 @@ void getMCresults(int kSample, int icent, int ix, int nIter, bool matRwt, bool s
 
   */
 
-valErr getDATApoint(int kSample, int icent, int ix, int nIter,  bool matRwt, bool specRwt, float massVal) {
+valErr getDATApoint(int kSample, int icent, int ix, int nIter,  bool matRwt, bool specRwt, int massBin) {
   TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d.root",kSample, (int)matRwt, (int)specRwt));
   TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnf1d_icent%d_ix%d_iter%d",icent,ix,nIter));
   valErr ret ; 
-  ret.val = hUnf->GetBinContent( hUnf->FindBin( massVal ) );
-  ret.err = hUnf->GetBinError( hUnf->FindBin( massVal ) );
+  ret.val = hUnf->GetBinContent( massBin );
+  ret.err = hUnf->GetBinError( massBin);
   return ret;
 }
 

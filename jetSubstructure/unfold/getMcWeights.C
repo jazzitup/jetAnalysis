@@ -129,15 +129,29 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   TH1D* ptdata = (TH1D*)hdataRaw->ProjectionX("ptdata");
   handsomeTH1(ptmc,1);
   handsomeTH1(ptdata,2);
-  cleverRangeLog(ptmc,10,1e-7);
+  ptmc->SetAxisRange(1e-6,1e8,"Y");
   ptmc->Draw();
   ptdata->Draw("same");
   gPad->SetLogy();
+  TLegend *leg1 = new TLegend(0.4814838,0.6583593,1,0.8723161,NULL,"brNDC");
+
+  easyLeg(leg1,"mass-integrated");
+  leg1->AddEntry(ptdata, "Data","pl");
+  leg1->AddEntry(ptmc, "MC","pl");
+  leg1->Draw();
+
   c1->cd(2);
   TH1D* hptRatio = (TH1D*)ptdata->Clone("hptRatio");
   hptRatio->Divide(ptmc);
+  if ( kSample == 0) hptRatio->SetAxisRange(0,1e5,"Y");
+
+  hptRatio->SetXTitle("Reconstructed m/p_{T}");
+  hptRatio->SetYTitle("Data/MC");
+  fixedFontHist(hptRatio,3,2,20);
+  hptRatio->SetNdivisions(505,"X");
   hptRatio->Draw();
   
+  c1->SaveAs(Form("reweightFactors/pTreweighting_kSample%d_icent%d.pdf",kSample,icent));
   TF1* fit;
   
   if ( kSample == kPP ) {
@@ -155,9 +169,14 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   }
   fit->SetName("fitFunction");
 
+  c1->SaveAs(Form("reweightFactors/pTreweighting_kSample%d_icent%d_fit.pdf",kSample,icent));
+
   TH2D* hmcPtCorr   = (TH2D*)hTemp->Clone(Form("hmcRawPtCorr_kSample%d_icent%d_opt%d",kSample,i,opt));
   TH2D* hmcTruthPtCorr = (TH2D*)hTemp->Clone(Form("hmcTruthPtCorr_kSample%d_icent%d_opt%d",kSample,i,opt));
   getMCspectra   ( kSample, icent, opt, hmcPtCorr, hmcTruthPtCorr,fit);
+
+
+
   TCanvas* c1ptCorr=  new TCanvas("c1ptCorr","",500,500);
   makeEfficiencyCanvas(c1ptCorr,1, 0.05, 0.01, 0.1, 0.3, 0.01);
   c1ptCorr->cd(1);
@@ -174,7 +193,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
 
   
 
-  TCanvas* c15=  new TCanvas("c15","",600,500);
+  TCanvas* c15=  new TCanvas("c15","",500,500);
   makeEfficiencyCanvas(c15,1, 0.05, 0.01, 0.1, 0.3, 0.01);
   c15->cd(1);
   TH1D* h1mcAllPt = (TH1D*)hmcPtCorr->ProjectionY("hmcPtCorrAllPt");
@@ -182,28 +201,59 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   cleverRangeLog(h1mcAllPt,100,1e-8);
   handsomeTH1(h1mcAllPt,1);
   handsomeTH1(h1dataAllPt,2);
+  fixedFontHist(h1mcAllPt,2.5,2,20);
   h1mcAllPt->Draw();
   h1dataAllPt->Draw("same");
   gPad->SetLogy();
+  TLegend *leg2 = new TLegend(0.1871854,0.6894175,0.7049639,0.9033743,NULL,"brNDC");
+  easyLeg(leg2,"After p_{T} weighting");
+  leg2->AddEntry(ptdata, "Data","pl");
+  leg2->AddEntry(ptmc, "MC","pl");
+  leg2->Draw();
   c15->cd(2);
   TH1D* hmptRatioPtAll = (TH1D*)h1dataAllPt->Clone("hmptRatioPtAll");
   hmptRatioPtAll->Divide(h1mcAllPt);
   TH1D* hmptRatioPtAllsmooth = (TH1D*)hmptRatioPtAll->Clone("hmptRatioPtAllsmooth");
 
   hmptRatioPtAllsmooth->Smooth();
-  hmptRatioPtAll->SetAxisRange(0,6,"Y");
+  hmptRatioPtAll->SetAxisRange(0,5,"Y");
+  hmptRatioPtAll->SetXTitle("Reconstructed m/p_{T}");
+  hmptRatioPtAll->SetYTitle("Data/MC");
+  hmptRatioPtAll->SetNdivisions(505,"X");
+  fixedFontHist(hmptRatioPtAll,3,2,20);
   hmptRatioPtAll->Draw();
   hmptRatioPtAllsmooth->Draw("same hist");
-  jumSun(0,1,0.3,1);
+  jumSun(-.2,1,0.35,1);
   
   TH1D* hsmooVarP = getVariedHist(hmptRatioPtAllsmooth,0.5);
   TH1D* hsmooVarM = getVariedHist(hmptRatioPtAllsmooth,-0.5);
 
   handsomeTH1( hsmooVarP,4);
-  handsomeTH1( hsmooVarM,5);
+  handsomeTH1( hsmooVarM,kGreen+4);
 
+  hsmooVarP->SetLineWidth(2);
+  hsmooVarP->SetLineWidth(2);
+
+  c15->SaveAs(Form("reweightFactors/MassIntreweighting_kSample%d_icent%d.pdf",kSample,icent));
+
+  TCanvas* c16 = new TCanvas("c16","",400,400);
+  hmptRatioPtAll->Draw();
+  jumSun(-.2,1,0.35,1);
+  hmptRatioPtAllsmooth->Draw("same hist");
   hsmooVarP->Draw("same hist");
   hsmooVarM->Draw("same hist");
+  drawCentrality(kSample, icent, 0.70,0.86,1,24);
+
+  TLegend *leg3 = new TLegend(0.1871854,0.6894175,0.7049639,0.9033743,NULL,"brNDC");
+  easyLeg(leg3,"Reweight factor");
+  leg3->AddEntry(hsmooVarP, "Varied by +50%","l");
+  leg3->AddEntry(hmptRatioPtAll, "Nominal","l");
+  leg3->AddEntry(hsmooVarM, "Varied by -50%","l");
+  leg3->Draw();
+
+  c16->SaveAs(Form("reweightFactors/MassIntreweighting_kSample%d_icent%d_ratioOnly.pdf",kSample,icent));
+  
+
 
   TH1D* hRatio[20];
   TH1D* hRatioSmoPtBin[20];
@@ -280,7 +330,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   }
 
   
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v-2.root",(int)weightCut,opt,(float)flucCut),"update");
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v-3.root",(int)weightCut,opt,(float)flucCut),"update");
   hmcPtCorr->Write("",TObject::kOverwrite);
   hmcTruth->Write("",TObject::kOverwrite);
   hdataRaw->Write("",TObject::kOverwrite);

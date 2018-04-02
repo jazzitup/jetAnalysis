@@ -4,12 +4,12 @@
 TH2D* getRewTable(int kSample, int icent)  { 
 
 
-  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v-2.root"); // Mar 29
+  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v-3.root"); // Mar 29
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized.root"); // Mar 28
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_fcalWeighted.root");
 
-  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent)); // Mar 29
-  //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent));  // Mar 28
+  //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio2_kSample%d_icent%d",kSample,icent)); // Mar 29 // 
+  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent));  // Mar 28  nominal 
   //TH2D* hTemp = (TH2D*)fReweight->Get(Form("hRatioRaw_kSample%d_icent%d_opt771",kSample,icent));
   
   //  TFile* fReweight = new TFile("reweightFactors/martin_jet_mass_weights.root");
@@ -20,8 +20,29 @@ TH2D* getRewTable(int kSample, int icent)  {
 
 
 
+int getRefIter( int kSample=0, int icent=0) {
+
+  return 6;
+
+  if ( kSample == 0 ) return 6;
+  if ( kSample == 1 ) {
+    if ( icent == 0 ) return 6;
+    if ( icent == 1 ) return 4;
+    if ( icent == 2 ) return 4;
+    if ( icent == 3 ) return 4;
+    if ( icent == 4 ) return 3;
+    if ( icent == 5 ) return 3;
+    if ( icent == 6 ) return 3;
+  }
+  
+  return -1;
+}
+
+
+
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
+  //  return false;
   if ( icent ==3 )  return true;
   if ( icent ==6 )  return true;
   if ( icent ==1 )  return true;
@@ -30,7 +51,6 @@ bool selectedCent(int icent=0) {
   if ( icent ==5 )  return true;
   else return false; 
 
-  return false;
 }
 
 
