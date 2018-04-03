@@ -491,8 +491,10 @@ void makeEfficiencyCanvas(TCanvas*& canv, const Int_t columns,
       }
    }
    
-   canv->cd(1)->SetLeftMargin(0.15);
-   canv->cd(columns+1)->SetLeftMargin(0.15);
+   canv->cd(1)->SetLeftMargin(leftMargin);
+   canv->cd(columns+1)->SetLeftMargin(leftMargin);
+   //   canv->cd(1)->SetLeftMargin(0.15);
+   //   canv->cd(columns+1)->SetLeftMargin(0.15);
    
 }
 
@@ -754,11 +756,12 @@ double cleverRange(TH1* h,TH1* h2, float fac=1.2, float minY=1.e-3)
   return max(maxY1,maxY2);
 }
 
-void cleverRangeLog(TH1* h,float fac=1.2, float theOrder=1.e-4)
+float cleverRangeLog(TH1* h,float fac=1.2, float theOrder=1.e-4)
 {
   float maxY =  fac * h->GetBinContent(h->GetMaximumBin());
   //   cout <<" range will be set as " << minY << " ~ " << maxY << endl;                                               
   h->SetAxisRange(maxY * theOrder,maxY,"Y");
+  return maxY;
 }
 
 

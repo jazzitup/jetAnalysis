@@ -32,7 +32,7 @@ double statFrac = 001;
 double fracStstData = 001;
 bool doUnfData = true ;
 
-bool useFullMC = true;
+bool useFullMC = false;
 
 int lowPtBin = 1;  int highPtBin = 13;
 //int lowPtBin = 6;   int highPtBin = 11;
@@ -325,7 +325,7 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 
       tr->GetEntry(i);
 
-      if ( (!useFullMC) && (i%2 != 1) )
+      if ( (!useFullMC) && (i%2 == 1) )
 	continue;
 
       if ( passEvent(myJetMc, icent, true) == false )

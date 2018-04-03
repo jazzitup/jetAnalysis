@@ -133,9 +133,11 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   ptmc->Draw();
   ptdata->Draw("same");
   gPad->SetLogy();
-  TLegend *leg1 = new TLegend(0.4814838,0.6583593,1,0.8723161,NULL,"brNDC");
+  drawCentrality(kSample, icent, 0.70,0.86,1,24);
 
-  easyLeg(leg1,"mass-integrated");
+  TLegend *leg1 = new TLegend(0.4814838,0.5583593,1,0.7723161,NULL,"brNDC");
+
+  easyLeg(leg1,"Mass integrated");
   leg1->AddEntry(ptdata, "Data","pl");
   leg1->AddEntry(ptmc, "MC","pl");
   leg1->Draw();
@@ -145,7 +147,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   hptRatio->Divide(ptmc);
   if ( kSample == 0) hptRatio->SetAxisRange(0,1e5,"Y");
 
-  hptRatio->SetXTitle("Reconstructed m/p_{T}");
+  hptRatio->SetXTitle("p_{T} (GeV)");
   hptRatio->SetYTitle("Data/MC");
   fixedFontHist(hptRatio,3,2,20);
   hptRatio->SetNdivisions(505,"X");
@@ -198,13 +200,16 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   c15->cd(1);
   TH1D* h1mcAllPt = (TH1D*)hmcPtCorr->ProjectionY("hmcPtCorrAllPt");
   TH1D* h1dataAllPt = (TH1D*)hdataRaw->ProjectionY("hdataRawAllPt");
-  cleverRangeLog(h1mcAllPt,100,1e-8);
+  float tempMax = cleverRange(h1mcAllPt,10,1);
+  //  float tempMax = cleverRange(h1mcAllPt,100,1e-8);
+  //  h1mcAllPt->SetAxisRange(1,tempMax*10,"Y");
   handsomeTH1(h1mcAllPt,1);
   handsomeTH1(h1dataAllPt,2);
   fixedFontHist(h1mcAllPt,2.5,2,20);
   h1mcAllPt->Draw();
   h1dataAllPt->Draw("same");
   gPad->SetLogy();
+  drawCentrality(kSample, icent, 0.70,0.86,1,24);
   TLegend *leg2 = new TLegend(0.1871854,0.6894175,0.7049639,0.9033743,NULL,"brNDC");
   easyLeg(leg2,"After p_{T} weighting");
   leg2->AddEntry(ptdata, "Data","pl");
@@ -217,7 +222,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
 
   hmptRatioPtAllsmooth->Smooth();
   hmptRatioPtAll->SetAxisRange(0,5,"Y");
-  hmptRatioPtAll->SetXTitle("Reconstructed m/p_{T}");
+  hmptRatioPtAll->SetXTitle("m/p_{T}^{Reco}");
   hmptRatioPtAll->SetYTitle("Data/MC");
   hmptRatioPtAll->SetNdivisions(505,"X");
   fixedFontHist(hmptRatioPtAll,3,2,20);
@@ -237,14 +242,21 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   c15->SaveAs(Form("reweightFactors/MassIntreweighting_kSample%d_icent%d.pdf",kSample,icent));
 
   TCanvas* c16 = new TCanvas("c16","",400,400);
-  hmptRatioPtAll->Draw();
+
+  cleverRange(hmptRatioPtAllsmooth,3);
+  hmptRatioPtAllsmooth->SetAxisRange(-0.07,0.3,"X");
+  if ( kSample == 1) hmptRatioPtAllsmooth->SetAxisRange(-0.18,0.3,"X");
   jumSun(-.2,1,0.35,1);
-  hmptRatioPtAllsmooth->Draw("same hist");
+  hmptRatioPtAllsmooth->SetXTitle("m/p_{T}");
+  hmptRatioPtAllsmooth->SetYTitle("Data/MC");
+  hmptRatioPtAllsmooth->Draw("hist");
+  jumSun(-0.18,1,0.3,1);
+  hmptRatioPtAll->Draw("same");
   hsmooVarP->Draw("same hist");
   hsmooVarM->Draw("same hist");
   drawCentrality(kSample, icent, 0.70,0.86,1,24);
-
-  TLegend *leg3 = new TLegend(0.1871854,0.6894175,0.7049639,0.9033743,NULL,"brNDC");
+  
+  TLegend *leg3 = new TLegend(0.4723618,0.6186667,0.959799,0.832,NULL,"brNDC");
   easyLeg(leg3,"Reweight factor");
   leg3->AddEntry(hsmooVarP, "Varied by +50%","l");
   leg3->AddEntry(hmptRatioPtAll, "Nominal","l");

@@ -31,7 +31,7 @@ using std::endl;
 double fracStst=0001;
 double fracStstData=01;
 
-bool useFullMC = true; 
+bool useFullMC = false;
 
 RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, TH2D* respX=0, TH2D* respY=0, double radius =0.4,bool doReweight = true);
 

@@ -110,11 +110,27 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
   
   TCanvas* c1=  new TCanvas("c1","",1200,550);
 
-  makeEfficiencyCanvas(c1,nPtPannels, 0.05, 0.01, 0.1, 0.3, 0.01);
+    makeEfficiencyCanvas(c1,nPtPannels+1, 0.02, 0.01, 0.2, 0.3, 0.01);
+    c1->cd(nPtPannels+1);
+    {
+
+      TLegend * leg1 = new TLegend(0.0,0.00,1.0,1.0,NULL,"brNDC");
+      //      easyLeg(leg1,"Unfolded",0.06);
+      easyLeg(leg1,"MC closure test",0.12);
+      leg1->AddEntry(hmcTruthSq[lowPtBin][refId], "Truth","l");
+      leg1->AddEntry(hmcRawSq[lowPtBin][refId], "Raw (Reco)","l");
+      for (int in = 0; in < int(vIter.size()) ; in++)  {
+	if ( vIter[in] == 1 ) leg1->AddEntry(hmcUnfSq[lowPtBin][in], Form("%dst iter.",vIter[in]));
+	else if ( vIter[in] == 2 ) leg1->AddEntry(hmcUnfSq[lowPtBin][in], Form("%dnd iter.",vIter[in]));
+	else  leg1->AddEntry(hmcUnfSq[lowPtBin][in], Form("%dth iter.",vIter[in]));
+      }
+      leg1->Draw();
+    }
   
   for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
+
     c1->cd(ipt - lowPtBin + 1);
-    
+
     for (int in = 0; in < int(vIter.size()) ; in++)  {
       if ( optY==1)  hmcTruthSq[ipt][in]->SetAxisRange(-300,2000,"X");
       else if ( optY==2) hmcTruthSq[ipt][in]->SetAxisRange(0.001,0.23999,"X");
@@ -126,66 +142,54 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
       handsomeTH1(hmcRawSq[ipt][in],1);
       handsomeTH1(hmcUnfSq[ipt][in],color[in]);
       
-      
+      hmcTruthSq[ipt][in]->SetLineStyle(2);
+
       if ( in == 0 )  {
-	hmcTruthSq[ipt][in]->SetLineStyle(2);
 	hmcTruthSq[ipt][in]->Draw("hist");
 	hmcRawSq[ipt][in]->Draw("hist same");
       }
       hmcUnfSq[ipt][in]->Draw("same e");
-      
       gPad->SetLogy();
+      
     }
-    drawBin(xBin,ipt,"GeV",0.16 + (0.05* (ipt==lowPtBin)), 0.78,1,16);
+    if ( ipt == lowPtBin )       
+      drawCentrality(kSample, icent, 0.25,0.86,1,24);
+    
+    drawBin(xBin,ipt,"GeV",0.2 + (0.05* (ipt==lowPtBin)), 0.78,1,18);
   
-    if ( ipt == lowPtBin ) {
-      drawCentrality(kSample, icent, 0.20,0.86,1,24);
-      TLegend *leg1 = new TLegend(0.2386514,0.2288023,0.7574586,0.4411159,NULL,"brNDC");
-      easyLeg(leg1,"MC",0.13);
-      leg1->AddEntry(hmcTruthSq[ipt][refId], "Truth","l");
-      leg1->AddEntry(hmcRawSq[ipt][refId], "Raw (Reco)","l");
-      leg1->Draw();
-    }
     
-    if ( ipt == lowPtBin )  {
-      TLegend * leg1 = new TLegend(0.2067083,0.0631472,0.6655156,0.6348713,NULL,"brNDC");
-      //      easyLeg(leg1,"Unfolded",0.06);
-      easyLeg(leg1,"Unfolded");
-      for (int in = 0; in < int(vIter.size()) ; in++)  {
-	if ( vIter[in] == 1 ) leg1->AddEntry(hmcUnfSq[ipt][in], Form("%dst iter.",vIter[in]));
-	else if ( vIter[in] == 2 ) leg1->AddEntry(hmcUnfSq[ipt][in], Form("%dnd iter.",vIter[in]));
-	else  leg1->AddEntry(hmcUnfSq[ipt][in], Form("%dth iter.",vIter[in]));
-      }
-      leg1->Draw();
-    }
-    TLegend* leg2 = new TLegend(0.2060963,0.02083363,0.8352797,0.2113352,NULL,"brNDC");
-    easyLeg(leg2,"N_{Unf.} - N_{Truth}",0.13);
-    for (int in = 0; in < int(vIter.size()) ; in++)  {
-    
-      double mig = hmcUnfSq[ipt][in]->Integral(1, hmcUnfSq[ipt][in]->GetNbinsX(), "width") -  hmcTruthSq[ipt][in]->Integral(1, hmcTruthSq[ipt][in]->GetNbinsX(),"width" ) ;
-      leg2->AddEntry(hmcUnfSq[ipt][in],Form("%.3f",(float)mig));
-    }
+    //    TLegend* leg2 = new TLegend(0.2060963,0.02083363,0.8352797,0.2113352,NULL,"brNDC");
+    //    easyLeg(leg2,"N_{Unf.} - N_{Truth}",0.13);
+    //    for (int in = 0; in < int(vIter.size()) ; in++)  {
+    //      double mig = hmcUnfSq[ipt][in]->Integral(1, hmcUnfSq[ipt][in]->GetNbinsX(), "width") -  hmcTruthSq[ipt][in]->Integral(1, hmcTruthSq[ipt][in]->GetNbinsX(),"width" ) ;
+    //      leg2->AddEntry(hmcUnfSq[ipt][in],Form("%.3f",(float)mig));
+    //    }
     //    leg2->Draw();
 
-    c1->cd(ipt - lowPtBin + 1 + nPtPannels);
+    c1->cd(ipt - lowPtBin + 2 + nPtPannels);
     for (int in = 0; in < int(vIter.size()) ; in++)  {
       hmcRatioSq[ipt][in] = (TH1D*)hmcUnfSq[ipt][in]->Clone(Form("mcRatioSq_ix%d_in%d",ipt,in));
       hmcRatioSq[ipt][in]->Divide(hmcTruthSq[ipt][in]);
       hmcRatioSq[ipt][in]->SetAxisRange(.5,1.5,"Y");
       hmcRatioSq[ipt][in]->SetAxisRange(0.001,0.2399,"X");
       if ( optY==1) hmcRatioSq[ipt][in]->SetAxisRange(0.00,100,"X");
-      hmcRatioSq[ipt][in]->SetYTitle("Unfolded/Truth");
+      hmcRatioSq[ipt][in]->SetYTitle("Ratio");
       hmcRatioSq[ipt][in]->SetNdivisions(505,"X");
+      hmcRatioSq[ipt][in]->SetNdivisions(505,"Y");
       hmcRatioSq[ipt][in]->SetTitleSize(.15,"X");
       hmcRatioSq[ipt][in]->SetTitleSize(0.1,"Y");
       hmcRatioSq[ipt][in]->SetTitleOffset(.5,"X");
       hmcRatioSq[ipt][in]->SetTitleOffset(.7,"Y");
-      
+      fixedFontHist(hmcRatioSq[ipt][in],2.5,2.5,20);
+  
+      //      hmcRatioSq[ipt][in]->GetXaxis()->SetLabelOffset(0.02);
       if ( in==0)  hmcRatioSq[ipt][in]->Draw();
       else  hmcRatioSq[ipt][in]->Draw("same");
       if ( optY == 2)  jumSun(0,1,0.3,1);
-      
     }
+    if ( ipt == lowPtBin) 
+      drawText("Unfolded/Truth", 0.20, 0.9,  1);
+    
     //    drawText(Form("Ratio to Iter. %d",vIter.at(refId)), 0.25, 0.9);
   
 
@@ -194,14 +198,40 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
   //  c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
   c1->SaveAs(Form("stabilitiy/mc_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
   
+  /*  TCanvas* labelCanvas =  new TCanvas("tlegend","",497,54,228,327);
+  TLegend *leg1 = new TLegend(0.002212389,0.1490066,0.9977876,1,NULL,"brNDC");
+  easyLeg(leg1,"Unfolded",0.08);
+  for (int in = 0; in < int(vIter.size()) ; in++)  {
+    if ( vIter[in] == 1 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dst iter.",vIter[in]));
+    else if ( vIter[in] == 2 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dnd iter.",vIter[in]));
+    else if ( vIter[in] == 3 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%drd iter.",vIter[in]));
+    else  leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dth iter.",vIter[in]));
+  }
+  leg1->Draw();
+  labelCanvas->SaveAs("stabilitiy/iterationLabel.pdf");
+  */
   
   if (doDATA) {
     TCanvas* c2 =  new TCanvas("c2","",1200,550);
     //  c2->Divide((nPtBinDraw+1)/2,2);
-    makeEfficiencyCanvas(c2,nPtPannels, 0.05, 0.01, 0.1, 0.3, 0.01);
+    makeEfficiencyCanvas(c2,nPtPannels+1, 0.02, 0.01, 0.2, 0.3, 0.01);
     
+    c2->cd(lowPtBin+1);
+    TLegend *leg1 = new TLegend(0.002212389,0.001490066,0.9977876,1,NULL,"brNDC");
+    easyLeg(leg1,"Data",0.12);
+    leg1->AddEntry( hdataRawSq[lowPtBin][0], "Raw","l");
+    
+    for (int in = 0; in < int(vIter.size()) ; in++)  {
+      if ( vIter[in] == 1 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dst iter.",vIter[in]));
+      else if ( vIter[in] == 2 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dnd iter.",vIter[in]));
+      else if ( vIter[in] == 3 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%drd iter.",vIter[in]));
+      else  leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dth iter.",vIter[in]));
+    }
+    leg1->Draw();
+
+
     for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
-      c2->cd(ipt - lowPtBin + 1);
+      c2->cd(ipt - lowPtBin+1);
       
       for (int in = 0; in < int(vIter.size()) ; in++)  {
 	if ( optY==1) hdataRawSq[ipt][in]->SetAxisRange(0.00,100,"X");
@@ -221,7 +251,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
 	gPad->SetLogy();
 	
       }
-	drawBin(xBin,ipt,"GeV",0.2,0.78,1,18);
+	drawBin(xBin,ipt,"GeV",0.25,0.78,1,18);
       
       if ( ipt == lowPtBin ) {
 	//	drawCentrality(kSample, icent, 0.45,0.86,1,24);
@@ -232,7 +262,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
       }
       
       if ( ipt == lowPtBin ) {
-        drawCentrality(kSample, icent, 0.2,0.86,1,24);
+        drawCentrality(kSample, icent, 0.25,0.86,1,24);
         TLegend *leg1 = new TLegend(0.1372267,0.04771138,0.6589362,0.4161378,NULL,"brNDC");
         easyLeg(leg1,"Unfolded",0.08);
         for (int in = 0; in < int(vIter.size()) ; in++)  {
@@ -243,7 +273,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
 	//	leg1->Draw();
       }
 
-      c2->cd(ipt - lowPtBin + 1 + nPtPannels);
+      c2->cd(ipt - lowPtBin + 2 + nPtPannels);
       bool drawFirst=true; 
       for (int in = 0; in < int(vIter.size()) ; in++)  {
 	if ( in ==refId  ) continue;
@@ -256,7 +286,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
 	//	hdataRatioSq[ipt][in]->SetYTitle("Ratio to 4th iter.");
 	hdataRatioSq[ipt][in]->SetNdivisions(505,"X");
 	hdataRatioSq[ipt][in]->SetNdivisions(505,"Y");
-	fixedFontHist(hdataRatioSq[ipt][in],2,2,20);
+	fixedFontHist(hdataRatioSq[ipt][in],2.5,2.5,20);
 	if ( drawFirst)  { 	hdataRatioSq[ipt][in]->Draw();
 	  drawFirst=false;  
 	}
@@ -264,26 +294,13 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
 	if ( optY == 2)  jumSun(0,1,0.3,1);
       }
       //      if (ipt == lowPtBin)   {
-	drawText("Ratio to", 0.25, 0.9,  color.at(refId));
-	drawText(Form("reference iter. (%d)",vIter.at(refId)), 0.25, 0.82, color.at(refId));
+      drawText("Ratio to", 0.20, 0.9,  1);
+      drawText(Form("reference iter. (%d)",vIter.at(refId)), 0.20, 0.82, 1);
 	//      }
     }
     //    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
     c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
   }
-  
-  
-  TCanvas* labelCanvas =  new TCanvas("tlegend","",497,54,228,327);
-  TLegend *leg1 = new TLegend(0.002212389,0.1490066,0.9977876,1,NULL,"brNDC");
-  easyLeg(leg1,"Unfolded",0.08);
-  for (int in = 0; in < int(vIter.size()) ; in++)  {
-    if ( vIter[in] == 1 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dst iter.",vIter[in]));
-    else if ( vIter[in] == 2 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dnd iter.",vIter[in]));
-    else if ( vIter[in] == 3 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%drd iter.",vIter[in]));
-    else  leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dth iter.",vIter[in]));
-  }
-  leg1->Draw();
-  labelCanvas->SaveAs("stabilitiy/iterationLabel.pdf");
 
 }  
 

@@ -15,7 +15,7 @@ struct valErr {
 
 valErr  getDATApoint(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, int massBin = 2);
 
-void checkFluctuation(int kSample= kPP,  int icent = 0, int massBin = 2){
+void checkFluctuation(int kSample= kPP,  int icent = 0, int massBin = 5){
   
   bool matRwt=1; bool specRwt=1; 
 int optX=1; int optY=2;
@@ -71,7 +71,10 @@ int optX=1; int optY=2;
 
     //    int fScale = 5;
     //    if ( ipt > lowPtBin + 2)  hStat[ipt]->Scale(1./fScale);
-    hStat[ipt]->SetAxisRange(-0.05,0.21,"Y");
+    if ( icent <=3)  hStat[ipt]->SetAxisRange(-0.05,0.21,"Y");
+    else if ( icent ==4)  hStat[ipt]->SetAxisRange(-0.50,1.21,"Y");
+    else if ( icent ==5)  hStat[ipt]->SetAxisRange(-0.50,1.21,"Y");
+    else if ( icent ==6)  hStat[ipt]->SetAxisRange(-1.0,5.1,"Y");
     hStat[ipt]->Draw();
     hDevi[ipt]->Draw("same");
 
