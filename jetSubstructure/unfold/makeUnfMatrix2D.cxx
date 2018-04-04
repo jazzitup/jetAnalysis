@@ -40,6 +40,7 @@ RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, in
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
 void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius= 0.4, bool doReweight=true) {
+  
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -50,8 +51,8 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
   int nYbins ;
   double yBin[30] ;
   getYbin(nYbins, yBin, optY);
-
-
+  
+  
   TH2D* hTruthTemp = new TH2D("hTruth","",nXbins,xBin,nYbins,yBin);
   TH2D* hRecoTemp = (TH2D*)hTruthTemp->Clone("hReco");
   RooUnfoldResponse* res[7];
