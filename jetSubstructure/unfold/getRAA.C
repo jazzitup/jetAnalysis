@@ -50,10 +50,11 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
   TH1D* hPPUnfSys[30]; // 
   TH1D* hPbPbUnfSys[30]; // 
   TH1D* hRAAUnfSys[30]; // 
-  
+
 
 
   TH1D* hRAA[30]; 
+  TH1D* hRAApt = new TH1D("hraapt",";p_{T};R_{AA}",nXbins,xBin);
   
   
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
@@ -65,7 +66,9 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     getDATAresults(kPbPb, icent, ix, nIterAA,  hPbPbRawSq[ix], hPbPbUnfSq[ix]);
 
   }
-  
+
+
+
   TCanvas* c1=  new TCanvas("c1","",1200,550);
   makeMultiPanelCanvas(c1,nPtPannels, 2, 0.0, 0.01, 0.3, 0.2, 0.05);
 
@@ -129,6 +132,12 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     hRAA[ipt] = (TH1D*)hPbPbUnfSq[ipt]->Clone(Form("hRAA_icent%d_ipt%d",icent,ipt));
     hRAA[ipt]->Divide(hPPUnfSq[ipt]);
     
+    double theRAA =  hPbPbUnfSq[ipt]->Integral("width");
+    theRAA = theRAA / hPPUnfSq[ipt]->Integral("width");
+    hRAApt->SetBinContent( ipt, theRAA) ;
+    hRAApt->SetBinError( ipt, 0.001);
+    
+    
     if ( optY==1)  hRAA[ipt]->SetAxisRange(-300,2000,"X");
     else if ( optY==2) hRAA[ipt]->SetAxisRange(0.001,0.239,"X");
     if ( optY==1)    hRAA[ipt]->SetXTitle("m (GeV)");
@@ -182,6 +191,18 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
   
   c1->Update();
   c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_NominalIter.pdf",optX,optY,icent));
+
+  TCanvas* c2 = new TCanvas("raapt","",400,400);
+  if ( icent == 0 ) handsomeTH1(hRAApt,2);
+  if ( icent == 3 ) handsomeTH1(hRAApt,4);
+  if ( icent == 6 ) handsomeTH1(hRAApt,8);
+  hRAApt->SetAxisRange(127,495,"X");
+  hRAApt->SetAxisRange(0,1.55,"Y");
+  hRAApt->Draw();
+  drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
+  jumSun(125,1,500,1);
+  //  jumSun(125,0.5,500,0.5);
+  c2->SaveAs(Form("raa_massIntegrated_icent%d.pdf",icent));
 }
 
 

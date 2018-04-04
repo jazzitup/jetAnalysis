@@ -33,6 +33,8 @@ double fracStstData=01;
 
 bool useFullMC = false;
 
+bool doJMS = false;
+
 RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, TH2D* respX=0, TH2D* respY=0, double radius =0.4,bool doReweight = true);
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
@@ -63,6 +65,9 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
   TH2D* hResX[7]; // response matrix for pT ( mass integrated)
   TH2D* hResY[7]; // response matrix for mass ( pT integrated)
   TH2D* h2dtempM = new TH2D("h2dtemp",";Truth m/p_{T};Reco m/p_{T}",100,-0.5,0.5,100,-0.5,0.5);
+  
+
+  
   for ( int i=0 ; i<=6; i++) {
     int icent = i;
     if ( !selectedCent(icent))       continue;
@@ -184,7 +189,22 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   double xBin[30];
   getXbin(nXbins, xBin, optX);
 
+  int nYbins ;
+  double yBin[30] ;
+  getYbin(nYbins, yBin, optY);
+
   TH1D* xBinTemp = new TH1D("xBinTemp","", nXbins, xBin);
+  
+  
+  TH1D* hJMS[15][10]; // centrality // gen pT  // gen m/pT
+  if ( doJMS) {
+    for ( int ix = 1 ; ix <= nXbins ; ix++) {
+      for ( int iy = 1 ; iy <= nYbins ; iy++) {
+	hJMS[ix][iy] = new TH1D(Form("hJMS_icent%d_ix%d_iy%d",icent,ix,iy),";(m/p_{T})^{Reco} - (m/p_{T})^{Truth};", 100,-0.2,0.2);
+      }
+    }
+  }
+
   
   RooUnfoldResponse* res;
   res = new RooUnfoldResponse( hReco, hTruth );
@@ -257,20 +277,30 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	
 	//	if ( passGenEvent(myJetMc, icent) )
 	//	if ( passRecoEvent(myJetMc, icent) )
-	  hTruth->Fill(truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-	  hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-	  
-	  res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-	  respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
-	  respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+	hTruth->Fill(truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+	hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+	
+	res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+	respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+	respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
 	
 	
 	
       }
       
   }
-
-return res;
+  
+  if ( doJMS) {
+    TFile* foutJMS = new TFile(Form("jms/jms_kSample%d_icent%d_doReweight%d.root",kSample,icent,doReweight),"recreate");
+    for ( int ix = 1 ; ix <= nXbins ; ix++) {
+      for ( int iy = 1 ; iy <= nYbins ; iy++)  {
+	hJMS[ix][iy]->Write();
+      }
+    }
+    foutJMS->Close();
+  }
+  
+  return res;
 }
 
 bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {

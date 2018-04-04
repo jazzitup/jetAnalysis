@@ -1,0 +1,337 @@
+
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
+#include <iostream>
+using std::cout;
+using std::endl;
+
+#include "TRandom.h"
+#include "TH1D.h"
+#include "TH2D.h"
+
+
+#include "../getSdHists.C"
+#include "../ntupleDefinition.h"
+//#include "../ntupleDefinition_v50.h"
+#include "../commonUtility.h"
+#include "../jzWeight.h"
+#endif
+
+//==============================================================================
+// Global definitions
+//==============================================================================
+
+#include "../JssUtils.h"
+#include <TPaletteAxis.h>
+#include "unfoldingUtil.h"
+
+double fracStst=001;
+
+
+void getDist( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hJMS=0, TH2D* hJMR=0, bool doReweight = true);
+
+
+void getJMS(int kSample = kPbPb, int icent=0, int optX =1, int optY=2, bool doReweight=false) {
+  TH1::SetDefaultSumw2();
+  int nXbins;
+  double xBin[30];
+  getXbin(nXbins, xBin, optX);
+  cout << " nXbins = " << nXbins << endl; 
+  cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
+  
+  int lowPtBin = 5;
+  int highPtBin = nXbins-1;
+  
+  int vColor[20] = {20,30,31,38,40,41,43,44,46,6,4};
+  int nYbins ;
+  double yBin[30] ;
+  getYbin(nYbins, yBin, optY);
+  
+  TH2D* hJMS = new TH2D("hJMS",";p_{T} (GeV) ; m/p_{T}", nXbins, xBin, nYbins, yBin);
+  TH2D* hJMR = (TH2D*)hJMS->Clone("hJMR");
+  
+  getDist(kSample, icent, optX, optY, hJMS, hJMR, doReweight);
+
+  
+  TCanvas* c01 = new TCanvas("c01", "",800,400);
+  c01->Divide(2,1);
+  c01->cd(1);
+  hJMS->Draw("colz");
+  c01->cd(2);
+  hJMR->Draw("colz");
+
+  TCanvas* c2 = new TCanvas("c2", "",500,500);
+  TLegend *leg1 = new TLegend(0.5061446,0.5142105,0.9599598,0.915789,NULL,"brNDC");
+  easyLeg(leg1,"Jet p_{T}");
+
+  for ( int ix = lowPtBin ; ix<=highPtBin ; ix++) { 
+    TH1D* hs = (TH1D*)hJMS->ProjectionY(Form("hs_ix%d",ix),ix,ix);
+    handsomeTH1(hs,vColor[ix-lowPtBin]);
+    hs->SetXTitle("[m/p_{T}]^{Truth}");
+    hs->SetYTitle("[m/p_{T}]^{Reco} - [m/p_{T}]^{Truth}");
+    hs->SetAxisRange(0.001,0.3,"X");
+    hs->SetAxisRange(-0.05,0.12,"Y");
+    hs->SetNdivisions(505,"X");
+    hs->SetNdivisions(505,"Y");
+    if ( ix == lowPtBin) hs->Draw();
+    else hs->Draw("same");
+    leg1->AddEntry(hs, textBin(xBin,ix,"GeV").Data(),"pl" );
+  }
+  jumSun(0,0,0.36,0);
+  drawCentrality(kSample, icent, 0.2,0.85,1,25);
+  drawText("<[p_{T}/m]>", 0.2,0.78,1,25);
+  leg1->Draw();
+  c2->SaveAs(Form("jms/jms_kSample%d_icent%d.pdf",kSample,icent));
+
+
+  TCanvas* c3 = new TCanvas("c3", "",500,500);
+  TLegend *leg2 = new TLegend(0.5061446,0.5142105,0.9599598,0.915789,NULL,"brNDC");
+  easyLeg(leg2,"Jet p_{T}");
+
+  for ( int ix = lowPtBin ; ix<=highPtBin ; ix++) { 
+    TH1D* hr = (TH1D*)hJMR->ProjectionY(Form("hr_ix%d",ix),ix,ix);
+    handsomeTH1(hr,vColor[ix-lowPtBin]);
+    hr->SetXTitle("[m/p_{T}]^{Truth}");
+    hr->SetYTitle("Resolution");
+    hr->SetAxisRange(0.001,0.3,"X");
+    hr->SetAxisRange(0,0.07,"Y");
+    hr->SetNdivisions(505,"X");
+    hr->SetNdivisions(505,"Y");
+    if ( ix == lowPtBin) hr->Draw();
+    else hr->Draw("same");
+    leg2->AddEntry(hr, textBin(xBin,ix,"GeV").Data(),"pl" );
+  }
+  jumSun(0,0,0.36,0);
+  drawCentrality(kSample, icent, 0.2,0.85,1,25);
+  drawText("#sigma[p_{T}/m]", 0.2,0.78,1,25);
+  leg2->Draw();
+  c3->SaveAs(Form("jms/jmr_kSample%d_icent%d.pdf",kSample,icent));
+
+
+  
+  /*
+  hMatrix[i]->SetXTitle("Bin # of reco (p_{T}, m/p_{T})");
+  hMatrix[i]->SetYTitle("Bin # of truth (p_{T}, m/p_{T})");
+  hMatrix[i]->SetTitle("MC Response matrix");
+  c01->SetRightMargin(0.2);
+  hMatrix[i]->Draw("colz");
+    c01->SaveAs(Form("pdfs/correlation_2dUnf_coll%d_cent%d_radius0%d_doReweight%d.pdf",kSample,i,(int)(radius*10.),doReweight));
+    TCanvas* c02 = new TCanvas("c02","",1000,500);
+    c02->Divide(2,1);
+    c02->cd(1);
+    hResX[i]->SetNdivisions(505,"X");
+    hResX[i]->Draw("colz");
+    c02->cd(1)->SetRightMargin(0.2);
+    gPad->SetLogz();
+    c02->cd(2);
+    h2dtempM->SetNdivisions(505,"X");
+    h2dtempM->Draw();
+    hResY[i]->Draw("colz same");
+    c02->cd(2)->SetRightMargin(0.2);
+    gPad->SetLogz();
+    c02->SaveAs(Form("pdfs/PtMassResp_coll%d_cent%d_radius%.1f_doReweight%d.pdf",kSample,i,(float)radius,doReweight));
+    
+
+  
+  TFile* fout = new TFile(Form("jms/jms_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",kSample,optX,optY,(float)radius,(int)doReweight),"recreate");
+  for ( int i=0 ; i<=6; i++) {
+  int icent = i;
+  if ( !selectedCent(icent))      continue;
+  if ( (kSample == kPP) && ( icent !=0 ) )      continue;
+  res[i]->Write();
+    hMatrix[i]->Write();
+    hReco[i]->Write();
+    hTruth[i]->Write();
+    
+    }
+    fout->Close();
+  */
+
+}
+
+void getDist( int kSample, int icent, int optX, int optY, TH2D* hJMS, TH2D* hJMR, bool doReweight ) { 
+  
+  double radius = 0.4;
+  
+  TH1::SetDefaultSumw2();
+  TString jz2;
+  TString jz3;
+  TString jz4;
+  if ( kSample == kPbPb ) {
+    if ( radius==0.4 ) {
+      // v50
+      //      jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2.root";
+      //      jz3 = "jetSubstructure_MC_HION9_pbpb_v50_jz3.root";
+      //      jz4 = "jetSubstructure_MC_HION9_pbpb_v50_jz4.root";
+      jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+      jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+      jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+    }
+  }
+  else if ( kSample == kPP ) {
+    if ( radius==0.4 ) {
+      //  jz2 = "jetSubstructure_MC_HION9_pp_v50_jz2.root";
+      //      jz3 = "jetSubstructure_MC_HION9_pp_v50_jz3.root";
+      //      jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4.root";
+      jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+      jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+      jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+    }
+  }
+  
+  TH1D* hFcalReweight;
+  if ( kSample == kPbPb ) {
+    //    TFile* fcal = new TFile("reweightFactors/FCal_HP_v_MB_weights.root");
+    //    hFcalReweight = (TH1D*)fcal->Get("FCal_HP_v_MBOV_weights");
+  }
+  
+  
+  TH2D* hReweight;
+  if ( doReweight ) {
+    hReweight = getRewTable(kSample, icent);
+  }
+  
+TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
+TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
+TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
+  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
+  
+  jetSubStr  myJetMc;
+  TBranch  *b_myJetSubMc;
+  
+  cout << " Setting tree branch address..." << endl;
+  TFile* fjz2 = new TFile(Form("../ntuples/%s",jz2.Data()));
+  TTree* tr2 = (TTree*)fjz2->Get("tr");
+  tr2->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+  
+  
+  TFile* fjz3 = new TFile(Form("../ntuples/%s",jz3.Data()));
+  TTree* tr3 = (TTree*)fjz3->Get("tr");
+  tr3->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+
+  TFile* fjz4 = new TFile(Form("../ntuples/%s",jz4.Data()));
+  TTree* tr4 = (TTree*)fjz4->Get("tr");
+  tr4->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+
+  int nXbins;
+  double xBin[30];
+  getXbin(nXbins, xBin, optX);
+
+  int nYbins ;
+  double yBin[30] ;
+  getYbin(nYbins, yBin, optY);
+
+  TH1D* xBinTemp = new TH1D("xBinTemp","", nXbins, xBin);
+  TH1D* yBinTemp = new TH1D("yBinTemp","", nYbins, yBin);
+  
+  
+
+  TH1D* hDist[20][20]; // gen pT  // gen m/pT
+  for ( int ix = 0 ; ix <= nXbins+1   ;  ix++) {
+    for ( int iy = 0 ; iy <= nYbins+1 ; iy++) {
+      hDist[ix][iy] = new TH1D(Form("hDist_ix%d_iy%d",ix,iy),";(m/p_{T})^{Reco} - (m/p_{T})^{Truth};", 100,-1,1);
+    }
+  }
+  
+  
+  for ( int ijz =2 ; ijz<=4 ; ijz++) { 
+    TTree* tr;
+    TH2D* hRecoEntries;
+    double jzNorm=0;
+    if ( ijz==2)  {
+      tr = tr2;   
+      jzNorm = hi9EvtWgtJZ2; 
+      hRecoEntries = recoEntries_jz2;
+      }
+    else if ( ijz==3)  {
+      tr = tr3;   
+      jzNorm = hi9EvtWgtJZ3; 
+      hRecoEntries = recoEntries_jz3;
+    }
+    else if ( ijz==4)  {
+      tr = tr4;   
+      jzNorm = hi9EvtWgtJZ4; 
+      hRecoEntries = recoEntries_jz4;
+      }
+    cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
+    
+    for (Int_t i= 0; i<tr->GetEntries() ; i++) {
+      if ( i > tr->GetEntries() * fracStst ) continue;
+      tr->GetEntry(i);
+      
+      if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
+	continue;
+      
+      //	if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
+      //	  continue;
+      
+      double recoVarX, truthVarX;
+      getXvalues( recoVarX, truthVarX, myJetMc, optX);
+      
+      double recoVarY, truthVarY;
+      getYvalues( recoVarY, truthVarY, myJetMc, optY);
+      
+      double fcalWeight = 1.0; 
+      if ( kSample==kPbPb) {
+	//	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
+      }
+      
+      // Data/MC reweighting factors 
+      double rewFact = 1; 
+      if ( doReweight) { 
+	//	  int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
+	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass/myJetMc.recoPt);
+	rewFact = hReweight->GetBinContent(rewBin);
+      }
+      
+      int xx = xBinTemp->FindBin( truthVarX);
+      int yy = yBinTemp->FindBin( truthVarY);
+      
+      hDist[xx][yy]->Fill(recoVarY - truthVarY);
+    }
+    
+  }
+  
+  for ( int ix = 1 ; ix <= nXbins ; ix++) {
+    for ( int iy = 1 ; iy <= nYbins ; iy++)  {
+      hDist[ix][iy]->Fit("gaus");
+      if ( hDist[ix][iy]->GetFunction("gaus") == NULL ) {
+	hJMS->SetBinContent(ix,iy,-100);
+	hJMS->SetBinError(ix,iy,-100);
+	hJMR->SetBinContent(ix,iy,-100);
+	hJMR->SetBinError(ix,iy,-100);
+      }
+      else {
+	float theJMS = hDist[ix][iy]->GetFunction("gaus")->GetParameter(1);
+	float theJMSerr = hDist[ix][iy]->GetFunction("gaus")->GetParError(1);
+	float theJMR = hDist[ix][iy]->GetFunction("gaus")->GetParameter(2);
+	float theJMRerr = hDist[ix][iy]->GetFunction("gaus")->GetParError(2);
+	hJMS->SetBinContent(ix,iy,theJMS);
+	hJMS->SetBinError(ix,iy,theJMSerr);
+	hJMR->SetBinContent(ix,iy,theJMR);
+	hJMR->SetBinError(ix,iy,theJMRerr);
+      }
+    }
+  }
+  
+  
+  TFile* foutJMS = new TFile(Form("jms/jms_kSample%d_icent%d_doReweight%d.root",kSample,icent,doReweight),"recreate");
+  for ( int ix = 1 ; ix <= nXbins ; ix++) {
+    for ( int iy = 1 ; iy <= nYbins ; iy++)  {
+      hDist[ix][iy]->Write();
+    }
+  }
+  foutJMS->Close();
+  
+  
+ }
+ 
+bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {
+  int theBin = hEntries->FindBin(recoVarX, recoVarY);
+  if (  hEntries->GetBinContent(theBin) < minEntries ) 
+    return true;
+
+  return false;
+  
+}
+
+
