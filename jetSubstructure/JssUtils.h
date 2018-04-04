@@ -95,5 +95,14 @@ void drawBin(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp
   else  drawText( Form("%.5f - %.5f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
 }
 
+TString textBin(double *xBin, int ix, TString demen = "GeV") {
+  if ( xBin[ix-1] >= 1  ) return Form("%d - %d %s", (int)(xBin[ix-1]),  (int)(xBin[ix]), demen.Data()) ;
+  else if ( xBin[ix-1] >= 0.1 ) return Form("%.2f - %.2f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data());
+  else if ( xBin[ix-1] >= 0.01 ) return Form("%.3f - %.3f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data());
+  else if ( xBin[ix-1] >= 0.001 ) return  Form("%.4f - %.4f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data());
+  else if ( xBin[ix-1] >= 0.0001 ) return  Form("%.5f - %.5f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data());
+  else  return Form("%.5f - %.5f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data());
+}
+
 
 #endif

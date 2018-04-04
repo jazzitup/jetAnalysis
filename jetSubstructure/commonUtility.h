@@ -980,6 +980,15 @@ TString getDateAndTime()
   return Form("%d%d%d%d%d",Year,Month,Day,Hour,Min);
 }
 
+void absTH1(TH1* h1) { 
+  for ( int ibin = 1 ; ibin <= h1->GetNbinsX() ; ibin++) {
+    double absY = fabs(h1->GetBinContent(ibin));
+    double absYerr = fabs(h1->GetBinError(ibin));
+    h1->SetBinContent( ibin, absY);
+    h1->SetBinError( ibin, absYerr);
+  }
+  
+}  
 
 
 
