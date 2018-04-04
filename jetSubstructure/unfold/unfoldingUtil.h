@@ -306,3 +306,31 @@ bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
   
 } 
 
+
+
+
+bool passJesEvent( jetSubStr myJetMc, int icent)  {
+
+  if ( !passGenEvent(myJetMc, icent) )
+    return false;
+  
+  double ptCut = 50;
+  double ptCutUp = 1000;
+  
+  if ( myJetMc.cent != icent )
+    return false;
+
+  if ( myJetMc.recoPt < ptCut )
+    return false;
+
+  if ( myJetMc.recoPt > ptCutUp )
+    return false;
+
+  if ( (myJetMc.recoMass / myJetMc.recoPt) > 0.3  )
+    return false;
+  if ( (myJetMc.recoMass / myJetMc.recoPt) < -0.2 )
+    return false;
+  
+  return true;
+
+}
