@@ -24,11 +24,10 @@ using std::endl;
 #include <TPaletteAxis.h>
 #include "unfoldingUtil.h"
 
-double fracStst=001;
+double fracStst=0001;
 
 
 void getDist( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hJMS=0, TH2D* hJMR=0, TH2D* hJES=0, TH2D* hJER=0, bool doReweight = true);
-
 
 void getJMS(int kSample = kPbPb, int icent=0, int optX =1, int optY=2, bool doReweight=false) {
   TH1::SetDefaultSumw2();
@@ -155,46 +154,6 @@ void getJMS(int kSample = kPbPb, int icent=0, int optX =1, int optY=2, bool doRe
   leg1s->Draw();
   c3a->SaveAs(Form("jms/jer_kSample%d_icent%d.pdf",kSample,icent));
 
-
-  
-  /*
-  hMatrix[i]->SetXTitle("Bin # of reco (p_{T}, m/p_{T})");
-  hMatrix[i]->SetYTitle("Bin # of truth (p_{T}, m/p_{T})");
-  hMatrix[i]->SetTitle("MC Response matrix");
-  c01->SetRightMargin(0.2);
-  hMatrix[i]->Draw("colz");
-    c01->SaveAs(Form("pdfs/correlation_2dUnf_coll%d_cent%d_radius0%d_doReweight%d.pdf",kSample,i,(int)(radius*10.),doReweight));
-    TCanvas* c02 = new TCanvas("c02","",1000,500);
-    c02->Divide(2,1);
-    c02->cd(1);
-    hResX[i]->SetNdivisions(505,"X");
-    hResX[i]->Draw("colz");
-    c02->cd(1)->SetRightMargin(0.2);
-    gPad->SetLogz();
-    c02->cd(2);
-    h2dtempM->SetNdivisions(505,"X");
-    h2dtempM->Draw();
-    hResY[i]->Draw("colz same");
-    c02->cd(2)->SetRightMargin(0.2);
-    gPad->SetLogz();
-    c02->SaveAs(Form("pdfs/PtMassResp_coll%d_cent%d_radius%.1f_doReweight%d.pdf",kSample,i,(float)radius,doReweight));
-    
-
-  
-  TFile* fout = new TFile(Form("jms/jms_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",kSample,optX,optY,(float)radius,(int)doReweight),"recreate");
-  for ( int i=0 ; i<=6; i++) {
-  int icent = i;
-  if ( !selectedCent(icent))      continue;
-  if ( (kSample == kPP) && ( icent !=0 ) )      continue;
-  res[i]->Write();
-    hMatrix[i]->Write();
-    hReco[i]->Write();
-    hTruth[i]->Write();
-    
-    }
-    fout->Close();
-  */
-
 }
 
 void getDist( int kSample, int icent, int optX, int optY, TH2D* hJMS, TH2D* hJMR, TH2D* hJES, TH2D* hJER, bool doReweight ) { 
@@ -239,10 +198,6 @@ void getDist( int kSample, int icent, int optX, int optY, TH2D* hJMS, TH2D* hJMR
     hReweight = getRewTable(kSample, icent);
   }
   
-TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
-TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
-TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
-  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
   
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
@@ -291,18 +246,15 @@ TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
     if ( ijz==2)  {
       tr = tr2;   
       jzNorm = hi9EvtWgtJZ2; 
-      hRecoEntries = recoEntries_jz2;
-      }
+    }
     else if ( ijz==3)  {
       tr = tr3;   
       jzNorm = hi9EvtWgtJZ3; 
-      hRecoEntries = recoEntries_jz3;
     }
     else if ( ijz==4)  {
       tr = tr4;   
       jzNorm = hi9EvtWgtJZ4; 
-      hRecoEntries = recoEntries_jz4;
-      }
+    }
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
     
     for (Int_t i= 0; i<tr->GetEntries() ; i++) {
@@ -384,7 +336,6 @@ TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
     }
   }
 
-  
   TFile* foutJMS = new TFile(Form("jms/jms_kSample%d_icent%d_doReweight%d.root",kSample,icent,doReweight),"recreate");
   for ( int ix = 1 ; ix <= nXbins ; ix++) {
     for ( int iy = 1 ; iy <= nYbins ; iy++)  {
@@ -392,18 +343,7 @@ TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
       hDistJes[ix][iy]->Write();
     }
   }
-  foutJMS->Close();
   
-  
- }
- 
-bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {
-  int theBin = hEntries->FindBin(recoVarX, recoVarY);
-  if (  hEntries->GetBinContent(theBin) < minEntries ) 
-    return true;
-
-  return false;
   
 }
-
-
+ 
