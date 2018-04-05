@@ -9,9 +9,9 @@ TH2D* getRewTable(int kSample, int icent)  {
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_fcalWeighted.root");
 
   //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatioVarP_kSample%d_icent%d",kSample,icent));  // plus50%
-      TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatioVarM_kSample%d_icent%d",kSample,icent));  // plus50%
+  //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatioVarM_kSample%d_icent%d",kSample,icent));  // plus50%
   //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio2_kSample%d_icent%d",kSample,icent)); // 01
-  //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent));  // 00
+  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent));  // 00
 
   //TH2D* hTemp = (TH2D*)fReweight->Get(Form("hRatioRaw_kSample%d_icent%d_opt771",kSample,icent));
   
@@ -22,6 +22,34 @@ TH2D* getRewTable(int kSample, int icent)  {
 }
 
 
+TString jz2PbPbString = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+TString jz3PbPbString = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+TString jz4PbPbString = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+
+TString   jz2PPString = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+TString   jz3PPString = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+TString   jz4PPString = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+
+// systematics
+TString jz2PbPbStringSys = "jetSubstructure_MC_HION9_jz2sys_v50.root";
+TString jz3PbPbStringSys = "jetSubstructure_MC_HION9_jz3sys_v50.root";
+TString jz4PbPbStringSys = "jetSubstructure_MC_HION9_jz4sys_v50.root";
+
+TString   jz2PPStringSys = "jetSubstructure_ppMC_HION9_jz2sys_v50.root";
+TString   jz3PPStringSys = "jetSubstructure_ppMC_HION9_jz3sys_v50.root";
+TString   jz4PPStringSys = "jetSubstructure_ppMC_HION9_jz4sys_v50.root";
+
+
+TString getPtSysName( int nSys) {
+  if (nSys < 0) 
+    return "";
+  else if ( (nSys >=0) && (nSys <= 21) )    // 0 -21 : pp intrinsic
+    return Form("ptSysPP%d",nSys);
+  else if ( (nSys >=100) && (nSys <= 106) )    // 100 -106 : HI intrinsic
+    return Form("ptSysHI%d",nSys-100);
+  else 
+    return "";
+}
 
 int getRefIter( int kSample=0, int icent=0) {
 

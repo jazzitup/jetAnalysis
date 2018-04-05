@@ -14,7 +14,7 @@ using std::endl;
 #include "../JssUtils.h"
 #include <TPaletteAxis.h>
 
-double statFrac = 001;
+double statFrac = 0.001;
 double fracStstData = 001;
 bool doUnfData = true ;
 
@@ -342,7 +342,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   }
 
   
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v-3.root",(int)weightCut,opt,(float)flucCut),"update");
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v-3-canBeRemoved.root",(int)weightCut,opt,(float)flucCut),"update");
   hmcPtCorr->Write("",TObject::kOverwrite);
   hmcTruth->Write("",TObject::kOverwrite);
   hdataRaw->Write("",TObject::kOverwrite);
