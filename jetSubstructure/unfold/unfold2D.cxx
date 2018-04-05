@@ -1,4 +1,3 @@
-
 #if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include <iostream>
 using std::cout;
@@ -44,7 +43,21 @@ void getDATAspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH2D* 
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=false) {
+void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=false, int nSys=-1) {
+
+  if ( nSys < 0 )
+    cout << "===== Nominal mode =====" << endl;
+  else if ( (nSys >= 0 ) && ( nSys <= 21 ) )
+    cout << "===== pp intrinsic JES sys mode ======" << endl;
+  else if ( (nSys >= 100 ) && ( nSys <= 106 ) )
+    cout << "===== HI JES sys mode =====" << endl;
+  else {
+    cout << "===== Invald nSys option ===== " << nSys << endl;
+    return ;
+  }
+  
+
+
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -70,8 +83,15 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
   TH2D* hdataUnf[7][maxIter]; // unfolding iter
 
   int matrixWeight = 1;
-  TFile* fmatrix = new TFile(Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",
-				  kSample,optX,optY,(float)radius,(int)matrixWeight));
+  
+  TString matrixName = Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",
+			    kSample,optX,optY,(float)radius,(int)matrixWeight);
+  if ( nSys>= 0) {
+    matrixName =       Form("spectraFiles/sys/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d_sys%d.root",
+		            kSample,optX,optY,(float)radius,(int)matrixWeight,nSys);
+  }
+  
+  TFile* fmatrix = new TFile(matrixName.Data());
   cout << " matrix name : "  << fmatrix->GetName() << endl;
   
   
@@ -79,7 +99,7 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     int icent = i;
     if ( !selectedCent(icent))       continue;
     if ( (kSample == kPP) && ( icent != 0 ) )      continue;
-
+    
     // MC 
     hmcRaw[i] = (TH2D*)hTemp->Clone(Form("hmcRaw_icent%d",i));
     hmcTruth[i] = (TH2D*)hTemp->Clone(Form("hmcTruth_icent%d",i));
@@ -103,7 +123,7 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     //    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
     //    TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
     //    TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
-    //RooUnfoldResponse* tempRes  = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
+    //    RooUnfoldResponse* tempRes  = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
     //    TH2D* h2ResMatrix = (TH2D*)tempRes->Hresponse(); 
     //    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
     //    res[i] = new RooUnfoldResponse(0,0, h2ResMatrix);
@@ -116,7 +136,6 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     //    res[i] = new RooUnfoldResponse(h2RecoTemp, h2TruthTemp, h2ResMatrix);
     //    res[i] = new RooUnfoldResponse(h2Reco, h2Truth, h2ResMatrix);
     res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); 
-    
   }
   
   
@@ -200,7 +219,13 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     }
   }
   
-  TFile * fout = new TFile(Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d.root",kSample,matrixWeight,doReweight),"recreate");
+  TString foutName = Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d.root",kSample,matrixWeight,doReweight); 
+  if ( nSys >=0 ) { 
+    foutName = Form("unfSpectra/sys/kSample%d_matrixRwt%d_spectraRwt%d_sys%d.root",kSample,matrixWeight,doReweight,nSys);
+  }
+    
+
+  TFile * fout = new TFile(foutName.Data(), "recreate");
   for ( int icent=0 ; icent<=6; icent++) {
     if ( !selectedCent(icent) )  continue;
     if ( (kSample == kPP) && ( icent != 0 ) )      continue;
