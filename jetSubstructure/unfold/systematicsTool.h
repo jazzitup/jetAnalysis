@@ -36,6 +36,38 @@ TH1D* getSysA(int kSample= kPP, int icent = 0, int ix=7, TString s1 ="reweight00
   return ret;
 
 }  
+
+
+TH1D* getSysJES(int kSample= kPP, int icent = 0, int ix=7, TString s1 ="reweight00varM50percent", TString s2="reweight00varP50percent" )   {
+
+  int optX = 1;
+  int optY = 2;
+
+  int nXbins;
+  double xBin[30];
+  getXbin(nXbins, xBin, optX);
+
+  int nYbins ;
+  double yBin[30] ;
+  getYbin(nYbins, yBin, optY);
+  TH1D* tempHistYsq = new TH1D("tempHistY",";m/p_{T};",nYbins,yBin);
+
+  TH1D* h1 = new TH1D("h1","",nYbins,yBin);
+  TH1D* h2 = (TH1D*)h1->Clone("h2");
+
+  getDATAresults( kSample, icent, ix, h1, s1);
+  getDATAresults( kSample, icent, ix, h2, s2);
+
+  TH1D* ret = (TH1D*)h2->Clone(Form("kSample%d_icent%d_ix%d_%s_%s",kSample,icent,ix,s1.Data(), s2.Data()) );
+  ret->Add(h1,-1);
+  ret->Divide(h1);
+
+  return ret;
+
+}
+
+
+
  
 
 void getDATAresults(int kSample, int icent, int ix, TH1D* hdataUnfSq, TString dir) {

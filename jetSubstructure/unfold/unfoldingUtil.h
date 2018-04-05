@@ -73,7 +73,6 @@ int getRefIter( int kSample=0, int icent=0) {
 
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-  return 0;
   if ( icent ==3 )  return true;
   if ( icent ==6 )  return true;
   if ( icent ==1 )  return true;
@@ -81,6 +80,7 @@ bool selectedCent(int icent=0) {
   if ( icent ==4 )  return true;
   if ( icent ==5 )  return true;
   else return false; 
+  return 0;
 
 }
 
