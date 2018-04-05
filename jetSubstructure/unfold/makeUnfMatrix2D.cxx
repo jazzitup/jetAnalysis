@@ -118,7 +118,7 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
   if ( nSys < 0 )   
     foutname = Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",kSample,optX,optY,(float)radius,(int)doReweight);
   else 
-    foutname = Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d_sys%d.root",kSample,optX,optY,(float)radius,(int)doReweight,nSys);
+    foutname = Form("spectraFiles/sys/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d_sys%d.root",kSample,optX,optY,(float)radius,(int)doReweight,nSys);
 
   TFile* fout = new TFile(foutname.Data(),"recreate");
   for ( int i=0 ; i<=6; i++) {
