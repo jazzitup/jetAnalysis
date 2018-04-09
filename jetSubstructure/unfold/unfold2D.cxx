@@ -12,7 +12,7 @@ using std::endl;
 //#include "RooUnfoldTUnfold.h"
 
 #include "../getSdHists.C"
-#include "../ntupleDefinition.h"
+#include "../ntupleDefinition_v50.h"
 //#include "../ntupleDefinition_v50.h"
 #include "../commonUtility.h"
 #include "../jzWeight.h"
@@ -401,9 +401,11 @@ void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, 
   TString fname;
   if ( radius == 0.4 ) {
     if ( kSample == kPbPb ) {
-      fname = "jetSubstructure_Data_HION9_v4.7_r4_pbpb_Jan23_ptCut90Eta2.1.root"; }
+      fname = pbpbDataString; 
+    }
     else if ( kSample == kPP) {
-      fname = "jetSubstructure_data_HION9_v4.7_r4_pp_Feb26_ptCut90Eta2.1_fullLumi.root"; }
+      fname = ppDataString;
+    }
   }
   
   TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));

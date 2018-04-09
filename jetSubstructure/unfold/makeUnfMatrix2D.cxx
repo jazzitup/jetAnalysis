@@ -120,15 +120,15 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
   else 
     foutname = Form("spectraFiles/sys/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d_sys%d.root",kSample,optX,optY,(float)radius,(int)doReweight,nSys);
 
-  TFile* fout = new TFile(foutname.Data(),"recreate");
+  TFile* fout = new TFile(foutname.Data(),"update");
   for ( int i=0 ; i<=6; i++) {
     int icent = i;
     if ( !selectedCent(icent))      continue;
     if ( (kSample == kPP) && ( icent !=0 ) )      continue;
-    res[i]->Write();
-    hMatrix[i]->Write();
-    hReco[i]->Write();
-    hTruth[i]->Write();
+    res[i]->Write("",TObject::kOverwrite);
+    hMatrix[i]->Write("",TObject::kOverwrite);
+    hReco[i]->Write("",TObject::kOverwrite);
+    hTruth[i]->Write("",TObject::kOverwrite);
 
   }
   fout->Close();
@@ -202,18 +202,18 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TFile* fjz2 = new TFile(Form("../ntuples/%s",jz2.Data()));
   TTree* tr2 = (TTree*)fjz2->Get("tr");
   tr2->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
-  tr2->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
+  if ( nSys>=0)   tr2->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
   
   
   TFile* fjz3 = new TFile(Form("../ntuples/%s",jz3.Data()));
   TTree* tr3 = (TTree*)fjz3->Get("tr");
   tr3->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
-  tr3->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
+  if ( nSys>=0)  tr3->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
 
   TFile* fjz4 = new TFile(Form("../ntuples/%s",jz4.Data()));
   TTree* tr4 = (TTree*)fjz4->Get("tr");
   tr4->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
-  tr4->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
+  if ( nSys>=0)  tr4->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
 
   int nXbins;
   double xBin[30];
@@ -278,8 +278,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	  double extraPtScale = ptSys / myJetMc.recoPt ; 
 	  
 	  recoVarX = recoVarX * extraPtScale ; //pt 
-	  if ( optY == 2) 
-	    recoVarY = recoVarY / extraPtScale ; //m/pt
+	  //	  if ( optY == 2) 
+	  //	    recoVarY = recoVarY / extraPtScale ; //m/pt
 	}
 	
 	double fcalWeight = 1.0; 

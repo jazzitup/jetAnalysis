@@ -24,9 +24,9 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
   int nIterPP = getRefIter(0,0);
   int nIterAA = getRefIter(1,icent);
   
-  //   nIterPP = 1 ;
-   // nIterAA = 1 ;
-
+  //int nIterPP = 6 ;
+  //  int nIterAA = 6 ;
+  
   int nXbins;
   double xBin[30];
   getXbin(nXbins, xBin, optX);

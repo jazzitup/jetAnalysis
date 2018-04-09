@@ -1,44 +1,41 @@
-//TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_v2.root";
-//TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_v4.root";
-//TString fReweightName = "reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3.root";
 TH2D* getRewTable(int kSample, int icent)  { 
-
-
-  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v-3.root"); // Mar 29
+  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50.root"); // Apr 7
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized.root"); // Mar 28
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_fcalWeighted.root");
-
+  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent));  // 00
   //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatioVarP_kSample%d_icent%d",kSample,icent));  // plus50%
   //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatioVarM_kSample%d_icent%d",kSample,icent));  // plus50%
   //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio2_kSample%d_icent%d",kSample,icent)); // 01
-  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent));  // 00
-
-  //TH2D* hTemp = (TH2D*)fReweight->Get(Form("hRatioRaw_kSample%d_icent%d_opt771",kSample,icent));
-  
-  //  TFile* fReweight = new TFile("reweightFactors/martin_jet_mass_weights.root");
-  //  TH2D* hTemp = (TH2D*)fReweight->Get("h_jet_v_mass_cent0"); // Martin's file
-  
   return hTemp;
 }
 
-
+/*
 TString jz2PbPbString = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
 TString jz3PbPbString = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
 TString jz4PbPbString = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-
 TString   jz2PPString = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
 TString   jz3PPString = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
 TString   jz4PPString = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-
+*/
 // systematics
 TString jz2PbPbStringSys = "jetSubstructure_MC_HION9_jz2sys_v50.root";
 TString jz3PbPbStringSys = "jetSubstructure_MC_HION9_jz3sys_v50.root";
 TString jz4PbPbStringSys = "jetSubstructure_MC_HION9_jz4sys_v50.root";
 
-TString   jz2PPStringSys = "jetSubstructure_ppMC_HION9_jz2sys_v50.root";
-TString   jz3PPStringSys = "jetSubstructure_ppMC_HION9_jz3sys_v50.root";
-TString   jz4PPStringSys = "jetSubstructure_ppMC_HION9_jz4sys_v50.root";
+TString jz2PPStringSys = "jetSubstructure_ppMC_HION9_jz2sys_v50.root";
+TString jz3PPStringSys = "jetSubstructure_ppMC_HION9_jz3sys_v50.root";
+TString jz4PPStringSys = "jetSubstructure_ppMC_HION9_jz4sys_v50.root";
 
+TString jz2PbPbString = jz2PbPbStringSys;
+TString jz3PbPbString = jz3PbPbStringSys;
+TString jz4PbPbString = jz4PbPbStringSys;
+
+TString jz2PPString = jz2PPStringSys;
+TString jz3PPString = jz3PPStringSys;
+TString jz4PPString = jz4PPStringSys;
+
+TString ppDataString = "jetSubstructure_data_HION9_v50_r4_pp.root";
+TString pbpbDataString = "jetSubstructure_data_HION9_v50_r4_pbpb.root";
 
 TString getPtSysName( int nSys) {
   if (nSys < 0) 
@@ -74,6 +71,7 @@ int getRefIter( int kSample=0, int icent=0) {
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
   if ( icent ==3 )  return true;
+  return false;
   if ( icent ==6 )  return true;
   if ( icent ==1 )  return true;
   if ( icent ==2 )  return true;
