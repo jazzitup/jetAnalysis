@@ -28,7 +28,7 @@ void getSystematics(int icent = 0) {
     if (i%2 == 0)  vIndPlus.push_back(i);  // pp JES
     else           vIndMinus.push_back(i);  // pp JES
   }
-  for ( int i=101 ; i<=104 ; i++){
+  for ( int i=101 ; i<=106 ; i++){
     if (i%2 == 1)  vIndPlus.push_back(i);  // pp JES
     else           vIndMinus.push_back(i);  // pp JES
   }
@@ -83,11 +83,13 @@ void getSystematics(int icent = 0) {
     if ( ix==lowPtBin)  drawText("R_{AA}", 0.37,0.73,1,20);
     
   }
+  cPlus->SaveAs(Form("pdfsSystematics/cPlus_icent%d.pdf",icent));
+
   TCanvas* cLeg = new TCanvas("clegend","",300,300);
   legPlus->Draw();
+  cLeg->SaveAs(Form("pdfsSystematics/cLeg.pdf"));
   
-
-
+  
   TCanvas* cMinus = new TCanvas("cMinus","",1200,800);
   makeMultiPanelCanvas(cMinus,nPtPannels,3, 0.0, 0.01, 0.3, 0.2, 0.05);
 
@@ -123,8 +125,8 @@ void getSystematics(int icent = 0) {
       else       sysMinus[ind].raa[ix]->Draw("same hist");
     }
     if ( ix==lowPtBin)  drawText("R_{AA}", 0.37,0.73,1,20);
-    
   }
+  cMinus->SaveAs(Form("pdfsSystematics/cMinus_icent%d.pdf",icent));
 
   TCanvas* cJer = new TCanvas("cJer","",1200,800);
   makeMultiPanelCanvas(cJer,nPtPannels,3, 0.0, 0.01, 0.3, 0.2, 0.05);
@@ -156,5 +158,6 @@ void getSystematics(int icent = 0) {
     jumSun(0,0,0.24,0);
     
   }
+  cJer->SaveAs(Form("pdfsSystematics/cJER_icent%d.pdf",icent));
   
 }

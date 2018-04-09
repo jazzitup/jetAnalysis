@@ -334,7 +334,6 @@ bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
 
 
 
-
 bool passJesEvent( jetSubStr myJetMc, int icent)  {
 
   if ( !passGenEvent(myJetMc, icent) )

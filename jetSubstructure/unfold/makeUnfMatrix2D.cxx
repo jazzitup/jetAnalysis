@@ -261,8 +261,6 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	if ( (!useFullMC) && (i%2 == 0) )
 	  continue;
 	
-	if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
-	  continue;
 	
 	//	if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
 	//	  continue;
@@ -276,11 +274,17 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	
 	if (nSys >=0)   {
 	  double extraPtScale = ptSys / myJetMc.recoPt ; 
-	  
 	  recoVarX = recoVarX * extraPtScale ; //pt 
-	  //	  if ( optY == 2) 
-	  //	    recoVarY = recoVarY / extraPtScale ; //m/pt
+	  
+	  myJetMc.recoPt = ptSys;  // New pT!!! 
+	  myJetMc.recoMass = myJetMc.recoMass * extraPtScale ; // new mass so that m/pT is invariant
 	}
+
+	//	cout << " myJetMc.recoPt = " << myJetMc.recoPt << endl;
+	//	cout << " myJetMc.ptSys = " << ptSys << endl << endl;
+
+	if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
+	  continue;
 	
 	double fcalWeight = 1.0; 
 	if ( kSample==kPbPb) {

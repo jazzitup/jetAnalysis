@@ -183,36 +183,36 @@ void getDATAresults(int kSample, int icent, int ix, TH1D* hdataUnfSq, TString di
 
 
 TString getSysName(int nSys ) { 
-  if      ( nSys == 0 )     return "Eta Intercal. model +";
-  else if ( nSys == 1 )     return "Eta Intercal. model  -";
-  else if ( nSys == 2 )     return "Eta InterCal. Stat. +";
-  else if ( nSys == 3 )     return "Eta InterCal. Stat. -";
-  else if ( nSys == 4 )     return "PunchTruthough +";
-  else if ( nSys == 5 )     return "PunchTruthough -";
-  else if ( nSys == 6 )     return "Effecive NP1 +";
-  else if ( nSys == 7 )     return "Effecive NP1 -";
-  else if ( nSys == 8 )     return "Effecive NP2 +";
-  else if ( nSys == 9 )     return "Effecive NP2 -";
-  else if ( nSys == 10 )     return "Effecive NP3 +";
-  else if ( nSys == 11 )     return "Effecive NP3 -";
-  else if ( nSys == 12 )     return "Effecive NP4 +";
-  else if ( nSys == 13 )     return "Effecive NP4 -";
-  else if ( nSys == 14 )     return "Effecive NP5 +";
-  else if ( nSys == 15 )     return "Effecive NP5 -";
-  else if ( nSys == 16 )     return "Eff. NP6reset +";
-  else if ( nSys == 17 )     return "Eff. NP6reset -";
-  else if ( nSys == 18 )     return "Inter. NonClosure +";
-  else if ( nSys == 19 )     return "Inter. NonClosure -";
-  else if ( nSys == 20 )     return "HighPt Sin. par. +";
-  else if ( nSys == 21 )     return "HighPt Sin. par. -";
+  if      ( nSys == 0 )     return "Eta Intercal. model";
+  else if ( nSys == 1 )     return "Eta Intercal. model";
+  else if ( nSys == 2 )     return "Eta InterCal. Stat.";
+  else if ( nSys == 3 )     return "Eta InterCal. Stat.";
+  else if ( nSys == 4 )     return "PunchTruthough";
+  else if ( nSys == 5 )     return "PunchTruthough";
+  else if ( nSys == 6 )     return "Effecive NP1";
+  else if ( nSys == 7 )     return "Effecive NP1";
+  else if ( nSys == 8 )     return "Effecive NP2";
+  else if ( nSys == 9 )     return "Effecive NP2";
+  else if ( nSys == 10 )     return "Effecive NP3";
+  else if ( nSys == 11 )     return "Effecive NP3";
+  else if ( nSys == 12 )     return "Effecive NP4";
+  else if ( nSys == 13 )     return "Effecive NP4";
+  else if ( nSys == 14 )     return "Effecive NP5";
+  else if ( nSys == 15 )     return "Effecive NP5";
+  else if ( nSys == 16 )     return "Eff. NP6reset";
+  else if ( nSys == 17 )     return "Eff. NP6reset";
+  else if ( nSys == 18 )     return "Inter. NonClosure";
+  else if ( nSys == 19 )     return "Inter. NonClosure";
+  else if ( nSys == 20 )     return "HighPt Sin. par.";
+  else if ( nSys == 21 )     return "HighPt Sin. par.";
 
   else if ( nSys == 100 )     return "JER";   //1
-  else if ( nSys == 101 )     return "HI intrinsic_1 +";   // 6
-  else if ( nSys == 102 )     return "HI intrinsic_1 -"; // 7
-  else if ( nSys == 103 )     return "HI intrinsic_2 +"; // 8
-  else if ( nSys == 104 )     return "HI intrinsic_2 - "; // 9
-  else if ( nSys == 105 )     return "HI Centrality +"; // 16
-  else if ( nSys == 106 )     return "HI Centrality -"; // 17
+  else if ( nSys == 101 )     return "HI intrinsic_1";   // 6
+  else if ( nSys == 102 )     return "HI intrinsic_1"; // 7
+  else if ( nSys == 103 )     return "HI intrinsic_2"; // 8
+  else if ( nSys == 104 )     return "HI intrinsic_2"; // 9
+  else if ( nSys == 105 )     return "HI Centrality"; // 16
+  else if ( nSys == 106 )     return "HI Centrality"; // 17
 
   return ".";
   
