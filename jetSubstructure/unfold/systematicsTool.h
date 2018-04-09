@@ -9,6 +9,7 @@
 struct JetSys {
   TH1D* pp[20];
   TH1D* pbpb[20];
+  TH1D* raa[20];
 };
 
 void getDATAresults(int kSample=0, int icent=0, int ix=0, TH1D* hdataUnfSq=0, TString dir="", int nSys=-1);
@@ -39,10 +40,19 @@ JetSys getSystematicsJES(int icent, int nSys) {
 
   TH1D* hSysApp[30];
   TH1D* hSysApbpb[30];
+  TH1D* hSysAraa[30];
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     hSysApp[ix] = getSysJES(kPP, 0  , ix,  nSys);
     hSysApbpb[ix] = getSysJES(kPbPb, icent, ix, nSys);
+    
+    hSysAraa[ix] = (TH1D*)hSysApbpb[ix]->Clone(Form("sysRaa_%d",hSysApbpb[ix]->GetName()) );
+    hSysAraa[ix]->Reset();
+    for ( int xx = 1 ; xx<= hSysApbpb[ix]->GetNbinsX() ; xx++) {
+      double y1 = hSysApbpb[ix]->GetBinContent(xx);
+      double y2 = hSysApp[ix]->GetBinContent(xx);
+      hSysAraa[ix]->SetBinContent(xx,  (y1+1.)/(y2+1.)-1);
+    }
   }
 
   bool savePic = false; 
@@ -88,6 +98,7 @@ JetSys getSystematicsJES(int icent, int nSys) {
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     ret.pp[ix]   =  hSysApp[ix];
     ret.pbpb[ix] =  hSysApbpb[ix];
+    ret.raa[ix]  = hSysAraa[ix];
   }
 
   return ret;
@@ -195,13 +206,13 @@ TString getSysName(int nSys ) {
   else if ( nSys == 20 )     return "HighPt Sin. par. +";
   else if ( nSys == 21 )     return "HighPt Sin. par. -";
 
-  else if ( nSys == 101 )     return "JER";   //1
-  else if ( nSys == 102 )     return "HI intrinsic_1 +";   // 6
-  else if ( nSys == 103 )     return "HI intrinsic_1 -"; // 7
-  else if ( nSys == 104 )     return "HI intrinsic_2 +"; // 8
-  else if ( nSys == 105 )     return "HI intrinsic_2 - "; // 9
-  else if ( nSys == 106 )     return "HI Centrality +"; // 16
-  else if ( nSys == 107 )     return "HI Centrality -"; // 17
+  else if ( nSys == 100 )     return "JER";   //1
+  else if ( nSys == 101 )     return "HI intrinsic_1 +";   // 6
+  else if ( nSys == 102 )     return "HI intrinsic_1 -"; // 7
+  else if ( nSys == 103 )     return "HI intrinsic_2 +"; // 8
+  else if ( nSys == 104 )     return "HI intrinsic_2 - "; // 9
+  else if ( nSys == 105 )     return "HI Centrality +"; // 16
+  else if ( nSys == 106 )     return "HI Centrality -"; // 17
 
   return ".";
   

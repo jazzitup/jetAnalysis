@@ -8,7 +8,7 @@ void groomHist(TH1D* h1) {
   h1->SetYTitle("Uncertainty (Relative)");
   h1->SetNdivisions(505,"X");
   h1->SetNdivisions(505,"Y");
-  fixedFontHist(h1,1.2,1.4,20);
+  fixedFontHist(h1,3,3,20);
 }
 void getSystematics(int icent = 0) {
   int optX = 1;  int optY = 2;
@@ -28,7 +28,7 @@ void getSystematics(int icent = 0) {
     if (i%2 == 0)  vIndPlus.push_back(i);  // pp JES
     else           vIndMinus.push_back(i);  // pp JES
   }
-  for ( int i=101 ; i<=106 ; i++){
+  for ( int i=101 ; i<=104 ; i++){
     if (i%2 == 1)  vIndPlus.push_back(i);  // pp JES
     else           vIndMinus.push_back(i);  // pp JES
   }
@@ -44,7 +44,7 @@ void getSystematics(int icent = 0) {
 
   TCanvas* cPlus = new TCanvas("cPlus","",1200,800);
   makeMultiPanelCanvas(cPlus,nPtPannels,3, 0.0, 0.01, 0.3, 0.2, 0.05);
-  TLegend *legPlus = new TLegend(-0.005286785,0.1525575,1,1.001334,NULL,"brNDC");
+  TLegend *legPlus = new TLegend(0,0.1,0.95,0.95,NULL, "brNDC");
   easyLeg(legPlus,"Systematics", 0.07);
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
@@ -57,9 +57,11 @@ void getSystematics(int icent = 0) {
       else       sysPlus[ind].pp[ix]->Draw("same hist");
  
       if ( ix==lowPtBin) legPlus->AddEntry(sysPlus[ind].pp[ix], getSysName( vIndPlus[ind] ).Data(),"l" );
-      if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.83,1,20);
-      if ( ix==lowPtBin)  drawText("Plus variation", 0.37,0.73,1,20);
     } 
+    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.83,1,20);
+    if ( ix==lowPtBin)  drawText("Plus variation", 0.37,0.73,1,20);
+    drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
+    
     cPlus->cd(ix - lowPtBin + 1 + nPtPannels);
     for ( int ind =0 ; ind <  vIndPlus.size() ; ind++) {
       handsomeTH1(sysPlus[ind].pbpb[ix],30 + ind);
@@ -67,41 +69,92 @@ void getSystematics(int icent = 0) {
       jumSun(0,0,0.24,0);
       if ( ind == 0 )   sysPlus[ind].pbpb[ix]->Draw("hist");
       else       sysPlus[ind].pbpb[ix]->Draw("same hist");
-
-      if ( ix==lowPtBin)  drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
     }
+    if ( ix==lowPtBin)  drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
+    
+    cPlus->cd(ix - lowPtBin + 1 + 2*nPtPannels);
+    for ( int ind =0 ; ind <  vIndPlus.size() ; ind++) {
+      handsomeTH1(sysPlus[ind].raa[ix],30 + ind);
+      groomHist(sysPlus[ind].raa[ix]);
+      jumSun(0,0,0.24,0);
+      if ( ind == 0 )   sysPlus[ind].raa[ix]->Draw("hist");
+      else       sysPlus[ind].raa[ix]->Draw("same hist");
+    }
+    if ( ix==lowPtBin)  drawText("R_{AA}", 0.37,0.73,1,20);
     
   }
-  TCanvas* cLeg = new TCanvas("clegend","",200,400);
+  TCanvas* cLeg = new TCanvas("clegend","",300,300);
   legPlus->Draw();
   
 
-  TCanvas* cMinus = new TCanvas("cMinus","",1218,309);
-  makeMultiPanelCanvas(cMinus,nPtPannels+1,1, 0.0, 0.01, 0.3, 0.2, 0.05);
-  TLegend *legMinus = new TLegend(-0.005286785,0.1525575,1,1.001334,NULL,"brNDC");
-  easyLeg(legMinus,"sys (-)", 0.07);
+
+  TCanvas* cMinus = new TCanvas("cMinus","",1200,800);
+  makeMultiPanelCanvas(cMinus,nPtPannels,3, 0.0, 0.01, 0.3, 0.2, 0.05);
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     cMinus->cd(ix - lowPtBin + 1);
     for ( int ind =0 ; ind <  vIndMinus.size() ; ind++) {
       handsomeTH1(sysMinus[ind].pp[ix],30 + ind);
-      sysMinus[ind].pp[ix]->SetAxisRange(0.001,0.23,"X");
-      sysMinus[ind].pp[ix]->SetAxisRange(-0.55,0.55,"Y");
-      sysMinus[ind].pp[ix]->SetXTitle("m/p_{T}");
-      sysMinus[ind].pp[ix]->SetYTitle("Uncertainty (Relative)");
-      sysMinus[ind].pp[ix]->SetNdivisions(505,"X");
-      sysMinus[ind].pp[ix]->SetNdivisions(505,"Y");
-      fixedFontHist(sysMinus[ind].pp[ix],1.2,1.4,20);
+      groomHist(sysMinus[ind].pp[ix]);
       jumSun(0,0,0.24,0);
       if ( ind == 0 )   sysMinus[ind].pp[ix]->Draw("hist");
       else       sysMinus[ind].pp[ix]->Draw("same hist");
- 
-      if ( ix==lowPtBin) legMinus->AddEntry(sysMinus[ind].pp[ix], getSysName( vIndMinus[ind] ).Data(),"l" );
     } 
-  }
-  cMinus->cd(nPtPannels+1);
-  legMinus->Draw();
-  
-  
+    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.83,1,20);
+    if ( ix==lowPtBin)  drawText("Minus variation", 0.37,0.73,1,20);
+    drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
+    
+    cMinus->cd(ix - lowPtBin + 1 + nPtPannels);
+    for ( int ind =0 ; ind <  vIndMinus.size() ; ind++) {
+      handsomeTH1(sysMinus[ind].pbpb[ix],30 + ind);
+      groomHist(sysMinus[ind].pbpb[ix]); 
+      jumSun(0,0,0.24,0);
+      if ( ind == 0 )   sysMinus[ind].pbpb[ix]->Draw("hist");
+      else       sysMinus[ind].pbpb[ix]->Draw("same hist");
+    }
+    if ( ix==lowPtBin)  drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
 
+    cMinus->cd(ix - lowPtBin + 1 + 2*nPtPannels);
+    for ( int ind =0 ; ind <  vIndMinus.size() ; ind++) {
+      handsomeTH1(sysMinus[ind].raa[ix],30 + ind);
+      groomHist(sysMinus[ind].raa[ix]);
+      jumSun(0,0,0.24,0);
+      if ( ind == 0 )   sysMinus[ind].raa[ix]->Draw("hist");
+      else       sysMinus[ind].raa[ix]->Draw("same hist");
+    }
+    if ( ix==lowPtBin)  drawText("R_{AA}", 0.37,0.73,1,20);
+    
+  }
+
+  TCanvas* cJer = new TCanvas("cJer","",1200,800);
+  makeMultiPanelCanvas(cJer,nPtPannels,3, 0.0, 0.01, 0.3, 0.2, 0.05);
+
+  for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
+    cJer->cd(ix - lowPtBin + 1);
+    handsomeTH1(sysJer.pp[ix],49);
+    groomHist(sysJer.pp[ix]);
+    sysJer.pp[ix]->Draw("hist");
+    jumSun(0,0,0.24,0);
+    
+    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.83,1,20);
+    if ( ix==lowPtBin)  drawText("JER variation", 0.37,0.73,1,20);
+    drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
+    
+    cJer->cd(ix - lowPtBin + 1 + nPtPannels);
+    handsomeTH1(sysJer.pbpb[ix],49);
+    groomHist(sysJer.pbpb[ix]); 
+    sysJer.pbpb[ix]->Draw("hist");
+    jumSun(0,0,0.24,0);
+
+    if ( ix==lowPtBin)  drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
+
+    cJer->cd(ix - lowPtBin + 1 + 2*nPtPannels);
+    handsomeTH1(sysJer.raa[ix],49);
+    groomHist(sysJer.raa[ix]);
+    sysJer.raa[ix]->Draw("hist");
+    if ( ix==lowPtBin)  drawText("R_{AA}", 0.37,0.73,1,20);
+    jumSun(0,0,0.24,0);
+    
+  }
+  
 }
