@@ -413,7 +413,7 @@ void getSystematics(int icent = 0) {
   cFinal->SaveAs(Form("pdfsSystematics/cFinal_icent%d.pdf",icent));
   
   //Save
-  TFile* fout = new TFile(Form("sysSpectra/systematics_icent%d",icent), "recreate");
+  TFile* fout = new TFile(Form("sysSpectra/systematics_icent%d.root",icent), "recreate");
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     sysFinalPlus.pp[ix]->Write();

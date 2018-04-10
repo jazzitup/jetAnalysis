@@ -1,22 +1,9 @@
-#include "../getSdHists.C"
-#include "../ntupleDefinition.h"
-#include "../commonUtility.h"
-#include "../jzWeight.h"
-#include "../commonUtility.h"
-#include "../JssUtils.h"
-#include "unfoldingUtil.h"
 #include "../TAA.h"
-void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
-void getErrorHist(TH1D* hh=0, int kSample=kPP, int icent =0, int ipt =0, int nIter=-1 ){
-  int nbins = hh->GetNbinsX();
-  TFile* fsys = new TFile(Form("uncertainty/unc_unfold_kSample%d_icent%d.root",kSample,icent));
-  TH1D* histsys = (TH1D*)fsys->Get(Form("unc_ipt%d_nIter%d",ipt,nIter));
-  for (int ii = 1 ; ii<=nbins; ii++) {
-    hh->SetBinContent( ii,fabs(histsys->GetBinContent(ii))); 
-    if ( ii == nbins ) 
-      hh->SetBinContent( ii,0);
-  }
-}
+#include "systematicsTool.h"
+
+void getDATAforRAA(int kSample=0, int icent=0, int ix=0, int nIter=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
+JetSys getFinalSys(int icent =0, int nVar=0);  
+void narrowSys( TH1D* hsys=0, double xlow=0, double xhigh=0);
 
 
 void getRAA(int icent=0, int optX=1, int optY=2 ) {
@@ -47,10 +34,10 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
   TH1D* hPbPbRawSq[30]; // 
   TH1D* hPbPbUnfSq[30]; // 
 
-  TH1D* hPPUnfSys[30]; // 
-  TH1D* hPbPbUnfSys[30]; // 
-  TH1D* hRAAUnfSys[30]; // 
-
+  JetSys sysPlus;
+  JetSys sysMinus;
+  sysPlus = getFinalSys(icent, 1);
+  sysMinus = getFinalSys(icent, -1);
 
 
   TH1D* hRAA[30]; 
@@ -62,8 +49,8 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     hPPUnfSq[ix] = (TH1D*)tempHistYsq->Clone(Form("hPPUnfSq_ix%d",ix));
     hPbPbRawSq[ix] = (TH1D*)tempHistYsq->Clone(Form("hPbPbRawSq_ix%d",ix));
     hPbPbUnfSq[ix] = (TH1D*)tempHistYsq->Clone(Form("hPbPbUnfSq_ix%d",ix));
-    getDATAresults(kPP,   0, ix, nIterPP,  hPPRawSq[ix], hPPUnfSq[ix]);
-    getDATAresults(kPbPb, icent, ix, nIterAA,  hPbPbRawSq[ix], hPbPbUnfSq[ix]);
+    getDATAforRAA(kPP,   0, ix, nIterPP,  hPPRawSq[ix], hPPUnfSq[ix]);
+    getDATAforRAA(kPbPb, icent, ix, nIterAA,  hPbPbRawSq[ix], hPbPbUnfSq[ix]);
 
   }
 
@@ -75,6 +62,10 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
   for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
     c1->cd(ipt - lowPtBin + 1);
     
+    narrowSys( sysPlus.pp[ipt], 0, 0.24);
+    narrowSys( sysPlus.pbpb[ipt], 0, 0.24);
+    narrowSys( sysPlus.raa[ipt], 0, 0.24);
+
     if ( optY==1)  hPPUnfSq[ipt]->SetAxisRange(-300,2000,"X");
     else if ( optY==2) hPPUnfSq[ipt]->SetAxisRange(0.001,0.239,"X");
     if ( optY==1)    hPPUnfSq[ipt]->SetXTitle("m (GeV)");
@@ -96,33 +87,15 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     hPPUnfSq[ipt]->Draw();
     hPbPbUnfSq[ipt]->Draw("same");
     onSun(0,0,0.3,0);
-//    gPad->SetLogy();
-    
  
-//    hPPUnfSys[ipt] = (TH1D*)hPPUnfSq[ipt]->Clone(Form("hPPSys_ipt%d",ipt));
-//    hPbPbUnfSys[ipt] = (TH1D*)hPbPbUnfSq[ipt]->Clone(Form("hPbPbSys_ipt%d",ipt));
-//    hRAAUnfSys[ipt] = (TH1D*)hPPUnfSys[ipt]->Clone(Form("hRAASys_ipt%d",ipt));
-//    hPPUnfSys[ipt]->Reset(); 
-//    hPbPbUnfSys[ipt]->Reset(); 
-//    hRAAUnfSys[ipt]->Reset(); 
-    //    getErrorHist(hPPUnfSys[ipt], kPP, 0,ipt,nIter);
-    //    getErrorHist(hPbPbUnfSys[ipt], kPbPb, icent,ipt,nIter);
-    //    quadraticSum(hRAAUnfSys[ipt], hPPUnfSys[ipt], hPbPbUnfSys[ipt]);
-    //    drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], 4, 1);
-    //    drawSys( hPPUnfSq[ipt], hPPUnfSys[ipt], 1, 1);
+    drawSys( hPbPbUnfSq[ipt], sysPlus.pbpb[ipt], 4, 1);
+    drawSys( hPPUnfSq[ipt], sysPlus.pp[ipt], 1, 1);
     hPPUnfSq[ipt]->SetFillStyle(1);
     hPbPbUnfSq[ipt]->SetFillStyle(1);
     hPPUnfSq[ipt]->Draw("same");
     hPbPbUnfSq[ipt]->Draw("same");
     
-
-    if ( ipt == lowPtBin ) {
-      TLegend *leg1 = new TLegend(0.5043845,0.5860943,0.9997715,0.8591246,NULL,"brNDC");
-      easyLeg(leg1," ");
-      leg1->AddEntry(hPPUnfSq[ipt], "pp","pf"); // #frac{d#sigma}{dp_{T}}","pl");
-      leg1->AddEntry(hPbPbUnfSq[ipt], "PbPb","pf");// #frac{dN}{dp_{T}}#frac{1}{T_{AA}}","pl");
-      leg1->Draw();
-    }
+  
     if ( ipt==lowPtBin)  drawBin(xBin,ipt,"GeV",0.35,0.83,1,18);
     else drawBin(xBin,ipt,"GeV",0.35,0.83,1,18);
 
@@ -150,7 +123,7 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     fixedFontHist(hRAA[ipt],2,2.2,20);
 
     hRAA[ipt]->Draw();
-    //    drawSys( hRAA[ipt], hRAAUnfSys[ipt], kYellow);
+    drawSys( hRAA[ipt], sysPlus.raa[ipt], kOrange);
     hRAA[ipt]->Draw("same");
     //    drawText("Ratio of per-jet distribution",0.3,0.78,2,16);
     jumSun(0,1,0.3,1);
@@ -168,18 +141,18 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
 
     hPPUnfSq[ipt]->Draw();
     hPbPbUnfSq[ipt]->Draw("same");
-    //    drawSys( hPbPbUnfSq[ipt], hPbPbUnfSys[ipt], kRed, 1);
-    //    drawSys( hPPUnfSq[ipt], hPPUnfSys[ipt], 1, 1);
+    drawSys( hPbPbUnfSq[ipt], sysPlus.pbpb[ipt], kRed, 1);
+    drawSys( hPPUnfSq[ipt], sysPlus.pp[ipt], 1, 1);
     if ( ipt == lowPtBin ) {
       //      drawText("#bf{#it{ATLAS}}",0.33,0.85,1,20);
-      TLegend *leg1 = new TLegend(0.7043845,0.4860943,0.9997715,0.7591246,NULL,"brNDC");
+      TLegend *leg1 = new TLegend(0.7043845,0.5860943,0.9997715,0.8591246,NULL,"brNDC");
       easyLeg(leg1," ");
       leg1->AddEntry(hPPUnfSq[ipt], "pp","pf"); // #frac{d#sigma}{dp_{T}}","pl");
       leg1->AddEntry(hPbPbUnfSq[ipt], "PbPb","pf");// #frac{dN}{dp_{T}}#frac{1}{T_{AA}}","pl");
       leg1->Draw();
     }
-    if ( ipt == lowPtBin+1 ) {
-    drawText("#it{pp} 25 pb^{-1}, PbPb 0.49 nb^{-1}",0.05,0.83,1,18);
+    if ( ipt == lowPtBin ) {
+    drawText("#it{pp} 25 pb^{-1}, PbPb 0.49 nb^{-1}",0.35,0.83,1,15);
     //    drawText("PbPb 0.49 nb^{-1}",0.4,0.78,1,15);
     }
     if ( ipt==lowPtBin)  drawBin(xBin,ipt,"GeV",0.35,0.73,1,16);
@@ -187,7 +160,7 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     gPad->RedrawAxis();
     
   }
-  //  c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_iter%d.png",optX,optY,icent));
+
   
   c1->Update();
   c1->SaveAs(Form("raaResults/RAA_2d_optX%d_optY%d_icent%d_NominalIter.pdf",optX,optY,icent));
@@ -207,7 +180,7 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
 
 
 
-void getDATAresults(int kSample, int icent, int ix, int nIter, TH1D* hdataRawSq, TH1D* hdataUnfSq) {
+void getDATAforRAA(int kSample, int icent, int ix, int nIter, TH1D* hdataRawSq, TH1D* hdataUnfSq) {
   TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt1_spectraRwt1.root",kSample));
   TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnf1d_icent%d_ix%d_iter%d",icent,ix,nIter));
   //  TH1D* hRaw = (TH1D*)fin->Get(Form("hdataRaw1d_icent%d_ix%d_iter%d",icent,ix,nIter));
@@ -220,6 +193,50 @@ void getDATAresults(int kSample, int icent, int ix, int nIter, TH1D* hdataRawSq,
 
 }
 
+
+JetSys getFinalSys(int icent, int nVar) {
+  int optX = 1;
+  int nXbins;  double xBin[30];
+  getXbin(nXbins, xBin, optX);
+
+  int lowPtBin = 6;
+  int highPtBin = nXbins-1;
+
+  TH1D* hpp[30];
+  TH1D* hpbpb[30];
+  TH1D* hraa[30];
+  
+  JetSys ret;
+  TFile* fsys = new TFile(Form("sysSpectra/systematics_icent%d.root",icent));
+  for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
+    if ( nVar == 1)  {
+      hpp[ix] = (TH1D*)fsys->Get(Form("sys_finalPlus_pp_ix%d",ix));
+      hpbpb[ix] = (TH1D*)fsys->Get(Form("sys_finalPlus_pbpb_ix%d",ix));
+      hraa[ix] = (TH1D*)fsys->Get(Form("sys_finalPlus_raa_ix%d",ix));
+    }
+    else if ( nVar == -1)  {
+      hpp[ix] = (TH1D*)fsys->Get(Form("sys_finalMinus_pp_ix%d",ix));
+      hpbpb[ix] = (TH1D*)fsys->Get(Form("sys_finalMinus_pbpb_ix%d",ix));
+      hraa[ix] = (TH1D*)fsys->Get(Form("sys_finalMinus_raa_ix%d",ix));
+    }
+    else {
+      cout << "No option for nVar = "  << nVar << endl;
+    }
+    ret.pp[ix] = hpp[ix];
+    ret.pbpb[ix] = hpbpb[ix];
+    ret.raa[ix] = hraa[ix];
+  }
+  return ret;
+}
+
+
+void narrowSys( TH1D* hsys, double xlow, double xhigh) { 
+  for ( int ii=0 ; ii<=hsys->GetNbinsX() ; ii++) {
+    double xVal = hsys->GetBinCenter(ii);
+    if ( xVal < xlow )    hsys->SetBinContent(ii,0);
+    if ( xVal > xhigh )   hsys->SetBinContent(ii,0);
+  }
+}
 
 
 

@@ -146,7 +146,7 @@ JetSys getSystematicsUnf(int icent, int nVar ) {
   
   TCanvas* cA;    
   if (savePic) { 
-    cA =  new TCanvas(Form("sysUnf_icent%d_nVar",icent,nVar),"",800,400);
+    cA =  new TCanvas(Form("sysUnf_icent%d_nVar%d",icent,nVar),"",800,400);
     makeMultiPanelCanvas(cA,nPtPannels,1);
   }
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
