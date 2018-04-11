@@ -38,7 +38,7 @@ double getNEvent(int icent, double lumi = 0.49) { // 0.49 nb
 }
 
 void CsScalePP( TH1D* hpp) {
-  hpp->Scale( 1. / 25000000. );  // 25000 nb-1 =  25 pb-1
+  hpp->Scale( 1. / 25300000. );  // 25300 nb-1 =  25.3 pb-1
 }
 
 void CsScalePbPb( TH1D* hpbpb, int icent =-1, double lumi = 0.49) {

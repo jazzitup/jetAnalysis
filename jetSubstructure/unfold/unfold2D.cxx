@@ -1,4 +1,3 @@
-
 #if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include <iostream>
 using std::cout;
@@ -13,7 +12,7 @@ using std::endl;
 //#include "RooUnfoldTUnfold.h"
 
 #include "../getSdHists.C"
-#include "../ntupleDefinition.h"
+#include "../ntupleDefinition_v50.h"
 //#include "../ntupleDefinition_v50.h"
 #include "../commonUtility.h"
 #include "../jzWeight.h"
@@ -44,7 +43,21 @@ void getDATAspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH2D* 
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=false) {
+void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=false, int nSys=-1) {
+
+  if ( nSys < 0 )
+    cout << "===== Nominal mode =====" << endl;
+  else if ( (nSys >= 0 ) && ( nSys <= 21 ) )
+    cout << "===== pp intrinsic JES sys mode ======" << endl;
+  else if ( (nSys >= 100 ) && ( nSys <= 106 ) )
+    cout << "===== HI JES sys mode =====" << endl;
+  else {
+    cout << "===== Invald nSys option ===== " << nSys << endl;
+    return ;
+  }
+  
+
+
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -70,8 +83,15 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
   TH2D* hdataUnf[7][maxIter]; // unfolding iter
 
   int matrixWeight = 1;
-  TFile* fmatrix = new TFile(Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",
-				  kSample,optX,optY,(float)radius,(int)matrixWeight));
+  
+  TString matrixName = Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",
+			    kSample,optX,optY,(float)radius,(int)matrixWeight);
+  if ( nSys>= 0) {
+    matrixName =       Form("spectraFiles/sys/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d_sys%d.root",
+		            kSample,optX,optY,(float)radius,(int)matrixWeight,nSys);
+  }
+  
+  TFile* fmatrix = new TFile(matrixName.Data());
   cout << " matrix name : "  << fmatrix->GetName() << endl;
   
   
@@ -79,7 +99,7 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     int icent = i;
     if ( !selectedCent(icent))       continue;
     if ( (kSample == kPP) && ( icent != 0 ) )      continue;
-
+    
     // MC 
     hmcRaw[i] = (TH2D*)hTemp->Clone(Form("hmcRaw_icent%d",i));
     hmcTruth[i] = (TH2D*)hTemp->Clone(Form("hmcTruth_icent%d",i));
@@ -103,7 +123,7 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     //    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
     //    TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
     //    TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
-    //RooUnfoldResponse* tempRes  = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
+    //    RooUnfoldResponse* tempRes  = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
     //    TH2D* h2ResMatrix = (TH2D*)tempRes->Hresponse(); 
     //    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
     //    res[i] = new RooUnfoldResponse(0,0, h2ResMatrix);
@@ -116,7 +136,6 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     //    res[i] = new RooUnfoldResponse(h2RecoTemp, h2TruthTemp, h2ResMatrix);
     //    res[i] = new RooUnfoldResponse(h2Reco, h2Truth, h2ResMatrix);
     res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); 
-    
   }
   
   
@@ -200,7 +219,13 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     }
   }
   
-  TFile * fout = new TFile(Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d.root",kSample,matrixWeight,doReweight),"recreate");
+  TString foutName = Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d.root",kSample,matrixWeight,doReweight); 
+  if ( nSys >=0 ) { 
+    foutName = Form("unfSpectra/sys/kSample%d_matrixRwt%d_spectraRwt%d_sys%d.root",kSample,matrixWeight,doReweight,nSys);
+  }
+    
+
+  TFile * fout = new TFile(foutName.Data(), "recreate");
   for ( int icent=0 ; icent<=6; icent++) {
     if ( !selectedCent(icent) )  continue;
     if ( (kSample == kPP) && ( icent != 0 ) )      continue;
@@ -252,9 +277,9 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
       //      jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2.root";
       //      jz3 = "jetSubstructure_MC_HION9_pbpb_v50_jz3.root";
       //      jz4 = "jetSubstructure_MC_HION9_pbpb_v50_jz4.root";
-      jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-      jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-      jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+      jz2 = jz2PbPbString;
+      jz3 = jz3PbPbString;
+      jz4 = jz4PbPbString;
     }
   }
   else if ( kSample == kPP ) {
@@ -262,12 +287,12 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
       //  jz2 = "jetSubstructure_MC_HION9_pp_v50_jz2.root";
       //      jz3 = "jetSubstructure_MC_HION9_pp_v50_jz3.root";
       //      jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4.root";
-      jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-      jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-      jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+      jz2 = jz2PPString;
+      jz3 = jz3PPString;
+      jz4 = jz4PPString;
     }
-
   }
+
 
   TH1D* hFcalReweight;
   if ( kSample == kPbPb ) {
@@ -376,9 +401,11 @@ void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, 
   TString fname;
   if ( radius == 0.4 ) {
     if ( kSample == kPbPb ) {
-      fname = "jetSubstructure_Data_HION9_v4.7_r4_pbpb_Jan23_ptCut90Eta2.1.root"; }
+      fname = pbpbDataString; 
+    }
     else if ( kSample == kPP) {
-      fname = "jetSubstructure_data_HION9_v4.7_r4_pp_Feb26_ptCut90Eta2.1_fullLumi.root"; }
+      fname = ppDataString;
+    }
   }
   
   TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));

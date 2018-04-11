@@ -6,7 +6,8 @@ using std::endl;
 #include "TH1D.h"
 
 #include "../getSdHists.C"
-#include "../ntupleDefinition.h"
+//#include "../ntupleDefinition.h"
+#include "../ntupleDefinition_v50.h"
 #include "../commonUtility.h"
 #include "../jzWeight.h"
 #include "unfoldingUtil.h"
@@ -14,7 +15,7 @@ using std::endl;
 #include "../JssUtils.h"
 #include <TPaletteAxis.h>
 
-double statFrac = 001;
+double statFrac = 0001;
 double fracStstData = 001;
 bool doUnfData = true ;
 
@@ -342,7 +343,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   }
 
   
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v-3.root",(int)weightCut,opt,(float)flucCut),"update");
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50.root",(int)weightCut,opt,(float)flucCut),"update");
   hmcPtCorr->Write("",TObject::kOverwrite);
   hmcTruth->Write("",TObject::kOverwrite);
   hdataRaw->Write("",TObject::kOverwrite);
@@ -369,18 +370,33 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
   hmcRaw->Reset();
   hmcTruth->Reset();
 
+  int  nSys = -1 ;
   TString jz2;
   TString jz3;
   TString jz4;
   if ( kSample == kPbPb ) {
-    jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-    jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-    jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+    if ( nSys >= 0 ) {
+      jz2 = jz2PbPbStringSys;
+      jz3 = jz3PbPbStringSys;
+      jz4 = jz4PbPbStringSys;
+    }
+    else {
+      jz2 = jz2PbPbString;
+      jz3 = jz3PbPbString;
+      jz4 = jz4PbPbString;
+    }
   }
   else if ( kSample == kPP ) {
-    jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-    jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-    jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+    if ( nSys >= 0 ) {
+      jz2 = jz2PPStringSys;
+      jz3 = jz3PPStringSys;
+      jz4 = jz4PPStringSys;
+    }
+    else {
+      jz2 = jz2PPString;
+      jz3 = jz3PPString;
+      jz4 = jz4PPString;
+    }
   }
   
   
@@ -389,7 +405,7 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
     TFile* fcal = new TFile("reweightFactors/FCal_HP_v_MB_weights.root");
     hFcalReweight = (TH1D*)fcal->Get("FCal_HP_v_MBOV_weights");
   }
-
+  
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
 
@@ -501,9 +517,11 @@ void getDATAspectra(int kSample, int icent, int opt, TH2D* hdataRaw) {
   hdataRaw->Reset();
   TString fname;
   if ( kSample == kPbPb ) {
-    fname = "jetSubstructure_Data_HION9_v4.7_r4_pbpb_Jan23_ptCut90Eta2.1.root"; }
+    fname = pbpbDataString; 
+  }
   else if ( kSample == kPP) {
-    fname = "jetSubstructure_data_HION9_v4.7_r4_pp_Feb26_ptCut90Eta2.1_fullLumi.root"; }
+    fname = ppDataString;
+  }
   
   TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));
   TTree* tr = (TTree*)fData->Get("tr");
