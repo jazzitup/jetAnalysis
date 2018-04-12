@@ -53,7 +53,7 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =6 ) {   // opt1 : mass, 
   int nPtPannels = highPtBin-lowPtBin+1;
   
   TCanvas* c2 =  new TCanvas("c2","",1200,400);
-  c2->Divide(nPtPannels,2);
+  makeMultiPanelCanvas(c2,nPtPannels, 2, 0.0, 0.01, 0.3, 0.2, 0.05);
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++) {
     c2->cd(ix - lowPtBin + 1);
     h1mc[ix] = (TH1D*)hmc->ProjectionX(Form("h1mc_ipt%d",ix),ix,ix);
@@ -65,17 +65,23 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =6 ) {   // opt1 : mass, 
     handsomeTH1(h1mc[ix],1);
     handsomeTH1(h1data[ix],2);
 
+    cleverRange(h1mc[ix],1.5);
     h1mc[ix]->Draw();
     h1data[ix]->Draw("same");
-    gPad->SetLogy();
+    cout << ix <<"th bin: "<< endl;
+    cout << "MC maean, RMS = " << h1mc[ix]->GetMean() << ",   " << h1mc[ix]->GetRMS() << endl;
+    cout << "DATA maean, RMS = " << h1data[ix]->GetMean() << ",   " << h1data[ix]->GetRMS() << endl;
 
-    if ( ix==1)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
+    //    gPad->SetLogy();
+    
+    if ( ix== lowPtBin)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
     drawBin(xBin,ix,"GeV",0.4,0.78,49,16);
     
     c2->cd(ix - lowPtBin +1 + nPtPannels);
     TH1D* hratio = (TH1D*)h1data[ix]->Clone(Form("ratio_%s",h1data[ix]->GetName()));
     hratio->Divide(h1mc[ix]);
     hratio->SetAxisRange(0,2,"Y");
+    hratio->SetYTitle("Data/MC");
     hratio->Draw();
     jumSun(0,1,50,1);
   }
@@ -165,8 +171,17 @@ void getMCR(int kSample, int icent, TH2D* hmc, int ptCut) {
         continue;
       
       
+
       // cut on trakc mass 
       if ( trkJetMass < 0.2 ) 
+	continue;
+      //      if ( ( myJetMc.recoMass / myJetMc.recoPt ) > 0.1 ) 
+      //      	continue;
+    
+      
+      double mpt =  myJetMc.recoMass / myJetMc.recoPt ;
+      double recoMass = myJetMc.recoMass ;
+      if (!( (recoMass>-100) && (recoMass<21)  ) )
 	continue;
       
       double recoPt = myJetMc.recoPt;
@@ -177,7 +192,8 @@ void getMCR(int kSample, int icent, TH2D* hmc, int ptCut) {
 	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
         //      cout <<" fcal, weight = "<<myJetMc.fcalet<<", "<<fcalWeight<<endl;
       }
-      hmc->Fill( theR, recoPt, myJetMc.weight * jzNorm * fcalWeight);
+      hmc->Fill(theR, recoPt, myJetMc.weight * jzNorm * fcalWeight);
+      
     }
   }
   
@@ -225,7 +241,16 @@ void getDATAR(int kSample, int icent,  TH2D* hdata, int ptCut) {
     // cut on trakc mass
     if ( trkJetMass < 0.2 )
       continue;
+    //    if ( ( myJet.recoMass / myJet.recoPt ) > 0.1 ) 
+    //      continue;
 
+    double mpt = myJet.recoMass / myJet.recoPt;
+    double recoMass = myJet.recoMass ;
+    if (!( (recoMass>-100) && (recoMass<21)  ) )
+      continue;
+	
+
+    
     double recoPt = myJet.recoPt;
     double theR = myJet.recoMass / trkJetMass;
 
