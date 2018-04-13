@@ -22,6 +22,20 @@ void getMCR(int kSample=kPP, int icent=0,  TH2D* hmc=0, int ptCut=6);
 void getDATAR(int kSample=kPP, int icent=0,  TH2D* hdata=0, int ptCut=6);
 TH1D* getVariedHist(TH1D* hin=0, double variation=0);
 
+double findPeak(TF1* f, double low =2,double high = 4 ) {
+  double step = 0.001;
+  double maxY =  -10000;
+  double peakPosition  = 0;
+  for ( double xx = low ; xx<= high ; xx = xx+step){ 
+    double yy = f->Eval(xx);
+    if ( yy > maxY)  {
+      maxY  = yy; 
+      peakPosition = xx;
+    }
+  }
+  return peakPosition;
+}
+
 void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
 
@@ -71,11 +85,14 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
     f1mc->SetParameter(1,1);
     f1mc->SetParameter(2,3);
     f1mc->SetParameter(3,2);
-    TF1 *f1data = new TF1(Form("fitH1mc_ix%d",ix),"[0]*TMath::Landau(x-[1],[2],[3])",0,20);
+    TF1 *f1data = new TF1(Form("fitH1data_ix%d",ix),"[0]*TMath::Landau(x-[1],[2],[3])",0,20);
     f1data->SetParameter(0,1);
     f1data->SetParameter(1,1);
     f1data->SetParameter(2,3);
     f1data->SetParameter(3,2);
+
+    f1mc->FixParameter(1,1);
+    f1data->FixParameter(1,1);
 
     h1mc[ix]->Fit(f1mc->GetName(),"LL","",0,15);
     h1data[ix]->Fit(f1data->GetName(),"LL","",0,15);
@@ -83,16 +100,23 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
     h1data[ix]->GetFunction(f1data->GetName())->SetLineColor(2);
     h1mc[ix]->Draw();
     h1data[ix]->Draw("same");
+
+
+    double mcPeak = findPeak(f1mc,2,4);
+    double dataPeak = findPeak(f1data,2,4);
     cout << ix <<"th bin: "<< endl;
+    cout << " MC peak  : " << mcPeak << endl;
+    cout << " Data peak  : " << dataPeak << endl;
+    cout << "Peak ratio = " << dataPeak/mcPeak << endl;
     cout << "MC maean, RMS = " << h1mc[ix]->GetMean() << ",   " << h1mc[ix]->GetRMS() << endl;
     cout << "DATA maean, RMS = " << h1data[ix]->GetMean() << ",   " << h1data[ix]->GetRMS() << endl;
     cout << "DATA/MC mean = " << h1data[ix]->GetMean()/ h1mc[ix]->GetMean() << endl;
-    double meanRatio = h1data[ix]->GetMean()/ h1mc[ix]->GetMean() ; //    gPad->SetLogy();
-    double peakRatio = h1data[ix]->GetBinCenter(h1data[ix]->GetMaximumBin()) / h1mc[ix]->GetBinCenter(h1mc[ix]->GetMaximumBin());
+    double meanRatio = f1data->Mean(0,20) / f1mc->Mean(0,20);
+    double peakRatio = dataPeak/mcPeak; 
     if ( ix== lowPtBin)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
-    drawBin(xBin,ix,"GeV",0.4,0.75,49,16);
-    drawText(Form("R_{fit} = %.2f", (float)peakRatio), 0.35, 0.65,1,20);
-    drawText(Form("R_{mean} = %.2f", (float)meanRatio), 0.35, 0.55,1,20);
+    drawBin(xBin,ix,"GeV",0.4,0.79,49,16);
+    drawText(Form("R_{fit} = %.2f", (float)peakRatio), 0.35, 0.72,1,20);
+    //    drawText(Form("R_{mean} = %.2f", (float)meanRatio), 0.35, 0.65,1,20);
     
 	     //    c2->cd(ix - lowPtBin +1 + nPtPannels);
 	     //    TH1D* hratio = (TH1D*)h1data[ix]->Clone(Form("ratio_%s",h1data[ix]->GetName()));
@@ -103,7 +127,7 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
 //    jumSun(0,1,50,1);
     
   }
-  c2->SaveAs(Form("c2_ptCut%d.pdf",(int)ptCut));
+  c2->SaveAs(Form("JMS_ptCut%d_kSample%d_cent%d.pdf",(int)ptCut,kSample,icent));
 }
 
 
