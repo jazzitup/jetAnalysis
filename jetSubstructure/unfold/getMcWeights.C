@@ -343,7 +343,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   }
 
   
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50.root",(int)weightCut,opt,(float)flucCut),"update");
+  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50-CanBeRemoved.root",(int)weightCut,opt,(float)flucCut),"update");
   hmcPtCorr->Write("",TObject::kOverwrite);
   hmcTruth->Write("",TObject::kOverwrite);
   hdataRaw->Write("",TObject::kOverwrite);
@@ -503,6 +503,8 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
       if ( ptScale != 0) {
 	ptWeight = ptScale->Eval(recoX);
       }
+      
+      recoY = recoY * 1.02;  // systematics!!
 
       hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);
       hmcTruth->Fill( genX, genY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);

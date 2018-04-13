@@ -278,13 +278,19 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	  
 	  myJetMc.recoPt = ptSys;  // New pT!!! 
 	  myJetMc.recoMass = myJetMc.recoMass * extraPtScale ; // new mass so that m/pT is invariant
+
 	}
 
 	//	cout << " myJetMc.recoPt = " << myJetMc.recoPt << endl;
 	//	cout << " myJetMc.ptSys = " << ptSys << endl << endl;
 
+
 	if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
 	  continue;
+
+	recoVarY = recoVarY * 1.02;  // systematics!! 
+      
+
 	
 	double fcalWeight = 1.0; 
 	if ( kSample==kPbPb) {

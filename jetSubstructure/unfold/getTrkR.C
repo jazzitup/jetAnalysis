@@ -22,7 +22,7 @@ void getMCR(int kSample=kPP, int icent=0,  TH2D* hmc=0, int ptCut=6);
 void getDATAR(int kSample=kPP, int icent=0,  TH2D* hdata=0, int ptCut=6);
 TH1D* getVariedHist(TH1D* hin=0, double variation=0);
 
-void getTrkR(int kSample = kPP, int icent=0, int ptCut =6 ) {   // opt1 : mass,   opt2 : m/pT  
+void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
 
   int optX = 1;    int optY = 2;  
@@ -35,8 +35,8 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =6 ) {   // opt1 : mass, 
   double yBin[30] ;
   getYbin(nYbins, yBin, optY);
 
-  int nRbins = 30;
-  TH2D* hTemp = new TH2D("rTemp","", nRbins, 0,50, nXbins, xBin);
+  int nRbins = 70;
+  TH2D* hTemp = new TH2D("rTemp","", nRbins, 0,20, nXbins, xBin);
   
   // MC 
   TH2D* hmc = (TH2D*)hTemp->Clone(Form("hmc_kSample%d_icent%d",kSample,icent));
@@ -53,7 +53,7 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =6 ) {   // opt1 : mass, 
   int nPtPannels = highPtBin-lowPtBin+1;
   
   TCanvas* c2 =  new TCanvas("c2","",1200,400);
-  makeMultiPanelCanvas(c2,nPtPannels, 2, 0.0, 0.01, 0.3, 0.2, 0.05);
+  makeMultiPanelCanvas(c2,nPtPannels, 1, 0.0, 0.01, 0.3, 0.2, 0.05);
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++) {
     c2->cd(ix - lowPtBin + 1);
     h1mc[ix] = (TH1D*)hmc->ProjectionX(Form("h1mc_ipt%d",ix),ix,ix);
@@ -65,27 +65,30 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =6 ) {   // opt1 : mass, 
     handsomeTH1(h1mc[ix],1);
     handsomeTH1(h1data[ix],2);
 
-    cleverRange(h1mc[ix],1.5);
+    cleverRange(h1mc[ix],2.);
     h1mc[ix]->Draw();
     h1data[ix]->Draw("same");
     cout << ix <<"th bin: "<< endl;
     cout << "MC maean, RMS = " << h1mc[ix]->GetMean() << ",   " << h1mc[ix]->GetRMS() << endl;
     cout << "DATA maean, RMS = " << h1data[ix]->GetMean() << ",   " << h1data[ix]->GetRMS() << endl;
-
-    //    gPad->SetLogy();
-    
+    cout << "DATA/MC mean = " << h1data[ix]->GetMean()/ h1mc[ix]->GetMean() << endl;
+    double meanRatio = h1data[ix]->GetMean()/ h1mc[ix]->GetMean() ; //    gPad->SetLogy();
+    double peakRatio = h1data[ix]->GetBinCenter(h1data[ix]->GetMaximumBin()) / h1mc[ix]->GetBinCenter(h1mc[ix]->GetMaximumBin());
     if ( ix== lowPtBin)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
-    drawBin(xBin,ix,"GeV",0.4,0.78,49,16);
+    drawBin(xBin,ix,"GeV",0.4,0.75,49,16);
+    drawText(Form("R_{peak} = %.2f", (float)peakRatio), 0.35, 0.65,1,20);
+    drawText(Form("R_{mean} = %.2f", (float)meanRatio), 0.35, 0.55,1,20);
     
-    c2->cd(ix - lowPtBin +1 + nPtPannels);
-    TH1D* hratio = (TH1D*)h1data[ix]->Clone(Form("ratio_%s",h1data[ix]->GetName()));
-    hratio->Divide(h1mc[ix]);
-    hratio->SetAxisRange(0,2,"Y");
-    hratio->SetYTitle("Data/MC");
-    hratio->Draw();
-    jumSun(0,1,50,1);
+	     //    c2->cd(ix - lowPtBin +1 + nPtPannels);
+	     //    TH1D* hratio = (TH1D*)h1data[ix]->Clone(Form("ratio_%s",h1data[ix]->GetName()));
+	     //   hratio->Divide(h1mc[ix]);
+//    hratio->SetAxisRange(0,2,"Y");
+///    hratio->SetYTitle("Data/MC");
+//    hratio->Draw();
+//    jumSun(0,1,50,1);
+    
   }
-  
+  c2->SaveAs(Form("c2_ptCut%d.pdf",(int)ptCut));
 }
 
 
@@ -98,14 +101,14 @@ void getMCR(int kSample, int icent, TH2D* hmc, int ptCut) {
   TString jz3;
   TString jz4;
   if ( kSample == kPbPb ) {
-    jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2_SmallSet.root";
-    jz3 = "jetSubstructure_MC_HION9_pbpb_v50_jz3_SmallSet.root";
-    jz4 = "jetSubstructure_MC_HION9_pbpb_v50_jz4_SmallSet.root";
+    jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2_april11.root";
+    jz3 = "jetSubstructure_MC_HION9_pbpb_v50_jz3_april11.root";
+    jz4 = "jetSubstructure_MC_HION9_pbpb_v50_jz4_april11.root";
   }
   else if ( kSample == kPP ) {
-    jz2 = "jetSubstructure_MC_HION9_pp_v50_jz2_SmallSet.root";
-    jz3 = "jetSubstructure_MC_HION9_pp_v50_jz3_SmallSet.root";
-    jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4_SmallSet.root";
+    jz2 = "jetSubstructure_MC_HION9_pp_v50_jz2_april11.root";
+    jz3 = "jetSubstructure_MC_HION9_pp_v50_jz3_april11.root";
+    jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4_april11.root";
   }
   
   
@@ -124,6 +127,10 @@ void getMCR(int kSample, int icent, TH2D* hmc, int ptCut) {
   TBranch *b_trkJetMass;
   TString trkMassVar = Form("trkJetMass%d",ptCut);
   TString trkPtVar = Form("trkJetPt%d",ptCut);
+  
+  //  if ( ptCut ==1 ) 
+  //    trkMassVar =  "chMassRaw"
+
   
   cout << " Setting tree branch address..." << endl;
   TFile* fjz2 = new TFile(Form("../ntuples/%s",jz2.Data()));
@@ -167,25 +174,21 @@ void getMCR(int kSample, int icent, TH2D* hmc, int ptCut) {
 
       tr->GetEntry(i);
 
-      if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
-        continue;
-      
-      
-
-      // cut on trakc mass 
-      if ( trkJetMass < 0.2 ) 
-	continue;
+      if ( ! passEvent(myJetMc, icent, true) )        continue;
+      if ( (ptCut != 1 ) && (trkJetMass < 0.2) )        continue;         // cut on trakc mass 
       //      if ( ( myJetMc.recoMass / myJetMc.recoPt ) > 0.1 ) 
       //      	continue;
-    
       
       double mpt =  myJetMc.recoMass / myJetMc.recoPt ;
       double recoMass = myJetMc.recoMass ;
-      if (!( (recoMass>-100) && (recoMass<21)  ) )
-	continue;
+      //      if (!( (recoMass>-100) && (recoMass<21)  ) )
+      //	continue;
       
       double recoPt = myJetMc.recoPt;
       double theR = myJetMc.recoMass / trkJetMass;
+      
+      if ( ptCut == 1) theR = myJetMc.recoMass / myJetMc.recoChMassRcSubt ; 
+      
       
       double fcalWeight = 1.0;
       if ( kSample==kPbPb) {
@@ -235,24 +238,22 @@ void getDATAR(int kSample, int icent,  TH2D* hdata, int ptCut) {
     tr->GetEntry(i);
     if ( i > tr->GetEntries() * statUsed) break;
 
-    if ( ! passEvent(myJet, icent, false) ) // isMC = false
-      continue;
-
-    // cut on trakc mass
-    if ( trkJetMass < 0.2 )
-      continue;
+    if ( ! passEvent(myJet, icent, false) )       continue;
+    if ( (ptCut != 1 ) && (trkJetMass < 0.2) )        continue;         // cut on trakc mass 
+    
     //    if ( ( myJet.recoMass / myJet.recoPt ) > 0.1 ) 
     //      continue;
 
     double mpt = myJet.recoMass / myJet.recoPt;
     double recoMass = myJet.recoMass ;
-    if (!( (recoMass>-100) && (recoMass<21)  ) )
-      continue;
+    //    if (!( (recoMass>-100) && (recoMass<21)  ) )
+    //      continue;
 	
 
     
     double recoPt = myJet.recoPt;
     double theR = myJet.recoMass / trkJetMass;
+    if ( ptCut == 1) theR = myJet.recoMass / myJet.recoChMassRcSubt ; 
 
     hdata->Fill( theR, recoPt);
   }
