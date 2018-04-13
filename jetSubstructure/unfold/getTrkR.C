@@ -66,6 +66,21 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
     handsomeTH1(h1data[ix],2);
 
     cleverRange(h1mc[ix],2.);
+    TF1 *f1mc = new TF1(Form("fitH1mc_ix%d",ix),"[0]*TMath::Landau(x-[1],[2],[3])",0,20);
+    f1mc->SetParameter(0,1);
+    f1mc->SetParameter(1,1);
+    f1mc->SetParameter(2,3);
+    f1mc->SetParameter(3,2);
+    TF1 *f1data = new TF1(Form("fitH1mc_ix%d",ix),"[0]*TMath::Landau(x-[1],[2],[3])",0,20);
+    f1data->SetParameter(0,1);
+    f1data->SetParameter(1,1);
+    f1data->SetParameter(2,3);
+    f1data->SetParameter(3,2);
+
+    h1mc[ix]->Fit(f1mc->GetName(),"LL","",0,15);
+    h1data[ix]->Fit(f1data->GetName(),"LL","",0,15);
+    h1mc[ix]->GetFunction(f1mc->GetName())->SetLineColor(1);
+    h1data[ix]->GetFunction(f1data->GetName())->SetLineColor(2);
     h1mc[ix]->Draw();
     h1data[ix]->Draw("same");
     cout << ix <<"th bin: "<< endl;
@@ -76,7 +91,7 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
     double peakRatio = h1data[ix]->GetBinCenter(h1data[ix]->GetMaximumBin()) / h1mc[ix]->GetBinCenter(h1mc[ix]->GetMaximumBin());
     if ( ix== lowPtBin)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
     drawBin(xBin,ix,"GeV",0.4,0.75,49,16);
-    drawText(Form("R_{peak} = %.2f", (float)peakRatio), 0.35, 0.65,1,20);
+    drawText(Form("R_{fit} = %.2f", (float)peakRatio), 0.35, 0.65,1,20);
     drawText(Form("R_{mean} = %.2f", (float)meanRatio), 0.35, 0.55,1,20);
     
 	     //    c2->cd(ix - lowPtBin +1 + nPtPannels);
