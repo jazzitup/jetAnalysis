@@ -2,7 +2,6 @@ bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
   if ( icent ==3 )  return true;
   if ( icent ==6 )  return true;
-  return false;
   if ( icent ==1 )  return true;
   if ( icent ==2 )  return true;
   if ( icent ==4 )  return true;
