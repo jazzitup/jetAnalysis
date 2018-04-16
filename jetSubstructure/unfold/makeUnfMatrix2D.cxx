@@ -42,6 +42,8 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
     cout << "pp intrinsic JES sys mode" << endl;
   else if ( (nSys >= 100 ) && ( nSys <= 106 ) )
     cout << "HI JES sys mode" << endl;
+  else if ( (nSys == 200 ) ) 
+    cout << "HI JMR sys mode" << endl;
   else {
     cout << "Invald nSys option : " << nSys << endl;
     return ;
