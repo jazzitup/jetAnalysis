@@ -12,7 +12,7 @@ using std::endl;
 #include "../JssUtils.h"
 #include <TPaletteAxis.h>
 
-double statUsed = 001;
+double statUsed = 1;
 
 int lowPtBin = 1;  int highPtBin = 13;
 
@@ -41,15 +41,26 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
 
   int optX = 1;    int optY = 2;  
 
-  int nXbins;
-  double xBin[30];
-  getXbin(nXbins, xBin, optX);
+  //  int nXbins;
+  //  double xBin[30];
+  //  getXbin(nXbins, xBin, optX);
+  //  int lowPtBin = 6;
+  //  int highPtBin = 11;
+  //  int nPtPannels = highPtBin-lowPtBin+1;
+  int nXbins = 7;
+  double xBin[30] = { 120,140,160,180,210,250,350,800}; 
+  int lowPtBin = 1;
+  int highPtBin = 7;
+  
+
+  int nPtPannels = highPtBin-lowPtBin+1;
+
 
   int nYbins ;
   double yBin[30] ;
   getYbin(nYbins, yBin, optY);
 
-  int nRbins = 70;
+  int nRbins = 35;
   TH2D* hTemp = new TH2D("rTemp","", nRbins, 0,20, nXbins, xBin);
   
   // MC 
@@ -61,10 +72,6 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
   getMCR   ( kSample, icent, hmc, ptCut);
   getDATAR ( kSample, icent, hdata, ptCut);
 
-
-  int lowPtBin = 6;
-  int highPtBin = 11;
-  int nPtPannels = highPtBin-lowPtBin+1;
   
   TCanvas* c2 =  new TCanvas("c2","",1200,400);
   makeMultiPanelCanvas(c2,nPtPannels, 1, 0.0, 0.01, 0.3, 0.2, 0.05);
@@ -80,30 +87,28 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
     handsomeTH1(h1data[ix],2);
 
     cleverRange(h1mc[ix],2.);
-    TF1 *f1mc = new TF1(Form("fitH1mc_ix%d",ix),"[0]*TMath::Landau(x-[1],[2],[3])",0,20);
+    TF1 *f1mc = new TF1(Form("fitH1mc_ix%d",ix),"[0]*TMath::Landau(x-[3],[1],[2])",0,20);
     f1mc->SetParameter(0,1);
-    f1mc->SetParameter(1,1);
-    f1mc->SetParameter(2,3);
-    f1mc->SetParameter(3,2);
-    TF1 *f1data = new TF1(Form("fitH1data_ix%d",ix),"[0]*TMath::Landau(x-[1],[2],[3])",0,20);
+    f1mc->SetParameter(1,2);
+    f1mc->SetParameter(2,2);
+    f1mc->SetParameter(3,1);
+
+    TF1 *f1data = new TF1(Form("fitH1data_ix%d",ix),"[0]*TMath::Landau(x-[3],[1],[2])",0,20);
     f1data->SetParameter(0,1);
-    f1data->SetParameter(1,1);
-    f1data->SetParameter(2,3);
-    f1data->SetParameter(3,2);
+    f1data->SetParameter(1,2);
+    f1data->SetParameter(2,2);
+    f1data->SetParameter(3,1);
 
-    f1mc->FixParameter(1,1);
-    f1data->FixParameter(1,1);
-
-    h1mc[ix]->Fit(f1mc->GetName(),"LL","",0,15);
-    h1data[ix]->Fit(f1data->GetName(),"LL","",0,15);
+    h1mc[ix]->Fit(f1mc->GetName(),"M","",0,10);
+    h1data[ix]->Fit(f1data->GetName(),"M","",0,10);
     h1mc[ix]->GetFunction(f1mc->GetName())->SetLineColor(1);
     h1data[ix]->GetFunction(f1data->GetName())->SetLineColor(2);
     h1mc[ix]->Draw();
     h1data[ix]->Draw("same");
 
 
-    double mcPeak = findPeak(f1mc,2,4);
-    double dataPeak = findPeak(f1data,2,4);
+    double mcPeak = findPeak(f1mc,0,4);
+    double dataPeak = findPeak(f1data,0,4);
     cout << ix <<"th bin: "<< endl;
     cout << " MC peak  : " << mcPeak << endl;
     cout << " Data peak  : " << dataPeak << endl;
@@ -127,7 +132,7 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
 //    jumSun(0,1,50,1);
     
   }
-  c2->SaveAs(Form("JMS_ptCut%d_kSample%d_cent%d.pdf",(int)ptCut,kSample,icent));
+  c2->SaveAs(Form("pdfsJMS/JMS_ptCut%d_kSample%d_cent%d.pdf",(int)ptCut,kSample,icent));
 }
 
 
@@ -226,8 +231,10 @@ void getMCR(int kSample, int icent, TH2D* hmc, int ptCut) {
       double recoPt = myJetMc.recoPt;
       double theR = myJetMc.recoMass / trkJetMass;
       
-      if ( ptCut == 1) theR = myJetMc.recoMass / myJetMc.recoChMassRcSubt ; 
-      
+      if ( ptCut == 1) {
+	if ( kSample == kPP)  theR = myJetMc.recoMass / myJetMc.recoChMassRaw ;
+	else theR = myJetMc.recoMass / myJetMc.recoChMassRcSubt ; 
+      }
       
       double fcalWeight = 1.0;
       if ( kSample==kPbPb) {
@@ -292,8 +299,11 @@ void getDATAR(int kSample, int icent,  TH2D* hdata, int ptCut) {
     
     double recoPt = myJet.recoPt;
     double theR = myJet.recoMass / trkJetMass;
-    if ( ptCut == 1) theR = myJet.recoMass / myJet.recoChMassRcSubt ; 
-
+    //    if ( ptCut == 1) theR = myJet.recoMass / myJet.recoChMassRcSubt ; 
+    if ( ptCut == 1) {
+      if ( kSample == kPP)  theR = myJet.recoMass / myJet.recoChMassRaw ;
+      else theR = myJet.recoMass / myJet.recoChMassRcSubt ; 
+    }
     hdata->Fill( theR, recoPt);
   }
   

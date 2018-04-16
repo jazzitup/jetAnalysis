@@ -288,10 +288,10 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
 	  continue;
 
-	recoVarY = recoVarY * 1.02;  // systematics!! 
-      
+	//	recoVarY = recoVarY * 0.96;  // systematics!!
+	recoVarY = recoVarY * ( 0.99 - 0.05 * (recoVarX-125)/250) ;
 
-	
+      	
 	double fcalWeight = 1.0; 
 	if ( kSample==kPbPb) {
 	  //	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));

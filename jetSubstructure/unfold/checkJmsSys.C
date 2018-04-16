@@ -20,7 +20,7 @@ JetSys getSystematicsUnf(int icent = 0, int nSys=1);
 void addSysInQuad(TH1D* sysTot=0, TH1D* sys1=0);
 
 
-void testJmsSys(int icent=0) {
+void checkJmsSys(int icent=0) {
   int optX =1 ;
   int optY =2 ;
 
@@ -43,8 +43,8 @@ void testJmsSys(int icent=0) {
   TH1D* hSysAraa[30];
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
-    hSysApp[ix] = getSysA(kPP, 0  , ix, "reweight00", "massVar102");
-    hSysApbpb[ix] = getSysA(kPbPb, icent, ix, "reweight00", "massVar102");
+    hSysApp[ix] = getSysA(kPP, 0  , ix, "reweight00", "massVarFunc");
+    hSysApbpb[ix] = getSysA(kPbPb, icent, ix, "reweight00", "massVarFunc");
     
     hSysAraa[ix] = (TH1D*)hSysApbpb[ix]->Clone(Form("sysRaa_%s",hSysApbpb[ix]->GetName()) );
     hSysAraa[ix]->Reset();

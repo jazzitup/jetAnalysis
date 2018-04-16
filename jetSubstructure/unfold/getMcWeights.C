@@ -504,7 +504,7 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 	ptWeight = ptScale->Eval(recoX);
       }
       
-      recoY = recoY * 1.02;  // systematics!!
+      recoY = recoY * ( 0.99 - 0.05 * (recoX-125)/250) ; 
 
       hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);
       hmcTruth->Fill( genX, genY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);
