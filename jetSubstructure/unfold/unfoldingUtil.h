@@ -13,8 +13,9 @@ bool selectedCent(int icent=0) {
 
 
 TH2D* getRewTable(int kSample, int icent)  { 
-  //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50-CanBeRemoved.root");  // April 12 mass shifted by 0.9
-  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50.root"); // Apr 7
+  //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50.root"); // Apr 7
+  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50_nSys210.root");   cout << " Using nSys = 210 table!! " << endl << endl << endl;
+ 
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized.root"); // Mar 28
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_fcalWeighted.root");
   TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent));  // 00

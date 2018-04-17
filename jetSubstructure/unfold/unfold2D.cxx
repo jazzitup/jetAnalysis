@@ -51,6 +51,8 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     cout << "===== pp intrinsic JES sys mode ======" << endl;
   else if ( (nSys >= 100 ) && ( nSys <= 106 ) )
     cout << "===== HI JES sys mode =====" << endl;
+  else if ( (nSys >= 200 ) && ( nSys <= 250 ) )
+    cout << "===== JMS/JMR sys mode =====" << endl;
   else {
     cout << "===== Invald nSys option ===== " << nSys << endl;
     return ;

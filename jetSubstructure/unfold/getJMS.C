@@ -24,7 +24,7 @@ using std::endl;
 #include <TPaletteAxis.h>
 #include "unfoldingUtil.h"
 
-double fracStst=0001;
+double fracStst=0.01;
 
 
 void getDist( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hJMS=0, TH2D* hJMR=0, TH2D* hJES=0, TH2D* hJER=0, bool doReweight = true);

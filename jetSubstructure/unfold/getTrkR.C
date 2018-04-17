@@ -12,7 +12,7 @@ using std::endl;
 #include "../JssUtils.h"
 #include <TPaletteAxis.h>
 
-double statUsed = 1;
+double statUsed = 01;
 
 int lowPtBin = 1;  int highPtBin = 13;
 
@@ -23,7 +23,13 @@ void getDATAR(int kSample=kPP, int icent=0,  TH2D* hdata=0, int ptCut=6);
 TH1D* getVariedHist(TH1D* hin=0, double variation=0);
 
 double findPeak(TF1* f, double low =2,double high = 4 ) {
-  double step = 0.001;
+  double v1 = f->GetParameter(1);
+  double v2 = f->GetParameter(2);
+  // Peak = ([1] - 0.22278) 
+  // https://root.cern.ch/root/html528/TMath.html#TMath:Landau
+  return (v1-0.22278);
+}
+/*  double step = 0.001;
   double maxY =  -10000;
   double peakPosition  = 0;
   for ( double xx = low ; xx<= high ; xx = xx+step){ 
@@ -34,6 +40,19 @@ double findPeak(TF1* f, double low =2,double high = 4 ) {
     }
   }
   return peakPosition;
+*/
+
+
+double errPeak(TF1* f) { 
+  double v1 = f->GetParameter(1);
+  double v2 = f->GetParameter(2);
+  double e1 = f->GetParError(1);
+  //  double e2 = f->GetParError(2);
+  // Peak = ([1] - 0.22278)* [2]
+  // https://root.cern.ch/root/html528/TMath.html#TMath:Landau
+  //  double ec1 =  (v1-0.22278)*e2  ;
+  //  double ec2 =  e1 * v2 ; 
+  return e1; 
 }
 
 void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass,   opt2 : m/pT  
@@ -62,7 +81,7 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
 
   int nRbins = 35;
   TH2D* hTemp = new TH2D("rTemp","", nRbins, 0,20, nXbins, xBin);
-  
+  TH1D* hTrkR = new TH1D(Form("hTrkR_kSample%d_icent%d",kSample,icent),";p_{T} (GeV/c);R^{trk};",nXbins, xBin);
   // MC 
   TH2D* hmc = (TH2D*)hTemp->Clone(Form("hmc_kSample%d_icent%d",kSample,icent));
   TH2D* hdata = (TH2D*)hTemp->Clone(Form("hdata_kSample%d_icent%d",kSample,icent));
@@ -87,7 +106,7 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
     handsomeTH1(h1data[ix],2);
 
     cleverRange(h1mc[ix],2.);
-    TF1 *f1mc = new TF1(Form("fitH1mc_ix%d",ix),"[0]*TMath::Landau(x-[3],[1],[2])",0,20);
+    /*   TF1 *f1mc = new TF1(Form("fitH1mc_ix%d",ix),"[0]*TMath::Landau(x-[3],[1],[2])",0,20);
     f1mc->SetParameter(0,1);
     f1mc->SetParameter(1,2);
     f1mc->SetParameter(2,2);
@@ -98,17 +117,37 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
     f1data->SetParameter(1,2);
     f1data->SetParameter(2,2);
     f1data->SetParameter(3,1);
+    */
+    TF1 *f1mc = new TF1(Form("fitH1mc_ix%d",ix),"[0]*TMath::Landau(x,[1],[2])",0,20);
+    f1mc->SetParameter(0,2);
+    f1mc->SetParameter(1,2.4);
+    f1mc->SetParameter(2,0.6);
+    //    f1mc->SetParameter(3,1);
 
-    h1mc[ix]->Fit(f1mc->GetName(),"M","",0,10);
-    h1data[ix]->Fit(f1data->GetName(),"M","",0,10);
+    TF1 *f1data = new TF1(Form("fitH1data_ix%d",ix),"[0]*TMath::Landau(x,[1],[2])",0,20);
+    f1data->SetParameter(0,2);
+    f1data->SetParameter(1,2.4);
+    f1data->SetParameter(2,0.6);
+    //    f1data->SetParameter(3,1);
+
+
+    h1mc[ix]->Fit(f1mc->GetName(),"","",0,10);
+    h1data[ix]->Fit(f1data->GetName(),"","",0,10);
     h1mc[ix]->GetFunction(f1mc->GetName())->SetLineColor(1);
     h1data[ix]->GetFunction(f1data->GetName())->SetLineColor(2);
     h1mc[ix]->Draw();
     h1data[ix]->Draw("same");
 
+    // Peak = ([1] - 0.22278)* [2] 
+    // https://root.cern.ch/root/html528/TMath.html#TMath:Landau
 
     double mcPeak = findPeak(f1mc,0,4);
     double dataPeak = findPeak(f1data,0,4);
+    double mcPeakErr = errPeak(f1mc);
+    double dataPeakErr = errPeak(f1data);
+    double peakRatio = dataPeak/mcPeak; 
+    double peakRatioErr =  peakRatio * sqrt (  pow(mcPeakErr/mcPeak,2) + pow(dataPeakErr/dataPeak,2) );
+
     cout << ix <<"th bin: "<< endl;
     cout << " MC peak  : " << mcPeak << endl;
     cout << " Data peak  : " << dataPeak << endl;
@@ -117,7 +156,6 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
     cout << "DATA maean, RMS = " << h1data[ix]->GetMean() << ",   " << h1data[ix]->GetRMS() << endl;
     cout << "DATA/MC mean = " << h1data[ix]->GetMean()/ h1mc[ix]->GetMean() << endl;
     double meanRatio = f1data->Mean(0,20) / f1mc->Mean(0,20);
-    double peakRatio = dataPeak/mcPeak; 
     if ( ix== lowPtBin)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
     drawBin(xBin,ix,"GeV",0.4,0.79,49,16);
     drawText(Form("R_{fit} = %.2f", (float)peakRatio), 0.35, 0.72,1,20);
@@ -131,8 +169,17 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
 //    hratio->Draw();
 //    jumSun(0,1,50,1);
     
+    hTrkR->SetBinContent(ix, peakRatio);
+    hTrkR->SetBinError(ix, peakRatioErr);
   }
   c2->SaveAs(Form("pdfsJMS/JMS_ptCut%d_kSample%d_cent%d.pdf",(int)ptCut,kSample,icent));
+  TCanvas* c3 = new TCanvas("c3","",500,500);
+  hTrkR->SetAxisRange(0.8,1.2,"Y");
+  TF1* f1 = new TF1("f1","[0] +x*[1]",xBin[0], xBin[nXbins]);
+  hTrkR->Fit("f1");
+  hTrkR->Draw();
+  jumSun(xBin[0],1, xBin[nXbins],1);
+  c3->SaveAs(Form("pdfsJMS/trkR_ptCut%d_kSample%d_cent%d.pdf",(int)ptCut,kSample,icent));
 }
 
 

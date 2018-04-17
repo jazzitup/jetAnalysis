@@ -4,7 +4,7 @@
 using std::cout;
 using std::endl;
 
-#include "TRandom.h"
+#include <TRandom3.h>
 #include "TH1D.h"
 #include "TH2D.h"
 
@@ -28,6 +28,7 @@ using std::endl;
 #include <TPaletteAxis.h>
 #include "unfoldingUtil.h"
 
+
 double fracStst=0001;
 
 bool useFullMC = false;
@@ -41,9 +42,9 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
   else if ( (nSys >= 0 ) && ( nSys <= 21 ) )
     cout << "pp intrinsic JES sys mode" << endl;
   else if ( (nSys >= 100 ) && ( nSys <= 106 ) )
-    cout << "HI JES sys mode" << endl;
-  else if ( (nSys == 200 ) ) 
-    cout << "HI JMR sys mode" << endl;
+    cout << "HI JES/JMR sys mode" << endl;
+  else if ( (nSys >= 200 ) && ( nSys <= 250 ) ) 
+    cout << "HI JMS/JMR sys mode" << endl;
   else {
     cout << "Invald nSys option : " << nSys << endl;
     return ;
@@ -139,17 +140,17 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
 RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, TH2D* respX, TH2D* respY, double radius, bool doReweight, int nSys)
 {
   
+  TRandom3 genRandom;
+  genRandom.SetSeed(200);
+
+  
   TH1::SetDefaultSumw2();
   TString jz2;
   TString jz3;
   TString jz4;
   if ( kSample == kPbPb ) {
     if ( radius==0.4 ) {
-      // v50
-      //      jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2.root";
-      //      jz3 = "jetSubstructure_MC_HION9_pbpb_v50_jz3.root";
-      //      jz4 = "jetSubstructure_MC_HION9_pbpb_v50_jz4.root";
-      if ( nSys >= 0 ) {
+      if ( (nSys>=0) && (nSys<200) ) {
 	jz2 = jz2PbPbStringSys;
         jz3 = jz3PbPbStringSys;
         jz4 = jz4PbPbStringSys;
@@ -163,7 +164,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   }
   else if ( kSample == kPP ) {
     if ( radius==0.4 ) {
-      if ( nSys >= 0 ) {
+      if ( (nSys>=0) && (nSys<200) ) {
 	jz2 = jz2PPStringSys;
         jz3 = jz3PPStringSys;
         jz4 = jz4PPStringSys;
@@ -204,18 +205,21 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TFile* fjz2 = new TFile(Form("../ntuples/%s",jz2.Data()));
   TTree* tr2 = (TTree*)fjz2->Get("tr");
   tr2->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
-  if ( nSys>=0)   tr2->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
+  if ( (nSys>=0) && (nSys<200) )
+    tr2->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
   
   
   TFile* fjz3 = new TFile(Form("../ntuples/%s",jz3.Data()));
   TTree* tr3 = (TTree*)fjz3->Get("tr");
   tr3->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
-  if ( nSys>=0)  tr3->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
+  if ( (nSys>=0) && (nSys<200) )
+    tr3->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
 
   TFile* fjz4 = new TFile(Form("../ntuples/%s",jz4.Data()));
   TTree* tr4 = (TTree*)fjz4->Get("tr");
   tr4->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
-  if ( nSys>=0)  tr4->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
+  if ( (nSys>=0) && (nSys<200) )  
+    tr4->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
 
   int nXbins;
   double xBin[30];
@@ -230,6 +234,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   
   TH1D* hJMS[15][10]; // centrality // gen pT  // gen m/pT
 
+  //  TH1D* htempres = new TH1D("htempres","",100,-1,2.5);
   
   RooUnfoldResponse* res;
   res = new RooUnfoldResponse( hReco, hTruth );
@@ -274,26 +279,29 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	double recoVarY, truthVarY;
 	getYvalues( recoVarY, truthVarY, myJetMc, optY);
 	
-	if (nSys >=0)   {
+	double relDev=0;
+	if ( (nSys>=0) && (nSys<200) )   {
 	  double extraPtScale = ptSys / myJetMc.recoPt ; 
 	  recoVarX = recoVarX * extraPtScale ; //pt 
-	  
 	  myJetMc.recoPt = ptSys;  // New pT!!! 
-	  myJetMc.recoMass = myJetMc.recoMass * extraPtScale ; // new mass so that m/pT is invariant
-
+	  myJetMc.recoMass = myJetMc.recoMass * extraPtScale ; // new mass so that m/pT is invariant.  This step is necessary for reweighitng (pT, m/pT)
 	}
-
-	//	cout << " myJetMc.recoPt = " << myJetMc.recoPt << endl;
-	//	cout << " myJetMc.ptSys = " << ptSys << endl << endl;
-
-
+	else if (nSys==200) { // JMR 
+	  // smear by 20% the recoY 
+	  double deviation = recoVarY - truthVarY;
+	  recoVarY = recoVarY + deviation*0.2;
+	  relDev = deviation / truthVarY;
+	}	
+	else if (nSys==210) { // JMS
+	  recoVarY = recoVarY * ( 0.99 - 0.04*(recoVarX-120.)/480.);
+	}
+	
 	if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
 	  continue;
-
+	
 	//	recoVarY = recoVarY * 0.96;  // systematics!!
-	recoVarY = recoVarY * ( 0.99 - 0.05 * (recoVarX-125)/250) ;
+	//	recoVarY = recoVarY * ( 0.99 - 0.05 * (recoVarX-125)/250) ;
 
-      	
 	double fcalWeight = 1.0; 
 	if ( kSample==kPbPb) {
 	  //	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
@@ -302,7 +310,6 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	// Data/MC reweighting factors 
 	double rewFact = 1; 
 	if ( doReweight) { 
-	  //	  int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass);
 	  int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass/myJetMc.recoPt);
 	  rewFact = hReweight->GetBinContent(rewBin);
 	}
@@ -311,16 +318,22 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	//	if ( passRecoEvent(myJetMc, icent) )
 	hTruth->Fill(truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
 	hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-	
+
 	res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+
 	respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
 	respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
 	
+	//	htempres->Fill( relDev, myJetMc.weight * rewFact * jzNorm* fcalWeight);
 	
 	
       }
       
   }
+
+  //  TCanvas* c00 = new TCanvas("c00","",500,500);
+  //  htempres->Draw();
+  //  c00->SaveAs("c00.pdf");
   
   return res;
 }
