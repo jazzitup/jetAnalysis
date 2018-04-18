@@ -240,99 +240,88 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   res = new RooUnfoldResponse( hReco, hTruth );
   res->SetName(Form("responseMatrix_icent%d",icent));
 
-  int nLoops = 1; 
-  if (nSys==200) 
-    nLoops = 10;
   
-  for ( int iLoop = 1 ; iLoop <= nLoops ; iLoop++) {     
-    for ( int ijz =2 ; ijz<=4 ; ijz++) { 
-      TTree* tr;
-      TH2D* hRecoEntries;
-      double jzNorm=0;
-      if ( ijz==2)  {
-	tr = tr2;   
-	jzNorm = hi9EvtWgtJZ2; 
-	hRecoEntries = recoEntries_jz2;
-      }
-      else if ( ijz==3)  {
-	tr = tr3;   
-	jzNorm = hi9EvtWgtJZ3; 
-	hRecoEntries = recoEntries_jz3;
-      }
-      else if ( ijz==4)  {
-	tr = tr4;   
-	jzNorm = hi9EvtWgtJZ4; 
-	hRecoEntries = recoEntries_jz4;
-      }
-      cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
-      
-      for (Int_t i= 0; i<tr->GetEntries() ; i++) {
-	if ( i > tr->GetEntries() * fracStst ) continue;
-	tr->GetEntry(i);
-	
-	if ( (!useFullMC) && (i%2 == 0) )
-	  continue;
-	
-	
-	//	if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
-	//	  continue;
-	//	cout <<" ratio = " << myJetMc.recoPt / ptSys << endl;
-
-	double recoVarX, truthVarX;
-	getXvalues( recoVarX, truthVarX, myJetMc, optX);
-	
-	double recoVarY, truthVarY;
-	getYvalues( recoVarY, truthVarY, myJetMc, optY);
-	
-	if ( (nSys>=0) && (nSys<200) )   {
-	  double extraPtScale = ptSys / myJetMc.recoPt ; 
-	  recoVarX = recoVarX * extraPtScale ; //pt 
-	  myJetMc.recoPt = ptSys;  // New pT!!! 
-	  myJetMc.recoMass = myJetMc.recoMass * extraPtScale ; // new mass so that m/pT is invariant.  This step is necessary for reweighitng (pT, m/pT)
-	}
-	else if (nSys==200) { // JMR 
-	  // smear by 20% the recoY 
-	  double theResol = getJMRsigma( kSample, icent, myJetMc.recoPt); 
-	  recoVarY = recoVarY * genRandom.Gaus(1, 0.66 * theResol);  //20 percent
-	}	
-	else if (nSys==210) { // JMS
-	  recoVarY = recoVarY * ( 0.99 - 0.04*(recoVarX-120.)/480.);
-	}
-	
-	if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
-	  continue;
-	
-	//	recoVarY = recoVarY * 0.96;  // systematics!!
-	//	recoVarY = recoVarY * ( 0.99 - 0.05 * (recoVarX-125)/250) ;
-
-	double fcalWeight = 1.0; 
-	if ( kSample==kPbPb) {
-	  //	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
-	}
-	
-	// Data/MC reweighting factors 
-	double rewFact = 1; 
-	if ( doReweight) { 
-	  int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass/myJetMc.recoPt);
-	  rewFact = hReweight->GetBinContent(rewBin);
-	}
-	
-	//	if ( passGenEvent(myJetMc, icent) )
-	//	if ( passRecoEvent(myJetMc, icent) )
-	hTruth->Fill(truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-	hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-
-	res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-
-	respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
-	respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
-	
-	
-	
-      }
-      
-      }
+  for ( int ijz =2 ; ijz<=4 ; ijz++) { 
+    TTree* tr;
+    TH2D* hRecoEntries;
+    double jzNorm=0;
+    if ( ijz==2)  {
+      tr = tr2;   
+      jzNorm = hi9EvtWgtJZ2; 
+      hRecoEntries = recoEntries_jz2;
     }
+    else if ( ijz==3)  {
+      tr = tr3;   
+      jzNorm = hi9EvtWgtJZ3; 
+      hRecoEntries = recoEntries_jz3;
+    }
+    else if ( ijz==4)  {
+      tr = tr4;   
+      jzNorm = hi9EvtWgtJZ4; 
+      hRecoEntries = recoEntries_jz4;
+    }
+    cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
+    
+    for (Int_t i= 0; i<tr->GetEntries() ; i++) {
+      if ( i > tr->GetEntries() * fracStst ) continue;
+      tr->GetEntry(i);
+      
+      if ( (!useFullMC) && (i%2 == 0) )
+	continue;
+      
+      double recoVarX, truthVarX;
+      getXvalues( recoVarX, truthVarX, myJetMc, optX);
+      
+      double recoVarY, truthVarY;
+      getYvalues( recoVarY, truthVarY, myJetMc, optY);
+      
+      if ( (nSys>=0) && (nSys<200) )   {
+	double extraPtScale = ptSys / myJetMc.recoPt ; 
+	recoVarX = recoVarX * extraPtScale ; //pt 
+	myJetMc.recoPt = ptSys;  // New pT!!! 
+	myJetMc.recoMass = myJetMc.recoMass * extraPtScale ; // new mass so that m/pT is invariant.  This step is necessary for reweighitng (pT, m/pT)
+      }
+      else if (nSys==200) { // JMR 
+	// smear by 20% the recoY 
+	double theResol = getJMRsigma( kSample, icent, myJetMc.recoPt); 
+	recoVarY = recoVarY * genRandom.Gaus(1, 0.66 * theResol);  //20 percent
+      }	
+      else if (nSys==210) { // JMS
+	double theRtrk = getRtrk( kSample, icent, myJetMc.recoPt);
+	recoVarY = recoVarY * theRtrk;
+      }
+      if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
+	continue;
+      
+      //	recoVarY = recoVarY * 0.96;  // systematics!!
+      //	recoVarY = recoVarY * ( 0.99 - 0.05 * (recoVarX-125)/250) ;
+      
+      double fcalWeight = 1.0; 
+      if ( kSample==kPbPb) {
+	//	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
+      }
+      
+      // Data/MC reweighting factors 
+      double rewFact = 1; 
+      if ( doReweight) { 
+	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass/myJetMc.recoPt);
+	rewFact = hReweight->GetBinContent(rewBin);
+      }
+      
+      //	if ( passGenEvent(myJetMc, icent) )
+      //	if ( passRecoEvent(myJetMc, icent) )
+      hTruth->Fill(truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+      hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+      
+      res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
+      
+      respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+      respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+      
+      
+      
+    }
+  }
   //  TCanvas* c00 = new TCanvas("c00","",500,500);
   //  htempres->Draw();
   //  c00->SaveAs("c00.pdf");

@@ -379,5 +379,38 @@ double getJMRsigma(int kSample=0, int icent=0, double jetPt=0) {
   }
   
   return p0  + p1 * jetPt;
+}
+
+
+double getRtrk(int kSample=0, int icent=0, double jetPt=0) {
+  // These values can be obtained from getJMR.C macro
+  double p0, p1, p2;
+  if ( kSample == kPP) {
+    p0 = 8.45894e-01; p1 = 7.41668e-02 ; p2 = -9.16700e-03;
+  }
+  else if ( kSample == kPbPb) {
+    if ( icent ==0) {
+      p0 = 3.20279e-01  ; p1 =  2.55680e-01 ;  p2 = -2.38110e-02 ;   
+    }
+    if ( icent ==1) {
+      p0 = 3.61702e-01  ; p1 =   2.32609e-01;  p2 =  -2.12574e-02 ;   
+    }
+    if ( icent ==2) {
+      p0= 1.67014e-01; p1 =  3.15547e-01; p2 = -3.02124e-02;
+    }
+    if ( icent ==3) {
+      p0= 9.87384e-01; p1=  1.31436e-02; p2 =  -2.74378e-03;
+    }
+    if ( icent ==4) {
+    p0 = 1.49288e+00;     p1 = -1.85183e-01;    p2 =1.65343e-02;
+    }
+    if ( icent ==5) {
+      p0 = -2.24462e-01;   p1 = 0.461;   p2 = -4.39981e-02; 
+    }
+    if ( icent ==6) {
+      p0 = -1.75795e-01;  p1=  4.90405e-01; p2= -5.13507e-02;	  
+    }
+  }
   
+  return p0  + p1 * log(jetPt) + p2 * log(jetPt)* log(jetPt);
 }

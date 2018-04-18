@@ -501,7 +501,6 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
       }
 
       
-      
       double fcalWeight = 1.0;
       if ( kSample==kPbPb) {
 	//        fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
@@ -520,8 +519,8 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
       }
       
       if (nSys==210) { // JMS
-	double deviation = recoY - genY;
-	recoY = recoY * ( 0.99 - 0.04*(recoX-120.)/480.);
+	double theRtrk = getRtrk( kSample, icent, myJetMc.recoPt);
+	recoY = recoY * theRtrk;
       }
       
       
