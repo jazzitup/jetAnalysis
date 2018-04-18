@@ -381,6 +381,47 @@ double getJMRsigma(int kSample=0, int icent=0, double jetPt=0) {
   return p0  + p1 * jetPt;
 }
 
+double getJMSscale(int kSample=0, int icent=0, double jetPt=0) { 
+  // These values can be obtained from getJMR.C macro
+  double p0, p1;
+  if ( kSample == kPP) {
+    p0 = 5.64677e-01   ;
+    p1 = 9.77777e-02  ;
+  }
+  else if ( kSample == kPbPb) {
+    if ( icent ==0) {
+      p0=  8.68347e-01;
+      p1=  4.98060e-02;
+    }
+    if ( icent ==1) {
+      p0 = 7.72952e-01   ;
+      p1 = 6.42673e-02   ;
+    }
+    if ( icent ==2) {
+      p0 = 7.05166e-01   ;
+      p1 = 7.41717e-02   ;
+    }
+    if ( icent ==3) {
+      p0 = 6.41878e-01   ;
+      p1 = 8.43167e-02   ;
+    }
+    if ( icent ==4) {
+      p0 = 6.08245e-01   ;
+      p1 = 8.93995e-02   ;
+    }
+    if ( icent ==5) {
+      p0 = 5.85829e-01   ;
+      p1 = 9.26819e-02    ;
+    }
+    if ( icent ==6) {
+      p0 =  5.61321e-01   ;
+      p1 =  9.70274e-02   ;
+    }
+  }
+  
+  return p0  + p1 * log(jetPt);
+}
+
 
 double getRtrk(int kSample=0, int icent=0, double jetPt=0) {
   // These values can be obtained from getJMR.C macro

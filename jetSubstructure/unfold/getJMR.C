@@ -118,9 +118,13 @@ void getJMR(int kSample = kPbPb, int icent=0) {   // opt1 : mass,   opt2 : m/pT
 
   TCanvas* c3 = new TCanvas("c3","",500,500);
   hJms->SetAxisRange(0,2,"Y");
-  TF1* f1 = new TF1("f1","[0] +x*[1]",xBin[0], xBin[nXbins]);
+  //  TF1* f1 = new TF1("f1","[0] +x*[1]",xBin[0], xBin[nXbins]);   // for jms
+  TF1* f1 = new TF1("f1","[0] +log(x)*[1]",xBin[0], xBin[nXbins]);   // for jms
   TF1* f2 = new TF1("f2","[0] +x*[1]",xBin[0], xBin[nXbins]);
-  hJms->Fit("f1");
+  cout << " ==== JMS function  === [0] + log(x)*[1] =====" << endl;
+  hJms->Fit("f1");   
+  cout << " =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=" << endl;
+
   hJmr->Fit("f2");
   hJmr->GetFunction("f2")->SetLineColor(4);
   hJms->Draw();
