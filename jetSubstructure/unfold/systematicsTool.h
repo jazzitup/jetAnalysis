@@ -1,8 +1,7 @@
 #include "../getSdHists.C"
-#include "../ntupleDefinition.h"
+#include "../ntupleDefinition_v50.h"
 #include "../commonUtility.h"
 #include "../jzWeight.h"
-#include "../commonUtility.h"
 #include "../JssUtils.h"
 #include "unfoldingUtil.h"
 
@@ -339,4 +338,46 @@ void sortPlusMinus(TH1D* hp, TH1D* hm) {
       hm->SetBinContent( ii, y1);
     }
   }
+}
+
+double getJMRsigma(int kSample=0, int icent=0, double jetPt=0) { 
+  // These values can be obtained from getJMR.C macro
+  double p0, p1;
+  if ( kSample == kPP) {
+    p0 = 0.23 ;
+    p1 = -0.000009;
+  }
+  else if ( kSample == kPbPb) {
+    if ( icent ==0) {
+      p0 = 0.29;      
+      p1 = -0.000046;
+    }
+    if ( icent ==1) {
+      p0 = 0.28;      
+      p1 = -0.000041;
+    }
+    if ( icent ==2) {
+      p0 = 0.27 ;      
+      p1 = -0.000028;
+    }
+    if ( icent ==3) {
+      p0 = 0.26;      
+      p1 = -0.000027;
+    }
+    if ( icent ==4) {
+      p0 = 0.25;      
+      p1 = -0.000023;
+    }
+    if ( icent ==5) {
+      p0 = 0.24 ;      
+      p1 = -0.000014;
+    }
+    if ( icent ==6) {
+      p0 = 0.24;      
+      p1 = -0.000011;
+    }
+  }
+  
+  return p0  + p1 * jetPt;
+  
 }

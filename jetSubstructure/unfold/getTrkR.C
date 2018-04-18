@@ -12,7 +12,7 @@ using std::endl;
 #include "../JssUtils.h"
 #include <TPaletteAxis.h>
 
-double statUsed = 01;
+double statUsed = 001;
 
 int lowPtBin = 1;  int highPtBin = 13;
 
@@ -55,7 +55,7 @@ double errPeak(TF1* f) {
   return e1; 
 }
 
-void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass,   opt2 : m/pT  
+void getTrkR(int kSample = kPbPb, int icent=0, int ptCut =1 ) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
 
   int optX = 1;    int optY = 2;  
@@ -175,10 +175,12 @@ void getTrkR(int kSample = kPP, int icent=0, int ptCut =1 ) {   // opt1 : mass, 
   c2->SaveAs(Form("pdfsJMS/JMS_ptCut%d_kSample%d_cent%d.pdf",(int)ptCut,kSample,icent));
   TCanvas* c3 = new TCanvas("c3","",500,500);
   hTrkR->SetAxisRange(0.8,1.2,"Y");
-  TF1* f1 = new TF1("f1","[0] +x*[1]",xBin[0], xBin[nXbins]);
+  //  TF1* f1 = new TF1("f1","[0] +x*[1]",xBin[0], xBin[nXbins]);
+  TF1* f1 = new TF1("f1","[0] +log(x)*[1] + log(x)*log(x)*[2]",xBin[0], xBin[nXbins]);
   hTrkR->Fit("f1");
   hTrkR->Draw();
   jumSun(xBin[0],1, xBin[nXbins],1);
+  drawCentrality(kSample, icent, 0.60,0.86,1,24);
   c3->SaveAs(Form("pdfsJMS/trkR_ptCut%d_kSample%d_cent%d.pdf",(int)ptCut,kSample,icent));
 }
 

@@ -14,6 +14,7 @@ using std::endl;
 
 #include "../JssUtils.h"
 #include <TPaletteAxis.h>
+#include "systematicsTool.h"
 
 double statFrac = 0001;
 double fracStstData = 001;
@@ -512,11 +513,12 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 	ptWeight = ptScale->Eval(recoX);
       }
       
-      if (nSys==200) { // JMR  
-	// smear 20% w/o random number generatgor
-	double deviation = recoY - genY;
-	recoY = recoY + deviation*0.2;
+      if (nSys==200) { // JMR
+	// smear by 20% the recoY
+	double theResol = getJMRsigma( kSample, icent, myJetMc.recoPt);
+	recoY = recoY * genRandom.Gaus(1, 0.66 * theResol);  //20 percent
       }
+      
       if (nSys==210) { // JMS
 	double deviation = recoY - genY;
 	recoY = recoY * ( 0.99 - 0.04*(recoX-120.)/480.);

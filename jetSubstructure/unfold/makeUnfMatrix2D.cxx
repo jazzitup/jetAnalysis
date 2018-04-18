@@ -27,7 +27,7 @@ using std::endl;
 #include "../JssUtils.h"
 #include <TPaletteAxis.h>
 #include "unfoldingUtil.h"
-
+#include "systematicsTool.h"
 
 double fracStst=0001;
 
@@ -239,21 +239,26 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   RooUnfoldResponse* res;
   res = new RooUnfoldResponse( hReco, hTruth );
   res->SetName(Form("responseMatrix_icent%d",icent));
-    
-  for ( int ijz =2 ; ijz<=4 ; ijz++) { 
-    TTree* tr;
-    TH2D* hRecoEntries;
-    double jzNorm=0;
-    if ( ijz==2)  {
-      tr = tr2;   
-      jzNorm = hi9EvtWgtJZ2; 
-      hRecoEntries = recoEntries_jz2;
+
+  int nLoops = 1; 
+  if (nSys==200) 
+    nLoops = 10;
+  
+  for ( int iLoop = 1 ; iLoop <= nLoops ; iLoop++) {     
+    for ( int ijz =2 ; ijz<=4 ; ijz++) { 
+      TTree* tr;
+      TH2D* hRecoEntries;
+      double jzNorm=0;
+      if ( ijz==2)  {
+	tr = tr2;   
+	jzNorm = hi9EvtWgtJZ2; 
+	hRecoEntries = recoEntries_jz2;
       }
-    else if ( ijz==3)  {
-      tr = tr3;   
-      jzNorm = hi9EvtWgtJZ3; 
-      hRecoEntries = recoEntries_jz3;
-    }
+      else if ( ijz==3)  {
+	tr = tr3;   
+	jzNorm = hi9EvtWgtJZ3; 
+	hRecoEntries = recoEntries_jz3;
+      }
       else if ( ijz==4)  {
 	tr = tr4;   
 	jzNorm = hi9EvtWgtJZ4; 
@@ -279,7 +284,6 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	double recoVarY, truthVarY;
 	getYvalues( recoVarY, truthVarY, myJetMc, optY);
 	
-	double relDev=0;
 	if ( (nSys>=0) && (nSys<200) )   {
 	  double extraPtScale = ptSys / myJetMc.recoPt ; 
 	  recoVarX = recoVarX * extraPtScale ; //pt 
@@ -288,9 +292,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	}
 	else if (nSys==200) { // JMR 
 	  // smear by 20% the recoY 
-	  double deviation = recoVarY - truthVarY;
-	  recoVarY = recoVarY + deviation*0.2;
-	  relDev = deviation / truthVarY;
+	  double theResol = getJMRsigma( kSample, icent, myJetMc.recoPt); 
+	  recoVarY = recoVarY * genRandom.Gaus(1, 0.66 * theResol);  //20 percent
 	}	
 	else if (nSys==210) { // JMS
 	  recoVarY = recoVarY * ( 0.99 - 0.04*(recoVarX-120.)/480.);
@@ -324,13 +327,12 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
 	respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
 	
-	//	htempres->Fill( relDev, myJetMc.weight * rewFact * jzNorm* fcalWeight);
 	
 	
       }
       
-  }
-
+      }
+    }
   //  TCanvas* c00 = new TCanvas("c00","",500,500);
   //  htempres->Draw();
   //  c00->SaveAs("c00.pdf");
