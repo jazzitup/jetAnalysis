@@ -1,3 +1,6 @@
+#ifndef GETSDHISTS_H
+#define GETSDHISTS_H
+
 #include "commonUtility.h"
 #include <vector>
 
@@ -113,3 +116,8 @@ sdVariable getSdHists (TString prefix = "pbpb",
   
   return ret;
 }
+
+
+
+
+#endif

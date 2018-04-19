@@ -41,8 +41,8 @@ void checkJmrSys(int icent=0) {
   TH1D* hSysAraa[30];
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
-    hSysApp[ix]   = getSysJES(kPP,     0  , ix, 210);
-    hSysApbpb[ix] = getSysJES(kPbPb, icent, ix, 210);
+    hSysApp[ix]   = getSysJES(kPP,     0  , ix, 100);
+    hSysApbpb[ix] = getSysJES(kPbPb, icent, ix, 100);
     
     hSysAraa[ix] = (TH1D*)hSysApbpb[ix]->Clone(Form("sysRaa_%s",hSysApbpb[ix]->GetName()) );
     hSysAraa[ix]->Reset();
@@ -65,26 +65,28 @@ void checkJmrSys(int icent=0) {
     handsomeTH1(hSysApp[ix],1);
     handsomeTH1(hSysApbpb[ix],1);
     hSysApp[ix]->SetAxisRange(0.001,0.23,"X");
-    hSysApp[ix]->SetAxisRange(-1,1,"Y");
+    hSysApp[ix]->SetAxisRange(-.5,.5,"Y");
     hSysApp[ix]->SetXTitle("m/p_{T}");
     hSysApp[ix]->SetYTitle("Ratio");
     hSysApp[ix]->SetNdivisions(505,"X");
     hSysApp[ix]->SetNdivisions(505,"Y");
     fixedFontHist(hSysApp[ix],1.2,1.4,20);
     hSysApp[ix]->Draw("" );
-    drawCentrality(kPP, 0, 0.25,0.88,1,20);
+    if ( ix == lowPtBin)  drawCentrality(kPP, 0, 0.25,0.83,1,20);
+    if ( ix== lowPtBin) drawBin(xBin,ix,"GeV",0.25,0.70,1,16);
+    else drawBin(xBin,ix,"GeV",0.25 - 0.15,0.70,1,16);
     jumSun(0,0,0.24,0);
 
     cA->cd(ix - lowPtBin + 1 + nPtPannels);
     hSysApbpb[ix]->SetAxisRange(0.001,0.23,"X");
-    hSysApbpb[ix]->SetAxisRange(-1,1,"Y");
+    hSysApbpb[ix]->SetAxisRange(-.5,.5,"Y");
     hSysApbpb[ix]->SetXTitle("m/p_{T}");
     hSysApbpb[ix]->SetYTitle("Ratio");
     hSysApbpb[ix]->SetNdivisions(505,"X");
     hSysApbpb[ix]->SetNdivisions(505,"Y");
     fixedFontHist(hSysApbpb[ix],1.2,1.4,20);
     hSysApbpb[ix]->Draw("");
-    drawCentrality(kPbPb, icent, 0.25,0.88,1,20);
+    if ( ix == lowPtBin)    drawCentrality(kPbPb, icent, 0.25,0.8,1,20);
     jumSun(0,0,0.24,0);
 
 
@@ -95,7 +97,6 @@ void checkJmrSys(int icent=0) {
     //      leg1->AddEntry(hSysApbpb[ix],"PbPb","l");
     //      leg1->Draw();
     //    }
-    drawBin(xBin,ix,"GeV",0.25,0.80,1,20);
 
   }
   if (savePic)  cA->SaveAs(Form("pdfsSystematics/sysJES_icent%d_massVar.pdf",icent));

@@ -514,8 +514,12 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
       
       if (nSys==200) { // JMR
 	// smear by 20% the recoY
+	double theCenter = genY * getJMSscale( kSample, icent, myJetMc.recoPt);
+	double recoDev = recoY - theCenter; 
 	double theResol = getJMRsigma( kSample, icent, myJetMc.recoPt);
-	recoY = recoY * genRandom.Gaus(1, 0.66 * theResol);  //20 percent
+	recoY = theCenter + recoDev * genRandom.Gaus(1, 0.66 * theResol);  //20 percent
+	//	cout << " JMS = " << getJMSscale( kSample, icent, myJetMc.recoPt);
+	//	cout << " recoDEV = " << recoDev << endl;
       }
       
       if (nSys==210) { // JMS

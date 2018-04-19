@@ -283,8 +283,10 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       }
       else if (nSys==200) { // JMR 
 	// smear by 20% the recoY 
-	double theResol = getJMRsigma( kSample, icent, myJetMc.recoPt); 
-	recoVarY = recoVarY * genRandom.Gaus(1, 0.66 * theResol);  //20 percent
+	double theCenter = truthVarY * getJMSscale( kSample, icent, myJetMc.recoPt);
+        double recoDev = recoVarY - theCenter;
+        double theResol = getJMRsigma( kSample, icent, myJetMc.recoPt);
+        recoVarY = theCenter + recoDev * genRandom.Gaus(1, 0.66 * theResol);  //20 percent
       }	
       else if (nSys==210) { // JMS
 	double theRtrk = getRtrk( kSample, icent, myJetMc.recoPt);

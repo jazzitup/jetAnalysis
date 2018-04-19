@@ -5,7 +5,6 @@ bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
   if ( icent ==3 )  return true;
   if ( icent ==6 )  return true;
-  return false;
   if ( icent ==1 )  return true;
   if ( icent ==2 )  return true;
   if ( icent ==4 )  return true;
@@ -16,14 +15,14 @@ bool selectedCent(int icent=0) {
 
 
 TH2D* getRewTable(int kSample, int icent)  { 
-  //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50.root"); // Apr 7
-  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50_nSys210.root");   cout << " Using nSys = 210 table!! " << endl << endl << endl;
- 
+  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50.root"); // Default, set in Apr 7
+  //  int nSys = 200;  TFile* fReweight = new TFile(Form("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50_nSys%d.root",nSys));   cout << " Using nSys = " << nSys << "table!! " << endl << endl << endl;
+  
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized.root"); // Mar 28
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_fcalWeighted.root");
   TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent));  // 00
   //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatioVarP_kSample%d_icent%d",kSample,icent));  // plus50%
-  //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatioVarM_kSample%d_icent%d",kSample,icent));  // plus50%
+  //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatioVarM_kSample%d_icent%d",kSample,icent));  // minus50%
   //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio2_kSample%d_icent%d",kSample,icent)); // 01
   return hTemp;
 }
@@ -41,9 +40,9 @@ TString jz2PbPbStringSys = "jetSubstructure_MC_HION9_jz2sys_v50.root";
 TString jz3PbPbStringSys = "jetSubstructure_MC_HION9_jz3sys_v50.root";
 TString jz4PbPbStringSys = "jetSubstructure_MC_HION9_jz4sys_v50.root";
 
-TString jz2PPStringSys = "jetSubstructure_ppMC_HION9_jz2sys_v50.root";
-TString jz3PPStringSys = "jetSubstructure_ppMC_HION9_jz3sys_v50.root";
-TString jz4PPStringSys = "jetSubstructure_ppMC_HION9_jz4sys_v50.root";
+TString jz2PPStringSys = "jetSubstructure_ppMC_HION9_jz2sys_v50_april14.root";     // _april14 is added only for pp as ptSysHI is fixed
+TString jz3PPStringSys = "jetSubstructure_ppMC_HION9_jz3sys_v50_april14.root";     // _april14 is added only for pp as ptSysHI is fixed
+TString jz4PPStringSys = "jetSubstructure_ppMC_HION9_jz4sys_v50_april14.root";     // _april14 is added only for pp as ptSysHI is fixed
 
 TString jz2PbPbString = jz2PbPbStringSys;
 TString jz3PbPbString = jz3PbPbStringSys;
