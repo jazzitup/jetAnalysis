@@ -250,10 +250,11 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
 	  hdataRawSq[ipt][in]->Draw("hist");
 	}
 	hdataUnfSq[ipt][in]->Draw("same e");
-
+	
 	gPad->SetLogy();
 	
       }
+      hmcUnfSq[ipt][0]->Draw("same hist");
       drawBin(xBin,ipt,"GeV",0.2 + (0.05* (ipt==lowPtBin)), 0.7,1,18);
 	
       if ( ipt == lowPtBin ) {
