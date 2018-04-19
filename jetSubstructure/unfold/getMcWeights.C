@@ -16,8 +16,7 @@ using std::endl;
 #include <TPaletteAxis.h>
 #include "systematicsTool.h"
 
-double statFrac = 0001;
-double fracStstData = 001;
+double statFrac = 001;
 bool doUnfData = true ;
 
 int lowPtBin = 1;  int highPtBin = 13;
@@ -126,24 +125,26 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
   }
   
   TCanvas* c1=  new TCanvas("c1","",500,500);
-  makeEfficiencyCanvas(c1,1, 0.05, 0.01, 0.1, 0.3, 0.01);
+  makeEfficiencyCanvas(c1,1, 0.0, 0.01, 0.2, 0.25, 0.01);
   c1->cd(1);
   TH1D* ptmc = (TH1D*)hmcRaw->ProjectionX("ptmc");
   TH1D* ptdata = (TH1D*)hdataRaw->ProjectionX("ptdata");
   handsomeTH1(ptmc,1);
   handsomeTH1(ptdata,2);
   ptmc->SetAxisRange(1e-6,1e8,"Y");
-  ptmc->Draw();
+  ptmc->SetYTitle("dN/dp_{T}^{Reco}");
+  ptmc->Draw(); 
   ptdata->Draw("same");
   gPad->SetLogy();
-  drawCentrality(kSample, icent, 0.70,0.86,1,24);
+  drawCentrality(kSample, icent, 0.6,0.86,1,24);
 
-  TLegend *leg1 = new TLegend(0.4814838,0.5583593,1,0.7723161,NULL,"brNDC");
+  TLegend *leg1 = new TLegend(0.60,0.5583593,1,0.8023161,NULL,"brNDC");
 
   easyLeg(leg1,"Mass integrated");
   leg1->AddEntry(ptdata, "Data","pl");
   leg1->AddEntry(ptmc, "MC","pl");
   leg1->Draw();
+  ATLASLabel(0.22, 0.88, "Internal");//, "Pb+Pb  #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}", kBlack);
 
   c1->cd(2);
   TH1D* hptRatio = (TH1D*)ptdata->Clone("hptRatio");
@@ -240,11 +241,13 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
   handsomeTH1( hsmooVarM,kGreen+4);
 
   hsmooVarP->SetLineWidth(2);
-  hsmooVarP->SetLineWidth(2);
+  hsmooVarM->SetLineWidth(2);
+  hsmooVarP->SetLineStyle(9);
+  hsmooVarM->SetLineStyle(6);
 
   c15->SaveAs(Form("reweightFactors/MassIntreweighting_kSample%d_icent%d.pdf",kSample,icent));
 
-  TCanvas* c16 = new TCanvas("c16","",400,400);
+  TCanvas* c16 = new TCanvas("c16","",500,500);
 
   cleverRange(hmptRatioPtAllsmooth,3);
   hmptRatioPtAllsmooth->SetAxisRange(-0.07,0.3,"X");
@@ -257,14 +260,16 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
   hmptRatioPtAll->Draw("same");
   hsmooVarP->Draw("same hist");
   hsmooVarM->Draw("same hist");
-  drawCentrality(kSample, icent, 0.70,0.86,1,24);
+  drawCentrality(kSample, icent, 0.50,0.86,1,24);
   
-  TLegend *leg3 = new TLegend(0.4723618,0.6186667,0.959799,0.832,NULL,"brNDC");
+  TLegend *leg3 = new TLegend(0.523618,0.6186667,0.959799,0.832,NULL,"brNDC");
   easyLeg(leg3,"Reweight factor");
   leg3->AddEntry(hsmooVarP, "Varied by +50%","l");
   leg3->AddEntry(hmptRatioPtAll, "Nominal","l");
   leg3->AddEntry(hsmooVarM, "Varied by -50%","l");
   leg3->Draw();
+
+  ATLASLabel(0.18, 0.88, "Internal",0.05);//, "Pb+Pb  #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}", kBlack);
 
   c16->SaveAs(Form("reweightFactors/MassIntreweighting_kSample%d_icent%d_ratioOnly.pdf",kSample,icent));
   
@@ -347,9 +352,9 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
   
   TFile * fout;
   if ( nSys < 0 ) 
-    fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50.root",(int)weightCut,opt,(float)flucCut),"update");
+    fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50_canBeRemoved.root",(int)weightCut,opt,(float)flucCut),"update");
   else
-    fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50_nSys%d.root",(int)weightCut,opt,(float)flucCut,nSys),"update");
+    fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50_nSys%d_canBeRemoved.root",(int)weightCut,opt,(float)flucCut,nSys),"update");
   
   hmcPtCorr->Write("",TObject::kOverwrite);
   hmcTruth->Write("",TObject::kOverwrite);
@@ -558,7 +563,7 @@ void getDATAspectra(int kSample, int icent, int opt, TH2D* hdataRaw) {
   
   for (Int_t i= 0; i<tr->GetEntries() ; i++) {
     tr->GetEntry(i);
-    if ( i > tr->GetEntries() * fracStstData) break;
+    if ( i > tr->GetEntries() * statFrac) break;
 
     if ( ! passEvent(myJet, icent, false) ) // isMC = false
       continue;

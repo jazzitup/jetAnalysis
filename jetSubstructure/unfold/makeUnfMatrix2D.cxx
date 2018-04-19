@@ -29,7 +29,7 @@ using std::endl;
 #include "unfoldingUtil.h"
 #include "systematicsTool.h"
 
-double fracStst=0001;
+double fracStst=01;
 
 bool useFullMC = false;
 
@@ -73,7 +73,7 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
   
   TH2D* hResX[7]; // response matrix for pT ( mass integrated)
   TH2D* hResY[7]; // response matrix for mass ( pT integrated)
-  TH2D* h2dtempM = new TH2D("h2dtemp",";Truth m/p_{T};Reco m/p_{T}",100,-0.5,0.5,100,-0.5,0.5);
+  TH2D* h2dtempM = new TH2D("h2dtemp",";Truth m/p_{T};Reco m/p_{T}",100,-0.05,0.3,100,-0.05,0.3);
   
 
   
@@ -99,6 +99,8 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
     hMatrix[i]->SetTitle("MC Response matrix");
     c01->SetRightMargin(0.2);
     hMatrix[i]->Draw("colz");
+    ATLASLabel(0.2,0.9,"Internal",0.05,0.14);
+
     c01->SaveAs(Form("pdfs/correlation_2dUnf_coll%d_cent%d_radius0%d_doReweight%d.pdf",kSample,i,(int)(radius*10.),doReweight));
     TCanvas* c02 = new TCanvas("c02","",1000,500);
     c02->Divide(2,1);
@@ -107,12 +109,16 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
     hResX[i]->Draw("colz");
     c02->cd(1)->SetRightMargin(0.2);
     gPad->SetLogz();
+    ATLASLabel(0.18,0.9,"Internal",0.05,0.17);
+
     c02->cd(2);
     h2dtempM->SetNdivisions(505,"X");
     h2dtempM->Draw();
     hResY[i]->Draw("colz same");
     c02->cd(2)->SetRightMargin(0.2);
     gPad->SetLogz();
+    ATLASLabel(0.18,0.9,"Internal",0.05,0.17);
+
     c02->SaveAs(Form("pdfs/PtMassResp_coll%d_cent%d_radius%.1f_doReweight%d.pdf",kSample,i,(float)radius,doReweight));
     
   }
@@ -230,12 +236,21 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   getYbin(nYbins, yBin, optY);
 
   TH1D* xBinTemp = new TH1D("xBinTemp","", nXbins, xBin);
+  TH1D* yBinTemp = new TH1D("yBinTemp","", nYbins, yBin);
   
+  TH1D* hJES1d[15][15]; // centrailty // gen pT // mass bin
+  TH2D* hJES; // centrailty // gen pT // 
+  TH2D* hJER; // centrailty // gen pT // 
+  hJES = new TH2D("hJES",";Truth p_{T} (GeV/c); Truth m/p_{T}", nXbins,xBin,nYbins,yBin);
+  hJER = new TH2D("hJER",";Truth p_{T} (GeV/c); Truth m/p_{T}", nXbins,xBin,nYbins,yBin);
+  for ( int ix = 1 ; ix<= nXbins; ix++) { 
+    for ( int iy = 1 ; iy<= nYbins; iy++) { 
+      if ( (kSample == kPP) && ( icent != 0 ) )      continue;
+      hJES1d[ix][iy] = new TH1D(Form("hjes1d_%d_%d",ix,iy),"",100,0,2);
+    }
+  }
   
-  TH1D* hJMS[15][10]; // centrality // gen pT  // gen m/pT
 
-  //  TH1D* htempres = new TH1D("htempres","",100,-1,2.5);
-  
   RooUnfoldResponse* res;
   res = new RooUnfoldResponse( hReco, hTruth );
   res->SetName(Form("responseMatrix_icent%d",icent));
@@ -320,14 +335,54 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
       respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
       
-      
+      int ix = xBinTemp->FindBin(truthVarX);
+      int iy = yBinTemp->FindBin(truthVarY);
+      if ( (ix >=0) && (ix<=nXbins) && (iy >=0) && (iy<=nYbins) ) 
+	hJES1d[ix][iy]->Fill(recoVarX/truthVarX);
+
       
     }
   }
-  //  TCanvas* c00 = new TCanvas("c00","",500,500);
-  //  htempres->Draw();
-  //  c00->SaveAs("c00.pdf");
   
+  for ( int ix = 1 ; ix<= nXbins; ix++) {
+    for ( int iy = 1 ; iy<= nYbins; iy++) {
+      if ( (kSample == kPP) && ( icent != 0 ) )      continue;
+      hJES->SetBinContent(ix, iy, hJES1d[ix][iy]->GetMean());
+      hJER->SetBinContent(ix, iy, hJES1d[ix][iy]->GetRMS());
+    }
+  }
+  //  cJes2->cd(2)->Update();
+
+  TCanvas* cJESJER = new TCanvas("cjesjer","",1000,500);
+  cJESJER->Divide(2,1);
+  cJESJER->cd(1);
+  TH2D* htemp2 = new TH2D("htemp2",";Truth p_{T};Truth m/p_{T};",100,126,800,100,0,0.4);
+  //  handsomeTH1(htemp2,1);
+  htemp2->GetXaxis()->SetMoreLogLabels();
+  htemp2->DrawCopy();
+  hJES->Draw("colz same");
+  drawCentrality(kSample,icent,0.55,0.87,1,20);
+  drawText("Jet energy scale",0.5,0.8,1,20);
+  ATLASLabel(0.2,0.87,"Internal",0.05,0.17);
+  cJESJER->cd(2);
+  htemp2->DrawCopy();
+  hJER->Draw("colz same");
+  drawCentrality(kSample,icent,0.55,0.87,1,20);
+  drawText("Jet energy resolution",0.4,0.8,1,20);
+  ATLASLabel(0.2,0.87,"Internal",0.05,0.17);
+
+  cJESJER->cd(1)->Update();
+  TPaletteAxis *palette1 = (TPaletteAxis*)hJES->GetListOfFunctions()->FindObject("palette");
+  palette1->SetX1NDC(0.87);
+  palette1->SetX2NDC(0.92);
+  gPad->SetLogx();
+  cJESJER->cd(2)->Update();
+  TPaletteAxis *palette2 = (TPaletteAxis*)hJER->GetListOfFunctions()->FindObject("palette");
+  palette2->SetX1NDC(0.87);
+  palette2->SetX2NDC(0.92);
+  gPad->SetLogx();
+  
+  cJESJER->SaveAs(Form("pdfs/JESJER_kSample%d_icent%d_optX%d_optY%d_applyMDJ0.pdf",kSample,icent,optX,optY));
   return res;
 }
 

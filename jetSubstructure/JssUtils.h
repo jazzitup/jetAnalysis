@@ -65,13 +65,13 @@ TH1D* getDataRaw_test4( int kSample = kPP, int ipt=0, int icent=0, int nIter=0, 
 void drawCentrality( int kSample = kPP, int icent = 0, float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18) {
   if ( kSample == kPP)  drawText("pp",xp,yp,textColor,textSize) ;
   else {
-    if ( icent==0 )  drawText( "0-10%",xp,yp,textColor,textSize) ;
-    if ( icent==1 )  drawText( "10-20%",xp,yp,textColor,textSize) ;
-    if ( icent==2 )  drawText( "20-30%",xp,yp,textColor,textSize) ;
-    if ( icent==3 )  drawText( "30-40%",xp,yp,textColor,textSize) ;
-    if ( icent==4 )  drawText( "40-50%",xp,yp,textColor,textSize) ;
-    if ( icent==5 )  drawText( "50-60%",xp,yp,textColor,textSize) ;
-    if ( icent==6 )  drawText( "60-80%",xp,yp,textColor,textSize) ;
+    if ( icent==0 )  drawText( "PbPb 0-10%",xp,yp,textColor,textSize) ;
+    if ( icent==1 )  drawText( "PbPb 10-20%",xp,yp,textColor,textSize) ;
+    if ( icent==2 )  drawText( "PbPb 20-30%",xp,yp,textColor,textSize) ;
+    if ( icent==3 )  drawText( "PbPb 30-40%",xp,yp,textColor,textSize) ;
+    if ( icent==4 )  drawText( "PbPb 40-50%",xp,yp,textColor,textSize) ;
+    if ( icent==5 )  drawText( "PbPb 50-60%",xp,yp,textColor,textSize) ;
+    if ( icent==6 )  drawText( "PbPb 60-80%",xp,yp,textColor,textSize) ;
   }
 }
 
