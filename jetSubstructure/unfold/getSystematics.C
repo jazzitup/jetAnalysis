@@ -3,7 +3,7 @@
 
 void groomHist(TH1D* h1) {
   h1->SetAxisRange(0.001,0.23,"X");
-  h1->SetAxisRange(-0.55,0.55,"Y");
+  h1->SetAxisRange(-0.35,0.35,"Y");
   h1->SetXTitle("m/p_{T}");
   h1->SetYTitle("Relative Uncertainty");
   h1->SetNdivisions(505,"X");
@@ -26,6 +26,8 @@ void getSystematics(int icent = 0) {
   vector<int> vIndPlus;
   vector<int> vIndMinus;
   int indexJER = 100;
+  int indexJMR = 200;
+  int indexJMS = 210;
   /*  for ( int i=0 ; i<=21 ; i++)   {
       if (i%2 == 0)  vIndPlus.push_back(i);  // pp JES
       else           vIndMinus.push_back(i);  // pp JES
@@ -33,19 +35,25 @@ void getSystematics(int icent = 0) {
   vIndPlus.push_back(1);  vIndPlus.push_back(3);
   vIndPlus.push_back(5);  vIndPlus.push_back(7);
   vIndPlus.push_back(9);  vIndPlus.push_back(10);
-  vIndPlus.push_back(12);
+  vIndPlus.push_back(12);  vIndPlus.push_back(14);
+  vIndPlus.push_back(16);  vIndPlus.push_back(18);
+  vIndPlus.push_back(20); 
   vIndPlus.push_back(102);  vIndPlus.push_back(104);  vIndPlus.push_back(106);
 
   vIndMinus.push_back(0);  vIndMinus.push_back(2);
   vIndMinus.push_back(4);  vIndMinus.push_back(6);
   vIndMinus.push_back(8);  vIndMinus.push_back(11);
-  vIndMinus.push_back(13);
+  vIndMinus.push_back(13);  vIndMinus.push_back(15);
+  vIndMinus.push_back(17);  vIndMinus.push_back(19);
+  vIndMinus.push_back(21);
   vIndMinus.push_back(101);  vIndMinus.push_back(103);  vIndMinus.push_back(105);
 
 
   JetSys sysPlus[20];
   JetSys sysMinus[20];
   JetSys sysJer;
+  JetSys sysJms;
+  JetSys sysJmr;
   
   JetSys sysJEStotPlus;
   JetSys sysJEStotMinus;
@@ -63,6 +71,8 @@ void getSystematics(int icent = 0) {
     sysMinus[is] = getSystematicsJES(icent, vIndMinus.at(is));
   }
   sysJer = getSystematicsJES(icent, indexJER );
+  sysJms = getSystematicsJES(icent, indexJMS );
+  sysJmr = getSystematicsJES(icent, indexJMR );
   sysUnfPlus = getSystematicsUnf(icent, 1);
   sysUnfMinus = getSystematicsUnf(icent, -1);
   
@@ -106,6 +116,26 @@ void getSystematics(int icent = 0) {
       addSysInQuad(sysJEStotMinus.pbpb[ix], sysJer.pbpb[ix]);
       addSysInQuad(sysJEStotMinus.raa[ix], sysJer.raa[ix]);
     }
+    bool addJMR = 1 ; 
+    if ( addJMR ) { 
+      addSysInQuad(sysJEStotPlus.pp[ix], sysJmr.pp[ix]);
+      addSysInQuad(sysJEStotPlus.pbpb[ix], sysJmr.pbpb[ix]);
+      addSysInQuad(sysJEStotPlus.raa[ix], sysJmr.raa[ix]);
+      addSysInQuad(sysJEStotMinus.pp[ix], sysJmr.pp[ix]);
+      addSysInQuad(sysJEStotMinus.pbpb[ix], sysJmr.pbpb[ix]);
+      addSysInQuad(sysJEStotMinus.raa[ix], sysJmr.raa[ix]);
+    }
+    bool addJMS = 1 ; 
+    if ( addJMS ) { 
+      addSysInQuad(sysJEStotPlus.pp[ix], sysJms.pp[ix]);
+      addSysInQuad(sysJEStotPlus.pbpb[ix], sysJms.pbpb[ix]);
+      addSysInQuad(sysJEStotPlus.raa[ix], sysJms.raa[ix]);
+      addSysInQuad(sysJEStotMinus.pp[ix], sysJms.pp[ix]);
+      addSysInQuad(sysJEStotMinus.pbpb[ix], sysJms.pbpb[ix]);
+      addSysInQuad(sysJEStotMinus.raa[ix], sysJms.raa[ix]);
+    }
+
+
   }  
 
   // Merge Unf into JES
@@ -135,7 +165,7 @@ void getSystematics(int icent = 0) {
     cPlus->cd(ix - lowPtBin + 1);
     for ( int ind =0 ; ind <  vIndPlus.size() ; ind++) {
       if ( vIndPlus[ind] < 100 )   handsomeTH1(sysPlus[ind].pp[ix],30 + ind);  // pp 
-      else                         handsomeTH1(sysPlus[ind].pp[ix], kRed + ind-6);  // pbpb
+      else                         handsomeTH1(sysPlus[ind].pp[ix], kRed + ind-10);  // pbpb
       groomHist(sysPlus[ind].pp[ix]);
       jumSun(0,0,0.24,0);
       if ( ind == 0 )   sysPlus[ind].pp[ix]->Draw("hist");
@@ -150,7 +180,7 @@ void getSystematics(int icent = 0) {
     cPlus->cd(ix - lowPtBin + 1 + nPtPannels);
     for ( int ind =0 ; ind <  vIndPlus.size() ; ind++) {
       if ( vIndPlus[ind] < 100 )   handsomeTH1(sysPlus[ind].pbpb[ix],30 + ind);  // pp 
-      else                         handsomeTH1(sysPlus[ind].pbpb[ix], kRed + ind-6);  // pbpb
+      else                         handsomeTH1(sysPlus[ind].pbpb[ix], kRed + ind-10);  // pbpb
       groomHist(sysPlus[ind].pbpb[ix]);
       jumSun(0,0,0.24,0);
       if ( ind == 0 )   sysPlus[ind].pbpb[ix]->Draw("hist");
@@ -161,7 +191,7 @@ void getSystematics(int icent = 0) {
     cPlus->cd(ix - lowPtBin + 1 + 2*nPtPannels);
     for ( int ind =0 ; ind <  vIndPlus.size() ; ind++) {
       if ( vIndPlus[ind] < 100 )   handsomeTH1(sysPlus[ind].raa[ix],30 + ind);  // pp
-      else                         handsomeTH1(sysPlus[ind].raa[ix], kRed + ind-6);  // pbpb
+      else                         handsomeTH1(sysPlus[ind].raa[ix], kRed + ind-10);  // pbpb
       groomHist(sysPlus[ind].raa[ix]);
       jumSun(0,0,0.24,0);
       if ( ind == 0 )   sysPlus[ind].raa[ix]->Draw("hist");
@@ -184,7 +214,7 @@ void getSystematics(int icent = 0) {
     cMinus->cd(ix - lowPtBin + 1);
     for ( int ind =0 ; ind <  vIndMinus.size() ; ind++) {
       if ( vIndPlus[ind] < 100 )   handsomeTH1(sysMinus[ind].pp[ix],30 + ind);  // pp
-      else                         handsomeTH1(sysMinus[ind].pp[ix], kRed + ind-6);  // pbpb
+      else                         handsomeTH1(sysMinus[ind].pp[ix], kRed + ind-10);  // pbpb
       groomHist(sysMinus[ind].pp[ix]);
       jumSun(0,0,0.24,0);
       if ( ind == 0 )   sysMinus[ind].pp[ix]->Draw("hist");
@@ -197,7 +227,7 @@ void getSystematics(int icent = 0) {
     cMinus->cd(ix - lowPtBin + 1 + nPtPannels);
     for ( int ind =0 ; ind <  vIndMinus.size() ; ind++) {
       if ( vIndPlus[ind] < 100 )   handsomeTH1(sysMinus[ind].pbpb[ix],30 + ind);  // pp
-      else                         handsomeTH1(sysMinus[ind].pbpb[ix], kRed + ind-6);  // pbpb
+      else                         handsomeTH1(sysMinus[ind].pbpb[ix], kRed + ind-10);  // pbpb
       groomHist(sysMinus[ind].pbpb[ix]); 
       jumSun(0,0,0.24,0);
       if ( ind == 0 )   sysMinus[ind].pbpb[ix]->Draw("hist");
@@ -208,7 +238,7 @@ void getSystematics(int icent = 0) {
     cMinus->cd(ix - lowPtBin + 1 + 2*nPtPannels);
     for ( int ind =0 ; ind <  vIndMinus.size() ; ind++) {
       if ( vIndPlus[ind] < 100 )   handsomeTH1(sysMinus[ind].raa[ix],30 + ind);  // pp
-      else                         handsomeTH1(sysMinus[ind].raa[ix], kRed + ind-6);  // pbpb
+      else                         handsomeTH1(sysMinus[ind].raa[ix], kRed + ind-10);  // pbpb
       groomHist(sysMinus[ind].raa[ix]);
       jumSun(0,0,0.24,0);
       if ( ind == 0 )   sysMinus[ind].raa[ix]->Draw("hist");
@@ -391,7 +421,8 @@ void getSystematics(int icent = 0) {
     if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.83,1,20);
     if ( ix==lowPtBin)  drawText("Unf+JES Unc.", 0.37,0.73,1,20);
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
-    
+    gPad->RedrawAxis();
+
     cFinal->cd(ix - lowPtBin + 1 + nPtPannels);
     groomHist(sysFinalPlus.pbpb[ix]);
     groomHist(sysFinalMinus.pbpb[ix]);
@@ -400,6 +431,7 @@ void getSystematics(int icent = 0) {
     jumSun(0,0,0.24,0);
  
     if ( ix==lowPtBin)  drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
+    gPad->RedrawAxis();
 
     cFinal->cd(ix - lowPtBin + 1 + 2*nPtPannels);
     groomHist(sysFinalPlus.raa[ix]);
@@ -408,6 +440,7 @@ void getSystematics(int icent = 0) {
     sysFinalMinus.raa[ix]->Draw("hist same");
     jumSun(0,0,0.24,0);
     if ( ix==lowPtBin)  drawText("#Delta(PbPb/pp)", 0.37,0.83,1,20);
+    gPad->RedrawAxis();
     
   }
   cFinal->SaveAs(Form("pdfsSystematics/cFinal_icent%d.pdf",icent));
