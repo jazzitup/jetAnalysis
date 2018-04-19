@@ -39,17 +39,18 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
   const int maxIter = 20;
   vector<int> vIter;  //2 3 4 6 8 10
   vector<int> color;  //2 3 4 6 8 10
+  vector<int> mstyle;  //2 3 4 6 8 10
 
-  vIter.push_back(1);   color.push_back (41);
-  vIter.push_back(2);   color.push_back (40);
-  vIter.push_back(3);   color.push_back (32);
-  vIter.push_back(4);   color.push_back (kBlue-7);
-  vIter.push_back(5);   color.push_back (43);
-  vIter.push_back(6);    color.push_back (45);
-  vIter.push_back(7);   color.push_back (48);
-  vIter.push_back(8);   color.push_back (47);
-  vIter.push_back(9);     color.push_back (50);
-  vIter.push_back(10);   color.push_back (46);
+  vIter.push_back(1);   color.push_back (32);   mstyle.push_back(33);
+  vIter.push_back(2);   color.push_back (kBlue-7);   mstyle.push_back(29);
+  //  vIter.push_back(3);   color.push_back (32);
+  vIter.push_back(4);   color.push_back (40);   mstyle.push_back(22);
+  //  vIter.push_back(5);   color.push_back (43);
+  vIter.push_back(6);    color.push_back (45);   mstyle.push_back(23);
+  //  vIter.push_back(7);   color.push_back (48);
+  vIter.push_back(8);   color.push_back (47);   mstyle.push_back(24);
+  //  vIter.push_back(9);     color.push_back (50);
+  vIter.push_back(10);   color.push_back (46);   mstyle.push_back(20);
   
   int refId = -1;
   for ( int ii = 0 ; ii< vIter.size() ; ii++) { 
@@ -136,13 +137,14 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
       else if ( optY==2) hmcTruthSq[ipt][in]->SetAxisRange(0.001,0.23999,"X");
       if ( optY==1)    hmcTruthSq[ipt][in]->SetXTitle("m^{2} GeV^{2}");
       else if ( optY==2)    hmcTruthSq[ipt][in]->SetXTitle("m/p_{T}");
-      if ( hmcTruthSq[ipt][in]->Integral()>0) cleverRangeLog(hmcTruthSq[ipt][in],100,0.000001);
+      if ( hmcTruthSq[ipt][in]->Integral()>0) cleverRangeLog(hmcTruthSq[ipt][in],100,0.00001);
       hmcTruthSq[ipt][in]->SetYTitle("Entries");
       handsomeTH1(hmcTruthSq[ipt][in],1);
       handsomeTH1(hmcRawSq[ipt][in],1);
       handsomeTH1(hmcUnfSq[ipt][in],color[in]);
       
       hmcTruthSq[ipt][in]->SetLineStyle(2);
+      hmcUnfSq[ipt][in]->SetMarkerStyle(mstyle[in]);
 
       if ( in == 0 )  {
 	hmcTruthSq[ipt][in]->Draw("hist");
@@ -152,11 +154,11 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
       gPad->SetLogy();
       
     }
-    if ( ipt == lowPtBin )       
-      drawCentrality(kSample, icent, 0.25,0.86,1,24);
-    
-    drawBin(xBin,ipt,"GeV",0.2 + (0.05* (ipt==lowPtBin)), 0.78,1,18);
-  
+    if ( ipt == lowPtBin )    {
+      drawCentrality(kSample, icent, 0.25,0.8,1,24);
+      ATLASLabel(0.25,0.92,"Internal",0.085,0.28);
+    }
+    drawBin(xBin,ipt,"GeV",0.2 + (0.05* (ipt==lowPtBin)), 0.7,1,18);
     
     //    TLegend* leg2 = new TLegend(0.2060963,0.02083363,0.8352797,0.2113352,NULL,"brNDC");
     //    easyLeg(leg2,"N_{Unf.} - N_{Truth}",0.13);
@@ -238,21 +240,22 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
 	else if ( optY==2) hdataRawSq[ipt][in]->SetAxisRange(0.001,0.23999,"X");
 	if ( optY==1)    hdataRawSq[ipt][in]->SetXTitle("m^{2} GeV^{2}");
 	else if ( optY==2)    hdataRawSq[ipt][in]->SetXTitle("m/p_{T}");
-	if ( hdataRawSq[ipt][in]->Integral()>0) cleverRangeLog(hdataRawSq[ipt][in],100,0.000001);
+	if ( hdataRawSq[ipt][in]->Integral()>0) cleverRangeLog(hdataRawSq[ipt][in],100,0.00001);
 	hdataRawSq[ipt][in]->SetYTitle("Entries");
 	handsomeTH1(hdataRawSq[ipt][in],1);
 	handsomeTH1(hdataUnfSq[ipt][in],color[in]);
+	hdataUnfSq[ipt][in]->SetMarkerStyle(mstyle[in]);
 
 	if ( in == 0 )  {
 	  hdataRawSq[ipt][in]->Draw("hist");
 	}
 	hdataUnfSq[ipt][in]->Draw("same e");
-	
+
 	gPad->SetLogy();
 	
       }
-	drawBin(xBin,ipt,"GeV",0.25,0.78,1,18);
-      
+      drawBin(xBin,ipt,"GeV",0.2 + (0.05* (ipt==lowPtBin)), 0.7,1,18);
+	
       if ( ipt == lowPtBin ) {
 	//	drawCentrality(kSample, icent, 0.45,0.86,1,24);
 	TLegend *leg1 = new  TLegend(0.2396099,0.1195233,0.7575544,0.3318368,NULL,"brNDC");
@@ -262,7 +265,8 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
       }
       
       if ( ipt == lowPtBin ) {
-        drawCentrality(kSample, icent, 0.25,0.86,1,24);
+	drawCentrality(kSample, icent, 0.25,0.8,1,24);
+        ATLASLabel(0.25,0.92,"Internal",0.085,0.28);
         TLegend *leg1 = new TLegend(0.1372267,0.04771138,0.6589362,0.4161378,NULL,"brNDC");
         easyLeg(leg1,"Unfolded",0.08);
         for (int in = 0; in < int(vIter.size()) ; in++)  {
