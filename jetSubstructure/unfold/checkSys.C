@@ -6,6 +6,18 @@
 #include "../JssUtils.h"
 #include "unfoldingUtil.h"
 
+void groomHist(TH1D* h1) {
+  h1->SetAxisRange(0.001,0.23,"X");
+  h1->SetAxisRange(-0.55,0.55,"Y");
+  h1->SetXTitle("m/p_{T}");
+  h1->SetYTitle("Uncertainty");
+  h1->SetNdivisions(505,"X");
+  h1->SetNdivisions(505,"Y");
+  fixedFontHist(h1,3,3,20);
+  h1->GetXaxis()->SetTitleOffset(7);
+  h1->GetYaxis()->SetTitleOffset(7);
+}
+
 struct JetSys {
   TH1D* pp[20];
   TH1D* pbpb[20];
@@ -18,7 +30,8 @@ TH1D* getSysJES(int kSample= kPP, int icent = 0, int ix=7, int nSys=-1);
 void addSysInQuad(TH1D* sysTot=0, TH1D* sys1=0);
 
 
-void checkJmrSys(int icent=0) {
+void checkSys(int nSys=200) { 
+
   int optX =1 ;
   int optY =2 ;
 
@@ -37,58 +50,41 @@ void checkJmrSys(int icent=0) {
   int nPtPannels = highPtBin-lowPtBin+1;
 
   TH1D* hSysApp[30];
-  TH1D* hSysApbpb[30];
-  TH1D* hSysAraa[30];
+  TH1D* hSysApbpb[30][8]; // pt, centrality
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
-    hSysApp[ix]   = getSysJES(kPP,     0  , ix, 100);
-    hSysApbpb[ix] = getSysJES(kPbPb, icent, ix, 100);
-    
-    hSysAraa[ix] = (TH1D*)hSysApbpb[ix]->Clone(Form("sysRaa_%s",hSysApbpb[ix]->GetName()) );
-    hSysAraa[ix]->Reset();
-    for ( int xx = 1 ; xx<= hSysApbpb[ix]->GetNbinsX() ; xx++) {
-      double y1 = hSysApbpb[ix]->GetBinContent(xx);
-      double y2 = hSysApp[ix]->GetBinContent(xx);
-      hSysAraa[ix]->SetBinContent(xx,  (y1+1.)/(y2+1.)-1);
+    hSysApp[ix]   = getSysJES(kPP,     0  , ix, nSys);
+    for ( int icent=0; icent<=6 ; icent++) { 
+      hSysApbpb[ix][icent] = getSysJES(kPbPb, icent, ix, nSys);
     }
+    
   }
-
+  
   bool savePic = 1; 
   
   TCanvas* cA;    
   if (savePic) { 
-    cA =  new TCanvas(Form("sysJES_icent%d",icent),"",800,400);
-    makeMultiPanelCanvas(cA,nPtPannels,2);
+    cA =  new TCanvas(Form("sysJES"),"",960,700);
+    makeMultiPanelCanvas(cA,nPtPannels,8,.01, .01,0.25,0.25);
   }
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     if (savePic)    cA->cd(ix - lowPtBin + 1);
     handsomeTH1(hSysApp[ix],1);
-    handsomeTH1(hSysApbpb[ix],1);
-    hSysApp[ix]->SetAxisRange(0.001,0.23,"X");
-    hSysApp[ix]->SetAxisRange(-.5,.5,"Y");
-    hSysApp[ix]->SetXTitle("m/p_{T}");
-    hSysApp[ix]->SetYTitle("Ratio");
-    hSysApp[ix]->SetNdivisions(505,"X");
-    hSysApp[ix]->SetNdivisions(505,"Y");
-    fixedFontHist(hSysApp[ix],1.2,1.4,20);
-    hSysApp[ix]->Draw("" );
-    if ( ix == lowPtBin)  drawCentrality(kPP, 0, 0.25,0.83,1,20);
-    if ( ix== lowPtBin) drawBin(xBin,ix,"GeV",0.25,0.70,1,16);
-    else drawBin(xBin,ix,"GeV",0.25 - 0.15,0.70,1,16);
+    groomHist(hSysApp[ix]); 
+    hSysApp[ix]->Draw("hist");
+    if ( ix == lowPtBin)  drawCentrality(kPP, 0, 0.3,0.78,1,20);
+    if ( ix== lowPtBin) drawBin(xBin,ix,"GeV",0.25,0.15,1,16);
+    else drawBin(xBin,ix,"GeV",0.25 - 0.15,0.15,1,16);
     jumSun(0,0,0.24,0);
-
-    cA->cd(ix - lowPtBin + 1 + nPtPannels);
-    hSysApbpb[ix]->SetAxisRange(0.001,0.23,"X");
-    hSysApbpb[ix]->SetAxisRange(-.5,.5,"Y");
-    hSysApbpb[ix]->SetXTitle("m/p_{T}");
-    hSysApbpb[ix]->SetYTitle("Ratio");
-    hSysApbpb[ix]->SetNdivisions(505,"X");
-    hSysApbpb[ix]->SetNdivisions(505,"Y");
-    fixedFontHist(hSysApbpb[ix],1.2,1.4,20);
-    hSysApbpb[ix]->Draw("");
-    if ( ix == lowPtBin)    drawCentrality(kPbPb, icent, 0.25,0.8,1,20);
-    jumSun(0,0,0.24,0);
-
+    
+    for ( int icent=0; icent<=6 ; icent++) {
+      cA->cd(ix - lowPtBin + 1 + nPtPannels*(1+icent));
+      handsomeTH1(hSysApbpb[ix][icent],1);
+      groomHist(hSysApbpb[ix][icent]); 
+      hSysApbpb[ix][icent]->Draw("hist");
+      if ( ix == lowPtBin)   	drawCentrality(kPbPb, icent, 0.3,0.78,1,20);
+      jumSun(0,0,0.24,0);
+    }
 
     //    if ( ix == lowPtBin) {
     //      TLegend *leg1 = new TLegend(0.2355436,0.2339862,0.758156,0.4051428,NULL,"brNDC");
@@ -99,14 +95,7 @@ void checkJmrSys(int icent=0) {
     //    }
 
   }
-  if (savePic)  cA->SaveAs(Form("pdfsSystematics/sysJES_icent%d_massVar.pdf",icent));
-  
-  JetSys ret;
-  for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
-    ret.pp[ix]   =  hSysApp[ix];
-    ret.pbpb[ix] =  hSysApbpb[ix];
-    ret.raa[ix]  = hSysAraa[ix];
-  }
+  if (savePic)  cA->SaveAs(Form("pdfsSystematics/sysJES_nSys%d.pdf",nSys));
 
   //  return ret;
 }
