@@ -173,8 +173,9 @@ void getSystematics(int icent = 0) {
  
       if ( ix==lowPtBin) legPlus->AddEntry(sysPlus[ind].pp[ix], getSysName( vIndPlus[ind] ).Data(),"l" );
     } 
-    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.83,1,20);
-    if ( ix==lowPtBin)  drawText("Plus variation", 0.37,0.73,1,20);
+    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.25);
+    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
+    if ( ix==lowPtBin)  drawText("Plus variation", 0.37,0.7,1,20);
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
     
     cPlus->cd(ix - lowPtBin + 1 + nPtPannels);
@@ -220,8 +221,9 @@ void getSystematics(int icent = 0) {
       if ( ind == 0 )   sysMinus[ind].pp[ix]->Draw("hist");
       else       sysMinus[ind].pp[ix]->Draw("same hist");
     } 
-    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.83,1,20);
-    if ( ix==lowPtBin)  drawText("Minus variation", 0.37,0.73,1,20);
+    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.25);
+    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
+    if ( ix==lowPtBin)  drawText("Minus variation", 0.37,0.7,1,20);
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
     
     cMinus->cd(ix - lowPtBin + 1 + nPtPannels);
@@ -258,8 +260,9 @@ void getSystematics(int icent = 0) {
     sysJer.pp[ix]->Draw("hist");
     jumSun(0,0,0.24,0);
     
-    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.83,1,20);
-    if ( ix==lowPtBin)  drawText("JER variation", 0.37,0.73,1,20);
+    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.25);
+    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
+    if ( ix==lowPtBin)  drawText("JER variation", 0.37,0.7,1,20);
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
     
     cJer->cd(ix - lowPtBin + 1 + nPtPannels);
@@ -310,8 +313,9 @@ void getSystematics(int icent = 0) {
     sysJEStotMinus.pp[ix]->Draw("hist same");
     jumSun(0,0,0.24,0);
     
-    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.83,1,20);
-    if ( ix==lowPtBin)  drawText("JES total", 0.37,0.73,1,20);
+    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.25);
+    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
+    if ( ix==lowPtBin)  drawText("JES variation", 0.37,0.7,1,20);
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
     
     cJesTot->cd(ix - lowPtBin + 1 + nPtPannels);
@@ -364,8 +368,10 @@ void getSystematics(int icent = 0) {
     sysUnfMinus.pp[ix]->Draw("hist same");
     jumSun(0,0,0.24,0);
     
-    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.83,1,20);
-    if ( ix==lowPtBin)  drawText("Unfolding Unc.", 0.37,0.73,1,20);
+    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.25);
+    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
+    if ( ix==lowPtBin)  drawText("Unfolding Uncertainty", 0.37,0.7,1,20);
+
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
     
     cUnf->cd(ix - lowPtBin + 1 + nPtPannels);
@@ -418,8 +424,10 @@ void getSystematics(int icent = 0) {
     sysFinalMinus.pp[ix]->Draw("hist same");
     jumSun(0,0,0.24,0);
     
-    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.83,1,20);
-    if ( ix==lowPtBin)  drawText("Unf+JES Unc.", 0.37,0.73,1,20);
+    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.25);
+    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
+    if ( ix==lowPtBin)  drawText("Total uncertainty", 0.37,0.7,1,20);
+
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
     gPad->RedrawAxis();
 

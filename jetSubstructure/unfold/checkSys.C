@@ -10,12 +10,12 @@ void groomHist(TH1D* h1) {
   h1->SetAxisRange(0.001,0.23,"X");
   h1->SetAxisRange(-0.55,0.55,"Y");
   h1->SetXTitle("m/p_{T}");
-  h1->SetYTitle("Uncertainty");
+  h1->SetYTitle("Unc.");
   h1->SetNdivisions(505,"X");
   h1->SetNdivisions(505,"Y");
   fixedFontHist(h1,3,3,20);
-  h1->GetXaxis()->SetTitleOffset(7);
-  h1->GetYaxis()->SetTitleOffset(7);
+  h1->GetXaxis()->SetTitleOffset(5);
+  h1->GetYaxis()->SetTitleOffset(5);
 }
 
 struct JetSys {
@@ -64,16 +64,17 @@ void checkSys(int nSys=200) {
   
   TCanvas* cA;    
   if (savePic) { 
-    cA =  new TCanvas(Form("sysJES"),"",960,700);
-    makeMultiPanelCanvas(cA,nPtPannels,8,.01, .01,0.25,0.25);
+    cA =  new TCanvas(Form("sysJES"),"",960,900);
+    makeMultiPanelCanvas(cA,nPtPannels,8,.01, .01,0.45,0.45);
   }
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     if (savePic)    cA->cd(ix - lowPtBin + 1);
     handsomeTH1(hSysApp[ix],1);
     groomHist(hSysApp[ix]); 
     hSysApp[ix]->Draw("hist");
-    if ( ix == lowPtBin)  drawCentrality(kPP, 0, 0.3,0.78,1,20);
-    if ( ix== lowPtBin) drawBin(xBin,ix,"GeV",0.25,0.15,1,16);
+    if ( ix == lowPtBin)  ATLASLabel(0.5,0.8,"Internal",0.15,0.2);
+    if ( ix == lowPtBin+1)  drawCentrality(kPP, 0, 0.1,0.8,1,20);
+    if ( ix== lowPtBin) drawBin(xBin,ix,"GeV",0.5,0.15,1,16);
     else drawBin(xBin,ix,"GeV",0.25 - 0.15,0.15,1,16);
     jumSun(0,0,0.24,0);
     
@@ -82,7 +83,7 @@ void checkSys(int nSys=200) {
       handsomeTH1(hSysApbpb[ix][icent],1);
       groomHist(hSysApbpb[ix][icent]); 
       hSysApbpb[ix][icent]->Draw("hist");
-      if ( ix == lowPtBin)   	drawCentrality(kPbPb, icent, 0.3,0.78,1,20);
+      if ( ix == lowPtBin+1)  drawCentrality(kPbPb, icent, 0.1,0.8,1,20);
       jumSun(0,0,0.24,0);
     }
 

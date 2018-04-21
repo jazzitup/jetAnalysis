@@ -29,7 +29,7 @@ using std::endl;
 #include "unfoldingUtil.h"
 #include "systematicsTool.h"
 
-double fracStst=01;
+double fracStst=0001;
 
 bool useFullMC = false;
 
@@ -359,13 +359,17 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TH2D* htemp2 = new TH2D("htemp2",";Truth p_{T};Truth m/p_{T};",100,126,800,100,0,0.4);
   //  handsomeTH1(htemp2,1);
   htemp2->GetXaxis()->SetMoreLogLabels();
-  htemp2->DrawCopy();
+  htemp2->SetAxisRange(0.7,1.3,"Z");
+  htemp2->DrawCopy("colz");
+  hJES->SetAxisRange(0.7,1.3,"Z");
   hJES->Draw("colz same");
   drawCentrality(kSample,icent,0.55,0.87,1,20);
   drawText("Jet energy scale",0.5,0.8,1,20);
   ATLASLabel(0.2,0.87,"Internal",0.05,0.17);
   cJESJER->cd(2);
-  htemp2->DrawCopy();
+  htemp2->SetAxisRange(0,0.3,"Z");
+  htemp2->DrawCopy("colz");
+  hJER->SetAxisRange(0,0.3,"Z");
   hJER->Draw("colz same");
   drawCentrality(kSample,icent,0.55,0.87,1,20);
   drawText("Jet energy resolution",0.4,0.8,1,20);

@@ -85,6 +85,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
   TH1D* hmcRawSq[20][maxIter]; 
   TH1D* hmcRatioSq[20][maxIter];
 
+  TH1D* hraioMCtemp[20][maxIter];
   TH1D* hdataUnfSq[30][maxIter]; 
   TH1D* hdataRawSq[30][maxIter]; 
   TH1D* hdataRatioSq[30][maxIter];
@@ -143,7 +144,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
       handsomeTH1(hmcRawSq[ipt][in],1);
       handsomeTH1(hmcUnfSq[ipt][in],color[in]);
       
-      hmcTruthSq[ipt][in]->SetLineStyle(2);
+      hmcTruthSq[ipt][in]->SetLineStyle(6);
       hmcUnfSq[ipt][in]->SetMarkerStyle(mstyle[in]);
 
       if ( in == 0 )  {
@@ -190,7 +191,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
       if ( optY == 2)  jumSun(0,1,0.3,1);
     }
     if ( ipt == lowPtBin) 
-      drawText("Unfolded/Truth", 0.20, 0.9,  1);
+      drawText("Unfolded/Truth", 0.22, 0.9,  1);
     
     //    drawText(Form("Ratio to Iter. %d",vIter.at(refId)), 0.25, 0.9);
   
@@ -229,6 +230,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
       else if ( vIter[in] == 3 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%drd iter.",vIter[in]));
       else  leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dth iter.",vIter[in]));
     }
+    leg1->AddEntry( hmcTruthSq[lowPtBin][0], "PYTHIA","l");
     leg1->Draw();
 
 
@@ -254,7 +256,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
 	gPad->SetLogy();
 	
       }
-      hmcUnfSq[ipt][0]->Draw("same hist");
+      hmcTruthSq[ipt][0]->Draw("same hist");
       drawBin(xBin,ipt,"GeV",0.2 + (0.05* (ipt==lowPtBin)), 0.7,1,18);
 	
       if ( ipt == lowPtBin ) {
@@ -284,26 +286,41 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
 	if ( in ==refId  ) continue;
 	hdataRatioSq[ipt][in] = (TH1D*)hdataUnfSq[ipt][in]->Clone(Form("dataRatioSq_ix%d_in%d",ipt,in));
 	hdataRatioSq[ipt][in]->Divide(hdataUnfSq[ipt][refId]);
+
 	hdataRatioSq[ipt][in]->SetAxisRange(0.45,1.55,"Y");
 	hdataRatioSq[ipt][in]->SetAxisRange(0.001,0.2399,"X");
 	if ( optY==1)  hdataRatioSq[ipt][in]->SetAxisRange(0.00,100,"X");
 	hdataRatioSq[ipt][in]->SetYTitle("Ratio");
-	//	hdataRatioSq[ipt][in]->SetYTitle("Ratio to 4th iter.");
 	hdataRatioSq[ipt][in]->SetNdivisions(505,"X");
 	hdataRatioSq[ipt][in]->SetNdivisions(505,"Y");
 	fixedFontHist(hdataRatioSq[ipt][in],2.5,2.5,20);
-	if ( drawFirst)  { 	hdataRatioSq[ipt][in]->Draw();
+	if ( drawFirst)  { 	
+	  hdataRatioSq[ipt][in]->Draw();
+	  
+	  hraioMCtemp[ipt][refId] = (TH1D*)hmcTruthSq[ipt][refId]->Clone(Form("hraioMCtemp_%d_%d",ipt,0));
+	  hraioMCtemp[ipt][refId]->Divide(hdataUnfSq[ipt][refId]);
+	  handsomeTH1(hraioMCtemp[ipt][refId],1);
+	  hraioMCtemp[ipt][refId]->SetLineWidth(2);
+	  hraioMCtemp[ipt][refId]->SetAxisRange(0.55,1.45,"Y");
+	  hraioMCtemp[ipt][refId]->Draw("hist same");
+      
 	  drawFirst=false;  
 	}
 	else   hdataRatioSq[ipt][in]->Draw("same");
 	if ( optY == 2)  jumSun(0,1,0.3,1);
+	
       }
-      //      if (ipt == lowPtBin)   {
-      drawText("Ratio to", 0.20, 0.9,  1);
-      drawText(Form("reference iter. (%d)",vIter.at(refId)), 0.20, 0.82, 1);
-	//      }
+      
+      
+      if (ipt == lowPtBin)   {
+	drawText("Ratio to", 0.22, 0.9,  1);
+	drawText(Form("reference iter. (%d)",vIter.at(refId)), 0.22, 0.82, 1);
+      }
+      
     }
+    
     //    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
+    c2->Modified();
     c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
   }
 

@@ -66,8 +66,8 @@ int optX=1; int optY=2;
       hStat[ipt]->SetBinError( in, 0.0000001);
       hDevi[ipt]->SetBinError( in, 0.0000001);
     }    
-    handsomeTH1(hStat[ipt],4,1,24);
-    handsomeTH1(hDevi[ipt],2,1,24);
+    handsomeTH1(hStat[ipt],4,1,26);
+    handsomeTH1(hDevi[ipt],2,1,32);
 
     //    int fScale = 5;
     //    if ( ipt > lowPtBin + 2)  hStat[ipt]->Scale(1./fScale);
@@ -80,14 +80,15 @@ int optX=1; int optY=2;
 
 
     if ( ipt == lowPtBin ) {
-      drawCentrality(kSample, icent, 0.25,0.86,1,24);
-      TLegend *leg1 = new TLegend(0.2041735,0.52576,0.7232587,0.7405867,NULL,"brNDC");
-      easyLeg(leg1,Form("%.2f < m/p_{T} < %.2f",(float)yBin[massBin-1], (float)yBin[massBin]));
+      drawCentrality(kSample, icent, 0.38,0.86,1,24);
+      TLegend *leg1 = new TLegend(0.3830109,0.5370667,0.9199772,0.74624,NULL,"brNDC");
+      easyLeg(leg1,Form("%.2f < m/p_{T} < %.2f",(float)yBin[massBin-1], (float)yBin[massBin]),0.07);
       leg1->AddEntry(hStat[ipt], "Stat. uncertainty","p");
       leg1->AddEntry(hDevi[ipt], "|y_{N} - y_{N-1}| / y_{N}","p");
       leg1->Draw();
+      ATLASLabel(0.2,0.93,"Internal",0.08,0.28);
     }
-    drawBin(xBin,ipt,"GeV",0.16 + (0.05* (ipt==lowPtBin)), 0.78,1,16);
+    drawBin(xBin,ipt,"GeV",0.33 + (0.05* (ipt==lowPtBin)), 0.78,1,20);
     //    if ( ipt > lowPtBin + 2) 
       //      drawText(Form("Stat. Unc scaled by 1/%d",fScale), 0.16 + (0.05* (ipt==lowPtBin)), 0.3,1,16);
     jumSun(0,0,49,0);
