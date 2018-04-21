@@ -3,7 +3,7 @@
 
 void groomHist(TH1D* h1) {
   h1->SetAxisRange(0.001,0.23,"X");
-  h1->SetAxisRange(-0.35,0.35,"Y");
+  h1->SetAxisRange(-0.55,0.55,"Y");
   h1->SetXTitle("m/p_{T}");
   h1->SetYTitle("Relative Uncertainty");
   h1->SetNdivisions(505,"X");
@@ -12,7 +12,7 @@ void groomHist(TH1D* h1) {
 
 }
 
-void getSystematics(int icent = 0) {
+void test(int icent = 0) {
   int optX = 1;  int optY = 2;
   int nXbins;  double xBin[30];
   getXbin(nXbins, xBin, optX);
@@ -54,6 +54,9 @@ void getSystematics(int icent = 0) {
   JetSys sysJer;
   JetSys sysJms;
   JetSys sysJmr;
+  JetSys sysJerInv;
+  JetSys sysJmsInv;
+  JetSys sysJmrInv;
   
   JetSys sysJEStotPlus;
   JetSys sysJEStotMinus;
@@ -70,9 +73,13 @@ void getSystematics(int icent = 0) {
     sysPlus[is] = getSystematicsJES(icent, vIndPlus.at(is));
     sysMinus[is] = getSystematicsJES(icent, vIndMinus.at(is));
   }
-  sysJer = getSystematicsJES(icent, indexJER );
-  sysJms = getSystematicsJES(icent, indexJMS );
-  sysJmr = getSystematicsJES(icent, indexJMR );
+  sysJer    = getSystematicsJES(icent, indexJER );
+  sysJerInv = getSystematicsJES(icent, indexJER, -1 );
+  sysJms    = getSystematicsJES(icent, indexJMS );
+  sysJmsInv = getSystematicsJES(icent, indexJMS, -1 );
+  sysJmr    = getSystematicsJES(icent, indexJMR );
+  sysJmrInv = getSystematicsJES(icent, indexJMR, -1 );
+
   sysUnfPlus = getSystematicsUnf(icent, 1);
   sysUnfMinus = getSystematicsUnf(icent, -1);
   
@@ -90,71 +97,79 @@ void getSystematics(int icent = 0) {
     sysJEStotMinus.pp[ix] = (TH1D*)sysMinus[0].pp[ix]->Clone(Form("sys_jes_minus_pp_ix%d",ix));
     sysJEStotMinus.pbpb[ix] = (TH1D*)sysJEStotMinus.pp[ix]->Clone(Form("sys_jes_minus_pbpb_ix%d",ix));
     sysJEStotMinus.raa[ix] = (TH1D*)sysJEStotMinus.pp[ix]->Clone(Form("sys_jes_minus_raa_ix%d",ix));
-    sysJEStotPlus.pp[ix]->Reset();
-    sysJEStotPlus.pbpb[ix]->Reset();
-    sysJEStotPlus.raa[ix]->Reset();
-    sysJEStotMinus.pp[ix]->Reset();
-    sysJEStotMinus.pbpb[ix]->Reset();
-    sysJEStotMinus.raa[ix]->Reset();
-  }
-  
-  for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
-    for ( int ind =0 ; ind <  vIndPlus.size() ; ind++) {
-      addSysInQuad(sysJEStotPlus.pp[ix], sysPlus[ind].pp[ix]);
-      addSysInQuad(sysJEStotPlus.pbpb[ix], sysPlus[ind].pbpb[ix]);
-      addSysInQuad(sysJEStotPlus.raa[ix], sysPlus[ind].raa[ix]);
-      addSysInQuad(sysJEStotMinus.pp[ix], sysMinus[ind].pp[ix]);
-      addSysInQuad(sysJEStotMinus.pbpb[ix], sysMinus[ind].pbpb[ix]);
-      addSysInQuad(sysJEStotMinus.raa[ix], sysMinus[ind].raa[ix]);
-    }
-    bool addJER = 1 ; 
-    if ( addJER ) { 
-      addSysInQuad(sysJEStotPlus.pp[ix], sysJer.pp[ix]);
-      addSysInQuad(sysJEStotPlus.pbpb[ix], sysJer.pbpb[ix]);
-      addSysInQuad(sysJEStotPlus.raa[ix], sysJer.raa[ix]);
-      addSysInQuad(sysJEStotMinus.pp[ix], sysJer.pp[ix]);
-      addSysInQuad(sysJEStotMinus.pbpb[ix], sysJer.pbpb[ix]);
-      addSysInQuad(sysJEStotMinus.raa[ix], sysJer.raa[ix]);
-    }
-    bool addJMR = 1 ; 
-    if ( addJMR ) { 
-      addSysInQuad(sysJEStotPlus.pp[ix], sysJmr.pp[ix]);
-      addSysInQuad(sysJEStotPlus.pbpb[ix], sysJmr.pbpb[ix]);
-      addSysInQuad(sysJEStotPlus.raa[ix], sysJmr.raa[ix]);
-      addSysInQuad(sysJEStotMinus.pp[ix], sysJmr.pp[ix]);
-      addSysInQuad(sysJEStotMinus.pbpb[ix], sysJmr.pbpb[ix]);
-      addSysInQuad(sysJEStotMinus.raa[ix], sysJmr.raa[ix]);
-    }
-    bool addJMS = 1 ; 
-    if ( addJMS ) { 
-      addSysInQuad(sysJEStotPlus.pp[ix], sysJms.pp[ix]);
-      addSysInQuad(sysJEStotPlus.pbpb[ix], sysJms.pbpb[ix]);
-      addSysInQuad(sysJEStotPlus.raa[ix], sysJms.raa[ix]);
-      addSysInQuad(sysJEStotMinus.pp[ix], sysJms.pp[ix]);
-      addSysInQuad(sysJEStotMinus.pbpb[ix], sysJms.pbpb[ix]);
-      addSysInQuad(sysJEStotMinus.raa[ix], sysJms.raa[ix]);
-    }
-
-
-  }  
-
-  // Merge Unf into JES
-  for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     sysFinalPlus.pp[ix] = (TH1D*)sysJEStotPlus.pp[ix]->Clone(Form("sys_finalPlus_pp_ix%d",ix));
     sysFinalPlus.pbpb[ix] = (TH1D*)sysJEStotPlus.pbpb[ix]->Clone(Form("sys_finalPlus_pbpb_ix%d",ix));
     sysFinalPlus.raa[ix] = (TH1D*)sysJEStotPlus.raa[ix]->Clone(Form("sys_finalPlus_raa_ix%d",ix));
     sysFinalMinus.pp[ix] = (TH1D*)sysJEStotMinus.pp[ix]->Clone(Form("sys_finalMinus_pp_ix%d",ix));
     sysFinalMinus.pbpb[ix] = (TH1D*)sysJEStotMinus.pbpb[ix]->Clone(Form("sys_finalMinus_pbpb_ix%d",ix));
     sysFinalMinus.raa[ix] = (TH1D*)sysJEStotMinus.raa[ix]->Clone(Form("sys_finalMinus_raa_ix%d",ix));
-    addSysInQuad(sysFinalPlus.pp[ix], sysUnfPlus.pp[ix]);
-    addSysInQuad(sysFinalPlus.pbpb[ix], sysUnfPlus.pbpb[ix]);
-    addSysInQuad(sysFinalPlus.raa[ix], sysUnfPlus.raa[ix]);
-    addSysInQuad(sysFinalMinus.pp[ix], sysUnfMinus.pp[ix]);
-    addSysInQuad(sysFinalMinus.pbpb[ix], sysUnfMinus.pbpb[ix]);
-    addSysInQuad(sysFinalMinus.raa[ix], sysUnfMinus.raa[ix]);
+  }
+
+
+  // Merge JES 
+  resetJetSys( sysJEStotPlus, lowPtBin, highPtBin) ;
+  resetJetSys( sysJEStotMinus, lowPtBin, highPtBin) ;
+  for ( int ind =0 ; ind <  vIndPlus.size() ; ind++) {
+    addSysInQuad3(sysJEStotPlus, sysPlus[ind], lowPtBin, highPtBin);
+    addSysInQuad3(sysJEStotMinus, sysMinus[ind], lowPtBin, highPtBin);
   }
   
+  
+  // Merge everything! 
+  bool addJES = 1 ; 
+  bool addUnf = 1 ;
+  bool addJER = 1 ; 
+  bool addJMR = 1 ; 
+  bool addJMS = 1 ; 
 
+  resetJetSys( sysFinalPlus, lowPtBin, highPtBin) ;
+  resetJetSys( sysFinalMinus, lowPtBin, highPtBin) ;
+  
+  if ( addJES ) { 
+    addSysInQuad3(sysFinalPlus, sysJEStotPlus, lowPtBin, highPtBin) ;
+    addSysInQuad3(sysFinalMinus, sysJEStotMinus, lowPtBin, highPtBin) ;
+  }
+  if ( addUnf) { 
+    addSysInQuad3(sysFinalPlus, sysUnfPlus, lowPtBin, highPtBin) ;
+    addSysInQuad3(sysFinalMinus, sysUnfMinus, lowPtBin, highPtBin) ;
+  }
+  if ( addJER ) { 
+    addSysInQuad3(sysFinalPlus, sysJer, lowPtBin, highPtBin) ;
+    addSysInQuad3(sysFinalMinus, sysJer, lowPtBin, highPtBin) ;
+  }
+  if ( addJMR ) { 
+    addSysInQuad3(sysFinalPlus, sysJmr, lowPtBin, highPtBin) ;
+    addSysInQuad3(sysFinalMinus, sysJmr, lowPtBin, highPtBin) ;
+  }
+  if ( addJMS ) { 
+    addSysInQuad3(sysFinalPlus, sysJms, lowPtBin, highPtBin) ;
+    addSysInQuad3(sysFinalMinus, sysJms, lowPtBin, highPtBin) ;
+  }
+  
+  for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {    
+    handsomeTH1( sysJms.pp[ix], kGreen);
+    handsomeTH1( sysJms.pbpb[ix], kGreen);
+    handsomeTH1( sysJms.raa[ix], kGreen);
+    handsomeTH1( sysJmsInv.pp[ix], kGreen);
+    handsomeTH1( sysJmsInv.pbpb[ix], kGreen);
+    handsomeTH1( sysJmsInv.raa[ix], kGreen);
+
+    handsomeTH1( sysJmr.pp[ix], kRed);
+    handsomeTH1( sysJmr.pbpb[ix], kRed);
+    handsomeTH1( sysJmr.raa[ix], kRed);
+    handsomeTH1( sysJmrInv.pp[ix], kRed);
+    handsomeTH1( sysJmrInv.pbpb[ix], kRed);
+    handsomeTH1( sysJmrInv.raa[ix], kRed);
+
+    handsomeTH1( sysJer.pp[ix], kBlue);
+    handsomeTH1( sysJer.pbpb[ix], kBlue);
+    handsomeTH1( sysJer.raa[ix], kBlue);
+    handsomeTH1( sysJerInv.pp[ix], kBlue);
+    handsomeTH1( sysJerInv.pbpb[ix], kBlue);
+    handsomeTH1( sysJerInv.raa[ix], kBlue);
+
+  }
+  
   
   TCanvas* cPlus = new TCanvas("cPlus","",1200,800);
   makeMultiPanelCanvas(cPlus,nPtPannels,3, 0.0, 0.01, 0.3, 0.2, 0.05);
@@ -255,7 +270,6 @@ void getSystematics(int icent = 0) {
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     cJer->cd(ix - lowPtBin + 1);
-    handsomeTH1(sysJer.pp[ix],49);
     groomHist(sysJer.pp[ix]);
     sysJer.pp[ix]->Draw("hist");
     jumSun(0,0,0.24,0);
@@ -266,7 +280,6 @@ void getSystematics(int icent = 0) {
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
     
     cJer->cd(ix - lowPtBin + 1 + nPtPannels);
-    handsomeTH1(sysJer.pbpb[ix],49);
     groomHist(sysJer.pbpb[ix]); 
     sysJer.pbpb[ix]->Draw("hist");
     jumSun(0,0,0.24,0);
@@ -274,7 +287,6 @@ void getSystematics(int icent = 0) {
     if ( ix==lowPtBin)  drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
 
     cJer->cd(ix - lowPtBin + 1 + 2*nPtPannels);
-    handsomeTH1(sysJer.raa[ix],49);
     groomHist(sysJer.raa[ix]);
     sysJer.raa[ix]->Draw("hist");
     if ( ix==lowPtBin)  drawText("#Delta(PbPb/pp)", 0.37,0.83,1,20);
@@ -300,12 +312,12 @@ void getSystematics(int icent = 0) {
     handsomeTH1(sysJEStotMinus.pbpb[ix],kAzure+1);
     handsomeTH1(sysJEStotPlus.raa[ix],kAzure+1);
     handsomeTH1(sysJEStotMinus.raa[ix],kAzure+1);
-    sysJEStotPlus.pp[ix]->SetFillColor(kAzure);
-    sysJEStotMinus.pp[ix]->SetFillColor(kAzure);
-    sysJEStotPlus.pbpb[ix]->SetFillColor(kAzure);
-    sysJEStotMinus.pbpb[ix]->SetFillColor(kAzure);
-    sysJEStotPlus.raa[ix]->SetFillColor(kAzure);
-    sysJEStotMinus.raa[ix]->SetFillColor(kAzure);
+    //    sysJEStotPlus.pp[ix]->SetFillColor(kAzure);
+    //    sysJEStotMinus.pp[ix]->SetFillColor(kAzure);
+    //    sysJEStotPlus.pbpb[ix]->SetFillColor(kAzure);
+    //    sysJEStotMinus.pbpb[ix]->SetFillColor(kAzure);
+    //    sysJEStotPlus.raa[ix]->SetFillColor(kAzure);
+    //    sysJEStotMinus.raa[ix]->SetFillColor(kAzure);
 
     groomHist(sysJEStotPlus.pp[ix]);
     groomHist(sysJEStotMinus.pp[ix]);
@@ -349,18 +361,12 @@ void getSystematics(int icent = 0) {
     //    sysUnfMinus.pbpb[ix]->Scale(-1);
     sysUnfMinus.raa[ix]->Scale(-1);
 
-    handsomeTH1(sysUnfPlus.pp[ix],kYellow+1);
-    handsomeTH1(sysUnfMinus.pp[ix],kYellow+1);
-    handsomeTH1(sysUnfPlus.pbpb[ix],kYellow+1);
-    handsomeTH1(sysUnfMinus.pbpb[ix],kYellow+1);
-    handsomeTH1(sysUnfPlus.raa[ix],kYellow+1);
-    handsomeTH1(sysUnfMinus.raa[ix],kYellow+1);
-    sysUnfPlus.pp[ix]->SetFillColor(kYellow);
-    sysUnfMinus.pp[ix]->SetFillColor(kYellow);
-    sysUnfPlus.pbpb[ix]->SetFillColor(kYellow);
-    sysUnfMinus.pbpb[ix]->SetFillColor(kYellow);
-    sysUnfPlus.raa[ix]->SetFillColor(kYellow);
-    sysUnfMinus.raa[ix]->SetFillColor(kYellow);
+    handsomeTH1(sysUnfPlus.pp[ix],kMagenta+1);
+    handsomeTH1(sysUnfMinus.pp[ix],kMagenta+1);
+    handsomeTH1(sysUnfPlus.pbpb[ix],kMagenta+1);
+    handsomeTH1(sysUnfMinus.pbpb[ix],kMagenta+1);
+    handsomeTH1(sysUnfPlus.raa[ix],kMagenta+1);
+    handsomeTH1(sysUnfMinus.raa[ix],kMagenta+1);
 
     groomHist(sysUnfPlus.pp[ix]);
     groomHist(sysUnfMinus.pp[ix]);
@@ -396,7 +402,7 @@ void getSystematics(int icent = 0) {
 
 
 
-  TCanvas* cFinal = new TCanvas("cFinal","",1200,800);
+  TCanvas* cFinal = new TCanvas("cFinal","",1200,600);
   makeMultiPanelCanvas(cFinal,nPtPannels,3, 0.0, 0.01, 0.3, 0.2, 0.05);
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
@@ -405,23 +411,45 @@ void getSystematics(int icent = 0) {
     sysFinalMinus.pbpb[ix]->Scale(-1);
     sysFinalMinus.raa[ix]->Scale(-1);
 
-    handsomeTH1(sysFinalPlus.pp[ix],kGreen-7+1);
-    handsomeTH1(sysFinalMinus.pp[ix],kGreen-7+1);
-    handsomeTH1(sysFinalPlus.pbpb[ix],kGreen-7+1);
-    handsomeTH1(sysFinalMinus.pbpb[ix],kGreen-7+1);
-    handsomeTH1(sysFinalPlus.raa[ix],kGreen-7+1);
-    handsomeTH1(sysFinalMinus.raa[ix],kGreen-7+1);
-    sysFinalPlus.pp[ix]->SetFillColor(kGreen-7);
-    sysFinalMinus.pp[ix]->SetFillColor(kGreen-7);
-    sysFinalPlus.pbpb[ix]->SetFillColor(kGreen-7);
-    sysFinalMinus.pbpb[ix]->SetFillColor(kGreen-7);
-    sysFinalPlus.raa[ix]->SetFillColor(kGreen-7);
-    sysFinalMinus.raa[ix]->SetFillColor(kGreen-7);
+    handsomeTH1(sysFinalPlus.pp[ix],1);
+    handsomeTH1(sysFinalMinus.pp[ix],1);
+    handsomeTH1(sysFinalPlus.pbpb[ix],1);
+    handsomeTH1(sysFinalMinus.pbpb[ix],1);
+    handsomeTH1(sysFinalPlus.raa[ix],1);
+    handsomeTH1(sysFinalMinus.raa[ix],1);
+    /*    sysFinalPlus.pp[ix]->SetFillColor(kOrange);
+    sysFinalMinus.pp[ix]->SetFillColor(kOrange);
+    sysFinalPlus.pbpb[ix]->SetFillColor(kOrange);
+    sysFinalMinus.pbpb[ix]->SetFillColor(kOrange);
+    sysFinalPlus.raa[ix]->SetFillColor(kOrange);
+    sysFinalMinus.raa[ix]->SetFillColor(kOrange);  */
 
     groomHist(sysFinalPlus.pp[ix]);
     groomHist(sysFinalMinus.pp[ix]);
     sysFinalPlus.pp[ix]->Draw("hist");
     sysFinalMinus.pp[ix]->Draw("hist same");
+    
+    if ( addJES )   { 
+      sysJEStotPlus.pp[ix]->Draw("same");
+      sysJEStotMinus.pp[ix]->Draw("same");
+    }
+    if ( addUnf) {
+      sysUnfPlus.pp[ix]->Draw("same hist");
+      sysUnfMinus.pp[ix]->Draw("same hist");
+    }
+    if ( addJER) {
+      sysJer.pp[ix]->Draw("same hist");
+      sysJerInv.pp[ix]->Draw("same hist");
+    }
+    if ( addJMR) {
+      sysJmr.pp[ix]->Draw("same hist");
+      sysJmrInv.pp[ix]->Draw("same hist");
+    }
+    if ( addJMS) {
+      sysJms.pp[ix]->Draw("same hist");
+      sysJmsInv.pp[ix]->Draw("same hist");
+    }
+
     jumSun(0,0,0.24,0);
     
     if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.25);
@@ -438,6 +466,28 @@ void getSystematics(int icent = 0) {
     sysFinalMinus.pbpb[ix]->Draw("hist same");
     jumSun(0,0,0.24,0);
  
+    if ( addJES )   { 
+      sysJEStotPlus.pbpb[ix]->Draw("same");
+      sysJEStotMinus.pbpb[ix]->Draw("same");
+    }
+    if ( addUnf) {
+      sysUnfPlus.pbpb[ix]->Draw("same hist");
+      sysUnfMinus.pbpb[ix]->Draw("same hist");
+    }
+    if ( addJER) {
+      sysJer.pbpb[ix]->Draw("same hist");
+      sysJerInv.pbpb[ix]->Draw("same hist");
+    }
+    if ( addJMR) {
+      sysJmr.pbpb[ix]->Draw("same hist");
+      sysJmrInv.pbpb[ix]->Draw("same hist");
+    }
+    if ( addJMS) {
+      sysJms.pbpb[ix]->Draw("same hist");
+      sysJmsInv.pbpb[ix]->Draw("same hist");
+    }
+
+
     if ( ix==lowPtBin)  drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
     gPad->RedrawAxis();
 
@@ -446,13 +496,48 @@ void getSystematics(int icent = 0) {
     groomHist(sysFinalMinus.raa[ix]);
     sysFinalPlus.raa[ix]->Draw("hist");
     sysFinalMinus.raa[ix]->Draw("hist same");
+
+    if ( addJES )   { 
+      sysJEStotPlus.raa[ix]->Draw("same");
+      sysJEStotMinus.raa[ix]->Draw("same");
+    }
+    if ( addUnf) {
+      sysUnfPlus.raa[ix]->Draw("same hist");
+      sysUnfMinus.raa[ix]->Draw("same hist");
+    }
+    if ( addJER) {
+      sysJer.raa[ix]->Draw("same hist");
+      sysJerInv.raa[ix]->Draw("same hist");
+    }
+    if ( addJMR) {
+      sysJmr.raa[ix]->Draw("same hist");
+      sysJmrInv.raa[ix]->Draw("same hist");
+    }
+    if ( addJMS) {
+      sysJms.raa[ix]->Draw("same hist");
+      sysJmsInv.raa[ix]->Draw("same hist");
+    }
+
+
     jumSun(0,0,0.24,0);
     if ( ix==lowPtBin)  drawText("#Delta(PbPb/pp)", 0.37,0.83,1,20);
     gPad->RedrawAxis();
     
   }
   cFinal->SaveAs(Form("pdfsSystematics/cFinal_icent%d.pdf",icent));
-  
+
+  TCanvas* cLeg = new TCanvas("cLeg","",200,200);
+  TLegend* leg1 = new TLegend(0,0,1,1,NULL,"brNDC");
+  easyLeg(leg1,"Systematics");
+  leg1->AddEntry(sysFinalPlus.pp[lowPtBin],"Total","l");
+  if (addUnf) leg1->AddEntry(sysUnfPlus.pp[lowPtBin],"Unfolding","l");
+  if (addJES) leg1->AddEntry(sysJEStotPlus.pp[lowPtBin],"JES","l");
+  if (addJER) leg1->AddEntry(sysJer.pp[lowPtBin],"JER","l");
+  if (addJMS) leg1->AddEntry(sysJms.pp[lowPtBin],"JMS","l");
+  if (addJMR) leg1->AddEntry(sysJmr.pp[lowPtBin],"JMR","l");
+  leg1->Draw();
+  cLeg->SaveAs(Form("pdfsSystematics/cFinal_legend.pdf",icent));
+
   //Save
   TFile* fout = new TFile(Form("sysSpectra/systematics_icent%d.root",icent), "recreate");
 
