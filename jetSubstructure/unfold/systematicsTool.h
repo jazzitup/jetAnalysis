@@ -11,17 +11,31 @@ struct JetSys {
   TH1D* raa[20];
 };
 
+void resetJetSys(JetSys js, int lowX, int highX) { 
+  for ( int ix = lowX ; ix <= highX ; ix++) { 
+    js.pp[ix]->Reset();
+    js.pbpb[ix]->Reset();
+    js.raa[ix]->Reset();
+  }
+  
+}
+
+JetSys jsDummy;
+
 void getDATAresults(int kSample=0, int icent=0, int ix=0, TH1D* hdataUnfSq=0, TString dir="", int nSys=-1);
 TString getSysName(int nSys = -1);
 TH1D* getSysA(int kSample= kPP, int icent = 0, int ix=7, TString s1 ="reweight00", TString s2="reweight00varP50percent" ); 
 TH1D* getSysJES(int kSample= kPP, int icent = 0, int ix=7, int nSys=-1);
-JetSys getSystematicsJES(int icent = 0, int nSys=1);
+JetSys getSystematicsJES(int icent = 0, int nSys=1, double theScale=1);
 JetSys getSystematicsUnf(int icent = 0, int nSys=1);
 void addSysInQuad(TH1D* sysTot=0, TH1D* sys1=0);
+void addSysInQuad3(JetSys jstot=jsDummy, JetSys js1=jsDummy, int lowX=0, int highX=0); 
+void mirrorJS(JetSys js1=jsDummy, JetSys js2=jsDummy, int lowX=0, int highX=0);
+
 void sortPlusMinus(TH1D* hp=0, TH1D* hm=0);
 
 
-JetSys getSystematicsJES(int icent, int nSys) {
+JetSys getSystematicsJES(int icent, int nSys, double theScale) {
   int optX =1 ;
   int optY =2 ;
 
@@ -97,6 +111,12 @@ JetSys getSystematicsJES(int icent, int nSys) {
   
   JetSys ret;
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
+    if ( theScale != 1) { 
+      hSysApp[ix]->Scale(theScale);
+      hSysApbpb[ix]->Scale(theScale);
+      hSysAraa[ix]->Scale(theScale);
+    }
+
     ret.pp[ix]   =  hSysApp[ix];
     ret.pbpb[ix] =  hSysApbpb[ix];
     ret.raa[ix]  = hSysAraa[ix];
@@ -305,7 +325,7 @@ TString getSysName(int nSys ) {
 
 void addSysInQuad(TH1D* sysTot, TH1D* sys1) {
   if ( sysTot->GetNbinsX() != sys1->GetNbinsX() ) {
-    cout << " Uncompatible histograms!!" << endl;
+    cout << " Incompatible histograms!!" << endl;
     return;
   }
   
@@ -454,4 +474,13 @@ double getRtrk(int kSample=0, int icent=0, double jetPt=0) {
   }
   
   return p0  + p1 * log(jetPt) + p2 * log(jetPt)* log(jetPt);
+}
+
+void addSysInQuad3(JetSys jstot, JetSys js1, int lowX, int highX) { 
+  for ( int ix=lowX ; ix<=highX ; ix++) {
+    addSysInQuad(jstot.pp[ix], js1.pp[ix]);
+    addSysInQuad(jstot.pbpb[ix], js1.pbpb[ix]);
+    addSysInQuad(jstot.raa[ix], js1.raa[ix]);
+  }
+
 }

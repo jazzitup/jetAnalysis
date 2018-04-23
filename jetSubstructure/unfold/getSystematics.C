@@ -12,7 +12,7 @@ void groomHist(TH1D* h1) {
 
 }
 
-void test(int icent = 0) {
+void getSystematics(int icent = 0) {
   int optX = 1;  int optY = 2;
   int nXbins;  double xBin[30];
   getXbin(nXbins, xBin, optX);
@@ -167,9 +167,7 @@ void test(int icent = 0) {
     handsomeTH1( sysJerInv.pp[ix], kBlue);
     handsomeTH1( sysJerInv.pbpb[ix], kBlue);
     handsomeTH1( sysJerInv.raa[ix], kBlue);
-
   }
-  
   
   TCanvas* cPlus = new TCanvas("cPlus","",1200,800);
   makeMultiPanelCanvas(cPlus,nPtPannels,3, 0.0, 0.01, 0.3, 0.2, 0.05);
@@ -526,7 +524,7 @@ void test(int icent = 0) {
   }
   cFinal->SaveAs(Form("pdfsSystematics/cFinal_icent%d.pdf",icent));
 
-  TCanvas* cLeg = new TCanvas("cLeg","",200,200);
+  TCanvas* cLeg2 = new TCanvas("cleg2","",100,300);
   TLegend* leg1 = new TLegend(0,0,1,1,NULL,"brNDC");
   easyLeg(leg1,"Systematics");
   leg1->AddEntry(sysFinalPlus.pp[lowPtBin],"Total","l");
@@ -536,7 +534,7 @@ void test(int icent = 0) {
   if (addJMS) leg1->AddEntry(sysJms.pp[lowPtBin],"JMS","l");
   if (addJMR) leg1->AddEntry(sysJmr.pp[lowPtBin],"JMR","l");
   leg1->Draw();
-  cLeg->SaveAs(Form("pdfsSystematics/cFinal_legend.pdf",icent));
+  cLeg2->SaveAs(Form("pdfsSystematics/cFinal_legend.pdf",icent));
 
   //Save
   TFile* fout = new TFile(Form("sysSpectra/systematics_icent%d.root",icent), "recreate");
