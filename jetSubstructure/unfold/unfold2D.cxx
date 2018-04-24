@@ -27,7 +27,7 @@ int mFlag = 0 ;
 #include <TPaletteAxis.h>
 #include "unfoldingUtil.h"
 
-double statFrac = 001;
+double statFrac = 0.001;
 double fracStstData = 001;
 bool doUnfData = true ;
 
@@ -345,7 +345,7 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
     if ( doReweight ) {
       hReweight = getRewTable(kSample, icent);
     }
-
+  
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
     for (Int_t i= 0; i<tr->GetEntries() ; i++) {
       if ( i > tr->GetEntries() * statFrac ) continue;

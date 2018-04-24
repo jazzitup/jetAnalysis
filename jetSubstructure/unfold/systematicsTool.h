@@ -35,6 +35,7 @@ void mirrorJS(JetSys js1=jsDummy, JetSys js2=jsDummy, int lowX=0, int highX=0);
 void sortPlusMinus(TH1D* hp=0, TH1D* hm=0);
 
 
+
 JetSys getSystematicsJES(int icent, int nSys, double theScale) {
   int optX =1 ;
   int optY =2 ;
@@ -483,4 +484,21 @@ void addSysInQuad3(JetSys jstot, JetSys js1, int lowX, int highX) {
     addSysInQuad(jstot.raa[ix], js1.raa[ix]);
   }
 
+}
+
+double getJmrUnc(int kSample=0, int icent=0, double jetPt = 0) { 
+
+  double pedestal = 0.2;
+  double baseline = 0.06 + 0.06* ((jetPt-300.)/150.) * ((jetPt-300.)/150.) ;
+  double hiComp =  0;
+  if (kSample == kPbPb) { 
+    if (icent ==0)     hiComp = 0.06/0.29;
+    if (icent ==1)     hiComp = 0.05/0.28;
+    if (icent ==2)     hiComp = 0.04/0.27;
+    if (icent ==3)     hiComp = 0.03/0.26;
+    if (icent ==4)     hiComp = 0.02/0.25;
+    if (icent ==5)     hiComp = 0.01/0.24;
+    if (icent ==6)     hiComp = 0.00/0.23;
+  }
+  return  sqrt ( baseline*baseline + hiComp*hiComp + pedestal*pedestal) ;
 }

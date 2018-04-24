@@ -300,8 +300,14 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	// smear by 20% the recoY 
 	double theCenter = truthVarY * getJMSscale( kSample, icent, myJetMc.recoPt);
         double recoDev = recoVarY - theCenter;
+	double jmrUnc = getJmrUnc( kSample, icent, myJetMc.recoPt); 
+	double theVariation = sqrt ( (1 +jmrUnc)*(1+jmrUnc) - 1 );  
+	//	cout << " Smearing = " << jmrUnc << endl;
+	//	cout << " theVariation = " << theVariation << endl;
+
         double theResol = getJMRsigma( kSample, icent, myJetMc.recoPt);
-        recoVarY = theCenter + recoDev * genRandom.Gaus(1, 0.66 * theResol);  //20 percent
+	recoVarY = theCenter + recoDev * genRandom.Gaus(1, theVariation * theResol);  //20 percent
+	//	recoVarY = theCenter + recoDev * genRandom.Gaus(1, 0.66 * theResol);  //20 percent
       }	
       else if (nSys==210) { // JMS
 	double theRtrk = getRtrk( kSample, icent, myJetMc.recoPt);

@@ -354,7 +354,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
   if ( nSys < 0 ) 
     fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50_canBeRemoved.root",(int)weightCut,opt,(float)flucCut),"update");
   else
-    fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50_nSys%d_canBeRemoved.root",(int)weightCut,opt,(float)flucCut,nSys),"update");
+    fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50_nSys%d.root",(int)weightCut,opt,(float)flucCut,nSys),"update");
   
   hmcPtCorr->Write("",TObject::kOverwrite);
   hmcTruth->Write("",TObject::kOverwrite);
@@ -522,9 +522,10 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 	double theCenter = genY * getJMSscale( kSample, icent, myJetMc.recoPt);
 	double recoDev = recoY - theCenter; 
 	double theResol = getJMRsigma( kSample, icent, myJetMc.recoPt);
-	recoY = theCenter + recoDev * genRandom.Gaus(1, 0.66 * theResol);  //20 percent
-	//	cout << " JMS = " << getJMSscale( kSample, icent, myJetMc.recoPt);
-	//	cout << " recoDEV = " << recoDev << endl;
+        double jmrUnc = getJmrUnc( kSample, icent, myJetMc.recoPt);
+        double theVariation = sqrt ( (1 +jmrUnc)*(1+jmrUnc) - 1 );
+	recoY = theCenter + recoDev * genRandom.Gaus(1, theVariation * theResol);  
+	//	recoY = theCenter + recoDev * genRandom.Gaus(1, 0.66 * theResol);  
       }
       
       if (nSys==210) { // JMS

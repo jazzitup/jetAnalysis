@@ -122,8 +122,8 @@ void compareEmHIjets() {
   hdataSigma->SetAxisRange(0.5,1.5,"Y");
   hdataSigma->Draw();
   
-  TF1* f1 = new TF1("f1","1.06 + 0.06*((x-300)/150)^2",125,500);
-  TF1* f2 = new TF1("f2","0.94 - 0.06*((x-300)/150)^2",125,500);
+  TF1* f1 = new TF1("f1","1 + 0.06 + 0.06*((x-300)/150)^2",125,500);
+  TF1* f2 = new TF1("f2","1 - 0.06 - 0.06*((x-300)/150)^2",125,500);
   f1->SetLineColor(4);
   f2->SetLineColor(4);
   f1->Draw("same");
