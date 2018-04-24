@@ -8,7 +8,7 @@
 
 void groomHist(TH1D* h1) {
   h1->SetAxisRange(0.001,0.23,"X");
-  h1->SetAxisRange(-0.25,0.25,"Y");
+  h1->SetAxisRange(-0.55,0.55,"Y");
   h1->SetXTitle("m/p_{T}");
   h1->SetYTitle("Unc.");
   h1->SetNdivisions(505,"X");

@@ -283,6 +283,7 @@ void getMCR(int kSample, int icent, TH2D* hmc, int ptCut) {
       if ( ptCut == 1) {
 	if ( kSample == kPP)  theR = myJetMc.recoMass / myJetMc.recoChMassRaw ;
 	else theR = myJetMc.recoMass / myJetMc.recoChMassRcSubt ; 
+	theR = myJetMc.recoMass / myJetMc.recoChMassRcSubt ; 
       }
       
       double fcalWeight = 1.0;

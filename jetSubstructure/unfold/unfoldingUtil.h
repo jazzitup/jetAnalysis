@@ -15,8 +15,8 @@ bool selectedCent(int icent=0) {
 
 
 TH2D* getRewTable(int kSample, int icent)  { 
-  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50.root"); // Default, set in Apr 7
-  //  int nSys = 200;  TFile* fReweight = new TFile(Form("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50_nSys%d.root",nSys));   cout << " Using nSys = " << nSys << "table!! " << endl << endl << endl;
+  //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50.root"); // Default, set in Apr 7
+  int nSys = 210;  TFile* fReweight = new TFile(Form("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50_nSys%d.root",nSys));   cout << " Using nSys = " << nSys << "table!! " << endl << endl << endl;
   
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized.root"); // Mar 28
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_fcalWeighted.root");
@@ -248,6 +248,7 @@ const Double_t cutdummy= -99999.0;
 void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int optY) {
 
   double genM = myJetMc.genMass;
+  if ( genM < 0 ) genM = 0.000001;
   double recoM = myJetMc.recoMass;
   double genPt = myJetMc.genPt;
   double recoPt = myJetMc.recoPt;

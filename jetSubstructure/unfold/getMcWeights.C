@@ -505,6 +505,7 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 	recoY = myJetMc.recoMass / myJetMc.recoPt;
       }
 
+      if ( genY < 0 ) genY = 0.000001;
       
       double fcalWeight = 1.0;
       if ( kSample==kPbPb) {
