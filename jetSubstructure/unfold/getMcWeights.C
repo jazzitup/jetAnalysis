@@ -429,18 +429,29 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
   TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
   TH2D* hRecoEntries;
 
+  float ptSys;
+  TBranch *b_ptSys;
+  TString jetSysName = getPtSysName(nSys);
+  cout << " jetSysName = " << jetSysName << endl;
+
   cout << " Setting tree branch address..." << endl;
   TFile* fjz2 = new TFile(Form("../ntuples/%s",jz2.Data()));
   TTree* tr2 = (TTree*)fjz2->Get("tr");
   tr2->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+  if ( (nSys>=0) && (nSys<200) )
+    tr2->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
 
   TFile* fjz3 = new TFile(Form("../ntuples/%s",jz3.Data()));
   TTree* tr3 = (TTree*)fjz3->Get("tr");
   tr3->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+  if ( (nSys>=0) && (nSys<200) )
+    tr3->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
 
   TFile* fjz4 = new TFile(Form("../ntuples/%s",jz4.Data()));
   TTree* tr4 = (TTree*)fjz4->Get("tr");
   tr4->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+  if ( (nSys>=0) && (nSys<200) )
+    tr4->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
 
 
   for ( int ijz =2 ; ijz<=4 ; ijz++) {
@@ -518,6 +529,13 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 	ptWeight = ptScale->Eval(recoX);
       }
       
+      if ( (nSys>=0) && (nSys<200) ) {
+	double extraPtScale = ptSys / myJetMc.recoPt ;
+	recoX = recoX * extraPtScale ; //pt
+	myJetMc.recoPt = ptSys;  // New pT!!!
+	myJetMc.recoMass = myJetMc.recoMass * extraPtScale ; // new mass so that m/pT is invariant.
+      }
+      
       if (nSys==200) { // JMR
 	// smear by 20% the recoY
 	double theCenter = genY * getJMSscale( kSample, icent, myJetMc.recoPt);
@@ -528,10 +546,24 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 	recoY = theCenter + recoDev * genRandom.Gaus(1, theVariation * theResol);  
 	//	recoY = theCenter + recoDev * genRandom.Gaus(1, 0.66 * theResol);  
       }
+      if (nSys==201) { // JMR HI
+	// smear by 20% the recoY
+	double theCenter = genY * getJMSscale( kSample, icent, myJetMc.recoPt);
+	double recoDev = recoY - theCenter; 
+	double theResol = getJMRsigma( kSample, icent, myJetMc.recoPt);
+        double jmrUnc = getJmrUncHI( kSample, icent, myJetMc.recoPt);
+        double theVariation = sqrt ( (1 +jmrUnc)*(1+jmrUnc) - 1 );
+	recoY = theCenter + recoDev * genRandom.Gaus(1, theVariation * theResol);  
+	//	recoY = theCenter + recoDev * genRandom.Gaus(1, 0.66 * theResol);  
+      }
+
       
       if (nSys==210) { // JMS
 	double theRtrk = getRtrk( kSample, icent, myJetMc.recoPt);
 	recoY = recoY * theRtrk;
+      }
+      if (nSys==211) { // JMS
+	recoY = recoY * 1.008;
       }
       
       

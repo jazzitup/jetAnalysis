@@ -28,6 +28,7 @@ TH1D* getSysA(int kSample= kPP, int icent = 0, int ix=7, TString s1 ="reweight00
 TH1D* getSysJES(int kSample= kPP, int icent = 0, int ix=7, int nSys=-1);
 JetSys getSystematicsJES(int icent = 0, int nSys=1, double theScale=1);
 JetSys getSystematicsUnf(int icent = 0, int nSys=1);
+void getInverse(JetSys inputSys=jsDummy, JetSys outputSys=jsDummy,  int lowX=0, int highX=0);
 void addSysInQuad(TH1D* sysTot=0, TH1D* sys1=0);
 void addSysInQuad3(JetSys jstot=jsDummy, JetSys js1=jsDummy, int lowX=0, int highX=0); 
 void mirrorJS(JetSys js1=jsDummy, JetSys js2=jsDummy, int lowX=0, int highX=0);
@@ -448,7 +449,7 @@ double getRtrk(int kSample=0, int icent=0, double jetPt=0) {
   // These values can be obtained from getJMR.C macro
   double p0, p1, p2;
   if ( kSample == kPP) {
-    p0 = 8.45894e-01; p1 = 7.41668e-02 ; p2 = -9.16700e-03;
+    p0 = 8.41757e-01; p1 = 8.26199e-02 ; p2 = -1.05534e-02;
   }
   else if ( kSample == kPbPb) {
     if ( icent ==0) {
@@ -486,11 +487,28 @@ void addSysInQuad3(JetSys jstot, JetSys js1, int lowX, int highX) {
 
 }
 
+void getInverse(JetSys inputSys, JetSys outputSys,  int lowX, int highX) {
+  for ( int ix=lowX ; ix<=highX ; ix++) {
+    outputSys.pp[ix]->Reset();
+    outputSys.pp[ix]->Add(inputSys.pp[ix], -1);
+    outputSys.pbpb[ix]->Reset();
+    outputSys.pbpb[ix]->Add(inputSys.pbpb[ix], -1);
+    outputSys.raa[ix]->Reset();
+    outputSys.raa[ix]->Add(inputSys.raa[ix], -1);
+  }
+}
+
+
 double getJmrUnc(int kSample=0, int icent=0, double jetPt = 0) { 
 
   double pedestal = 0.2;
   double baseline = 0.06 + 0.06* ((jetPt-300.)/150.) * ((jetPt-300.)/150.) ;
-  double hiComp =  0;
+  return  sqrt ( baseline*baseline + pedestal*pedestal) ;
+}
+
+double getJmrUncHI(int kSample=0, int icent=0, double jetPt = 0) { 
+  
+  double hiComp = 0;
   if (kSample == kPbPb) { 
     if (icent ==0)     hiComp = 0.06/0.29;
     if (icent ==1)     hiComp = 0.05/0.28;
@@ -498,7 +516,7 @@ double getJmrUnc(int kSample=0, int icent=0, double jetPt = 0) {
     if (icent ==3)     hiComp = 0.03/0.26;
     if (icent ==4)     hiComp = 0.02/0.25;
     if (icent ==5)     hiComp = 0.01/0.24;
-    if (icent ==6)     hiComp = 0.00/0.23;
+    if (icent ==6)     hiComp = 0.01/0.23;
   }
-  return  sqrt ( baseline*baseline + hiComp*hiComp + pedestal*pedestal) ;
+  return  hiComp;
 }

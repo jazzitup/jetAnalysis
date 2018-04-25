@@ -12,17 +12,17 @@ using std::endl;
 #include "../JssUtils.h"
 #include <TPaletteAxis.h>
 
-double statUsed = 001;
+double statUsed = 01;
 
 int lowPtBin = 1;  int highPtBin = 13;
 
 int nPtPannels = highPtBin-lowPtBin+1;
 
-void getMCR(int kSample=kPP, int icent=0,  TH2D* hmc=0, int ptCut=6);
-void getDATAR(int kSample=kPP, int icent=0,  TH2D* hdata=0, int ptCut=6);
+void getMCR(int kSample=kPP, int icent=0,  TH2D* hmc=0);
+void getDATAR(int kSample=kPP, int icent=0,  TH2D* hdata=0);
 TH1D* getVariedHist(TH1D* hin=0, double variation=0);
 
-double findPeak(TF1* f, double low =2,double high = 4 ) {
+double findPeak(TF1* f) { 
   double v1 = f->GetParameter(1);
   double v2 = f->GetParameter(2);
   // Peak = ([1] - 0.22278) 
@@ -55,7 +55,7 @@ double errPeak(TF1* f) {
   return e1; 
 }
 
-void getTrkR(int kSample = kPbPb, int icent=0, int ptCut =1 ) {   // opt1 : mass,   opt2 : m/pT  
+void getTrkR(int kSample = kPbPb, int icent=0) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
 
   int optX = 1;    int optY = 2;  
@@ -88,8 +88,8 @@ void getTrkR(int kSample = kPbPb, int icent=0, int ptCut =1 ) {   // opt1 : mass
   TH1D* h1mc[20];
   TH1D* h1data[20];
 
-  getMCR   ( kSample, icent, hmc, ptCut);
-  getDATAR ( kSample, icent, hdata, ptCut);
+  getMCR   ( kSample, icent, hmc);
+  getDATAR ( kSample, icent, hdata);
 
   
   TCanvas* c2 =  new TCanvas("c2","",1200,400);
@@ -141,8 +141,8 @@ void getTrkR(int kSample = kPbPb, int icent=0, int ptCut =1 ) {   // opt1 : mass
     // Peak = ([1] - 0.22278)* [2] 
     // https://root.cern.ch/root/html528/TMath.html#TMath:Landau
 
-    double mcPeak = findPeak(f1mc,0,4);
-    double dataPeak = findPeak(f1data,0,4);
+    double mcPeak = findPeak(f1mc);
+    double dataPeak = findPeak(f1data);
     double mcPeakErr = errPeak(f1mc);
     double dataPeakErr = errPeak(f1data);
     double peakRatio = dataPeak/mcPeak; 
@@ -172,7 +172,7 @@ void getTrkR(int kSample = kPbPb, int icent=0, int ptCut =1 ) {   // opt1 : mass
     hTrkR->SetBinContent(ix, peakRatio);
     hTrkR->SetBinError(ix, peakRatioErr);
   }
-  c2->SaveAs(Form("pdfsJMS/JMS_ptCut%d_kSample%d_cent%d.pdf",(int)ptCut,kSample,icent));
+  c2->SaveAs(Form("pdfsJMS/JMS_kSample%d_cent%d.pdf",kSample,icent));
   TCanvas* c3 = new TCanvas("c3","",500,500);
   hTrkR->SetAxisRange(0.8,1.2,"Y");
   //  TF1* f1 = new TF1("f1","[0] +x*[1]",xBin[0], xBin[nXbins]);
@@ -181,11 +181,11 @@ void getTrkR(int kSample = kPbPb, int icent=0, int ptCut =1 ) {   // opt1 : mass
   hTrkR->Draw();
   jumSun(xBin[0],1, xBin[nXbins],1);
   drawCentrality(kSample, icent, 0.60,0.86,1,24);
-  c3->SaveAs(Form("pdfsJMS/trkR_ptCut%d_kSample%d_cent%d.pdf",(int)ptCut,kSample,icent));
+  c3->SaveAs(Form("pdfsJMS/trkR_kSample%d_cent%d.pdf",kSample,icent));
 }
 
 
-void getMCR(int kSample, int icent, TH2D* hmc, int ptCut) { 
+void getMCR(int kSample, int icent, TH2D* hmc) { 
   
   TH1::SetDefaultSumw2();
   hmc->Reset();
@@ -218,8 +218,8 @@ void getMCR(int kSample, int icent, TH2D* hmc, int ptCut) {
   float trkJetMass;
   TBranch *b_trkJetPt;
   TBranch *b_trkJetMass;
-  TString trkMassVar = Form("trkJetMass%d",ptCut);
-  TString trkPtVar = Form("trkJetPt%d",ptCut);
+  //  TString trkMassVar = Form("trkJetMass%d",ptCut);
+  //  TString trkPtVar = Form("trkJetPt%d",ptCut);
   
   //  if ( ptCut ==1 ) 
   //    trkMassVar =  "chMassRaw"
@@ -229,20 +229,20 @@ void getMCR(int kSample, int icent, TH2D* hmc, int ptCut) {
   TFile* fjz2 = new TFile(Form("../ntuples/%s",jz2.Data()));
   TTree* tr2 = (TTree*)fjz2->Get("tr");
   tr2->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
-  tr2->SetBranchAddress(trkMassVar.Data(), &trkJetMass, &b_trkJetMass);
-  tr2->SetBranchAddress(trkPtVar.Data(), &trkJetPt, &b_trkJetPt);
+  //  tr2->SetBranchAddress(trkMassVar.Data(), &trkJetMass, &b_trkJetMass);
+  //  tr2->SetBranchAddress(trkPtVar.Data(), &trkJetPt, &b_trkJetPt);
   
   TFile* fjz3 = new TFile(Form("../ntuples/%s",jz3.Data()));
   TTree* tr3 = (TTree*)fjz3->Get("tr");
   tr3->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
-  tr3->SetBranchAddress(trkMassVar.Data(), &trkJetMass, &b_trkJetMass);
-  tr3->SetBranchAddress(trkPtVar.Data(), &trkJetPt, &b_trkJetPt);
+  //  tr3->SetBranchAddress(trkMassVar.Data(), &trkJetMass, &b_trkJetMass);
+  //  tr3->SetBranchAddress(trkPtVar.Data(), &trkJetPt, &b_trkJetPt);
 
   TFile* fjz4 = new TFile(Form("../ntuples/%s",jz4.Data()));
   TTree* tr4 = (TTree*)fjz4->Get("tr");
   tr4->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
-  tr4->SetBranchAddress(trkMassVar.Data(), &trkJetMass, &b_trkJetMass);
-  tr4->SetBranchAddress(trkPtVar.Data(), &trkJetPt, &b_trkJetPt);
+  //  tr4->SetBranchAddress(trkMassVar.Data(), &trkJetMass, &b_trkJetMass);
+  //  tr4->SetBranchAddress(trkPtVar.Data(), &trkJetPt, &b_trkJetPt);
 
   for ( int ijz =2 ; ijz<=4 ; ijz++) {
     TTree* tr;
@@ -268,9 +268,7 @@ void getMCR(int kSample, int icent, TH2D* hmc, int ptCut) {
       tr->GetEntry(i);
 
       if ( ! passEvent(myJetMc, icent, true) )        continue;
-      if ( (ptCut != 1 ) && (trkJetMass < 0.2) )        continue;         // cut on trakc mass 
-      //      if ( ( myJetMc.recoMass / myJetMc.recoPt ) > 0.1 ) 
-      //      	continue;
+      //      if ( (ptCut != 1 ) && (trkJetMass < 0.2) )        continue;         // cut on trakc mass 
       
       double mpt =  myJetMc.recoMass / myJetMc.recoPt ;
       double recoMass = myJetMc.recoMass ;
@@ -278,13 +276,9 @@ void getMCR(int kSample, int icent, TH2D* hmc, int ptCut) {
       //	continue;
       
       double recoPt = myJetMc.recoPt;
-      double theR = myJetMc.recoMass / trkJetMass;
+
+      double theR = myJetMc.recoMass / myJetMc.recoChMassRcSubt ; 
       
-      if ( ptCut == 1) {
-	if ( kSample == kPP)  theR = myJetMc.recoMass / myJetMc.recoChMassRaw ;
-	else theR = myJetMc.recoMass / myJetMc.recoChMassRcSubt ; 
-	theR = myJetMc.recoMass / myJetMc.recoChMassRcSubt ; 
-      }
       
       double fcalWeight = 1.0;
       if ( kSample==kPbPb) {
@@ -298,7 +292,7 @@ void getMCR(int kSample, int icent, TH2D* hmc, int ptCut) {
   
 }
 
-void getDATAR(int kSample, int icent,  TH2D* hdata, int ptCut) {
+void getDATAR(int kSample, int icent,  TH2D* hdata) {
 
   TH1::SetDefaultSumw2();
   hdata->Reset();
@@ -314,17 +308,17 @@ void getDATAR(int kSample, int icent,  TH2D* hdata, int ptCut) {
   TTree* tr = (TTree*)fData->Get("tr");
   jetSubStr myJet;
   TBranch       *b_myJet;
-  float trkJetPt;
-  float trkJetMass;
-  TBranch *b_trkJetPt;
-  TBranch *b_trkJetMass;
-  TString trkMassVar = Form("trkJetMass%d",ptCut);
-  TString trkPtVar = Form("trkJetPt%d",ptCut);
+  //  float trkJetPt;
+  //  float trkJetMass;
+  //  TBranch *b_trkJetPt;
+  //  TBranch *b_trkJetMass;
+  //  TString trkMassVar = Form("trkJetMass%d",ptCut);
+  //  TString trkPtVar = Form("trkJetPt%d",ptCut);
 
 
   tr->SetBranchAddress("jets", &(myJet.cent), &b_myJet);
-  tr->SetBranchAddress(trkPtVar.Data(), &trkJetPt, &b_trkJetPt);
-  tr->SetBranchAddress(trkMassVar.Data(), &trkJetMass, &b_trkJetMass);
+  //  tr->SetBranchAddress(trkPtVar.Data(), &trkJetPt, &b_trkJetPt);
+  //  tr->SetBranchAddress(trkMassVar.Data(), &trkJetMass, &b_trkJetMass);
 
   if ( kSample == kPP )  cout << " pp " ;
   else if ( kSample == kPbPb) cout << " PbPb " ;
@@ -335,10 +329,7 @@ void getDATAR(int kSample, int icent,  TH2D* hdata, int ptCut) {
     if ( i > tr->GetEntries() * statUsed) break;
 
     if ( ! passEvent(myJet, icent, false) )       continue;
-    if ( (ptCut != 1 ) && (trkJetMass < 0.2) )        continue;         // cut on trakc mass 
-    
-    //    if ( ( myJet.recoMass / myJet.recoPt ) > 0.1 ) 
-    //      continue;
+    //    if ( (ptCut != 1 ) && (trkJetMass < 0.2) )        continue;         // cut on trakc mass 
 
     double mpt = myJet.recoMass / myJet.recoPt;
     double recoMass = myJet.recoMass ;
@@ -348,12 +339,10 @@ void getDATAR(int kSample, int icent,  TH2D* hdata, int ptCut) {
 
     
     double recoPt = myJet.recoPt;
-    double theR = myJet.recoMass / trkJetMass;
-    //    if ( ptCut == 1) theR = myJet.recoMass / myJet.recoChMassRcSubt ; 
-    if ( ptCut == 1) {
-      if ( kSample == kPP)  theR = myJet.recoMass / myJet.recoChMassRaw ;
-      else theR = myJet.recoMass / myJet.recoChMassRcSubt ; 
-    }
+    //    double theR = myJet.recoMass / trkJetMass;
+
+    double theR = myJet.recoMass / myJet.recoChMassRcSubt ;
+    
     hdata->Fill( theR, recoPt);
   }
   

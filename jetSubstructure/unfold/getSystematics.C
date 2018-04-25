@@ -26,8 +26,10 @@ void getSystematics(int icent = 0) {
   vector<int> vIndPlus;
   vector<int> vIndMinus;
   int indexJER = 100;
-  int indexJMR = 200;
-  int indexJMS = 210;
+  int indexJMR0 = 200;
+  int indexJMR1 = 201;
+  int indexJMS0 = 210;
+  int indexJMS1 = 211;
   /*  for ( int i=0 ; i<=21 ; i++)   {
       if (i%2 == 0)  vIndPlus.push_back(i);  // pp JES
       else           vIndMinus.push_back(i);  // pp JES
@@ -52,9 +54,14 @@ void getSystematics(int icent = 0) {
   JetSys sysPlus[20];
   JetSys sysMinus[20];
   JetSys sysJer;
+  JetSys sysJerInv;
+
   JetSys sysJms;
   JetSys sysJmr;
-  JetSys sysJerInv;
+
+  JetSys sysJms1;  // place holders
+  JetSys sysJmr1;
+
   JetSys sysJmsInv;
   JetSys sysJmrInv;
   
@@ -75,11 +82,24 @@ void getSystematics(int icent = 0) {
   }
   sysJer    = getSystematicsJES(icent, indexJER );
   sysJerInv = getSystematicsJES(icent, indexJER, -1 );
-  sysJms    = getSystematicsJES(icent, indexJMS );
-  sysJmsInv = getSystematicsJES(icent, indexJMS, -1 );
-  sysJmr    = getSystematicsJES(icent, indexJMR );
-  sysJmrInv = getSystematicsJES(icent, indexJMR, -1 );
 
+  sysJms    = getSystematicsJES(icent, indexJMS0 );
+  sysJms1    = getSystematicsJES(icent, indexJMS1 );
+  addSysInQuad3(sysJms, sysJms1, lowPtBin, highPtBin);
+
+  sysJmr    = getSystematicsJES(icent, indexJMR0 );
+  sysJmr1    = getSystematicsJES(icent, indexJMR1 );
+  addSysInQuad3(sysJmr, sysJmr1, lowPtBin, highPtBin);
+  
+  
+  sysJmsInv = getSystematicsJES(icent, indexJMS0 );
+  resetJetSys(sysJmsInv, lowPtBin, highPtBin) ;
+  getInverse(sysJms, sysJmsInv, lowPtBin, highPtBin) ;
+  
+  sysJmrInv = getSystematicsJES(icent, indexJMR0 );
+  resetJetSys(sysJmrInv, lowPtBin, highPtBin) ;
+  getInverse(sysJmr, sysJmrInv, lowPtBin, highPtBin) ;
+  
   sysUnfPlus = getSystematicsUnf(icent, 1);
   sysUnfMinus = getSystematicsUnf(icent, -1);
   
@@ -524,7 +544,7 @@ void getSystematics(int icent = 0) {
   }
   cFinal->SaveAs(Form("pdfsSystematics/cFinal_icent%d.pdf",icent));
 
-  TCanvas* cLeg2 = new TCanvas("cleg2","",100,300);
+  TCanvas* cLeg2 = new TCanvas("cleg2","",77,59,274,313);
   TLegend* leg1 = new TLegend(0,0,1,1,NULL,"brNDC");
   easyLeg(leg1,"Systematics");
   leg1->AddEntry(sysFinalPlus.pp[lowPtBin],"Total","l");
@@ -534,7 +554,7 @@ void getSystematics(int icent = 0) {
   if (addJMS) leg1->AddEntry(sysJms.pp[lowPtBin],"JMS","l");
   if (addJMR) leg1->AddEntry(sysJmr.pp[lowPtBin],"JMR","l");
   leg1->Draw();
-  cLeg2->SaveAs(Form("pdfsSystematics/cFinal_legend.pdf",icent));
+  cLeg2->SaveAs("pdfsSystematics/cFinal_legend.pdf");
 
   //Save
   TFile* fout = new TFile(Form("sysSpectra/systematics_icent%d.root",icent), "recreate");
