@@ -4,7 +4,7 @@
 void groomHist(TH1D* h1) {
   h1->SetAxisRange(0.001,0.23,"X");
   h1->SetAxisRange(-0.55,0.55,"Y");
-  h1->SetXTitle("m/p_{T}");
+  h1->SetXTitle("m^{jet}/p_{T}^{jet}");
   h1->SetYTitle("Relative Uncertainty");
   h1->SetNdivisions(505,"X");
   h1->SetNdivisions(505,"Y");
@@ -12,7 +12,7 @@ void groomHist(TH1D* h1) {
 
 }
 
-void getSystematics(int icent = 0) {
+void getSystematics(int icent = 0, bool drawPP = false) {
   int optX = 1;  int optY = 2;
   int nXbins;  double xBin[30];
   getXbin(nXbins, xBin, optX);
@@ -166,6 +166,7 @@ void getSystematics(int icent = 0) {
     addSysInQuad3(sysFinalMinus, sysJms, lowPtBin, highPtBin) ;
   }
   
+  int jumSunStyle = 7;
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {    
     handsomeTH1( sysJms.pp[ix], kGreen);
     handsomeTH1( sysJms.pbpb[ix], kGreen);
@@ -173,6 +174,13 @@ void getSystematics(int icent = 0) {
     handsomeTH1( sysJmsInv.pp[ix], kGreen);
     handsomeTH1( sysJmsInv.pbpb[ix], kGreen);
     handsomeTH1( sysJmsInv.raa[ix], kGreen);
+    sysJms.pp[ix]->SetLineStyle(jumSunStyle);
+    sysJms.pbpb[ix]->SetLineStyle(jumSunStyle);
+    sysJms.raa[ix]->SetLineStyle(jumSunStyle);
+    sysJmsInv.pp[ix]->SetLineStyle(jumSunStyle);
+    sysJmsInv.pbpb[ix]->SetLineStyle(jumSunStyle);
+    sysJmsInv.raa[ix]->SetLineStyle(jumSunStyle);
+
 
     handsomeTH1( sysJmr.pp[ix], kRed);
     handsomeTH1( sysJmr.pbpb[ix], kRed);
@@ -180,6 +188,12 @@ void getSystematics(int icent = 0) {
     handsomeTH1( sysJmrInv.pp[ix], kRed);
     handsomeTH1( sysJmrInv.pbpb[ix], kRed);
     handsomeTH1( sysJmrInv.raa[ix], kRed);
+    sysJmr.pp[ix]->SetLineStyle(jumSunStyle);
+    sysJmr.pbpb[ix]->SetLineStyle(jumSunStyle);
+    sysJmr.raa[ix]->SetLineStyle(jumSunStyle);
+    sysJmrInv.pp[ix]->SetLineStyle(jumSunStyle);
+    sysJmrInv.pbpb[ix]->SetLineStyle(jumSunStyle);
+    sysJmrInv.raa[ix]->SetLineStyle(jumSunStyle);
 
     handsomeTH1( sysJer.pp[ix], kBlue);
     handsomeTH1( sysJer.pbpb[ix], kBlue);
@@ -420,11 +434,17 @@ void getSystematics(int icent = 0) {
 
 
 
-  TCanvas* cFinal = new TCanvas("cFinal","",1200,600);
-  makeMultiPanelCanvas(cFinal,nPtPannels,3, 0.0, 0.01, 0.3, 0.2, 0.05);
+  TCanvas* cFinal;
+  if (drawPP){ 
+    cFinal = new TCanvas("cFinal","",1200,600);
+    makeMultiPanelCanvas(cFinal,nPtPannels,3, 0.0, 0.01, 0.3, 0.2, 0.05);
+  }  else {
+    cFinal = new TCanvas("cFinal","",1200,430);
+    makeMultiPanelCanvas(cFinal,nPtPannels,2, 0.0, 0.01, 0.3, 0.2, 0.05);
+  }
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
-    cFinal->cd(ix - lowPtBin + 1);
+    
     sysFinalMinus.pp[ix]->Scale(-1);
     sysFinalMinus.pbpb[ix]->Scale(-1);
     sysFinalMinus.raa[ix]->Scale(-1);
@@ -442,48 +462,58 @@ void getSystematics(int icent = 0) {
     sysFinalPlus.raa[ix]->SetFillColor(kOrange);
     sysFinalMinus.raa[ix]->SetFillColor(kOrange);  */
 
-    groomHist(sysFinalPlus.pp[ix]);
-    groomHist(sysFinalMinus.pp[ix]);
-    sysFinalPlus.pp[ix]->Draw("hist");
-    sysFinalMinus.pp[ix]->Draw("hist same");
+    if ( drawPP )  {
+      
+      cFinal->cd(ix - lowPtBin + 1);
+      groomHist(sysFinalPlus.pp[ix]);
+      groomHist(sysFinalMinus.pp[ix]);
+      
+      sysFinalPlus.pp[ix]->Draw("hist");
+      sysFinalMinus.pp[ix]->Draw("hist same");
+      
+      if ( addJES )   { 
+	sysJEStotPlus.pp[ix]->Draw("same");
+	sysJEStotMinus.pp[ix]->Draw("same");
+      }
+      if ( addUnf) {
+	sysUnfPlus.pp[ix]->Draw("same hist");
+	sysUnfMinus.pp[ix]->Draw("same hist");
+      }
+      if ( addJER) {
+	sysJer.pp[ix]->Draw("same hist");
+	sysJerInv.pp[ix]->Draw("same hist");
+      }
+      if ( addJMR) {
+	sysJmr.pp[ix]->Draw("same hist");
+	sysJmrInv.pp[ix]->Draw("same hist");
+      }
+      if ( addJMS) {
+	sysJms.pp[ix]->Draw("same hist");
+	sysJmsInv.pp[ix]->Draw("same hist");
+      }
+      
+      jumSun(0,0,0.24,0);
     
-    if ( addJES )   { 
-      sysJEStotPlus.pp[ix]->Draw("same");
-      sysJEStotMinus.pp[ix]->Draw("same");
+      if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.18);
+      if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
+      if ( ix==lowPtBin)  drawText("Total uncertainty", 0.37,0.7,1,20);
+      
+      drawBinPt(xBin,ix,"GeV",0.15 + (ix==lowPtBin)*0.2,0.05,1,18);
+      gPad->RedrawAxis();
+      
     }
-    if ( addUnf) {
-      sysUnfPlus.pp[ix]->Draw("same hist");
-      sysUnfMinus.pp[ix]->Draw("same hist");
-    }
-    if ( addJER) {
-      sysJer.pp[ix]->Draw("same hist");
-      sysJerInv.pp[ix]->Draw("same hist");
-    }
-    if ( addJMR) {
-      sysJmr.pp[ix]->Draw("same hist");
-      sysJmrInv.pp[ix]->Draw("same hist");
-    }
-    if ( addJMS) {
-      sysJms.pp[ix]->Draw("same hist");
-      sysJmsInv.pp[ix]->Draw("same hist");
-    }
-
-    jumSun(0,0,0.24,0);
     
-    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.25);
-    if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
-    if ( ix==lowPtBin)  drawText("Total uncertainty", 0.37,0.7,1,20);
+    if (drawPP) 
+      cFinal->cd(ix - lowPtBin + 1 + nPtPannels);
+    else 
+      cFinal->cd(ix - lowPtBin + 1 );
 
-    drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
-    gPad->RedrawAxis();
-
-    cFinal->cd(ix - lowPtBin + 1 + nPtPannels);
     groomHist(sysFinalPlus.pbpb[ix]);
     groomHist(sysFinalMinus.pbpb[ix]);
     sysFinalPlus.pbpb[ix]->Draw("hist");
     sysFinalMinus.pbpb[ix]->Draw("hist same");
     jumSun(0,0,0.24,0);
- 
+    
     if ( addJES )   { 
       sysJEStotPlus.pbpb[ix]->Draw("same");
       sysJEStotMinus.pbpb[ix]->Draw("same");
@@ -505,13 +535,32 @@ void getSystematics(int icent = 0) {
       sysJmsInv.pbpb[ix]->Draw("same hist");
     }
 
+    if ( !drawPP) { 
+      drawBinPt(xBin,ix,"GeV",0.15 + (ix==lowPtBin)*0.2,0.05,1,18);
+      gPad->RedrawAxis();
+    }
+    
+    
+    if ( ix==lowPtBin) {
+      if ( drawPP) drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
+      else  { 
+	drawCentrality(kPbPb, icent, 0.37,0.73,1,20);
+	ATLASLabel(0.37,0.87,"Internal",0.075,0.18);
+      }
+    }
+gPad->RedrawAxis();
 
-    if ( ix==lowPtBin)  drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
-    gPad->RedrawAxis();
 
-    cFinal->cd(ix - lowPtBin + 1 + 2*nPtPannels);
+
+    if ( drawPP)  cFinal->cd(ix - lowPtBin + 1 + 2*nPtPannels);
+    else  cFinal->cd(ix - lowPtBin + 1 + nPtPannels);
+    
     groomHist(sysFinalPlus.raa[ix]);
     groomHist(sysFinalMinus.raa[ix]);
+
+    if (!drawPP)          sysFinalPlus.raa[ix]->GetXaxis()->SetTitleOffset(1.9);
+    else          sysFinalPlus.raa[ix]->GetXaxis()->SetTitleOffset(2.7);
+
     sysFinalPlus.raa[ix]->Draw("hist");
     sysFinalMinus.raa[ix]->Draw("hist same");
 
@@ -542,11 +591,13 @@ void getSystematics(int icent = 0) {
     gPad->RedrawAxis();
     
   }
-  cFinal->SaveAs(Form("pdfsSystematics/cFinal_icent%d.pdf",icent));
+  if ( drawPP)   cFinal->SaveAs(Form("pdfsSystematics/cFinal_icent%d.pdf",icent));
+  else           cFinal->SaveAs(Form("pdfsSystematics/cFinal_icent%d_noPP.pdf",icent));
 
-  TCanvas* cLeg2 = new TCanvas("cleg2","",77,59,274,313);
-  TLegend* leg1 = new TLegend(0,0,1,1,NULL,"brNDC");
-  easyLeg(leg1,"Systematics");
+
+  TCanvas* cLeg2 = new TCanvas("cleg2","",200,600);
+  TLegend* leg1 = new TLegend(0,0.7058065,1,1,NULL,"brNDC");
+  easyLeg(leg1,"Systematics",0.1);
   leg1->AddEntry(sysFinalPlus.pp[lowPtBin],"Total","l");
   if (addUnf) leg1->AddEntry(sysUnfPlus.pp[lowPtBin],"Unfolding","l");
   if (addJES) leg1->AddEntry(sysJEStotPlus.pp[lowPtBin],"JES","l");
