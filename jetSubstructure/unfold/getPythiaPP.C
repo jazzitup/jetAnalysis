@@ -153,7 +153,6 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       
       // SCALING! 
       CsScalePP(hdataUnfSq[ipt][0]);
-      scaleByPtBinWidth( hdataUnfSq[ipt][0], xBin, ipt);
       
       double normalization = hdataUnfSq[ipt][0]->Integral("w") / hmcTruthSq[ipt][0]->Integral("w"); 
       hmcTruthSq[ipt][0]->Scale(normalization);
@@ -165,7 +164,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       hmcTruthSq[ipt][0]->SetAxisRange(0,0.239,"X");
       handsomeTH1(hdataUnfSq[ipt][0],2);
       hmcTruthSq[ipt][0]->GetYaxis()->SetTitleOffset(3);
-      hmcTruthSq[ipt][0]->SetYTitle("#frac{d#sigma}{dp_{T}d(m/p_{T})} (#mub^{-1} GeV^{-1})");
+      hmcTruthSq[ipt][0]->SetYTitle("#frac{d#sigma}{d(m/p_{T})} (#mub^{-1})");
       hmcTruthSq[ipt][0]->Draw("hist");
       drawSysUpDown( hdataUnfSq[ipt][0], sysPlus.pp[ipt], sysMinus.pp[ipt],  kOrange);
       hdataUnfSq[ipt][0]->Draw("same e");
@@ -173,9 +172,9 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       if ( ipt > lowPtBin)  
 	drawPatch(0.,0.955, 0.5, 1);
 
-      drawBinPt(xBin,ipt,"GeV",0.2 + (0.15* (ipt==lowPtBin)), 0.75,1,15);
+      drawBinPt(xBin,ipt,"GeV",0.17 + (0.18* (ipt==lowPtBin)), 0.75,1,18);
       if ( ipt == lowPtBin)  {
-	TLegend *leg = new TLegend(0.3056911,0.5333334,0.7575784,0.8166667,NULL,"brNDC");
+	TLegend *leg = new TLegend(0.3056911,0.5133334,0.7575784,0.7966667,NULL,"brNDC");
 	easyLeg(leg,"",0.06);
 	leg->AddEntry(hdataUnfSq[ipt][0],"Data","pl");
 	leg->AddEntry(hmcTruthSq[ipt][0],"PYTHIA (scaled to data)","l");
@@ -196,7 +195,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
 
       hraioMCtemp[ipt][0] = (TH1D*)hmcTruthSq[ipt][0]->Clone(Form("hraioMCtemp_ipt%d",ipt));
       hraioMCtemp[ipt][0]->Divide(hdataUnfSq[ipt][0]);
-      hraioMCtemp[ipt][0]->SetYTitle("Ratio");
+      hraioMCtemp[ipt][0]->SetYTitle("MC/Data");
       hraioMCtemp[ipt][0]->SetNdivisions(505,"X");
       hraioMCtemp[ipt][0]->SetNdivisions(505,"Y");
       fixedFontHist(hraioMCtemp[ipt][0],2.5,2.5,20);
@@ -215,7 +214,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       
       
       if (ipt == lowPtBin)   {
-	drawText("PYTHIA/data", 0.32, 0.8, 1,20);
+	drawText("PYTHIA/data", 0.35, 0.8, 1,20);
 	//	drawText(Form("reference iter. (%d)",vIter.at(refId)), 0.22, 0.82, 1);
       }
       gPad->RedrawAxis();
