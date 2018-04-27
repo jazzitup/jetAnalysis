@@ -1,3 +1,4 @@
+#include "../TAA.h"
 #include "../getSdHists.C"
 #include "../ntupleDefinition_v50.h"
 #include "../commonUtility.h"
@@ -28,12 +29,11 @@ void getMCresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRw
 void getDATAresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
 void narrowSys( TH1D* hsys=0, double xlow=0, double xhigh=0);
 
-void comparePythiaData(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int optY=2, bool applyMDJ=false) {
+void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int optY=2, bool applyMDJ=false) {
   
   bool specRwtData = 1;
   bool specRwtMc = 0;
 
-  bool doDATA = true; 
   
   int nXbins;
   double xBin[30];
@@ -127,71 +127,62 @@ void comparePythiaData(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=
       hmcRawSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("mcRawSq_ix%d_in%d",ix,in));
       getMCresults(kSample, icent, ix, vIter.at(in), matRwt, specRwtMc , hmcTruthSq[ix][in], hmcRawSq[ix][in], hmcUnfSq[ix][in]);
 
-      if ( doDATA) { 
-	hdataUnfSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("dataUnfSq_ix%d_in%d",ix,in));
-	hdataRawSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("dataRawSq_ix%d_in%d",ix,in));
-	getDATAresults(kSample, icent, ix, vIter.at(in), matRwt, specRwtData ,  hdataRawSq[ix][in], hdataUnfSq[ix][in]);
-      }  
+      hdataUnfSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("dataUnfSq_ix%d_in%d",ix,in));
+      hdataRawSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("dataRawSq_ix%d_in%d",ix,in));
+      getDATAresults(kSample, icent, ix, vIter.at(in), matRwt, specRwtData ,  hdataRawSq[ix][in], hdataUnfSq[ix][in]);
+      
       cout << hmcUnfSq[ix][in]->GetName() << " : " << hmcUnfSq[ix][in]->Integral(1, hmcUnfSq[ix][in]->GetNbinsX(), "width") << endl;
       cout << hmcTruthSq[ix][in]->GetName() << " : " <<  hmcTruthSq[ix][in]->Integral(1, hmcTruthSq[ix][in]->GetNbinsX(),"width")  << endl;
     }
   }
   
   
-  if (doDATA) {
-    TCanvas* c2 =  new TCanvas("c2","",1200,550);
-    //  c2->Divide((nPtBinDraw+1)/2,2);
-    //    makeEfficiencyCanvas(c2,nPtPannels+1, 0.02, 0.01, 0.2, 0.3, 0.01);
-    makeMultiPanelCanvas(c2,nPtPannels, 2,0.02, 0.01, 0.2, 0.3, 0.01);
-    
-    /*    c2->cd(lowPtBin+1);
-    TLegend *leg1 = new TLegend(0.002212389,0.001490066,0.9977876,1,NULL,"brNDC");
-    easyLeg(leg1,"Data",0.12);
-    //    leg1->AddEntry( hdataRawSq[lowPtBin][0], "Raw","l");
-    
-    for (int in = 0; in < int(vIter.size()) ; in++)  {
-      if ( vIter[in] == 1 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dst iter.",vIter[in]));
-      else if ( vIter[in] == 2 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dnd iter.",vIter[in]));
-      else if ( vIter[in] == 3 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%drd iter.",vIter[in]));
-      else  leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dth iter.",vIter[in]));
-    }
-    leg1->AddEntry( hmcTruthSq[lowPtBin][0], "PYTHIA Truth","l");
-    leg1->Draw();
-    */
-
+  TCanvas* c2 =  new TCanvas("c2","",1200,550);
+  makeMultiPanelCanvas(c2,nPtPannels, 2,0,0,0.3); //,0.01, 0.01, 0.2, 0.3, 0.0);
+  
     for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
       c2->cd(ipt - lowPtBin+1);
       
-      scaleInt(hmcTruthSq[ipt][0]);
-      cleverRange(hmcTruthSq[ipt][0],2);
-      hmcTruthSq[ipt][0]->SetAxisRange(0,0.239,"X");
-      
-      if ( optY==1) hdataRawSq[ipt][0]->SetAxisRange(0.00,100,"X");
-      else if ( optY==2) hdataRawSq[ipt][0]->SetAxisRange(0.001,0.23999,"X");
-      if ( optY==1)    hdataRawSq[ipt][0]->SetXTitle("m^{2} GeV^{2}");
-      else if ( optY==2)    hdataRawSq[ipt][0]->SetXTitle("m/p_{T}");
-      if ( hdataRawSq[ipt][0]->Integral()>0) cleverRangeLog(hdataRawSq[ipt][0],100,0.00001);
-      hdataRawSq[ipt][0]->SetYTitle("Entries");
-      handsomeTH1(hdataRawSq[ipt][0],1);
-      handsomeTH1(hdataUnfSq[ipt][0],2);
-      
-      scaleInt(hdataUnfSq[ipt][0]);
+      narrowSys( sysPlus.pp[ipt], 0, 0.24);
+      narrowSys( sysPlus.pbpb[ipt], 0, 0.24);
+      narrowSys( sysPlus.raa[ipt], 0, 0.24);
+      narrowSys( sysMinus.pp[ipt], 0, 0.24);
+      narrowSys( sysMinus.pbpb[ipt], 0, 0.24);
+      narrowSys( sysMinus.raa[ipt], 0, 0.24);
 
+      
+      // SCALING! 
+      CsScalePP(hdataUnfSq[ipt][0]);
+      scaleByPtBinWidth( hdataUnfSq[ipt][0], xBin, ipt);
+      
+      double normalization = hdataUnfSq[ipt][0]->Integral("w") / hmcTruthSq[ipt][0]->Integral("w"); 
+      hmcTruthSq[ipt][0]->Scale(normalization);
+      double maxY = cleverRange(hmcTruthSq[ipt][0],2.,0);
+      handsomeTH1(hmcTruthSq[ipt][0],1);
+      hmcTruthSq[ipt][0]->SetNdivisions(505,"Y");
+      fixedFontHist(hmcTruthSq[ipt][0],2.5,2.5,20);
+      hmcTruthSq[ipt][0]->SetAxisRange(0, maxY,"Y");
+      hmcTruthSq[ipt][0]->SetAxisRange(0,0.239,"X");
+      handsomeTH1(hdataUnfSq[ipt][0],2);
+      hmcTruthSq[ipt][0]->GetYaxis()->SetTitleOffset(3);
+      hmcTruthSq[ipt][0]->SetYTitle("#frac{d#sigma}{dp_{T}d(m/p_{T})} (#mub^{-1} GeV^{-1})");
       hmcTruthSq[ipt][0]->Draw("hist");
       drawSysUpDown( hdataUnfSq[ipt][0], sysPlus.pp[ipt], sysMinus.pp[ipt],  kOrange);
       hdataUnfSq[ipt][0]->Draw("same e");
       hmcTruthSq[ipt][0]->Draw("hist same");
-      
-      drawBin(xBin,ipt,"GeV",0.35 + (0.05* (ipt==lowPtBin)), 0.81,1,20);
+      if ( ipt > lowPtBin)  
+	drawPatch(0.,0.955, 0.5, 1);
+
+      drawBinPt(xBin,ipt,"GeV",0.2 + (0.15* (ipt==lowPtBin)), 0.75,1,15);
       if ( ipt == lowPtBin)  {
-	TLegend *leg = new TLegend(0.2388782,0.5308459,0.7592913,0.9024531,NULL,"brNDC");
-	easyLeg(leg,"",0.08);
+	TLegend *leg = new TLegend(0.3056911,0.5333334,0.7575784,0.8166667,NULL,"brNDC");
+	easyLeg(leg,"",0.06);
 	leg->AddEntry(hdataUnfSq[ipt][0],"Data","pl");
-	leg->AddEntry(hmcTruthSq[ipt][0],"PYTHIA","l");
+	leg->AddEntry(hmcTruthSq[ipt][0],"PYTHIA (scaled to data)","l");
 	leg->Draw();
 	if ( ipt == lowPtBin ) {
-	  drawCentrality(kSample, icent, 0.25,0.83,1,24);
-	  ATLASLabel(0.25,0.9,"Internal",0.085,0.28);
+	  //	  drawCentrality(kSample, icent, 0.32,0.75,1,20);
+	  ATLASLabel(0.32,0.85,"Internal",0.085,0.28);
 	}
       }
 
@@ -212,6 +203,8 @@ void comparePythiaData(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=
       handsomeTH1(hraioMCtemp[ipt][0],1);
       hraioMCtemp[ipt][0]->SetLineWidth(1);
       hraioMCtemp[ipt][0]->SetAxisRange(0.,2.2,"Y");
+      hraioMCtemp[ipt][0]->GetXaxis()->SetTitleOffset(1.7);
+      hraioMCtemp[ipt][0]->GetYaxis()->SetTitleOffset(2.7);
       hraioMCtemp[ipt][0]->Draw("hist");
       drawSysUpDown( hUnity, sysPlus.pp[ipt], sysMinus.pp[ipt],  kOrange);
       hraioMCtemp[ipt][0]->Draw("hist same");
@@ -222,16 +215,15 @@ void comparePythiaData(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=
       
       
       if (ipt == lowPtBin)   {
-	drawText("PYTHIA/data", 0.25, 0.9, 1);
+	drawText("PYTHIA/data", 0.32, 0.8, 1,20);
 	//	drawText(Form("reference iter. (%d)",vIter.at(refId)), 0.22, 0.82, 1);
       }
       gPad->RedrawAxis();
     }
     
     //    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
-    c2->Modified();
-    //    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
-  }
+  
+  c2->SaveAs("raaResults/PP_and_pythia.pdf");
 
 }  
 
