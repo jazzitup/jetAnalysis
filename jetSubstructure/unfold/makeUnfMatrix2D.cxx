@@ -321,8 +321,12 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	double theRtrk = getRtrk( kSample, icent, myJetMc.recoPt);
 	recoVarY = recoVarY * theRtrk;
       }
+      else if (nSys==213) { // JMS by Herwig
+	double theRtrk = getRtrkHerwig( kSample, icent, myJetMc.recoPt);
+        recoVarY = recoVarY / theRtrk;
+      }
       else if (nSys==211) { // JMS
-	recoVarY = recoVarY * 1.008;
+	recoVarY = recoVarY * 1.014;
       }
 
       if ( passEvent(myJetMc, icent, true) == false ) // true = isMC

@@ -162,7 +162,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       fixedFontHist(hmcTruthSq[ipt][0],2.5,2.5,20);
       hmcTruthSq[ipt][0]->SetAxisRange(0, maxY,"Y");
       hmcTruthSq[ipt][0]->SetAxisRange(0,0.239,"X");
-      handsomeTH1(hdataUnfSq[ipt][0],2);
+      handsomeTH1(hdataUnfSq[ipt][0],1);
       hmcTruthSq[ipt][0]->GetYaxis()->SetTitleOffset(3);
       hmcTruthSq[ipt][0]->SetYTitle("#frac{d#sigma}{d(m/p_{T})} (#mub^{-1})");
       hmcTruthSq[ipt][0]->Draw("hist");
@@ -176,7 +176,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       if ( ipt == lowPtBin)  {
 	TLegend *leg = new TLegend(0.3056911,0.5133334,0.7575784,0.7966667,NULL,"brNDC");
 	easyLeg(leg,"",0.06);
-	leg->AddEntry(hdataUnfSq[ipt][0],"Data","pl");
+	leg->AddEntry(hdataUnfSq[ipt][0],"pp data","pl");
 	leg->AddEntry(hmcTruthSq[ipt][0],"PYTHIA (scaled to data)","l");
 	leg->Draw();
 	if ( ipt == lowPtBin ) {
@@ -222,82 +222,9 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
     
     //    c2->SaveAs(Form("stabilitiy/data_coll%d_icent%d_matrixRwt%d_spectraRwt%d.pdf",kSample,icent,(int)matRwt, (int)specRwt));
   
-  c2->SaveAs("raaResults/PP_and_pythia.pdf");
-
+  c2->SaveAs("PPPYTHIAfigure_confnote.pdf");
+  
 }  
-
-/*
-  TCanvas* c11=  new TCanvas("c11","",1200,800);
-  //  c11->Divide((nPtBinDraw+1)/2,2);
-  makeMultiPanelCanvas(c11,(nPtBinDraw+1)/2,2);
-  for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
-    c11->cd(ipt - lowPtBin +1);
-    int lowestBin = findLowerBoundBin( theRatio[ipt],4,9);
-    double scaleFact = theRatio[ipt]->GetBinContent(lowestBin) ;
-    theRatio[ipt]->Scale(1./scaleFact);
-    theRatio[ipt]->SetAxisRange(0,9,"Y");
-    theRatio[ipt]->Draw();
-    jumSun(-0.02,1,0.09,1);
-    if ( ipt==lowPtBin)  drawCentrality(kSample, icent, 0.45,0.86,1,24);
-    //    drawText(Form("%dth iteration / 4th",vIter[in]),0.45,0.7,2,14);
-    drawBin(ptBin,ipt,"GeV",0.3,0.78,1,20);
-  }
-  c11->SaveAs(Form("pdfs/mcVsData_coll%d_icent%d_ratio.pdf",kSample,icent));
-  c11->SaveAs(Form("pdfs/mcVsData_coll%d_icent%d_ratio.png",kSample,icent));
-  
-  TH1D* hRatio[20][10];  // ipt, iteration
-  
-  for ( int in = 1 ; in< vIter.size() ; in++)  {//    for (int icent = 1 ; icent<=8 ; icent++)  { 
-    TCanvas* c2=  new TCanvas(Form("c2_%d",in),"",1200,800);
-    //    c2->Divide((nPtBinDraw+1)/2,2);
-    makeMultiPanelCanvas(c2,(nPtBinDraw+1)/2,2);
-    for ( int ipt = lowPtBin ; ipt<=highPtBin ; ipt++)  {
-      c2->cd(ipt - lowPtBin +1);
-      hmass[ipt][in]->Divide(hmass[ipt][0]);
-      hmass[ipt][in]->SetAxisRange(0,3,"Y");
-      hmass[ipt][in]->SetYTitle("Ratio");
-      if ( optY==1)  hmass[ipt][in]->SetAxisRange(0,30,"X");
-      else if ( optY==2) hmass[ipt][in]->SetAxisRange(0,0.27,"X");
-      if ( optY==1)    hmass[ipt][in]->SetXTitle("m (GeV)");
-      else if ( optY==2)    hmass[ipt][in]->SetXTitle("m/p_{T}");
-
-
-      hmass[ipt][in]->Draw("e");
-      if ( optY==1) jumSun(0,1,100,1);
-      else if ( optY==2) jumSun(0,1,0.27,1);
-      
-      if ( ipt==lowPtBin)  drawCentrality(kSample, icent, 0.45,0.85,1,24);
-      drawBin(ptBin,ipt,"GeV",0.45,0.76,1,18);
-      drawText(Form("%dth iteration / 4th",vIter[in]),0.45,0.65,2,16);
-      hRatio[ipt][in]  = (TH1D*)hmass[ipt][in]->Clone(Form("hmass_ipt%d_in%d",ipt,in));
-      
-    }
-    c2->SaveAs(Form("pdfs/unfoldingStability_coll%d_icent%d_nIter%d.pdf",kSample,icent,vIter[in]));
-  }
-  TCanvas* cOverlay=  new TCanvas("cOverlay","",1200,800);
-  makeMultiPanelCanvas(cOverlay,(nPtBinDraw+1)/2,2);
-  for ( int ipt = lowPtBin ; ipt<=highPtBin ; ipt++)  {
-    cOverlay->cd(ipt - lowPtBin +1);
-    TLegend *leg = new TLegend(0.2758281,0.0008063921,0.9970038,0.3762096,NULL,"brNDC");
-    easyLeg(leg,Form("Ratio to %dth iteration",vIter[0]));
-    for ( int in = 1 ; in< vIter.size() ; in++)  {  
-      handsomeTH1(hRatio[ipt][in], in);
-      hRatio[ipt][in]->SetAxisRange(0.5,1.5,"Y");
-      if ( in ==1 ) hRatio[ipt][in]->Draw();
-      else hRatio[ipt][in]->Draw("same");
-      if ( optY==1) jumSun(0,1,100,1);
-      else if ( optY==2) jumSun(0,1,0.27,1);
-      
-      if ( ipt==lowPtBin)  drawCentrality(kSample, icent, 0.45,0.88,1,24);
-      drawBin(ptBin,ipt,"GeV",0.45,0.80,1,18);
-      leg->AddEntry(hRatio[ipt][in], Form("Iter. %d",vIter[in])); 
-    }
-    if ( ipt == lowPtBin)  leg->Draw();
-  }
-  cOverlay->SaveAs(Form("pdfs/unfoldingStability_coll%d_icent%d_Overlay.pdf",kSample,icent));
-  cOverlay->SaveAs(Form("pdfs/unfoldingStability_coll%d_icent%d_Overlay.png",kSample,icent));
-}
-  */
 
 
 

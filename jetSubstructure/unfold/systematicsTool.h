@@ -478,6 +478,14 @@ double getRtrk(int kSample=0, int icent=0, double jetPt=0) {
   return p0  + p1 * log(jetPt) + p2 * log(jetPt)* log(jetPt);
 }
 
+double getRtrkHerwig(int kSample=0, int icent=0, double jetPt=0) {
+  double p0, p1, p2;
+  p0 =  1.26920e+00;
+  p1 =  -5.59201e-02;
+  p2 =  2.73860e-05;
+  return p0  + p1 * log(jetPt) + p2 * log(jetPt)* log(jetPt);
+}
+
 void addSysInQuad3(JetSys jstot, JetSys js1, int lowX, int highX) { 
   for ( int ix=lowX ; ix<=highX ; ix++) {
     addSysInQuad(jstot.pp[ix], js1.pp[ix]);
@@ -502,8 +510,9 @@ void getInverse(JetSys inputSys, JetSys outputSys,  int lowX, int highX) {
 double getJmrUnc(int kSample=0, int icent=0, double jetPt = 0) { 
 
   double pedestal = 0.2;
-  double baseline = 0.06 + 0.06* ((jetPt-300.)/150.) * ((jetPt-300.)/150.) ;
-  return  sqrt ( baseline*baseline + pedestal*pedestal) ;
+  double diffEmTopoHI = 0.06 + 0.06* ((jetPt-300.)/150.) * ((jetPt-300.)/150.) ;
+  //  return  sqrt ( diffEmTopoHI*diffEmTopoHI + pedestal*pedestal) ;
+  return  diffEmTopoHI + pedestal ;
 }
 
 double getJmrUncHI(int kSample=0, int icent=0, double jetPt = 0) { 

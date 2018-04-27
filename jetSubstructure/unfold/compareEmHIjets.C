@@ -119,6 +119,7 @@ void compareEmHIjets() {
   handsomeTH1(hmcSigma,1);
   handsomeTH1(hdataSigma,1);
   hdataSigma->Divide(hmcSigma);
+  hdataSigma->SetYTitle("HIAlgo/EMTopo");
   hdataSigma->SetAxisRange(0.5,1.5,"Y");
   hdataSigma->Draw();
   

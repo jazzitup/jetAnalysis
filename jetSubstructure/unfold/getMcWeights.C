@@ -556,8 +556,6 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 	recoY = theCenter + recoDev * genRandom.Gaus(1, theVariation * theResol);  
 	//	recoY = theCenter + recoDev * genRandom.Gaus(1, 0.66 * theResol);  
       }
-
-      
       if (nSys==210) { // JMS
 	double theRtrk = getRtrk( kSample, icent, myJetMc.recoPt);
 	recoY = recoY * theRtrk;
@@ -565,7 +563,10 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
       if (nSys==211) { // JMS
 	recoY = recoY * 1.008;
       }
-      
+      if (nSys==213) { // JMS by Herwig
+	double theRtrk = getRtrkHerwig( kSample, icent, myJetMc.recoPt);
+	recoY = recoY / theRtrk;
+      }
       
       hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);
       hmcTruth->Fill( genX, genY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);

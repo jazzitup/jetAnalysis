@@ -3,7 +3,7 @@
 
 void groomHist(TH1D* h1) {
   h1->SetAxisRange(0.001,0.23,"X");
-  h1->SetAxisRange(-0.55,0.55,"Y");
+  h1->SetAxisRange(-0.98,0.98,"Y");
   h1->SetXTitle("m^{jet}/p_{T}^{jet}");
   h1->SetYTitle("Relative Uncertainty");
   h1->SetNdivisions(505,"X");
@@ -12,7 +12,7 @@ void groomHist(TH1D* h1) {
 
 }
 
-void getSystematics(int icent = 0, bool drawPP = false) {
+void getSystematics(int icent = 0, bool drawPP = true) {
   int optX = 1;  int optY = 2;
   int nXbins;  double xBin[30];
   getXbin(nXbins, xBin, optX);
@@ -25,11 +25,17 @@ void getSystematics(int icent = 0, bool drawPP = false) {
 
   vector<int> vIndPlus;
   vector<int> vIndMinus;
+
   int indexJER = 100;
+
   int indexJMR0 = 200;
   int indexJMR1 = 201;
+
   int indexJMS0 = 210;
-  int indexJMS1 = 211;
+  int indexJMS1 = 211; // EV
+  int indexJMS2 = 213; // herwig 
+  // int indexJMS3 = 212; // MV
+
   /*  for ( int i=0 ; i<=21 ; i++)   {
       if (i%2 == 0)  vIndPlus.push_back(i);  // pp JES
       else           vIndMinus.push_back(i);  // pp JES
@@ -57,10 +63,13 @@ void getSystematics(int icent = 0, bool drawPP = false) {
   JetSys sysJerInv;
 
   JetSys sysJms;
-  JetSys sysJmr;
+  JetSys sysJms1;
+  JetSys sysJms2;
 
-  JetSys sysJms1;  // place holders
+  JetSys sysJmr;
   JetSys sysJmr1;
+  JetSys sysJmr2;
+
 
   JetSys sysJmsInv;
   JetSys sysJmrInv;
@@ -85,9 +94,12 @@ void getSystematics(int icent = 0, bool drawPP = false) {
 
   sysJms    = getSystematicsJES(icent, indexJMS0 );
   sysJms1    = getSystematicsJES(icent, indexJMS1 );
+  sysJms2    = getSystematicsJES(icent, indexJMS2 );
   addSysInQuad3(sysJms, sysJms1, lowPtBin, highPtBin);
+  addSysInQuad3(sysJms, sysJms2, lowPtBin, highPtBin);
 
-  sysJmr    = getSystematicsJES(icent, indexJMR0 );
+
+  sysJmr     = getSystematicsJES(icent, indexJMR0 );
   sysJmr1    = getSystematicsJES(icent, indexJMR1 );
   addSysInQuad3(sysJmr, sysJmr1, lowPtBin, highPtBin);
   
@@ -215,6 +227,7 @@ void getSystematics(int icent = 0, bool drawPP = false) {
       else                         handsomeTH1(sysPlus[ind].pp[ix], kRed + ind-10);  // pbpb
       groomHist(sysPlus[ind].pp[ix]);
       jumSun(0,0,0.24,0);
+      sysPlus[ind].pp[ix]->SetAxisRange(-0.15,0.15,"Y");
       if ( ind == 0 )   sysPlus[ind].pp[ix]->Draw("hist");
       else       sysPlus[ind].pp[ix]->Draw("same hist");
  
@@ -231,6 +244,7 @@ void getSystematics(int icent = 0, bool drawPP = false) {
       else                         handsomeTH1(sysPlus[ind].pbpb[ix], kRed + ind-10);  // pbpb
       groomHist(sysPlus[ind].pbpb[ix]);
       jumSun(0,0,0.24,0);
+      sysPlus[ind].pbpb[ix]->SetAxisRange(-0.15,0.15,"Y");
       if ( ind == 0 )   sysPlus[ind].pbpb[ix]->Draw("hist");
       else       sysPlus[ind].pbpb[ix]->Draw("same hist");
     }
@@ -242,6 +256,7 @@ void getSystematics(int icent = 0, bool drawPP = false) {
       else                         handsomeTH1(sysPlus[ind].raa[ix], kRed + ind-10);  // pbpb
       groomHist(sysPlus[ind].raa[ix]);
       jumSun(0,0,0.24,0);
+      sysPlus[ind].raa[ix]->SetAxisRange(-0.15,0.15,"Y");
       if ( ind == 0 )   sysPlus[ind].raa[ix]->Draw("hist");
       else       sysPlus[ind].raa[ix]->Draw("same hist");
     }
@@ -265,6 +280,7 @@ void getSystematics(int icent = 0, bool drawPP = false) {
       else                         handsomeTH1(sysMinus[ind].pp[ix], kRed + ind-10);  // pbpb
       groomHist(sysMinus[ind].pp[ix]);
       jumSun(0,0,0.24,0);
+      sysMinus[ind].pp[ix]->SetAxisRange(-0.15,0.15,"Y");
       if ( ind == 0 )   sysMinus[ind].pp[ix]->Draw("hist");
       else       sysMinus[ind].pp[ix]->Draw("same hist");
     } 
@@ -279,6 +295,7 @@ void getSystematics(int icent = 0, bool drawPP = false) {
       else                         handsomeTH1(sysMinus[ind].pbpb[ix], kRed + ind-10);  // pbpb
       groomHist(sysMinus[ind].pbpb[ix]); 
       jumSun(0,0,0.24,0);
+      sysMinus[ind].pbpb[ix]->SetAxisRange(-0.15,0.15,"Y");
       if ( ind == 0 )   sysMinus[ind].pbpb[ix]->Draw("hist");
       else       sysMinus[ind].pbpb[ix]->Draw("same hist");
     }
@@ -290,6 +307,7 @@ void getSystematics(int icent = 0, bool drawPP = false) {
       else                         handsomeTH1(sysMinus[ind].raa[ix], kRed + ind-10);  // pbpb
       groomHist(sysMinus[ind].raa[ix]);
       jumSun(0,0,0.24,0);
+      sysMinus[ind].raa[ix]->SetAxisRange(-0.15,0.15,"Y");
       if ( ind == 0 )   sysMinus[ind].raa[ix]->Draw("hist");
       else       sysMinus[ind].raa[ix]->Draw("same hist");
     }

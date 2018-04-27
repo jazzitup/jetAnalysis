@@ -94,6 +94,12 @@ void drawBin(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp
   else if ( xBin[ix-1] >= 0.0001 ) drawText( Form("%.5f - %.5f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
   else  drawText( Form("%.5f - %.5f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
 }
+void drawBinPt(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
+  drawText( Form("%d < p_{T}^{jet} < %d %s", (int)(xBin[ix-1]),  (int)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
+}
+void drawBinPt2(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
+  drawText( Form("%d < p_{T}^{jet} < %d %s", (int)(xBin[ix-1]),  (int)(xBin[ix+1]), demen.Data()) , xp,yp,textColor,textSize) ;
+}
 
 TString textBin(double *xBin, int ix, TString demen = "GeV") {
   if ( xBin[ix-1] >= 1  ) return Form("%d - %d %s", (int)(xBin[ix-1]),  (int)(xBin[ix]), demen.Data()) ;

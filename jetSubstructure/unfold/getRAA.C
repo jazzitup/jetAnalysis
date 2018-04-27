@@ -11,8 +11,9 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
   int nIterPP = getRefIter(0,0);
   int nIterAA = getRefIter(1,icent);
   
-  //int nIterPP = 6 ;
-  //  int nIterAA = 6 ;
+  
+  //  nIterPP = 6 ;
+  //  nIterAA = 6 ;
   
   int nXbins;
   double xBin[30];
@@ -23,7 +24,7 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
   getYbin(nYbins, yBin, optY);
   TH1D* tempHistYsq;
   if ( optY == 1 ) tempHistYsq = new TH1D("tempHistY",";mass(GeV);",nYbins,yBin);
-  if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m/p_{T};",nYbins,yBin);
+  if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m^{jet}/p_{T}^{jet};",nYbins,yBin);
 
   int lowPtBin = 6;
   int highPtBin = 11;
@@ -69,7 +70,7 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     if ( optY==1)  hPPUnfSq[ipt]->SetAxisRange(-300,2000,"X");
     else if ( optY==2) hPPUnfSq[ipt]->SetAxisRange(0.001,0.239,"X");
     if ( optY==1)    hPPUnfSq[ipt]->SetXTitle("m (GeV)");
-    else if ( optY==2)    hPPUnfSq[ipt]->SetXTitle("m/p_{T}");
+    else if ( optY==2)    hPPUnfSq[ipt]->SetXTitle("m^{jet}/p_{T}^{jet}");
     
     hPPUnfSq[ipt]->SetYTitle("Cross section (#mub^{-1} GeV^{-1})");
     handsomeTH1(hPPUnfSq[ipt],1);
@@ -115,7 +116,7 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     if ( optY==1)  hRAA[ipt]->SetAxisRange(-300,2000,"X");
     else if ( optY==2) hRAA[ipt]->SetAxisRange(0.001,0.239,"X");
     if ( optY==1)    hRAA[ipt]->SetXTitle("m (GeV)");
-    else if ( optY==2)    hRAA[ipt]->SetXTitle("m/p_{T}");
+    else if ( optY==2)    hRAA[ipt]->SetXTitle("m^{jet}/p_{T}^{jet}");
     
     hRAA[ipt]->SetNdivisions(505,"X");
     hRAA[ipt]->SetAxisRange( -0.05,1.99,"Y");
@@ -158,8 +159,8 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     drawText("#it{pp} 25 pb^{-1}, PbPb 0.49 nb^{-1}",0.1,0.86,1,16);
     //    drawText("PbPb 0.49 nb^{-1}",0.4,0.78,1,15);
     }
-    if ( ipt==lowPtBin)  drawBin(xBin,ipt,"GeV",0.35,0.78,1,16);
-    else drawBin(xBin,ipt,"GeV",0.35,0.68,1,16);
+    if ( ipt==lowPtBin)  drawBinPt(xBin,ipt,"GeV",0.35,0.78,1,16);
+    else drawBinPt(xBin,ipt,"GeV",0.20,0.78,1,16);
     gPad->RedrawAxis();
     
   }

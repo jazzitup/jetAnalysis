@@ -201,6 +201,48 @@ void drawSys(TH1 *h,TH1 *sys, int theColor= kYellow, int fillStyle = -1, int lin
     }
 }
 
+
+
+void drawSysUp(TH1 *h,TH1 *sys, int theColor= kYellow, int fillStyle = -1, int lineStyle = -1)
+{
+  for (int i=1;i<=h->GetNbinsX();i++)
+    {
+      double val = h->GetBinContent(i);
+      double err = val* fabs(sys->GetBinContent(i));
+      if (err == 0  ) continue;
+      TBox *b = new TBox(h->GetBinLowEdge(i),val,h->GetBinLowEdge(i+1),val+err);
+      b->SetLineColor(theColor);
+      b->SetFillColor(theColor);
+      if ( fillStyle > -1 ) b->SetFillStyle(fillStyle);
+      if ( lineStyle > -1 ) b->SetLineStyle(lineStyle);
+
+      b->Draw();
+    }
+}
+void drawSysDown(TH1 *h,TH1 *sys, int theColor= kYellow, int fillStyle = -1, int lineStyle = -1)
+{
+  for (int i=1;i<=h->GetNbinsX();i++)
+    {
+      double val = h->GetBinContent(i);
+      double err = val* fabs(sys->GetBinContent(i));
+      if (err == 0  ) continue;
+      TBox *b = new TBox(h->GetBinLowEdge(i),val-err,h->GetBinLowEdge(i+1),val);
+      b->SetLineColor(theColor);
+      b->SetFillColor(theColor);
+      if ( fillStyle > -1 ) b->SetFillStyle(fillStyle);
+      if ( lineStyle > -1 ) b->SetLineStyle(lineStyle);
+
+      b->Draw();
+    }
+}
+
+void drawSysUpDown(TH1 *h,TH1 *sysUp, TH1 *sysDown, int theColor= kYellow, int fillStyle = -1, int lineStyle = -1)  {
+  drawSysUp(h,sysUp, theColor, fillStyle, lineStyle);
+  drawSysDown(h,sysDown, theColor, fillStyle, lineStyle);
+}
+
+
+
 void drawSysAbs(TH1 *h,TH1 *sys, int theColor= kYellow, int fillStyle = -1, int lineStyle = -1)
 {
    for (int i=1;i<=h->GetNbinsX();i++)
@@ -245,7 +287,7 @@ void multiplyBonA(TH1* h1, TH1* h2) {
 }
 
 void drawPatch(float x1, float y1, float x2, float y2, int color =0, int style=1001, TString ops=""){
-  TLegend *t1=new TLegend(x1,y1,x2,y2,NULL,ops.Data());
+  TLegend *t1=new TLegend(x1,y1,x2,y2,NULL,"brNDC");
    if ( color ==0) t1->SetFillColor(kWhite);
    else t1->SetFillColor(color);
    t1->SetBorderSize(0);

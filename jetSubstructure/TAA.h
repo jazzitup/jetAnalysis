@@ -37,6 +37,10 @@ double getNEvent(int icent, double lumi = 0.49) { // 0.49 nb
     return 0;
 }
 
+void scaleByPtBinWidth(TH1D* hpp, double *xBin, int ix) {
+  hpp->Scale( 1./ (xBin[ix] - xBin[ix-1]) );
+}
+
 void CsScalePP( TH1D* hpp) {
   hpp->Scale( 1. / 25300000. );  // 25300 nb-1 =  25.3 pb-1
 }

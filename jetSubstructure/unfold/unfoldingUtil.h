@@ -3,21 +3,21 @@
 
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-  if ( icent ==3 )  return true;
-  if ( icent ==6 )  return true;
   if ( icent ==1 )  return true;
   if ( icent ==2 )  return true;
+  if ( icent ==3 )  return true;
   if ( icent ==4 )  return true;
   if ( icent ==5 )  return true;
+  if ( icent ==6 )  return true;
   else return false; 
   return 0;
 }
 
 
 TH2D* getRewTable(int kSample, int icent)  { 
-  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50.root"); // Default, set in Apr 7
-  //  int nSys = 210;  TFile* fReweight = new TFile(Form("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50_nSys%d.root",nSys));   cout << " Using nSys = " << nSys << "table!! " << endl << endl << endl;
-  
+  //TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50.root"); // Default, set in Apr 7
+  int nSys = 213;  TFile* fReweight = new TFile(Form("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50_nSys%d.root",nSys));   cout << " Using nSys = " << nSys << "table!! " << endl << endl << endl;
+
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized.root"); // Mar 28
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_fcalWeighted.root");
   TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent));  // 00 default

@@ -12,7 +12,7 @@ using std::endl;
 #include "../JssUtils.h"
 #include <TPaletteAxis.h>
 
-double statUsed = 01;
+double statUsed = 001;
 
 int lowPtBin = 1;  int highPtBin = 13;
 
@@ -55,7 +55,7 @@ double errPeak(TF1* f) {
   return e1; 
 }
 
-void getTrkR(int kSample = kPbPb, int icent=0) {   // opt1 : mass,   opt2 : m/pT  
+void getTrkR(int kSample = kPP, int icent=0) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
 
   int optX = 1;    int optY = 2;  
@@ -181,6 +181,14 @@ void getTrkR(int kSample = kPbPb, int icent=0) {   // opt1 : mass,   opt2 : m/pT
   hTrkR->Draw();
   jumSun(xBin[0],1, xBin[nXbins],1);
   drawCentrality(kSample, icent, 0.60,0.86,1,24);
+  
+  TF1* f2 = new TF1("f2","2- ([0] +log(x)*[1] + log(x)*log(x)*[2])",xBin[0], xBin[nXbins]);
+  f2->SetParameter( 0, f1->GetParameter(0));  
+  f2->SetParameter( 1, f1->GetParameter(1));  
+  f2->SetParameter( 2, f1->GetParameter(2));
+  f2->SetLineColor(2);
+  f2->SetLineStyle(2);
+  //  f2->Draw("same");
   c3->SaveAs(Form("pdfsJMS/trkR_kSample%d_cent%d.pdf",kSample,icent));
 }
 
@@ -263,7 +271,6 @@ void getMCR(int kSample, int icent, TH2D* hmc) {
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
     for (Int_t i= 0; i<tr->GetEntries() ; i++) {
       if ( i > tr->GetEntries() * statUsed ) break;
-      if (i%2==0)  continue;
 
       tr->GetEntry(i);
 

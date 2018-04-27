@@ -143,6 +143,8 @@ void getPbPbCs(int optX=1, int optY=2 ) {
   // lumi uncertainty 
   // double lumiUnc = getLumiRelErr(icent);
   // drawErrorBox( 0, 1-lumiUnc, 0.025, 1+lumiUnc, 1);
+
+  c1->SaveAs("PbPbfigure_confnote.pdf");
   
 }
 
