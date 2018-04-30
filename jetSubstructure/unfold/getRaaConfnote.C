@@ -1,4 +1,3 @@
-
 #include "../TAA.h"
 #include "systematicsTool.h"
 
@@ -7,7 +6,7 @@ JetSys getFinalSys(int icent =0, int nVar=0);
 void narrowSys( TH1D* hsys=0, double xlow=0, double xhigh=0);
 
 
-void getPbPbCs(int optX=1, int optY=2 ) {
+void getRaaConfnote(int optX=1, int optY=2 ) {
 
   int nIterPP = getRefIter(0,0);
   int nIterAA = nIterPP; 
@@ -47,8 +46,9 @@ void getPbPbCs(int optX=1, int optY=2 ) {
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
   }
   
-  TCanvas *c1 = new TCanvas("c1", "",4,45,1050,1200);
-  makeMultiPanelCanvas(c1,nCols, nPtPannels, 0.0, 0.01, 0.15, 0.25, 0.05);
+  TCanvas *c1 = new TCanvas("c1", "",4,45,900,1200);
+  //  makeMultiPanelCanvas(c1,nPtPannels, nCols, 0.0, 0.01, 0.35, 0.25, 0.05);
+  makeMultiPanelCanvas(c1,nCols, nPtPannels, 0.0, 0.01, 0.2, 0.25, 0.05);
   //c1->Divide(nPtPannels, 2);
   
   for ( int ii = 0 ; ii < nCols ; ii++) 	{ 
@@ -80,100 +80,72 @@ void getPbPbCs(int optX=1, int optY=2 ) {
   for ( int ii = 0 ; ii < nCols ; ii++)   {
     for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
       c1->cd(ii+1+ (ipt-lowPtBin)*nCols);
-
-      c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetRightMargin(0.01);
-      if ( ii == 0)
-        c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetLeftMargin(0.38);
-      else
-        c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetLeftMargin(0.33);
-
-      //      if ( ipt != lowPtBin) 
-      //	c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetTopMargin(0.15);
       
-      if (   (ipt == highPtBin) && ( vCent[ii] >= 5) )  {
-        c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetBottomMargin(0.99999);
-	TH1D* dummyHist = (TH1D*)hPbPbUnfSq[ipt][ii-1]->Clone("dummyhist");
-        dummyHist->Reset();
-        dummyHist->SetAxisRange(2.1,2.4,"Y");
-        dummyHist->GetYaxis()->SetLabelColor(0);
-        dummyHist->SetYTitle("");
-        dummyHist->DrawCopy();
-        continue;
-
+      c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetRightMargin(0.01);
+      if ( ii == 0)     
+	c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetLeftMargin(0.32);
+      else 
+	c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetLeftMargin(0.15);
+      
+      if (   (ipt == highPtBin) && ( vCent[ii] >= 5) )  { 
+	c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetBottomMargin(0.99999);
+	
+	TH1D* dummyHist = (TH1D*)hRAA[ipt][ii-1]->Clone("dummyhist");
+	dummyHist->Reset();
+	dummyHist->SetAxisRange(2.1,2.4,"Y");
+	dummyHist->GetYaxis()->SetLabelColor(0);
+	dummyHist->DrawCopy();
+	//	drawPatch(0,0.8,0.133,1.0);
+	continue;
+	
       }
       
-      //      hPbPbUnfSq[ipt][ii]->SetAxisRange(0.001,0.239,"X");
-      //      hPbPbUnfSq[ipt][ii]->SetXTitle("m^{jet}/p_{T}^{jet}");
-      //      hPbPbUnfSq[ipt][ii]->SetYTitle("#frac{1}{N_{evt}} #frac{dN^{jet}}{dp_{T}d(m/p_{T})}  (GeV^{-1})");
-      handsomeTH1(hPPUnfSq[ipt][ii],1);
-      hPPUnfSq[ipt][ii]->SetMarkerStyle(24);
-      handsomeTH1(hPbPbUnfSq[ipt][ii],1);
-      //    scaleInt(hPPUnfSq[ipt][ii]);
-      //    scaleInt(hPbPbUnfSq[ipt][ii]);
-
       // CS -> dN/dm
       hPbPbUnfSq[ipt][ii]->Scale( getTaa(vCent[ii]) / 1000.);
 
-      //      if ( ii==2)   {
-      //	hPbPbUnfSq[ipt][ii]->Scale(100);
-      //      }
-      TGaxis::SetMaxDigits(8);
-
-      hPbPbUnfSq[ipt][ii]->SetYTitle("#frac{1}{N_{evt}} #frac{dN^{jet}}{d(m/p_{T})}");
-      if ( (ipt > lowPtBin+1)) {
-	hPbPbUnfSq[ipt][ii]->Scale(1000);
-	hPbPbUnfSq[ipt][ii]->SetYTitle("#frac{1}{N_{evt}} #frac{dN^{jet}}{d(m/p_{T})} #times10^{3}");
+      if ( ii==2)   {
+	hPbPbUnfSq[ipt][ii]->Scale(100);
       }
-      //      else if ( ipt > lowPtBin+3)    {
-      //	hPbPbUnfSq[ipt][ii]->Scale(1000000);
-      //	hPbPbUnfSq[ipt][ii]->SetYTitle("#frac{1}{N_{evt}} #frac{dN^{jet}}{d(m/p_{T})} #times10^{6}");
-      //      }
 
-      double maxY = cleverRange(hPbPbUnfSq[ipt][ii],2,0.00000001);
-      hPbPbUnfSq[ipt][ii]->SetAxisRange(0, 0.2399,"X");
-      hPbPbUnfSq[ipt][ii]->SetAxisRange(0, maxY,"Y");
-      hPbPbUnfSq[ipt][ii]->SetNdivisions(505,"X");
-      hPbPbUnfSq[ipt][ii]->SetNdivisions(505,"Y");
-      hPbPbUnfSq[ipt][ii]->GetYaxis()->SetDrawOption("G");
-      fixedFontHist(hPbPbUnfSq[ipt][ii],2.5,2.5,20);
-      hPbPbUnfSq[ipt][ii]->GetXaxis()->SetTitleOffset(5.5);
-      hPbPbUnfSq[ipt][ii]->GetYaxis()->SetTitleSize(17);
-      hPbPbUnfSq[ipt][ii]->GetYaxis()->SetTitleOffset(8);
-      hPbPbUnfSq[ipt][ii]->Draw();
-      drawSysUpDown( hPbPbUnfSq[ipt][ii], sysPlus[ii].pbpb[ipt],  sysMinus[ii].pbpb[ipt], kCyan+1);
-      hPbPbUnfSq[ipt][ii]->Draw("same");
+      hRAA[ipt][ii]->SetAxisRange(0, 0.2399,"X");
+      hRAA[ipt][ii]->SetAxisRange(0.01, 2.19,"Y");
+      hRAA[ipt][ii]->SetNdivisions(505,"X");
+      hRAA[ipt][ii]->SetNdivisions(505,"Y");
+      fixedFontHist(hRAA[ipt][ii],2.5,2.5,20);
+      hRAA[ipt][ii]->GetXaxis()->SetTitleOffset(5);
+      hRAA[ipt][ii]->SetYTitle("R_{AA}");
+      if ( ii>0)       hRAA[ipt][ii]->SetYTitle("");
+      hRAA[ipt][ii]->GetYaxis()->SetTitleSize(17);
+      hRAA[ipt][ii]->GetYaxis()->SetTitleOffset(6);
+      hRAA[ipt][ii]->Draw();
+      jumSun(0,1,0.24,1);
+      drawSysUpDown( hRAA[ipt][ii], sysPlus[ii].raa[ipt],  sysMinus[ii].raa[ipt], kOrange);
+      // lumi uncertainty
+      double lumiUnc = getLumiRelErr(vCent[ii]);
+      drawErrorBox( 0, 1-lumiUnc, 0.025, 1+lumiUnc, 1);
+      hRAA[ipt][ii]->Draw("same");
       
-      if ( ii<2)   drawPatch(0,0,0.4,0.06);
-      else    drawPatch(0,0,0.32,0.06);
-
-      if ( (ipt==highPtBin) && (ii==0) ) 
-	drawPatch(0,0.95,0.8,1);
-      if ( (ipt==highPtBin-1) && (ii==2) ) 
-	drawPatch(0,0.95,0.8,1);
-
-
+      
       if ( (ipt == lowPtBin ) && ( ii == 0 ) )
-        ATLASLabel(0.42,0.84,"Internal",0.10,0.18);
+	ATLASLabel(0.39,0.84,"Internal",0.11,0.18);
       if (ipt == lowPtBin )
-	drawCentrality(kPbPb, vCent[ii], 0.42,0.73,1,20);
+      drawCentrality(kPbPb, vCent[ii], 0.39,0.73,1,20);
       if ( ii == 0 ) {
-        if (ipt == lowPtBin )
-          drawBinPt(xBin,ipt,"GeV", 0.42 ,0.58,1,18);
-        else if (ipt != highPtBin )
-          drawBinPt(xBin,ipt,"GeV", 0.42 ,0.78,1,18);
-        else if (ipt == highPtBin )
-          drawBinPt(xBin,ipt,"GeV", 0.42 ,0.85,1,18);
+	if (ipt < highPtBin )	
+	  drawBinPt(xBin,ipt,"GeV", 0.4 ,0.58,1,18);
+	if (ipt == highPtBin )
+	  drawBinPt(xBin,ipt,"GeV", 0.4 ,0.68,1,18);
       }
       gPad->RedrawAxis();
+      
       //      if ( (ii==0) && (ipt > lowPtBin) )
       //	drawPatch(0.,0.955, 0.5, 1);
     }}
   // lumi uncertainty 
   // double lumiUnc = getLumiRelErr(icent);
   // drawErrorBox( 0, 1-lumiUnc, 0.025, 1+lumiUnc, 1);
-
-  c1->SaveAs("PbPbfigure_confnote.pdf");
   
+  c1->SaveAs("raaFigure_confNote.pdf");
 }
 
 

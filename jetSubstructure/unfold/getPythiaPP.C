@@ -146,11 +146,14 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
   }
   
   
-  TCanvas* c2 =  new TCanvas("c2","",1200,550);
-  makeMultiPanelCanvas(c2,nPtPannels, 2,0,0,0.3); //,0.01, 0.01, 0.2, 0.3, 0.0);
+  TCanvas* c2 =  new TCanvas("c2","",700,1000);
+  //  makeMultiPanelCanvas(c2,nPtPannels, 2,0,0,0.3); //,0.01, 0.01, 0.2, 0.3, 0.0);
+  makeMultiPanelCanvas(c2,2, nPtPannels, 0.0, 0.01, 0.2, 0.25, 0.05);
   
     for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
-      c2->cd(ipt - lowPtBin+1);
+      c2->cd((ipt - lowPtBin+1)*2 -1);
+      c2->cd((ipt - lowPtBin+1)*2-1)->SetRightMargin(.01);
+      c2->cd((ipt - lowPtBin+1)*2-1)->SetLeftMargin(.32);
       
       narrowSys( sysPlus.pp[ipt], 0, 0.24);
       narrowSys( sysPlus.pbpb[ipt], 0, 0.24);
@@ -165,36 +168,41 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       
       double normalization = hdataUnfSq[ipt][0]->Integral("w") / hmcTruthSq[ipt][0]->Integral("w"); 
       hmcTruthSq[ipt][0]->Scale(normalization);
-      double maxY = cleverRange(hmcTruthSq[ipt][0],2.,0);
+      double maxY = cleverRange(hmcTruthSq[ipt][0],2.,0.000000001);
       handsomeTH1(hmcTruthSq[ipt][0],1);
       hmcTruthSq[ipt][0]->SetNdivisions(505,"Y");
       fixedFontHist(hmcTruthSq[ipt][0],2.5,2.5,20);
-      hmcTruthSq[ipt][0]->SetAxisRange(0, maxY,"Y");
       hmcTruthSq[ipt][0]->SetAxisRange(0,0.239,"X");
       handsomeTH1(hdataUnfSq[ipt][0],1);
-      hmcTruthSq[ipt][0]->GetYaxis()->SetTitleOffset(3);
+      hmcTruthSq[ipt][0]->GetYaxis()->SetTitleOffset(6);
       hmcTruthSq[ipt][0]->SetYTitle("#frac{d#sigma}{d(m/p_{T})} (#mub^{-1})");
+      hmcTruthSq[ipt][0]->SetNdivisions(505,"X");
+      hmcTruthSq[ipt][0]->SetAxisRange(0.000001, maxY,"Y");
+      if ( ipt == lowPtBin ) 
+      hmcTruthSq[ipt][0]->SetAxisRange(0.000001, maxY*1.3,"Y");
+
       hmcTruthSq[ipt][0]->Draw("hist");
       drawSysUpDown( hdataUnfSq[ipt][0], sysPlus.pp[ipt], sysMinus.pp[ipt],  kSpring);
       hdataUnfSq[ipt][0]->Draw("same e");
       hmcTruthSq[ipt][0]->Draw("hist same");
-      if ( ipt > lowPtBin)  
-	drawPatch(0.,0.955, 0.5, 1);
+      
+      drawPatch(0.,0,0.315,0.1);
 
-      drawBinPt(xBin,ipt,"GeV",0.17 + (0.18* (ipt==lowPtBin)), 0.75,1,18);
+      drawBinPt(xBin,ipt,"GeV",0.35, 0.68,1,18);
       if ( ipt == lowPtBin)  {
-	TLegend *leg = new TLegend(0.3056911,0.5133334,0.7575784,0.7966667,NULL,"brNDC");
-	easyLeg(leg,"",0.06);
+	TLegend* leg = new TLegend(0.3272508,0.4217734,0.7811794,0.7297419,NULL,"brNDC");
+	easyLeg(leg,"",0.1);
 	leg->AddEntry(hdataUnfSq[ipt][0],"pp data","pl");
-	leg->AddEntry(hmcTruthSq[ipt][0],"PYTHIA (scaled to data)","l");
+	leg->AddEntry(hmcTruthSq[ipt][0],"PYTHIA+Herwig","l");
 	leg->Draw();
 	if ( ipt == lowPtBin ) {
 	  //	  drawCentrality(kSample, icent, 0.32,0.75,1,20);
-	  ATLASLabel(0.32,0.85,"Internal",0.085,0.28);
+	  ATLASLabel(0.35,0.82,"Internal",0.12,0.16);
 	}
       }
 
-      c2->cd(ipt - lowPtBin + 1 + nPtPannels);
+      c2->cd((ipt - lowPtBin+1)*2);
+      c2->cd((ipt - lowPtBin+1)*2)->SetLeftMargin(.15);
       
       TH1D* hUnity = (TH1D*)hdataUnfSq[ipt][0]->Clone("hUnity");
       makeUnityWithErr(hUnity);
@@ -207,9 +215,9 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       fixedFontHist(hraioMCtemp[ipt][0],2.5,2.5,20);
       handsomeTH1(hraioMCtemp[ipt][0],1);
       hraioMCtemp[ipt][0]->SetLineWidth(1);
-      hraioMCtemp[ipt][0]->SetAxisRange(0.,2.2,"Y");
+      hraioMCtemp[ipt][0]->SetAxisRange(0.1,2.19,"Y");
       hraioMCtemp[ipt][0]->GetXaxis()->SetTitleOffset(1.7);
-      hraioMCtemp[ipt][0]->GetYaxis()->SetTitleOffset(2.7);
+      hraioMCtemp[ipt][0]->GetYaxis()->SetTitleOffset(3.3);
       hraioMCtemp[ipt][0]->Draw("hist");
       drawSysUpDown( hUnity, sysPlus.pp[ipt], sysMinus.pp[ipt],  kSpring);
       hUnity->DrawCopy("same");
@@ -217,11 +225,11 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       
 
       //	else   hdataRatioSq[ipt][in]->Draw("same");
-      if ( optY == 2)  jumSun(0,1,0.3,1);
+      if ( optY == 2)  jumSun(0,1,0.24,1);
       
       
       if (ipt == lowPtBin)   {
-	drawText("PYTHIA/data", 0.35, 0.8, 1,20);
+	drawText("(PYTHIA+Herwig)/data", 0.3, 0.8, 1,18);
 	//	drawText(Form("reference iter. (%d)",vIter.at(refId)), 0.22, 0.82, 1);
       }
       gPad->RedrawAxis();
