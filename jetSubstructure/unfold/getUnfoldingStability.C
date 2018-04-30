@@ -230,7 +230,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
       else if ( vIter[in] == 3 ) leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%drd iter.",vIter[in]));
       else  leg1->AddEntry(hdataUnfSq[lowPtBin][in], Form("%dth iter.",vIter[in]));
     }
-    leg1->AddEntry( hmcTruthSq[lowPtBin][0], "PYTHIA","l");
+    //    leg1->AddEntry( hmcTruthSq[lowPtBin][0], "PYTHIA","l");
     leg1->Draw();
 
 
@@ -256,7 +256,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
 	gPad->SetLogy();
 	
       }
-      hmcTruthSq[ipt][0]->Draw("same hist");
+      //      hmcTruthSq[ipt][0]->Draw("same hist");
       drawBin(xBin,ipt,"GeV",0.2 + (0.05* (ipt==lowPtBin)), 0.7,1,18);
 	
       if ( ipt == lowPtBin ) {
@@ -302,7 +302,7 @@ void getUnfoldingStability(int kSample= kPP, int icent = 0, bool matRwt=1, bool 
 	  handsomeTH1(hraioMCtemp[ipt][refId],1);
 	  hraioMCtemp[ipt][refId]->SetLineWidth(2);
 	  hraioMCtemp[ipt][refId]->SetAxisRange(0.55,1.45,"Y");
-	  hraioMCtemp[ipt][refId]->Draw("hist same");
+	  //	  hraioMCtemp[ipt][refId]->Draw("hist same");
       
 	  drawFirst=false;  
 	}

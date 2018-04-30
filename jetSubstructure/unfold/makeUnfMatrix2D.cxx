@@ -328,6 +328,9 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       else if (nSys==211) { // JMS
 	recoVarY = recoVarY * 1.014;
       }
+      else if (nSys==217) { // JMS by Herwig
+        recoVarY = recoVarY * 1.05;
+      }
 
       if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
 	continue;

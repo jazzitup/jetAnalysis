@@ -71,7 +71,7 @@ int optX=1; int optY=2;
 
     //    int fScale = 5;
     //    if ( ipt > lowPtBin + 2)  hStat[ipt]->Scale(1./fScale);
-    if ( icent <=3)  hStat[ipt]->SetAxisRange(-0.05,0.21,"Y");
+    if ( icent <=3)  hStat[ipt]->SetAxisRange(-0.01,0.03,"Y");
     else if ( icent ==4)  hStat[ipt]->SetAxisRange(-0.50,1.21,"Y");
     else if ( icent ==5)  hStat[ipt]->SetAxisRange(-0.50,1.21,"Y");
     else if ( icent ==6)  hStat[ipt]->SetAxisRange(-1.0,5.1,"Y");

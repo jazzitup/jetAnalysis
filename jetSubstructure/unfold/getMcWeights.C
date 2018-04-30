@@ -567,6 +567,9 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 	double theRtrk = getRtrkHerwig( kSample, icent, myJetMc.recoPt);
 	recoY = recoY / theRtrk;
       }
+      if (nSys==217) { // JMS by Herwig
+	recoY = recoY * 1.05;
+      }
       
       hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);
       hmcTruth->Fill( genX, genY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);

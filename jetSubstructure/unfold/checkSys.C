@@ -8,7 +8,7 @@
 
 void groomHist(TH1D* h1) {
   h1->SetAxisRange(0.001,0.23,"X");
-  h1->SetAxisRange(-0.95,0.95,"Y");
+  h1->SetAxisRange(-0.55,0.55,"Y");
   h1->SetXTitle("m/p_{T}");
   h1->SetYTitle("Unc.");
   h1->SetNdivisions(505,"X");
@@ -97,6 +97,7 @@ void checkSys(int nSys=200) {
 
   }
   if (savePic)  cA->SaveAs(Form("pdfsSystematics/sysJES_nSys%d.pdf",nSys));
+  if (savePic)  cA->SaveAs(Form("pdfsSystematics/sysJES_nSys%d.C",nSys));
 
   //  return ret;
 }

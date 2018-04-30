@@ -23,6 +23,15 @@ void resetJetSys(JetSys js, int lowX, int highX) {
 
 }
 
+void makeUnityWithErr( TH1* h) { 
+  for ( int ii = 0; ii <= h->GetNbinsX() ; ii++) {
+    double err = h->GetBinError(ii);
+    double val = h->GetBinContent(ii);
+    h->SetBinContent(ii,1);
+    h->SetBinError(ii, err/val);
+  }
+}
+
 JetSys getFinalSys(int icent =0, int nVar=0);
 
 void getMCresults(int kSample=0, int icent=0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0,  TH1D* hmcTruthSq=0, TH1D* hmcRawSq=0, TH1D* hmcUnfSq=0);
@@ -166,7 +175,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       hmcTruthSq[ipt][0]->GetYaxis()->SetTitleOffset(3);
       hmcTruthSq[ipt][0]->SetYTitle("#frac{d#sigma}{d(m/p_{T})} (#mub^{-1})");
       hmcTruthSq[ipt][0]->Draw("hist");
-      drawSysUpDown( hdataUnfSq[ipt][0], sysPlus.pp[ipt], sysMinus.pp[ipt],  kOrange);
+      drawSysUpDown( hdataUnfSq[ipt][0], sysPlus.pp[ipt], sysMinus.pp[ipt],  kSpring);
       hdataUnfSq[ipt][0]->Draw("same e");
       hmcTruthSq[ipt][0]->Draw("hist same");
       if ( ipt > lowPtBin)  
@@ -187,12 +196,9 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
 
       c2->cd(ipt - lowPtBin + 1 + nPtPannels);
       
-      TH1D* hUnity = (TH1D*)hmcTruthSq[ipt][0]->Clone("hUnity");
-      for ( int i=1 ; i<=hUnity->GetNbinsX() ; i++){  
-	hUnity->SetBinContent(i,1);
-      }
-
-
+      TH1D* hUnity = (TH1D*)hdataUnfSq[ipt][0]->Clone("hUnity");
+      makeUnityWithErr(hUnity);
+      hUnity->SetMarkerSize(0);
       hraioMCtemp[ipt][0] = (TH1D*)hmcTruthSq[ipt][0]->Clone(Form("hraioMCtemp_ipt%d",ipt));
       hraioMCtemp[ipt][0]->Divide(hdataUnfSq[ipt][0]);
       hraioMCtemp[ipt][0]->SetYTitle("MC/Data");
@@ -205,7 +211,8 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       hraioMCtemp[ipt][0]->GetXaxis()->SetTitleOffset(1.7);
       hraioMCtemp[ipt][0]->GetYaxis()->SetTitleOffset(2.7);
       hraioMCtemp[ipt][0]->Draw("hist");
-      drawSysUpDown( hUnity, sysPlus.pp[ipt], sysMinus.pp[ipt],  kOrange);
+      drawSysUpDown( hUnity, sysPlus.pp[ipt], sysMinus.pp[ipt],  kSpring);
+      hUnity->DrawCopy("same");
       hraioMCtemp[ipt][0]->Draw("hist same");
       
 
