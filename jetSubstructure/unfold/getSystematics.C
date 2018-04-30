@@ -216,9 +216,9 @@ void getSystematics(int icent = 0, bool drawPP = true) {
   }
   
   TCanvas* cPlus = new TCanvas("cPlus","",1200,800);
-  makeMultiPanelCanvas(cPlus,nPtPannels,3, 0.0, 0.01, 0.3, 0.2, 0.05);
+  makeMultiPanelCanvas(cPlus,nPtPannels+1,3, 0.0, 0.01, 0.3, 0.2, 0.05);
   TLegend *legPlus = new TLegend(0,0.1,0.95,0.95,NULL, "brNDC");
-  easyLeg(legPlus,"Systematics", 0.07);
+  easyLeg(legPlus,"Uncertainties", 0.07);
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     cPlus->cd(ix - lowPtBin + 1);
@@ -238,11 +238,12 @@ void getSystematics(int icent = 0, bool drawPP = true) {
     if ( ix==lowPtBin)  drawText("Plus variation", 0.37,0.7,1,20);
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
     
-    cPlus->cd(ix - lowPtBin + 1 + nPtPannels);
+    cPlus->cd(ix - lowPtBin + 1 + nPtPannels );
     for ( int ind =0 ; ind <  vIndPlus.size() ; ind++) {
       if ( vIndPlus[ind] < 100 )   handsomeTH1(sysPlus[ind].pbpb[ix],30 + ind);  // pp 
       else                         handsomeTH1(sysPlus[ind].pbpb[ix], kRed + ind-10);  // pbpb
       groomHist(sysPlus[ind].pbpb[ix]);
+      sysPlus[ind].pbpb[ix]->SetYTitle("");
       jumSun(0,0,0.24,0);
       sysPlus[ind].pbpb[ix]->SetAxisRange(-0.15,0.15,"Y");
       if ( ind == 0 )   sysPlus[ind].pbpb[ix]->Draw("hist");
@@ -255,12 +256,13 @@ void getSystematics(int icent = 0, bool drawPP = true) {
       if ( vIndPlus[ind] < 100 )   handsomeTH1(sysPlus[ind].raa[ix],30 + ind);  // pp
       else                         handsomeTH1(sysPlus[ind].raa[ix], kRed + ind-10);  // pbpb
       groomHist(sysPlus[ind].raa[ix]);
+      sysPlus[ind].raa[ix]->SetYTitle("");
       jumSun(0,0,0.24,0);
       sysPlus[ind].raa[ix]->SetAxisRange(-0.15,0.15,"Y");
       if ( ind == 0 )   sysPlus[ind].raa[ix]->Draw("hist");
       else       sysPlus[ind].raa[ix]->Draw("same hist");
     }
-    if ( ix==lowPtBin)  drawText("#Delta(PbPb/pp)", 0.37,0.83,1,20);
+    if ( ix==lowPtBin)  drawText("#DeltaR_{AA}", 0.37,0.83,1,20);
     
   }
   cPlus->SaveAs(Form("pdfsSystematics/cPlus_icent%d.pdf",icent));
@@ -311,7 +313,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
       if ( ind == 0 )   sysMinus[ind].raa[ix]->Draw("hist");
       else       sysMinus[ind].raa[ix]->Draw("same hist");
     }
-    if ( ix==lowPtBin)  drawText("#Delta(PbPb/pp)", 0.37,0.83,1,20);
+    if ( ix==lowPtBin)  drawText("#DeltaR_{AA}", 0.37,0.83,1,20);
   }
   cMinus->SaveAs(Form("pdfsSystematics/cMinus_icent%d.pdf",icent));
 
@@ -339,7 +341,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
     cJer->cd(ix - lowPtBin + 1 + 2*nPtPannels);
     groomHist(sysJer.raa[ix]);
     sysJer.raa[ix]->Draw("hist");
-    if ( ix==lowPtBin)  drawText("#Delta(PbPb/pp)", 0.37,0.83,1,20);
+    if ( ix==lowPtBin)  drawText("#DeltaR_{AA}", 0.37,0.83,1,20);
     jumSun(0,0,0.24,0);
     
   }
@@ -395,7 +397,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
     sysJEStotPlus.raa[ix]->Draw("hist");
     sysJEStotMinus.raa[ix]->Draw("hist same");
     jumSun(0,0,0.24,0);
-    if ( ix==lowPtBin)  drawText("#Delta(PbPb/pp)", 0.37,0.83,1,20);
+    if ( ix==lowPtBin)  drawText("#DeltaR_{AA}", 0.37,0.83,1,20);
     
   }
   cJesTot->SaveAs(Form("pdfsSystematics/cTotJES_icent%d.pdf",icent));
@@ -445,7 +447,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
     sysUnfPlus.raa[ix]->Draw("hist");
     sysUnfMinus.raa[ix]->Draw("hist same");
     jumSun(0,0,0.24,0);
-    if ( ix==lowPtBin)  drawText("#Delta(PbPb/pp)", 0.37,0.83,1,20);
+    if ( ix==lowPtBin)  drawText("#DeltaR_{AA}", 0.37,0.83,1,20);
     
   }
   cUnf->SaveAs(Form("pdfsSystematics/cUnf_icent%d.pdf",icent));
@@ -605,7 +607,7 @@ gPad->RedrawAxis();
 
 
     jumSun(0,0,0.24,0);
-    if ( ix==lowPtBin)  drawText("#Delta(PbPb/pp)", 0.37,0.83,1,20);
+    if ( ix==lowPtBin)  drawText("#DeltaR_{AA}", 0.37,0.83,1,20);
     gPad->RedrawAxis();
     
   }
@@ -614,7 +616,7 @@ gPad->RedrawAxis();
 
 
   TCanvas* cLeg2 = new TCanvas("cleg2","",200,600);
-  TLegend* leg1 = new TLegend(0,0.7058065,1,1,NULL,"brNDC");
+  TLegend* leg1 = new TLegend(0,0.7058065,1,0.95,NULL,"brNDC");
   easyLeg(leg1,"Systematics",0.1);
   leg1->AddEntry(sysFinalPlus.pp[lowPtBin],"Total","l");
   if (addUnf) leg1->AddEntry(sysUnfPlus.pp[lowPtBin],"Unfolding","l");
@@ -624,6 +626,31 @@ gPad->RedrawAxis();
   if (addJMR) leg1->AddEntry(sysJmr.pp[lowPtBin],"JMR","l");
   leg1->Draw();
   cLeg2->SaveAs("pdfsSystematics/cFinal_legend.pdf");
+
+  TCanvas* cLeg3 = new TCanvas("cleg3","",200,430);
+  TLegend* leg2 = new TLegend(0,0.650065,1,0.93,NULL,"brNDC");
+  easyLeg(leg2,"Systematics",0.1);
+  leg2->AddEntry(sysFinalPlus.pp[lowPtBin],"Total","l");
+  if (addUnf) leg2->AddEntry(sysUnfPlus.pp[lowPtBin],"Unfolding","l");
+  if (addJES) leg2->AddEntry(sysJEStotPlus.pp[lowPtBin],"JES","l");
+  if (addJER) leg2->AddEntry(sysJer.pp[lowPtBin],"JER","l");
+  if (addJMS) leg2->AddEntry(sysJms.pp[lowPtBin],"JMS","l");
+  if (addJMR) leg2->AddEntry(sysJmr.pp[lowPtBin],"JMR","l");
+  leg2->Draw();
+  cLeg3->SaveAs("pdfsSystematics/cFinal_legend_2.pdf");
+
+  TCanvas* cLeg4 = new TCanvas("cleg4","",200,430);
+  TLegend* leg3 = new TLegend(0,0.650065,1,0.98,NULL,"brNDC");
+  easyLeg(leg3,"Systematics",0.1);
+  leg3->AddEntry(sysFinalPlus.pp[lowPtBin],"Total","l");
+  if (addUnf) leg3->AddEntry(sysUnfPlus.pp[lowPtBin],"Unfolding","l");
+  if (addJES) leg3->AddEntry(sysJEStotPlus.pp[lowPtBin],"JES","l");
+  if (addJER) leg3->AddEntry(sysJer.pp[lowPtBin],"JER","l");
+  if (addJMS) leg3->AddEntry(sysJms.pp[lowPtBin],"JMS","l");
+  if (addJMR) leg3->AddEntry(sysJmr.pp[lowPtBin],"JMR","l");
+  leg3->Draw();
+  cLeg4->SaveAs("pdfsSystematics/cFinal_legend_3.pdf");
+
 
   //Save
   TFile* fout = new TFile(Form("sysSpectra/systematics_icent%d.root",icent), "recreate");
