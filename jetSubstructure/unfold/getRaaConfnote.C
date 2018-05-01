@@ -82,7 +82,7 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
       c1->cd(ii+1+ (ipt-lowPtBin)*nCols);
 
       if ( ipt == lowPtBin) 
-	c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetTopMargin(0.15);
+	c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetTopMargin(0.02);
       
       c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetRightMargin(0.01);
       if ( ii == 0)     
@@ -115,11 +115,11 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
       hRAA[ipt][ii]->SetNdivisions(505,"X");
       hRAA[ipt][ii]->SetNdivisions(505,"Y");
       fixedFontHist(hRAA[ipt][ii],2.5,2.5,20);
-      hRAA[ipt][ii]->GetXaxis()->SetTitleOffset(5);
+      hRAA[ipt][ii]->GetXaxis()->SetTitleOffset(5.5);
       hRAA[ipt][ii]->SetYTitle("R_{AA}");
       if ( ii>0)       hRAA[ipt][ii]->SetYTitle("");
       hRAA[ipt][ii]->GetYaxis()->SetTitleSize(17);
-      hRAA[ipt][ii]->GetYaxis()->SetTitleOffset(6);
+      hRAA[ipt][ii]->GetYaxis()->SetTitleOffset(5);
       hRAA[ipt][ii]->Draw();
       drawSysUpDown( hRAA[ipt][ii], sysPlus[ii].raa[ipt],  sysMinus[ii].raa[ipt], kOrange);
       // lumi uncertainty
@@ -128,15 +128,27 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
       hRAA[ipt][ii]->Draw("same");
       
       
-      if ( (ipt == lowPtBin ) && ( ii == 0 ) )
-	ATLASLabel(0.39,0.88,"Internal",0.12,0.20);
-      if (ipt == lowPtBin )
-      drawCentrality(kPbPb, vCent[ii], 0.39,0.73,1,20);
+      if (ipt == lowPtBin ) {  
+	if ( ii == 0 ) 
+	  ATLASLabel(0.39,0.86,"Internal",0.12,0.20);
+	if ( ii == 1 ) 
+	  ATLASLabel(0.245,0.86,"Internal",0.12,0.25);
+	if ( ii == 2 ) 
+	  ATLASLabel(0.245,0.86,"Internal",0.12,0.24);
+
+
+      }
+      if (ipt == lowPtBin ) {
+	if ( ii == 0 ) drawCentrality(kPbPb, vCent[ii], 0.39,0.73,1,20);
+	if ( ii == 1 ) drawCentrality(kPbPb, vCent[ii], 0.245,0.73,1,20);
+	if ( ii == 2 ) drawCentrality(kPbPb, vCent[ii], 0.245,0.73,1,20);
+      }
+      
       if ( ii == 0 ) {
 	if (ipt < highPtBin )	
-	  drawBinPt(xBin,ipt,"GeV", 0.4 ,0.58,1,18);
+	  drawBinPt(xBin,ipt,"GeV", 0.39 ,0.58,1,18);
 	if (ipt == highPtBin )
-	  drawBinPt(xBin,ipt,"GeV", 0.4 ,0.68,1,18);
+	  drawBinPt(xBin,ipt,"GeV", 0.39 ,0.68,1,18);
       }
       if ( ii==2 ) { 
 	if ( ipt == highPtBin-1)

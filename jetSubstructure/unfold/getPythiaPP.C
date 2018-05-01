@@ -156,7 +156,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       c2->cd((ipt - lowPtBin+1)*2-1)->SetLeftMargin(.32);
       
       if ( ipt == lowPtBin)
-	c2->cd((ipt - lowPtBin+1)*2 -1)->SetTopMargin(0.15);
+	c2->cd((ipt - lowPtBin+1)*2 -1)->SetTopMargin(0.015);
 
 
       narrowSys( sysPlus.pp[ipt], 0, 0.24);
@@ -193,24 +193,24 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       
       drawPatch(0.,0,0.315,0.08);
 
-      if ( ipt < highPtBin) drawBinPt(xBin,ipt,"GeV",0.35, 0.68,1,18);
-      else                  drawBinPt(xBin,ipt,"GeV",0.35, 0.78,1,18);
+      if ( ipt < highPtBin) drawBinPt(xBin,ipt,"GeV",0.37, 0.70,1,18);
+      else                  drawBinPt(xBin,ipt,"GeV",0.37, 0.80,1,18);
       if ( ipt == lowPtBin)  {
-	TLegend* leg = new TLegend(0.3272508,0.3717734,0.6711794,0.7797419,NULL,"brNDC");
+	TLegend* leg = new TLegend(0.37000,0.3817734,0.7211794,0.8097419,NULL,"brNDC");
 	easyLeg(leg,"",0.12);
 	leg->AddEntry(hdataUnfSq[ipt][0],"pp data","pl");
 	leg->AddEntry(hmcTruthSq[ipt][0],"PYTHIA+Herwig","l");
 	leg->Draw();
 	if ( ipt == lowPtBin ) {
-	  //	  drawCentrality(kSample, icent, 0.32,0.75,1,20);
-	  ATLASLabel(0.35,0.88,"Internal",0.14,0.20);
+	  ATLASLabel(0.37,0.86,"Internal",0.14,0.21);
 	}
+
       }
 
       c2->cd((ipt - lowPtBin+1)*2);
       c2->cd((ipt - lowPtBin+1)*2)->SetLeftMargin(.15);
       if ( ipt == lowPtBin)
-	c2->cd((ipt - lowPtBin+1)*2)->SetTopMargin(0.15);
+	c2->cd((ipt - lowPtBin+1)*2)->SetTopMargin(0.015);
       
       TH1D* hUnity = (TH1D*)hdataUnfSq[ipt][0]->Clone("hUnity");
       makeUnityWithErr(hUnity);
@@ -224,8 +224,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       handsomeTH1(hraioMCtemp[ipt][0],1);
       hraioMCtemp[ipt][0]->SetLineWidth(1);
       hraioMCtemp[ipt][0]->SetAxisRange(0.1,2.19,"Y");
-      hraioMCtemp[ipt][0]->GetXaxis()->SetTitleOffset(1.7);
-      hraioMCtemp[ipt][0]->GetYaxis()->SetTitleOffset(3.3);
+      hraioMCtemp[ipt][0]->GetYaxis()->SetTitleOffset(3.6);
       hraioMCtemp[ipt][0]->GetXaxis()->SetTitleOffset(5);
       hraioMCtemp[ipt][0]->Draw("hist");
       drawSysUpDown( hUnity, sysPlus.pp[ipt], sysMinus.pp[ipt],  kSpring);
@@ -238,7 +237,8 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       
       
       if (ipt == lowPtBin)   {
-	drawText("(PYTHIA+Herwig)/data", 0.19, 0.72, 1,18);
+	ATLASLabel(0.21,0.86,"Internal",0.14,0.24);
+	drawText("(PYTHIA+Herwig)/data", 0.21, 0.72, 1,18);
 	//	drawText(Form("reference iter. (%d)",vIter.at(refId)), 0.22, 0.82, 1);
       }
       gPad->RedrawAxis();

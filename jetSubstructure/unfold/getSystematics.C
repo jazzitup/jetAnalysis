@@ -485,7 +485,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
 
     if ( drawPP )  {
       
-      cFinal->cd(ix - lowPtBin + 1)->SetTopMargin(0.15);
+      cFinal->cd(ix - lowPtBin + 1)->SetTopMargin(0.02);
       groomHist(sysFinalPlus.pp[ix]);
       groomHist(sysFinalMinus.pp[ix]);
       groomHist(sysJEStotPlus.pp[ix]);
@@ -534,7 +534,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
 
       jumSun(0,0,0.24,0);
     
-      if ( ix==lowPtBin)         ATLASLabel(0.37,0.88,"Internal",0.105,0.235);
+      if ( ix==lowPtBin)         ATLASLabel(0.37,0.86,"Internal",0.105,0.235);
       if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.75,1,20);
       
       drawBinPt(xBin,ix,"GeV",0.12 + (ix==lowPtBin)*0.2,0.1,1,18);
@@ -545,7 +545,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
     if (drawPP) 
       cFinal->cd(ix - lowPtBin + 1 + nPtPannels);
     else 
-      cFinal->cd(ix - lowPtBin + 1 )->SetTopMargin(0.15);
+      cFinal->cd(ix - lowPtBin + 1 )->SetTopMargin(0.02);
 
     groomHist(sysFinalPlus.pbpb[ix]);
     groomHist(sysFinalMinus.pbpb[ix]);
@@ -585,7 +585,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
       if ( drawPP) drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
       else  { 
 	drawCentrality(kPbPb, icent, 0.37,0.73,1,20);
-        ATLASLabel(0.37,0.88,"Internal",0.105,0.235);
+        ATLASLabel(0.37,0.86,"Internal",0.105,0.235);
       }
     }
 gPad->RedrawAxis();
