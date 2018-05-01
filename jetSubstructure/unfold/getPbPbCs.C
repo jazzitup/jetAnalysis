@@ -81,10 +81,15 @@ void getPbPbCs(int optX=1, int optY=2 ) {
     for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
       c1->cd(ii+1+ (ipt-lowPtBin)*nCols);
 
+      if ( ipt == lowPtBin ) 
+	c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetTopMargin(0.15);
+
       c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetRightMargin(0.01);
       if ( ii == 0)
-        c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetLeftMargin(0.38);
-      else
+        c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetLeftMargin(0.42);
+      else if ( ii == 1) 
+        c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetLeftMargin(0.3);
+      else if ( ii == 2) 
         c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetLeftMargin(0.33);
 
       //      if ( ipt != lowPtBin) 
@@ -129,21 +134,24 @@ void getPbPbCs(int optX=1, int optY=2 ) {
       //	hPbPbUnfSq[ipt][ii]->SetYTitle("#frac{1}{N_{evt}} #frac{dN^{jet}}{d(m/p_{T})} #times10^{6}");
       //      }
 
-      double maxY = cleverRange(hPbPbUnfSq[ipt][ii],2,0.00000001);
+      double maxY = cleverRange(hPbPbUnfSq[ipt][ii],2,0.000001);
       hPbPbUnfSq[ipt][ii]->SetAxisRange(0, 0.2399,"X");
-      hPbPbUnfSq[ipt][ii]->SetAxisRange(0, maxY,"Y");
+      hPbPbUnfSq[ipt][ii]->SetAxisRange(0.000000, maxY,"Y");
       hPbPbUnfSq[ipt][ii]->SetNdivisions(505,"X");
       hPbPbUnfSq[ipt][ii]->SetNdivisions(505,"Y");
       hPbPbUnfSq[ipt][ii]->GetYaxis()->SetDrawOption("G");
       fixedFontHist(hPbPbUnfSq[ipt][ii],2.5,2.5,20);
       hPbPbUnfSq[ipt][ii]->GetXaxis()->SetTitleOffset(5.5);
       hPbPbUnfSq[ipt][ii]->GetYaxis()->SetTitleSize(17);
-      hPbPbUnfSq[ipt][ii]->GetYaxis()->SetTitleOffset(8);
+      if ( ii == 0 ) hPbPbUnfSq[ipt][ii]->GetYaxis()->SetTitleOffset(7);
+      if ( ii == 1 ) hPbPbUnfSq[ipt][ii]->GetYaxis()->SetTitleOffset(8);
+      if ( ii == 2 ) hPbPbUnfSq[ipt][ii]->GetYaxis()->SetTitleOffset(9);
       hPbPbUnfSq[ipt][ii]->Draw();
       drawSysUpDown( hPbPbUnfSq[ipt][ii], sysPlus[ii].pbpb[ipt],  sysMinus[ii].pbpb[ipt], kCyan+1);
       hPbPbUnfSq[ipt][ii]->Draw("same");
       
-      if ( ii<2)   drawPatch(0,0,0.4,0.06);
+      if ( ii==0)   drawPatch(0,0,0.44,0.06);
+      if ( ii==1)   drawPatch(0,0,0.35,0.06);
       else    drawPatch(0,0,0.32,0.06);
 
       if ( (ipt==highPtBin) && (ii==0) ) 
@@ -153,16 +161,20 @@ void getPbPbCs(int optX=1, int optY=2 ) {
 
 
       if ( (ipt == lowPtBin ) && ( ii == 0 ) )
-        ATLASLabel(0.42,0.84,"Internal",0.10,0.18);
+        ATLASLabel(0.47,0.9,"Internal",0.13,0.20);
       if (ipt == lowPtBin )
-	drawCentrality(kPbPb, vCent[ii], 0.42,0.73,1,20);
+	drawCentrality(kPbPb, vCent[ii], 0.47,0.73,1,20);
       if ( ii == 0 ) {
         if (ipt == lowPtBin )
-          drawBinPt(xBin,ipt,"GeV", 0.42 ,0.58,1,18);
+          drawBinPt(xBin,ipt,"GeV", 0.47 ,0.58,1,18);
         else if (ipt != highPtBin )
-          drawBinPt(xBin,ipt,"GeV", 0.42 ,0.78,1,18);
+          drawBinPt(xBin,ipt,"GeV", 0.47 ,0.78,1,18);
         else if (ipt == highPtBin )
-          drawBinPt(xBin,ipt,"GeV", 0.42 ,0.85,1,18);
+          drawBinPt(xBin,ipt,"GeV", 0.47 ,0.85,1,18);
+      }
+      if ( ii==2 ) {
+        if ( ipt == highPtBin-1)
+          drawBinPt2(xBin,ipt,"GeV", 0.47 ,0.8,1,18);
       }
       gPad->RedrawAxis();
       //      if ( (ii==0) && (ipt > lowPtBin) )

@@ -76,7 +76,8 @@ void getTrkR(int kSample = kPP, int icent=0) {   // opt1 : mass,   opt2 : m/pT
 
   int nRbins = 35;
   TH2D* hTemp = new TH2D("rTemp","", nRbins, 0,20, nXbins, xBin);
-  TH1D* hTrkR = new TH1D(Form("hTrkR_kSample%d_icent%d",kSample,icent),";p_{T} (GeV/c);R^{trk};",nXbins, xBin);
+  //  TH1D* hTrkR = new TH1D(Form("hTrkR_kSample%d_icent%d",kSample,icent),";p_{T} (GeV/c);R^{trk};",nXbins, xBin);
+  TH1D* hTrkR = new TH1D(Form("hTrkR_kSample%d_icent%d",kSample,icent),";p_{T} (GeV/c);R^{trk};",100,120,500};
   // MC 
   double Rx[30];
   double Ry[30];

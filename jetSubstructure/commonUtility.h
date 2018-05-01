@@ -227,6 +227,9 @@ void drawSysDown(TH1 *h,TH1 *sys, int theColor= kYellow, int fillStyle = -1, int
       double err = val* fabs(sys->GetBinContent(i));
       if (err == 0  ) continue;
       TBox *b = new TBox(h->GetBinLowEdge(i),val-err,h->GetBinLowEdge(i+1),val);
+      if ( val-err < 0) 
+	b = new TBox(h->GetBinLowEdge(i),0,h->GetBinLowEdge(i+1),val);
+
       b->SetLineColor(theColor);
       b->SetFillColor(theColor);
       if ( fillStyle > -1 ) b->SetFillStyle(fillStyle);

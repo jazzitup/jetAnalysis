@@ -80,6 +80,9 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
   for ( int ii = 0 ; ii < nCols ; ii++)   {
     for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
       c1->cd(ii+1+ (ipt-lowPtBin)*nCols);
+
+      if ( ipt == lowPtBin) 
+	c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetTopMargin(0.15);
       
       c1->cd(ii+1+ (ipt-lowPtBin)*nCols)->SetRightMargin(0.01);
       if ( ii == 0)     
@@ -118,7 +121,6 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
       hRAA[ipt][ii]->GetYaxis()->SetTitleSize(17);
       hRAA[ipt][ii]->GetYaxis()->SetTitleOffset(6);
       hRAA[ipt][ii]->Draw();
-      jumSun(0,1,0.24,1);
       drawSysUpDown( hRAA[ipt][ii], sysPlus[ii].raa[ipt],  sysMinus[ii].raa[ipt], kOrange);
       // lumi uncertainty
       double lumiUnc = getLumiRelErr(vCent[ii]);
@@ -127,7 +129,7 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
       
       
       if ( (ipt == lowPtBin ) && ( ii == 0 ) )
-	ATLASLabel(0.39,0.84,"Internal",0.11,0.18);
+	ATLASLabel(0.39,0.88,"Internal",0.12,0.20);
       if (ipt == lowPtBin )
       drawCentrality(kPbPb, vCent[ii], 0.39,0.73,1,20);
       if ( ii == 0 ) {
@@ -136,6 +138,11 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
 	if (ipt == highPtBin )
 	  drawBinPt(xBin,ipt,"GeV", 0.4 ,0.68,1,18);
       }
+      if ( ii==2 ) { 
+	if ( ipt == highPtBin-1)
+	  drawBinPt2(xBin,ipt,"GeV", 0.4 ,0.8,1,18);
+      }
+      jumSun(0,1,0.24,1);
       gPad->RedrawAxis();
       
       //      if ( (ii==0) && (ipt > lowPtBin) )

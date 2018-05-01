@@ -5,9 +5,10 @@ void groomHist(TH1D* h1) {
   h1->SetAxisRange(0.001,0.23,"X");
   h1->SetAxisRange(-0.98,0.98,"Y");
   h1->SetXTitle("m^{jet}/p_{T}^{jet}");
-  h1->SetYTitle("Relative Uncertainty");
+  h1->SetYTitle("Rel. uncertainty");
   h1->SetNdivisions(505,"X");
   h1->SetNdivisions(505,"Y");
+  h1->SetLineWidth(2);
   fixedFontHist(h1,3,3,20);
 
 }
@@ -262,7 +263,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
       if ( ind == 0 )   sysPlus[ind].raa[ix]->Draw("hist");
       else       sysPlus[ind].raa[ix]->Draw("same hist");
     }
-    if ( ix==lowPtBin)  drawText("#DeltaR_{AA}", 0.37,0.83,1,20);
+    if ( ix==lowPtBin)  drawText("R_{AA}", 0.37,0.83,1,20);
     
   }
   cPlus->SaveAs(Form("pdfsSystematics/cPlus_icent%d.pdf",icent));
@@ -457,10 +458,10 @@ void getSystematics(int icent = 0, bool drawPP = true) {
   TCanvas* cFinal;
   if (drawPP){ 
     cFinal = new TCanvas("cFinal","",1200,600);
-    makeMultiPanelCanvas(cFinal,nPtPannels,3, 0.0, 0.01, 0.3, 0.2, 0.05);
+    makeMultiPanelCanvas(cFinal,nPtPannels,3, 0.0, 0.01, 0.3, 0.23, 0.05);
   }  else {
     cFinal = new TCanvas("cFinal","",1200,430);
-    makeMultiPanelCanvas(cFinal,nPtPannels,2, 0.0, 0.01, 0.3, 0.2, 0.05);
+    makeMultiPanelCanvas(cFinal,nPtPannels,2, 0.0, 0.01, 0.3, 0.23, 0.05);
   }
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
@@ -484,7 +485,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
 
     if ( drawPP )  {
       
-      cFinal->cd(ix - lowPtBin + 1);
+      cFinal->cd(ix - lowPtBin + 1)->SetTopMargin(0.15);
       groomHist(sysFinalPlus.pp[ix]);
       groomHist(sysFinalMinus.pp[ix]);
       
@@ -514,11 +515,10 @@ void getSystematics(int icent = 0, bool drawPP = true) {
       
       jumSun(0,0,0.24,0);
     
-      if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.18);
-      if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
-      if ( ix==lowPtBin)  drawText("Total uncertainty", 0.37,0.7,1,20);
+      if ( ix==lowPtBin)         ATLASLabel(0.37,0.88,"Internal",0.105,0.235);
+      if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.75,1,20);
       
-      drawBinPt(xBin,ix,"GeV",0.15 + (ix==lowPtBin)*0.2,0.05,1,18);
+      drawBinPt(xBin,ix,"GeV",0.12 + (ix==lowPtBin)*0.2,0.1,1,18);
       gPad->RedrawAxis();
       
     }
@@ -526,10 +526,11 @@ void getSystematics(int icent = 0, bool drawPP = true) {
     if (drawPP) 
       cFinal->cd(ix - lowPtBin + 1 + nPtPannels);
     else 
-      cFinal->cd(ix - lowPtBin + 1 );
+      cFinal->cd(ix - lowPtBin + 1 )->SetTopMargin(0.15);
 
     groomHist(sysFinalPlus.pbpb[ix]);
     groomHist(sysFinalMinus.pbpb[ix]);
+    //    if (drawPP) sysFinalPlus.pbpb[ix]->SetYTitle("");
     sysFinalPlus.pbpb[ix]->Draw("hist");
     sysFinalMinus.pbpb[ix]->Draw("hist same");
     jumSun(0,0,0.24,0);
@@ -556,7 +557,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
     }
 
     if ( !drawPP) { 
-      drawBinPt(xBin,ix,"GeV",0.15 + (ix==lowPtBin)*0.2,0.05,1,18);
+      drawBinPt(xBin,ix,"GeV",0.12 + (ix==lowPtBin)*0.23,0.1,1,18);
       gPad->RedrawAxis();
     }
     
@@ -565,7 +566,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
       if ( drawPP) drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
       else  { 
 	drawCentrality(kPbPb, icent, 0.37,0.73,1,20);
-	ATLASLabel(0.37,0.87,"Internal",0.075,0.18);
+        ATLASLabel(0.37,0.88,"Internal",0.105,0.235);
       }
     }
 gPad->RedrawAxis();
@@ -581,6 +582,7 @@ gPad->RedrawAxis();
     if (!drawPP)          sysFinalPlus.raa[ix]->GetXaxis()->SetTitleOffset(1.9);
     else          sysFinalPlus.raa[ix]->GetXaxis()->SetTitleOffset(2.7);
 
+    //    sysFinalPlus.raa[ix]->SetYTitle("");
     sysFinalPlus.raa[ix]->Draw("hist");
     sysFinalMinus.raa[ix]->Draw("hist same");
 
@@ -607,8 +609,10 @@ gPad->RedrawAxis();
 
 
     jumSun(0,0,0.24,0);
-    if ( ix==lowPtBin)  drawText("#DeltaR_{AA}", 0.37,0.83,1,20);
+    if ( ix==lowPtBin)  drawText("R_{AA}", 0.37,0.83,1,20);
     gPad->RedrawAxis();
+
+    if ( ix > lowPtBin)  drawPatch(0,0, 0.05,0.22);
     
   }
   if ( drawPP)   cFinal->SaveAs(Form("pdfsSystematics/cFinal_icent%d.pdf",icent));
@@ -617,7 +621,7 @@ gPad->RedrawAxis();
 
   TCanvas* cLeg2 = new TCanvas("cleg2","",200,600);
   TLegend* leg1 = new TLegend(0,0.7058065,1,0.95,NULL,"brNDC");
-  easyLeg(leg1,"Systematics",0.1);
+  easyLeg(leg1,"Uncertainties",0.1);
   leg1->AddEntry(sysFinalPlus.pp[lowPtBin],"Total","l");
   if (addUnf) leg1->AddEntry(sysUnfPlus.pp[lowPtBin],"Unfolding","l");
   if (addJES) leg1->AddEntry(sysJEStotPlus.pp[lowPtBin],"JES","l");
@@ -629,7 +633,7 @@ gPad->RedrawAxis();
 
   TCanvas* cLeg3 = new TCanvas("cleg3","",200,430);
   TLegend* leg2 = new TLegend(0,0.650065,1,0.93,NULL,"brNDC");
-  easyLeg(leg2,"Systematics",0.1);
+  easyLeg(leg2,"Uncertainties",0.1);
   leg2->AddEntry(sysFinalPlus.pp[lowPtBin],"Total","l");
   if (addUnf) leg2->AddEntry(sysUnfPlus.pp[lowPtBin],"Unfolding","l");
   if (addJES) leg2->AddEntry(sysJEStotPlus.pp[lowPtBin],"JES","l");
@@ -640,8 +644,8 @@ gPad->RedrawAxis();
   cLeg3->SaveAs("pdfsSystematics/cFinal_legend_2.pdf");
 
   TCanvas* cLeg4 = new TCanvas("cleg4","",200,430);
-  TLegend* leg3 = new TLegend(0,0.650065,1,0.98,NULL,"brNDC");
-  easyLeg(leg3,"Systematics",0.1);
+  TLegend* leg3 = new TLegend(0,0.70065,1,0.96,NULL,"brNDC");
+  easyLeg(leg3,"Uncertainties",0.1);
   leg3->AddEntry(sysFinalPlus.pp[lowPtBin],"Total","l");
   if (addUnf) leg3->AddEntry(sysUnfPlus.pp[lowPtBin],"Unfolding","l");
   if (addJES) leg3->AddEntry(sysJEStotPlus.pp[lowPtBin],"JES","l");
