@@ -157,7 +157,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
 
   resetJetSys( sysFinalPlus, lowPtBin, highPtBin) ;
   resetJetSys( sysFinalMinus, lowPtBin, highPtBin) ;
-  
+
   if ( addJES ) { 
     addSysInQuad3(sysFinalPlus, sysJEStotPlus, lowPtBin, highPtBin) ;
     addSysInQuad3(sysFinalMinus, sysJEStotMinus, lowPtBin, highPtBin) ;
@@ -488,6 +488,17 @@ void getSystematics(int icent = 0, bool drawPP = true) {
       cFinal->cd(ix - lowPtBin + 1)->SetTopMargin(0.15);
       groomHist(sysFinalPlus.pp[ix]);
       groomHist(sysFinalMinus.pp[ix]);
+      groomHist(sysJEStotPlus.pp[ix]);
+      groomHist(sysJEStotMinus.pp[ix]);
+      groomHist(sysUnfPlus.pp[ix]);
+      groomHist(sysUnfMinus.pp[ix]);
+      groomHist(sysJer.pp[ix]);
+      groomHist(sysJerInv.pp[ix]);
+      groomHist(sysJmr.pp[ix]);
+      groomHist(sysJmrInv.pp[ix]);
+      groomHist(sysJms.pp[ix]);
+      groomHist(sysJmsInv.pp[ix]);
+  
       
       sysFinalPlus.pp[ix]->Draw("hist");
       sysFinalMinus.pp[ix]->Draw("hist same");
@@ -512,7 +523,15 @@ void getSystematics(int icent = 0, bool drawPP = true) {
 	sysJms.pp[ix]->Draw("same hist");
 	sysJmsInv.pp[ix]->Draw("same hist");
       }
-      
+      if ( ix==highPtBin) {
+	cout << " final = " <<  sysFinalPlus.pp[ix]->GetBinContent(2) << endl;
+	cout << "sysJms.pp[ix] = " << sysJms.pp[ix]->GetBinContent(2) << endl;
+	cout << "sysJms.pp[ix] = " << sysJms.pp[ix]->GetBinContent(2) << endl;
+	cout <<" sysJer.pp[ix] = " << sysJer.pp[ix]->GetBinContent(2) << endl;
+	cout <<" sysJmr.pp[ix] = " << sysJmr.pp[ix]->GetBinContent(2) << endl;
+	cout <<" sysUnfPlus.pp[ix] = " << sysUnfPlus.pp[ix]->GetBinContent(2) << endl;
+      }
+
       jumSun(0,0,0.24,0);
     
       if ( ix==lowPtBin)         ATLASLabel(0.37,0.88,"Internal",0.105,0.235);

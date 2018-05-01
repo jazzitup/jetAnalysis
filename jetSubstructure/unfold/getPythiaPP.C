@@ -179,7 +179,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       hmcTruthSq[ipt][0]->SetAxisRange(0,0.239,"X");
       handsomeTH1(hdataUnfSq[ipt][0],1);
       hmcTruthSq[ipt][0]->GetYaxis()->SetTitleOffset(6);
-      hmcTruthSq[ipt][0]->SetYTitle("#frac{d#sigma}{d(m/p_{T})} (#mub^{-1})");
+      hmcTruthSq[ipt][0]->SetYTitle("#frac{d#sigma}{d(m/p_{T})} (#mub)");
       hmcTruthSq[ipt][0]->SetNdivisions(505,"X");
       hmcTruthSq[ipt][0]->SetAxisRange(0.000001, maxY,"Y");
       if ( ipt == lowPtBin ) 
@@ -191,7 +191,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       hdataUnfSq[ipt][0]->Draw("same e");
       hmcTruthSq[ipt][0]->Draw("hist same");
       
-      drawPatch(0.,0,0.315,0.1);
+      drawPatch(0.,0,0.315,0.08);
 
       if ( ipt < highPtBin) drawBinPt(xBin,ipt,"GeV",0.35, 0.68,1,18);
       else                  drawBinPt(xBin,ipt,"GeV",0.35, 0.78,1,18);
