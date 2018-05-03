@@ -1,3 +1,5 @@
+#ifndef NTUPLEDEF_V50
+#define NTUPLEDEF_V50
 struct jetSubStr { //v4.7
   
   Int_t cent;
@@ -10,3 +12,5 @@ struct jetSubStr { //v4.7
   float nTrkRaw, nTrkBkg, nTrkBkgNoWgt,  recoChPtRcSubt, recoChMassRcSubt, drTrkJetBkg, maxTrkPt ;   // random cone
   float fcalet;
 };
+
+#endif

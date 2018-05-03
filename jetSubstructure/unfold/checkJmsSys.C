@@ -1,7 +1,8 @@
 #include "../getSdHists.C"
-#include "../ntupleDefinition_v50.h"
+#include "../ntupleDefinition.h"
 #include "../commonUtility.h"
 #include "../jzWeight.h"
+#include "../commonUtility.h"
 #include "../JssUtils.h"
 #include "unfoldingUtil.h"
 
@@ -11,33 +12,15 @@ struct JetSys {
   TH1D* raa[20];
 };
 
-void resetJetSys(JetSys js, int lowX, int highX) { 
-  for ( int ix = lowX ; ix <= highX ; ix++) { 
-    js.pp[ix]->Reset();
-    js.pbpb[ix]->Reset();
-    js.raa[ix]->Reset();
-  }
-  
-}
-
-JetSys jsDummy;
-
 void getDATAresults(int kSample=0, int icent=0, int ix=0, TH1D* hdataUnfSq=0, TString dir="", int nSys=-1);
 TString getSysName(int nSys = -1);
 TH1D* getSysA(int kSample= kPP, int icent = 0, int ix=7, TString s1 ="reweight00", TString s2="reweight00varP50percent" ); 
 TH1D* getSysJES(int kSample= kPP, int icent = 0, int ix=7, int nSys=-1);
-JetSys getSystematicsJES(int icent = 0, int nSys=1, double theScale=1);
 JetSys getSystematicsUnf(int icent = 0, int nSys=1);
-void getInverse(JetSys inputSys=jsDummy, JetSys outputSys=jsDummy,  int lowX=0, int highX=0);
 void addSysInQuad(TH1D* sysTot=0, TH1D* sys1=0);
-void addSysInQuad3(JetSys jstot=jsDummy, JetSys js1=jsDummy, int lowX=0, int highX=0); 
-void mirrorJS(JetSys js1=jsDummy, JetSys js2=jsDummy, int lowX=0, int highX=0);
-
-void sortPlusMinus(TH1D* hp=0, TH1D* hm=0);
 
 
-
-JetSys getSystematicsJES(int icent, int nSys, double theScale) {
+void checkJmsSys(int icent=0) {
   int optX =1 ;
   int optY =2 ;
 
@@ -60,72 +43,73 @@ JetSys getSystematicsJES(int icent, int nSys, double theScale) {
   TH1D* hSysAraa[30];
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
-    hSysApp[ix] = getSysJES(kPP, 0  , ix,  nSys);
-    hSysApbpb[ix] = getSysJES(kPbPb, icent, ix, nSys);
+    hSysApp[ix] = getSysA(kPP, 0  , ix, "reweight00", "noVar");
+    hSysApbpb[ix] = getSysA(kPbPb, icent, ix, "reweight00", "noVar");
     
     hSysAraa[ix] = (TH1D*)hSysApbpb[ix]->Clone(Form("sysRaa_%s",hSysApbpb[ix]->GetName()) );
     hSysAraa[ix]->Reset();
     for ( int xx = 1 ; xx<= hSysApbpb[ix]->GetNbinsX() ; xx++) {
       double y1 = hSysApbpb[ix]->GetBinContent(xx);
       double y2 = hSysApp[ix]->GetBinContent(xx);
-      //      if ( nSys == 210)   hSysAraa[ix]->SetBinContent(xx,  sqrt( y1*y1 + y2*y2) ) ;
       hSysAraa[ix]->SetBinContent(xx,  (y1+1.)/(y2+1.)-1);
     }
   }
 
-  bool savePic = 0; 
+  bool savePic = 1; 
   
   TCanvas* cA;    
   if (savePic) { 
-    cA =  new TCanvas(Form("sysJES_icent%d_nSys%d",icent,nSys),"",800,400);
-    makeMultiPanelCanvas(cA,nPtPannels,1);
+    cA =  new TCanvas(Form("sysJES_icent%d",icent),"",800,400);
+    makeMultiPanelCanvas(cA,nPtPannels,2);
   }
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     if (savePic)    cA->cd(ix - lowPtBin + 1);
     handsomeTH1(hSysApp[ix],1);
-    handsomeTH1(hSysApbpb[ix],2);
+    handsomeTH1(hSysApbpb[ix],1);
     hSysApp[ix]->SetAxisRange(0.001,0.23,"X");
-    hSysApp[ix]->SetAxisRange(-0.55,0.55,"Y");
+    hSysApp[ix]->SetAxisRange(-1,1,"Y");
     hSysApp[ix]->SetXTitle("m/p_{T}");
-    hSysApp[ix]->SetYTitle("Uncertainty (Relative)");
+    hSysApp[ix]->SetYTitle("Ratio");
     hSysApp[ix]->SetNdivisions(505,"X");
     hSysApp[ix]->SetNdivisions(505,"Y");
     fixedFontHist(hSysApp[ix],1.2,1.4,20);
-    hSysApp[ix]->Draw("hist" );
-    hSysApbpb[ix]->Draw("same hist");
+    hSysApp[ix]->Draw("" );
+    drawCentrality(kPP, 0, 0.25,0.88,1,20);
+    jumSun(0,0,0.24,0);
+
+    cA->cd(ix - lowPtBin + 1 + nPtPannels);
+    hSysApbpb[ix]->SetAxisRange(0.001,0.23,"X");
+    hSysApbpb[ix]->SetAxisRange(-1,1,"Y");
+    hSysApbpb[ix]->SetXTitle("m/p_{T}");
+    hSysApbpb[ix]->SetYTitle("Ratio");
+    hSysApbpb[ix]->SetNdivisions(505,"X");
+    hSysApbpb[ix]->SetNdivisions(505,"Y");
+    fixedFontHist(hSysApbpb[ix],1.2,1.4,20);
+    hSysApbpb[ix]->Draw("");
+    drawCentrality(kPbPb, icent, 0.25,0.88,1,20);
     jumSun(0,0,0.24,0);
 
 
-    if ( ix == lowPtBin) {
-      drawCentrality(kPbPb, icent, 0.25,0.88,1,20);
-      TLegend *leg1 = new TLegend(0.2355436,0.2339862,0.758156,0.4051428,NULL,"brNDC");
-      TString sysTxt = getSysName(nSys);
-      easyLeg(leg1,sysTxt.Data(),0.07);
-      //easyLeg(leg1,"ss",0.07);
-
-      leg1->AddEntry(hSysApp[ix],"pp","l");
-      leg1->AddEntry(hSysApbpb[ix],"PbPb","l");
-      leg1->Draw();
-    }
+    //    if ( ix == lowPtBin) {
+    //      TLegend *leg1 = new TLegend(0.2355436,0.2339862,0.758156,0.4051428,NULL,"brNDC");
+    //      easyLeg(leg1,"(mass varied)/default" ,0.07);
+    //      leg1->AddEntry(hSysApp[ix],"pp","l");
+    //      leg1->AddEntry(hSysApbpb[ix],"PbPb","l");
+    //      leg1->Draw();
+    //    }
     drawBin(xBin,ix,"GeV",0.25,0.80,1,20);
 
   }
-  if (savePic)  cA->SaveAs(Form("pdfsSystematics/sysJES_icent%d_nSys%d.pdf",icent,nSys));
+  if (savePic)  cA->SaveAs(Form("pdfsSystematics/sysJES_icent%d_massVar.pdf",icent));
   
   JetSys ret;
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
-    if ( theScale != 1) { 
-      hSysApp[ix]->Scale(theScale);
-      hSysApbpb[ix]->Scale(theScale);
-      hSysAraa[ix]->Scale(theScale);
-    }
-
     ret.pp[ix]   =  hSysApp[ix];
     ret.pbpb[ix] =  hSysApbpb[ix];
     ret.raa[ix]  = hSysAraa[ix];
   }
 
-  return ret;
+  //  return ret;
 }
 
 
@@ -174,7 +158,7 @@ JetSys getSystematicsUnf(int icent, int nVar ) {
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     if (savePic)    cA->cd(ix - lowPtBin + 1);
     handsomeTH1(hSysApp[ix],1);
-    handsomeTH1(hSysApbpb[ix],2);
+    handsomeTH1(hSysApbpb[ix],1);
     hSysApp[ix]->SetAxisRange(0.001,0.23,"X");
     hSysApp[ix]->SetAxisRange(-0.55,0.55,"Y");
     hSysApp[ix]->SetXTitle("m/p_{T}");
@@ -326,208 +310,18 @@ TString getSysName(int nSys ) {
   
 }
 
+
 void addSysInQuad(TH1D* sysTot, TH1D* sys1) {
   if ( sysTot->GetNbinsX() != sys1->GetNbinsX() ) {
-    cout << " Incompatible histograms!!" << endl;
+    cout << " Uncompatible histograms!!" << endl;
     return;
   }
-  
-  int nBins = sysTot->GetNbinsX(); 
+
+  int nBins = sysTot->GetNbinsX();
   for ( int ii=0 ; ii<=nBins ; ii++) {
     double yTot = sysTot->GetBinContent(ii);
     double y1 = sys1->GetBinContent(ii);
     double newYTot = sqrt( yTot*yTot + y1*y1) ;
     sysTot->SetBinContent(ii, newYTot);
   }
-}
-
-
-void sortPlusMinus(TH1D* hp, TH1D* hm) {
-  if ( hp->GetNbinsX() != hm->GetNbinsX() ) {
-    cout << " Uncompatible histograms!!" << endl;
-    return;
-  }
-
-  int nBins = hp->GetNbinsX();
-  for ( int ii=0 ; ii<=nBins ; ii++) {
-    double y1 = hp->GetBinContent(ii);
-    double y2 = hm->GetBinContent(ii);
-    if ( y1 > y2 )  {
-      hp->SetBinContent( ii, y1);
-      hm->SetBinContent( ii, y2);
-    }
-    else  {
-      hp->SetBinContent( ii, y2);
-      hm->SetBinContent( ii, y1);
-    }
-  }
-}
-
-double getJMRsigma(int kSample=0, int icent=0, double jetPt=0) { 
-  // These values can be obtained from getJMR.C macro
-  double p0, p1;
-  if ( kSample == kPP) {
-    p0 = 0.23 ;
-    p1 = -0.000009;
-  }
-  else if ( kSample == kPbPb) {
-    if ( icent ==0) {
-      p0 = 0.29;      
-      p1 = -0.000046;
-    }
-    if ( icent ==1) {
-      p0 = 0.28;      
-      p1 = -0.000041;
-    }
-    if ( icent ==2) {
-      p0 = 0.27 ;      
-      p1 = -0.000028;
-    }
-    if ( icent ==3) {
-      p0 = 0.26;      
-      p1 = -0.000027;
-    }
-    if ( icent ==4) {
-      p0 = 0.25;      
-      p1 = -0.000023;
-    }
-    if ( icent ==5) {
-      p0 = 0.24 ;      
-      p1 = -0.000014;
-    }
-    if ( icent ==6) {
-      p0 = 0.24;      
-      p1 = -0.000011;
-    }
-  }
-  
-  return p0  + p1 * jetPt;
-}
-
-double getJMSscale(int kSample=0, int icent=0, double jetPt=0) { 
-  // These values can be obtained from getJMR.C macro
-  double p0, p1;
-  if ( kSample == kPP) {
-    p0 = 5.64677e-01   ;
-    p1 = 9.77777e-02  ;
-  }
-  else if ( kSample == kPbPb) {
-    if ( icent ==0) {
-      p0=  8.68347e-01;
-      p1=  4.98060e-02;
-    }
-    if ( icent ==1) {
-      p0 = 7.72952e-01   ;
-      p1 = 6.42673e-02   ;
-    }
-    if ( icent ==2) {
-      p0 = 7.05166e-01   ;
-      p1 = 7.41717e-02   ;
-    }
-    if ( icent ==3) {
-      p0 = 6.41878e-01   ;
-      p1 = 8.43167e-02   ;
-    }
-    if ( icent ==4) {
-      p0 = 6.08245e-01   ;
-      p1 = 8.93995e-02   ;
-    }
-    if ( icent ==5) {
-      p0 = 5.85829e-01   ;
-      p1 = 9.26819e-02    ;
-    }
-    if ( icent ==6) {
-      p0 =  5.61321e-01   ;
-      p1 =  9.70274e-02   ;
-    }
-  }
-  
-  return p0  + p1 * log(jetPt);
-}
-
-
-double getRtrk(int kSample=0, int icent=0, double jetPt=0) {
-  // These values can be obtained from getJMR.C macro
-  double p0, p1, p2;
-  if ( kSample == kPP) {
-    //    p0 = 8.41757e-01; p1 = 8.26199e-02 ; p2 = -1.05534e-02;
-    p0 = 4.40588e-01; p1 = 2.41911e-01 ; p2 = -2.63250e-02;
-  }
-  else if ( kSample == kPbPb) {
-    if ( icent ==0) {
-      p0 = -4.56321e-01  ; p1 =  5.55171e-01 ;  p2 = -5.26155e-02 ;   
-    }
-    if ( icent ==1) {
-      p0 = 2.00967e-01  ; p1 =   3.00164e-01;  p2 =  -2.83054e-02 ;   
-    }
-    if ( icent ==2) {
-      p0= -0.5207;  p1 =  5.86584e-01; p2 = -5.68520e-02;
-    }
-    if ( icent ==3) {
-      p0= 7.95068e-01; p1=  8.19498e-02; p2 =  -8.89938e-03;
-    }
-    if ( icent ==4) {
-    p0 = 2.00140e+00;     p1 = -3.79735e-01;    p2 =3.51096e-02;
-    }
-    if ( icent ==5) {
-      p0 = -1.52238e+00; p1 =   9.68029e-01 ; p2 =   -9.34660e-02;
-    }
-    if ( icent ==6) {
-      p0 = -1.48588e+00; p1 =  1.00748e+00 ; p2 = -1.02264e-01;
-    }
-  }
-  
-  return p0  + p1 * log(jetPt) + p2 * log(jetPt)* log(jetPt);
-}
-
-double getRtrkHerwig(int kSample=0, int icent=0, double jetPt=0) {
-  double p0, p1, p2;
-  p0 =  1.26920e+00;
-  p1 =  -5.59201e-02;
-  p2 =  2.73860e-05;
-  return p0  + p1 * log(jetPt) + p2 * log(jetPt)* log(jetPt);
-}
-
-void addSysInQuad3(JetSys jstot, JetSys js1, int lowX, int highX) { 
-  for ( int ix=lowX ; ix<=highX ; ix++) {
-    addSysInQuad(jstot.pp[ix], js1.pp[ix]);
-    addSysInQuad(jstot.pbpb[ix], js1.pbpb[ix]);
-    addSysInQuad(jstot.raa[ix], js1.raa[ix]);
-  }
-
-}
-
-void getInverse(JetSys inputSys, JetSys outputSys,  int lowX, int highX) {
-  for ( int ix=lowX ; ix<=highX ; ix++) {
-    outputSys.pp[ix]->Reset();
-    outputSys.pp[ix]->Add(inputSys.pp[ix], -1);
-    outputSys.pbpb[ix]->Reset();
-    outputSys.pbpb[ix]->Add(inputSys.pbpb[ix], -1);
-    outputSys.raa[ix]->Reset();
-    outputSys.raa[ix]->Add(inputSys.raa[ix], -1);
-  }
-}
-
-
-double getJmrUnc(int kSample=0, int icent=0, double jetPt = 0) { 
-
-  double pedestal = 0.2;
-  double diffEmTopoHI = 0.06 + 0.06* ((jetPt-300.)/150.) * ((jetPt-300.)/150.) ;
-  //  return  sqrt ( diffEmTopoHI*diffEmTopoHI + pedestal*pedestal) ;
-  return  diffEmTopoHI + pedestal ;
-}
-
-double getJmrUncHI(int kSample=0, int icent=0, double jetPt = 0) { 
-  
-  double hiComp = 0;
-  if (kSample == kPbPb) { 
-    if (icent ==0)     hiComp = 0.06/0.29;
-    if (icent ==1)     hiComp = 0.05/0.28;
-    if (icent ==2)     hiComp = 0.04/0.27;
-    if (icent ==3)     hiComp = 0.03/0.26;
-    if (icent ==4)     hiComp = 0.02/0.25;
-    if (icent ==5)     hiComp = 0.01/0.24;
-    if (icent ==6)     hiComp = 0.01/0.23;
-  }
-  return  hiComp;
 }

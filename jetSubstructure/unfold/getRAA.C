@@ -11,9 +11,6 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
   int nIterPP = getRefIter(0,0);
   int nIterAA = getRefIter(1,icent);
   
-  //int nIterPP = 6 ;
-  //  int nIterAA = 6 ;
-  
   int nXbins;
   double xBin[30];
   getXbin(nXbins, xBin, optX);
@@ -23,7 +20,7 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
   getYbin(nYbins, yBin, optY);
   TH1D* tempHistYsq;
   if ( optY == 1 ) tempHistYsq = new TH1D("tempHistY",";mass(GeV);",nYbins,yBin);
-  if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m/p_{T};",nYbins,yBin);
+  if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m^{jet}/p_{T}^{jet};",nYbins,yBin);
 
   int lowPtBin = 6;
   int highPtBin = 11;
@@ -65,14 +62,18 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     narrowSys( sysPlus.pp[ipt], 0, 0.24);
     narrowSys( sysPlus.pbpb[ipt], 0, 0.24);
     narrowSys( sysPlus.raa[ipt], 0, 0.24);
+    narrowSys( sysMinus.pp[ipt], 0, 0.24);
+    narrowSys( sysMinus.pbpb[ipt], 0, 0.24);
+    narrowSys( sysMinus.raa[ipt], 0, 0.24);
 
     if ( optY==1)  hPPUnfSq[ipt]->SetAxisRange(-300,2000,"X");
     else if ( optY==2) hPPUnfSq[ipt]->SetAxisRange(0.001,0.239,"X");
     if ( optY==1)    hPPUnfSq[ipt]->SetXTitle("m (GeV)");
-    else if ( optY==2)    hPPUnfSq[ipt]->SetXTitle("m/p_{T}");
+    else if ( optY==2)    hPPUnfSq[ipt]->SetXTitle("m^{jet}/p_{T}^{jet}");
     
     hPPUnfSq[ipt]->SetYTitle("Cross section (#mub^{-1} GeV^{-1})");
     handsomeTH1(hPPUnfSq[ipt],1);
+    hPPUnfSq[ipt]->SetMarkerStyle(24);
     handsomeTH1(hPbPbUnfSq[ipt],kRed);
     //    scaleInt(hPPUnfSq[ipt]);
     //    scaleInt(hPbPbUnfSq[ipt]);
@@ -88,8 +89,8 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     hPbPbUnfSq[ipt]->Draw("same");
     onSun(0,0,0.3,0);
  
-    drawSys( hPbPbUnfSq[ipt], sysPlus.pbpb[ipt], 4, 1);
-    drawSys( hPPUnfSq[ipt], sysPlus.pp[ipt], 1, 1);
+    drawSysUpDown( hPbPbUnfSq[ipt], sysPlus.pbpb[ipt], sysMinus.pbpb[ipt], 4, 1);
+    drawSysUpDown( hPPUnfSq[ipt], sysPlus.pp[ipt], sysMinus.pp[ipt], 1, 1);
     hPPUnfSq[ipt]->SetFillStyle(1);
     hPbPbUnfSq[ipt]->SetFillStyle(1);
     hPPUnfSq[ipt]->Draw("same");
@@ -114,7 +115,7 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     if ( optY==1)  hRAA[ipt]->SetAxisRange(-300,2000,"X");
     else if ( optY==2) hRAA[ipt]->SetAxisRange(0.001,0.239,"X");
     if ( optY==1)    hRAA[ipt]->SetXTitle("m (GeV)");
-    else if ( optY==2)    hRAA[ipt]->SetXTitle("m/p_{T}");
+    else if ( optY==2)    hRAA[ipt]->SetXTitle("m^{jet}/p_{T}^{jet}");
     
     hRAA[ipt]->SetNdivisions(505,"X");
     hRAA[ipt]->SetAxisRange( -0.05,1.99,"Y");
@@ -123,12 +124,13 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     fixedFontHist(hRAA[ipt],2,2.2,20);
 
     hRAA[ipt]->Draw();
-    drawSys( hRAA[ipt], sysPlus.raa[ipt], kOrange);
+    drawSysUpDown( hRAA[ipt], sysPlus.raa[ipt], sysMinus.raa[ipt], kOrange);
     hRAA[ipt]->Draw("same");
     //    drawText("Ratio of per-jet distribution",0.3,0.78,2,16);
     jumSun(0,1,0.3,1);
     if ( ipt == lowPtBin ) {
       drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
+      ATLASLabel(0.33,0.92,"Internal",0.075,0.25);
     }
     // lumi uncertainty 
     double lumiUnc = getLumiRelErr(icent);
@@ -141,22 +143,23 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
 
     hPPUnfSq[ipt]->Draw();
     hPbPbUnfSq[ipt]->Draw("same");
-    drawSys( hPbPbUnfSq[ipt], sysPlus.pbpb[ipt], kRed, 1);
-    drawSys( hPPUnfSq[ipt], sysPlus.pp[ipt], 1, 1);
+    drawSysUpDown( hPbPbUnfSq[ipt], sysPlus.pbpb[ipt], sysMinus.pbpb[ipt], kRed, 1);
+    drawSysUpDown( hPPUnfSq[ipt], sysPlus.pp[ipt], sysMinus.pp[ipt], 1, 1);
     if ( ipt == lowPtBin ) {
       //      drawText("#bf{#it{ATLAS}}",0.33,0.85,1,20);
-      TLegend *leg1 = new TLegend(0.7043845,0.5860943,0.9997715,0.8591246,NULL,"brNDC");
+      TLegend *leg1 = new TLegend(0.3543845,0.5860943,1.0497715,0.8491246,NULL,"brNDC");
       easyLeg(leg1," ");
       leg1->AddEntry(hPPUnfSq[ipt], "pp","pf"); // #frac{d#sigma}{dp_{T}}","pl");
       leg1->AddEntry(hPbPbUnfSq[ipt], "PbPb","pf");// #frac{dN}{dp_{T}}#frac{1}{T_{AA}}","pl");
       leg1->Draw();
+      ATLASLabel(0.33,0.86,"Internal",0.09,0.25);
     }
-    if ( ipt == lowPtBin ) {
-    drawText("#it{pp} 25 pb^{-1}, PbPb 0.49 nb^{-1}",0.35,0.83,1,15);
+    if ( ipt == lowPtBin +1) {
+    drawText("#it{pp} 25 pb^{-1}, PbPb 0.49 nb^{-1}",0.1,0.86,1,16);
     //    drawText("PbPb 0.49 nb^{-1}",0.4,0.78,1,15);
     }
-    if ( ipt==lowPtBin)  drawBin(xBin,ipt,"GeV",0.35,0.73,1,16);
-    else drawBin(xBin,ipt,"GeV",0.35,0.73,1,16);
+    if ( ipt==lowPtBin)  drawBinPt(xBin,ipt,"GeV",0.35,0.78,1,16);
+    else drawBinPt(xBin,ipt,"GeV",0.20,0.78,1,16);
     gPad->RedrawAxis();
     
   }

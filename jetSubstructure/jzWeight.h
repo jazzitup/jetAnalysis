@@ -37,4 +37,23 @@ double hi9EvtWgtJZ2 = perEvtWgtJZ2 / 5856854. ;
 double hi9EvtWgtJZ3 = perEvtWgtJZ3 / 5913566. ;
 double hi9EvtWgtJZ4 = perEvtWgtJZ4 / 7887243. ;  // 5887243.
 
+//herwig++
+const double hJZ2_cs     = 4.2399E+05;
+const double hJZ2_fltEff = 3.2473E-03 ;
+
+const double hJZ3_cs     = 3.0223E+03;
+const double hJZ3_fltEff = 3.7789E-03;
+
+const double hJZ4_cs     =  1.5916E+01;
+const double hJZ4_fltEff = 3.3926E-03;
+
+double hperEvtWgtJZ2 = hJZ2_cs * hJZ2_fltEff;
+double hperEvtWgtJZ3 = hJZ3_cs * hJZ3_fltEff;
+double hperEvtWgtJZ4 = hJZ4_cs * hJZ4_fltEff;
+
+double HerwigEvtWgtJZ2 = hperEvtWgtJZ2 / 2564996. ;
+double HerwigEvtWgtJZ3 = hperEvtWgtJZ3 / 2899992. ;
+double HerwigEvtWgtJZ4 = hperEvtWgtJZ4 / 2804995. ;  // 5887243.
+
+
 #endif 

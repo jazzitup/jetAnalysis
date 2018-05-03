@@ -201,6 +201,51 @@ void drawSys(TH1 *h,TH1 *sys, int theColor= kYellow, int fillStyle = -1, int lin
     }
 }
 
+
+
+void drawSysUp(TH1 *h,TH1 *sys, int theColor= kYellow, int fillStyle = -1, int lineStyle = -1)
+{
+  for (int i=1;i<=h->GetNbinsX();i++)
+    {
+      double val = h->GetBinContent(i);
+      double err = val* fabs(sys->GetBinContent(i));
+      if (err == 0  ) continue;
+      TBox *b = new TBox(h->GetBinLowEdge(i),val,h->GetBinLowEdge(i+1),val+err);
+      b->SetLineColor(theColor);
+      b->SetFillColor(theColor);
+      if ( fillStyle > -1 ) b->SetFillStyle(fillStyle);
+      if ( lineStyle > -1 ) b->SetLineStyle(lineStyle);
+
+      b->Draw();
+    }
+}
+void drawSysDown(TH1 *h,TH1 *sys, int theColor= kYellow, int fillStyle = -1, int lineStyle = -1)
+{
+  for (int i=1;i<=h->GetNbinsX();i++)
+    {
+      double val = h->GetBinContent(i);
+      double err = val* fabs(sys->GetBinContent(i));
+      if (err == 0  ) continue;
+      TBox *b = new TBox(h->GetBinLowEdge(i),val-err,h->GetBinLowEdge(i+1),val);
+      if ( val-err < 0) 
+	b = new TBox(h->GetBinLowEdge(i),0,h->GetBinLowEdge(i+1),val);
+
+      b->SetLineColor(theColor);
+      b->SetFillColor(theColor);
+      if ( fillStyle > -1 ) b->SetFillStyle(fillStyle);
+      if ( lineStyle > -1 ) b->SetLineStyle(lineStyle);
+
+      b->Draw();
+    }
+}
+
+void drawSysUpDown(TH1 *h,TH1 *sysUp, TH1 *sysDown, int theColor= kYellow, int fillStyle = -1, int lineStyle = -1)  {
+  drawSysUp(h,sysUp, theColor, fillStyle, lineStyle);
+  drawSysDown(h,sysDown, theColor, fillStyle, lineStyle);
+}
+
+
+
 void drawSysAbs(TH1 *h,TH1 *sys, int theColor= kYellow, int fillStyle = -1, int lineStyle = -1)
 {
    for (int i=1;i<=h->GetNbinsX();i++)
@@ -245,7 +290,7 @@ void multiplyBonA(TH1* h1, TH1* h2) {
 }
 
 void drawPatch(float x1, float y1, float x2, float y2, int color =0, int style=1001, TString ops=""){
-  TLegend *t1=new TLegend(x1,y1,x2,y2,NULL,ops.Data());
+  TLegend *t1=new TLegend(x1,y1,x2,y2,NULL,"brNDC");
    if ( color ==0) t1->SetFillColor(kWhite);
    else t1->SetFillColor(color);
    t1->SetBorderSize(0);
@@ -452,7 +497,7 @@ void makeEfficiencyCanvas(TCanvas*& canv, const Int_t columns,
    Xlow[0] = leftOffset;
    Xup[0] = leftOffset + PadWidth/(1.0-leftMargin);
    Xup[columns-1] = 1;
-   Xlow[columns-1] = 1.0-PadWidth/(1.0-edge);
+   if ( columns > 1)  Xlow[columns-1] = 1.0-PadWidth/(1.0-edge);
    
    Yup[0] = 1;
    Ylow[rows-1] = bottomOffset;
@@ -1080,6 +1125,27 @@ float  getNpart(int ibin) {
   if (ibin ==39) return  2.7877;
   return -100000;
 }
+
+
+
+void ATLASLabel(Double_t x,Double_t y,const char* text, float size=0.08, float space = 0.16, Color_t color=1)
+{
+  TLatex *tex = new TLatex(x,y,"ATLAS");
+  tex->SetNDC();
+  tex->SetTextFont(72);
+  //   if(bold)tex->SetTextFont(43);
+  tex->SetTextSize(size);
+  tex->SetTextColor(color);
+  tex->Draw();
+
+  TLatex *tex2 = new TLatex(x+ space,y,text);
+  tex2->SetNDC();
+  tex2->SetTextFont(42);
+  tex2->SetTextSize(size);
+  tex2->SetTextColor(color);
+  tex2->Draw();
+}
+
 
 
 

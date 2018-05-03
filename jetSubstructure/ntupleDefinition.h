@@ -1,3 +1,7 @@
+#ifndef NTUPLEDEF_H
+#define NTUPLEDEF_H
+
+
 struct jetSubStr { //v4.7
   
   Int_t cent;
@@ -9,3 +13,7 @@ struct jetSubStr { //v4.7
   float recoTrNsub, recoTrTheta, recoTrMassRaw, recoTrMassCorr, recoTrDels, genTrNsub, genTrTheta, genTrMass, genTrDels;  // trimming
   float nTrkRaw, nTrkBkg, nTrkBkgNoWgt,  recoChPtRcSubt, recoChMassRcSubt, drTrkJetBkg, maxTrkPt ;   // random cone
 };
+
+
+
+#endif

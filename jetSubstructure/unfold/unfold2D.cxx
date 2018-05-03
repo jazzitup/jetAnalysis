@@ -27,7 +27,7 @@ int mFlag = 0 ;
 #include <TPaletteAxis.h>
 #include "unfoldingUtil.h"
 
-double statFrac = 001;
+double statFrac = 0.001;
 double fracStstData = 001;
 bool doUnfData = true ;
 
@@ -51,6 +51,8 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     cout << "===== pp intrinsic JES sys mode ======" << endl;
   else if ( (nSys >= 100 ) && ( nSys <= 106 ) )
     cout << "===== HI JES sys mode =====" << endl;
+  else if ( (nSys >= 200 ) && ( nSys <= 250 ) )
+    cout << "===== JMS/JMR sys mode =====" << endl;
   else {
     cout << "===== Invald nSys option ===== " << nSys << endl;
     return ;
@@ -343,7 +345,7 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
     if ( doReweight ) {
       hReweight = getRewTable(kSample, icent);
     }
-
+  
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
     for (Int_t i= 0; i<tr->GetEntries() ; i++) {
       if ( i > tr->GetEntries() * statFrac ) continue;

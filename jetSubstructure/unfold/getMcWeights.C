@@ -2,7 +2,7 @@
 using std::cout;
 using std::endl;
 
-#include "TRandom.h"
+#include <TRandom3.h>
 #include "TH1D.h"
 
 #include "../getSdHists.C"
@@ -14,9 +14,9 @@ using std::endl;
 
 #include "../JssUtils.h"
 #include <TPaletteAxis.h>
+#include "systematicsTool.h"
 
-double statFrac = 0001;
-double fracStstData = 001;
+double statFrac = 001;
 bool doUnfData = true ;
 
 int lowPtBin = 1;  int highPtBin = 13;
@@ -26,7 +26,7 @@ int nPtPannels = highPtBin-lowPtBin+1;
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0, TF1* ptScale=0);
+void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0, TF1* ptScale=0, int nSys=-1);
 void getDATAspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hdataRaw=0);
 
 TH1D* getVariedHist(TH1D* hin=0, double variation=0);
@@ -47,7 +47,8 @@ void removeFluc2(TH2* h) {
   }
 }
 
-void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=772) {   // opt1 : mass,   opt2 : m/pT  
+void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys=-1) {   // opt1 : mass,   opt2 : m/pT  
+  int opt = 772;
   TH1::SetDefaultSumw2();
   
   int nXbins;
@@ -81,7 +82,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   TH2D* hdataRaw = (TH2D*)hTemp->Clone(Form("hdataRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
   //  TH3D* hPtMassGenMass = new TH3D("hPtMassGenMass","",nXbins, xBin, nYbins, yBin,nYbins, yBin);
   //void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0); 
-  getMCspectra   ( kSample, icent, opt, hmcRaw, hmcTruth);
+  getMCspectra   ( kSample, icent, opt, hmcRaw, hmcTruth, 0, nSys);
   getDATAspectra ( kSample, icent, opt, hdataRaw);
 
   
@@ -124,24 +125,26 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   }
   
   TCanvas* c1=  new TCanvas("c1","",500,500);
-  makeEfficiencyCanvas(c1,1, 0.05, 0.01, 0.1, 0.3, 0.01);
+  makeEfficiencyCanvas(c1,1, 0.0, 0.01, 0.2, 0.25, 0.01);
   c1->cd(1);
   TH1D* ptmc = (TH1D*)hmcRaw->ProjectionX("ptmc");
   TH1D* ptdata = (TH1D*)hdataRaw->ProjectionX("ptdata");
   handsomeTH1(ptmc,1);
   handsomeTH1(ptdata,2);
   ptmc->SetAxisRange(1e-6,1e8,"Y");
-  ptmc->Draw();
+  ptmc->SetYTitle("dN/dp_{T}^{Reco}");
+  ptmc->Draw(); 
   ptdata->Draw("same");
   gPad->SetLogy();
-  drawCentrality(kSample, icent, 0.70,0.86,1,24);
+  drawCentrality(kSample, icent, 0.6,0.86,1,24);
 
-  TLegend *leg1 = new TLegend(0.4814838,0.5583593,1,0.7723161,NULL,"brNDC");
+  TLegend *leg1 = new TLegend(0.60,0.5583593,1,0.8023161,NULL,"brNDC");
 
   easyLeg(leg1,"Mass integrated");
   leg1->AddEntry(ptdata, "Data","pl");
   leg1->AddEntry(ptmc, "MC","pl");
   leg1->Draw();
+  ATLASLabel(0.22, 0.88, "Internal");//, "Pb+Pb  #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}", kBlack);
 
   c1->cd(2);
   TH1D* hptRatio = (TH1D*)ptdata->Clone("hptRatio");
@@ -176,7 +179,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
 
   TH2D* hmcPtCorr   = (TH2D*)hTemp->Clone(Form("hmcRawPtCorr_kSample%d_icent%d_opt%d",kSample,i,opt));
   TH2D* hmcTruthPtCorr = (TH2D*)hTemp->Clone(Form("hmcTruthPtCorr_kSample%d_icent%d_opt%d",kSample,i,opt));
-  getMCspectra   ( kSample, icent, opt, hmcPtCorr, hmcTruthPtCorr,fit);
+  getMCspectra   ( kSample, icent, opt, hmcPtCorr, hmcTruthPtCorr,fit, nSys);
 
 
 
@@ -238,11 +241,13 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   handsomeTH1( hsmooVarM,kGreen+4);
 
   hsmooVarP->SetLineWidth(2);
-  hsmooVarP->SetLineWidth(2);
+  hsmooVarM->SetLineWidth(2);
+  hsmooVarP->SetLineStyle(9);
+  hsmooVarM->SetLineStyle(6);
 
   c15->SaveAs(Form("reweightFactors/MassIntreweighting_kSample%d_icent%d.pdf",kSample,icent));
 
-  TCanvas* c16 = new TCanvas("c16","",400,400);
+  TCanvas* c16 = new TCanvas("c16","",500,500);
 
   cleverRange(hmptRatioPtAllsmooth,3);
   hmptRatioPtAllsmooth->SetAxisRange(-0.07,0.3,"X");
@@ -255,14 +260,16 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   hmptRatioPtAll->Draw("same");
   hsmooVarP->Draw("same hist");
   hsmooVarM->Draw("same hist");
-  drawCentrality(kSample, icent, 0.70,0.86,1,24);
+  drawCentrality(kSample, icent, 0.50,0.86,1,24);
   
-  TLegend *leg3 = new TLegend(0.4723618,0.6186667,0.959799,0.832,NULL,"brNDC");
+  TLegend *leg3 = new TLegend(0.523618,0.6186667,0.959799,0.832,NULL,"brNDC");
   easyLeg(leg3,"Reweight factor");
   leg3->AddEntry(hsmooVarP, "Varied by +50%","l");
   leg3->AddEntry(hmptRatioPtAll, "Nominal","l");
   leg3->AddEntry(hsmooVarM, "Varied by -50%","l");
   leg3->Draw();
+
+  ATLASLabel(0.18, 0.88, "Internal",0.05);//, "Pb+Pb  #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}", kBlack);
 
   c16->SaveAs(Form("reweightFactors/MassIntreweighting_kSample%d_icent%d_ratioOnly.pdf",kSample,icent));
   
@@ -343,7 +350,12 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
   }
 
   
-  TFile * fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50.root",(int)weightCut,opt,(float)flucCut),"update");
+  TFile * fout;
+  if ( nSys < 0 ) 
+    fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50_canBeRemoved.root",(int)weightCut,opt,(float)flucCut),"update");
+  else
+    fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50_nSys%d.root",(int)weightCut,opt,(float)flucCut,nSys),"update");
+  
   hmcPtCorr->Write("",TObject::kOverwrite);
   hmcTruth->Write("",TObject::kOverwrite);
   hdataRaw->Write("",TObject::kOverwrite);
@@ -364,18 +376,20 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int opt=
 }
 
 
-void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth, TF1* ptScale) {
+void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth, TF1* ptScale, int nSys) {
   
+  TRandom3 genRandom;
+  genRandom.SetSeed(200);
+
   TH1::SetDefaultSumw2();
   hmcRaw->Reset();
   hmcTruth->Reset();
 
-  int  nSys = -1 ;
   TString jz2;
   TString jz3;
   TString jz4;
   if ( kSample == kPbPb ) {
-    if ( nSys >= 0 ) {
+    if ( (nSys >= 0)&&(nSys<200)) {
       jz2 = jz2PbPbStringSys;
       jz3 = jz3PbPbStringSys;
       jz4 = jz4PbPbStringSys;
@@ -387,7 +401,7 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
     }
   }
   else if ( kSample == kPP ) {
-    if ( nSys >= 0 ) {
+    if ( (nSys >= 0)&&(nSys<200)) {
       jz2 = jz2PPStringSys;
       jz3 = jz3PPStringSys;
       jz4 = jz4PPStringSys;
@@ -415,18 +429,29 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
   TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
   TH2D* hRecoEntries;
 
+  float ptSys;
+  TBranch *b_ptSys;
+  TString jetSysName = getPtSysName(nSys);
+  cout << " jetSysName = " << jetSysName << endl;
+
   cout << " Setting tree branch address..." << endl;
   TFile* fjz2 = new TFile(Form("../ntuples/%s",jz2.Data()));
   TTree* tr2 = (TTree*)fjz2->Get("tr");
   tr2->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+  if ( (nSys>=0) && (nSys<200) )
+    tr2->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
 
   TFile* fjz3 = new TFile(Form("../ntuples/%s",jz3.Data()));
   TTree* tr3 = (TTree*)fjz3->Get("tr");
   tr3->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+  if ( (nSys>=0) && (nSys<200) )
+    tr3->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
 
   TFile* fjz4 = new TFile(Form("../ntuples/%s",jz4.Data()));
   TTree* tr4 = (TTree*)fjz4->Get("tr");
   tr4->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+  if ( (nSys>=0) && (nSys<200) )
+    tr4->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
 
 
   for ( int ijz =2 ; ijz<=4 ; ijz++) {
@@ -491,7 +516,7 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 	recoY = myJetMc.recoMass / myJetMc.recoPt;
       }
 
-
+      if ( genY < 0 ) genY = 0.000001;
       
       double fcalWeight = 1.0;
       if ( kSample==kPbPb) {
@@ -503,7 +528,49 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
       if ( ptScale != 0) {
 	ptWeight = ptScale->Eval(recoX);
       }
-
+      
+      if ( (nSys>=0) && (nSys<200) ) {
+	double extraPtScale = ptSys / myJetMc.recoPt ;
+	recoX = recoX * extraPtScale ; //pt
+	myJetMc.recoPt = ptSys;  // New pT!!!
+	myJetMc.recoMass = myJetMc.recoMass * extraPtScale ; // new mass so that m/pT is invariant.
+      }
+      
+      if (nSys==200) { // JMR
+	// smear by 20% the recoY
+	double theCenter = genY * getJMSscale( kSample, icent, myJetMc.recoPt);
+	double recoDev = recoY - theCenter; 
+	double theResol = getJMRsigma( kSample, icent, myJetMc.recoPt);
+        double jmrUnc = getJmrUnc( kSample, icent, myJetMc.recoPt);
+        double theVariation = sqrt ( (1 +jmrUnc)*(1+jmrUnc) - 1 );
+	recoY = theCenter + recoDev * genRandom.Gaus(1, theVariation * theResol);  
+	//	recoY = theCenter + recoDev * genRandom.Gaus(1, 0.66 * theResol);  
+      }
+      if (nSys==201) { // JMR HI
+	// smear by 20% the recoY
+	double theCenter = genY * getJMSscale( kSample, icent, myJetMc.recoPt);
+	double recoDev = recoY - theCenter; 
+	double theResol = getJMRsigma( kSample, icent, myJetMc.recoPt);
+        double jmrUnc = getJmrUncHI( kSample, icent, myJetMc.recoPt);
+        double theVariation = sqrt ( (1 +jmrUnc)*(1+jmrUnc) - 1 );
+	recoY = theCenter + recoDev * genRandom.Gaus(1, theVariation * theResol);  
+	//	recoY = theCenter + recoDev * genRandom.Gaus(1, 0.66 * theResol);  
+      }
+      if (nSys==210) { // JMS
+	double theRtrk = getRtrk( kSample, icent, myJetMc.recoPt);
+	recoY = recoY * theRtrk;
+      }
+      if (nSys==211) { // JMS
+	recoY = recoY * 1.008;
+      }
+      if (nSys==213) { // JMS by Herwig
+	double theRtrk = getRtrkHerwig( kSample, icent, myJetMc.recoPt);
+	recoY = recoY / theRtrk;
+      }
+      if (nSys==217) { // JMS by Herwig
+	recoY = recoY * 1.05;
+      }
+      
       hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);
       hmcTruth->Fill( genX, genY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);
     }
@@ -534,7 +601,7 @@ void getDATAspectra(int kSample, int icent, int opt, TH2D* hdataRaw) {
   
   for (Int_t i= 0; i<tr->GetEntries() ; i++) {
     tr->GetEntry(i);
-    if ( i > tr->GetEntries() * fracStstData) break;
+    if ( i > tr->GetEntries() * statFrac) break;
 
     if ( ! passEvent(myJet, icent, false) ) // isMC = false
       continue;

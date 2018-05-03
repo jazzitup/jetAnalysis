@@ -24,7 +24,7 @@ using std::endl;
 #include <TPaletteAxis.h>
 #include "unfoldingUtil.h"
 
-double fracStst=0001;
+double fracStst=001;
 
 
 void getDist( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hJMS=0, TH2D* hJMR=0, TH2D* hJES=0, TH2D* hJER=0, bool doReweight = true);
@@ -79,7 +79,7 @@ void getJMS(int kSample = kPbPb, int icent=0, int optX =1, int optY=2, bool doRe
   }
   jumSun(0,0,0.36,0);
   drawCentrality(kSample, icent, 0.2,0.85,1,25);
-  drawText("<[p_{T}/m]>", 0.2,0.78,1,25);
+  //  drawText("<m/p_{T}]>", 0.2,0.78,1,25);
   leg1->Draw();
   c2->SaveAs(Form("jms/jms_kSample%d_icent%d.pdf",kSample,icent));
 
@@ -94,16 +94,16 @@ void getJMS(int kSample = kPbPb, int icent=0, int optX =1, int optY=2, bool doRe
     hr->SetXTitle("[m/p_{T}]^{Truth}");
     hr->SetYTitle("Resolution");
     hr->SetAxisRange(0.001,0.239,"X");
-    hr->SetAxisRange(0,0.3,"Y");
+    hr->SetAxisRange(0,0.1,"Y");
     hr->SetNdivisions(505,"X");
     hr->SetNdivisions(505,"Y");
     if ( ix == lowPtBin) hr->Draw();
     else hr->Draw("same");
     leg2->AddEntry(hr, textBin(xBin,ix,"GeV").Data(),"pl" );
   }
-  jumSun(0,0,0.36,0);
+  //  jumSun(0,0,0.36,0);
   drawCentrality(kSample, icent, 0.2,0.85,1,25);
-  drawText("#sigma[p_{T}/m]", 0.2,0.78,1,25);
+  drawText("#sigma[m/p_{T}]", 0.2,0.78,1,25);
   leg2->Draw();
   c3->SaveAs(Form("jms/jmr_kSample%d_icent%d.pdf",kSample,icent));
 
@@ -170,9 +170,10 @@ void getDist( int kSample, int icent, int optX, int optY, TH2D* hJMS, TH2D* hJMR
       //      jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2.root";
       //      jz3 = "jetSubstructure_MC_HION9_pbpb_v50_jz3.root";
       //      jz4 = "jetSubstructure_MC_HION9_pbpb_v50_jz4.root";
-      jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-      jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-      jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+      jz2 = "jetSubstructure_pbpbMC_HION9_jz2_v51_april124.root";
+      jz3 = "jetSubstructure_pbpbMC_HION9_jz3_v51_april124.root";
+      jz4 = "jetSubstructure_pbpbMC_HION9_jz4_v51_april124.root";
+
     }
   }
   else if ( kSample == kPP ) {
@@ -180,9 +181,9 @@ void getDist( int kSample, int icent, int optX, int optY, TH2D* hJMS, TH2D* hJMR
       //  jz2 = "jetSubstructure_MC_HION9_pp_v50_jz2.root";
       //      jz3 = "jetSubstructure_MC_HION9_pp_v50_jz3.root";
       //      jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4.root";
-      jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-      jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-      jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+      jz2 = "jetSubstructure_ppMC_HION9_jz2sys_v50_april14.root";
+      jz3 = "jetSubstructure_ppMC_HION9_jz3sys_v50_april14.root";
+      jz4 = "jetSubstructure_ppMC_HION9_jz4sys_v50_april14.root";
     }
   }
   
