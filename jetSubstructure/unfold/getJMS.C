@@ -94,7 +94,7 @@ void getJMS(int kSample = kPbPb, int icent=0, int optX =1, int optY=2, bool doRe
     hr->SetXTitle("[m/p_{T}]^{Truth}");
     hr->SetYTitle("Resolution");
     hr->SetAxisRange(0.001,0.239,"X");
-    hr->SetAxisRange(0,0.25,"Y");
+    hr->SetAxisRange(0,0.1,"Y");
     hr->SetNdivisions(505,"X");
     hr->SetNdivisions(505,"Y");
     if ( ix == lowPtBin) hr->Draw();
@@ -103,7 +103,7 @@ void getJMS(int kSample = kPbPb, int icent=0, int optX =1, int optY=2, bool doRe
   }
   //  jumSun(0,0,0.36,0);
   drawCentrality(kSample, icent, 0.2,0.85,1,25);
-  drawText("#sigma[p_{T}/m]", 0.2,0.78,1,25);
+  drawText("#sigma[m/p_{T}]", 0.2,0.78,1,25);
   leg2->Draw();
   c3->SaveAs(Form("jms/jmr_kSample%d_icent%d.pdf",kSample,icent));
 
@@ -182,8 +182,8 @@ void getDist( int kSample, int icent, int optX, int optY, TH2D* hJMS, TH2D* hJMR
       //      jz3 = "jetSubstructure_MC_HION9_pp_v50_jz3.root";
       //      jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4.root";
       jz2 = "jetSubstructure_ppMC_HION9_jz2sys_v50_april14.root";
-      jz3 = "jetSubstructure_ppMC_HION9_jz2sys_v50_april14.root";
-      jz4 = "jetSubstructure_ppMC_HION9_jz2sys_v50_april14.root";
+      jz3 = "jetSubstructure_ppMC_HION9_jz3sys_v50_april14.root";
+      jz4 = "jetSubstructure_ppMC_HION9_jz4sys_v50_april14.root";
     }
   }
   

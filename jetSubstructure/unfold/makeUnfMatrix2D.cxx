@@ -307,7 +307,6 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	//	recoVarY = theCenter + recoDev * genRandom.Gaus(1, 0.66 * theResol);  //20 percent
       }	
       else if (nSys==201) { // JMR  HI
-	// smear by 20% the recoY 
 	double theCenter = truthVarY * getJMSscale( kSample, icent, myJetMc.recoPt);
         double recoDev = recoVarY - theCenter;
 	double jmrUnc = getJmrUncHI( kSample, icent, myJetMc.recoPt); 

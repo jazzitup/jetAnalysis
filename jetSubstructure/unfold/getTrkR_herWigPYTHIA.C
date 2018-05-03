@@ -21,6 +21,7 @@ int nPtPannels = highPtBin-lowPtBin+1;
 void getHerwigR(int kSample=kPbPb, int icent=0,  TH2D* hmc=0, int ptCut=6, TString varName="");
 void getPYTHIAR(int kSample=kPbPb, int icent=0,  TH2D* hmc=0, int ptCut=6, TString varName="");
 TH1D* getVariedHist(TH1D* hin=0, double variation=0);
+void getMeanPt(int kSample=kPP, int icent=0, TH1D* hMean=0);
 
 double findPeak(TF1* f, double low =2,double high = 4 ) {
   double v1 = f->GetParameter(1);
@@ -92,6 +93,11 @@ void getTrkR_herWigPYTHIA() {
   TH1D* h1herwig[20];
   TH1D* h1pythia[20];
 
+  double Rx[30];
+  double Ry[30];
+  double RxErr[30];
+  double RyErr[30];
+
   //  getHerwigR   ( kSample, icent, hHerwig, ptCut, "trkJetMassRcSub2");
   //  getPYTHIAR   ( kSample, icent, hPythia, ptCut,"trkJetMassRcSub2");
   //  getHerwigR   ( kSample, icent, hHerwig, ptCut, "");
@@ -100,6 +106,9 @@ void getTrkR_herWigPYTHIA() {
   getHerwigR   ( kSample, icent, hHerwig, ptCut, "");
   getPYTHIAR   ( kSample, icent, hPythia, ptCut,"");
   
+  TH1D* hMeanPt = new TH1D("hmeanpt","",nXbins,xBin);
+  getMeanPt(0,0,hMeanPt);
+
   TCanvas* c2 =  new TCanvas("c2","",1200,400);
   makeMultiPanelCanvas(c2,nPtPannels, 1, 0.0, 0.01, 0.3, 0.2, 0.05);
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++) {
@@ -164,7 +173,8 @@ void getTrkR_herWigPYTHIA() {
     cout << "PYTHIA maean, RMS = " << h1pythia[ix]->GetMean() << ",   " << h1pythia[ix]->GetRMS() << endl;
     cout << "Herwig/PYTHIA mean = " <<  h1herwig[ix]->GetMean()/ h1pythia[ix]->GetMean() << endl;
     double meanRatio = f1pythia->Mean(0,20) / f1Herwig->Mean(0,20);
-    if ( ix== lowPtBin)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
+    //    if ( ix== lowPtBin)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
+    if ( ix== lowPtBin)    drawText("R^{trk} of Herwig/PYTHIA", 0.30,0.86,1,16);
     drawBin(xBin,ix,"GeV",0.4,0.79,49,16);
     drawText(Form("R_{fit} = %.2f", (float)peakRatio), 0.35, 0.72,1,20);
     //    drawText(Form("R_{mean} = %.2f", (float)meanRatio), 0.35, 0.65,1,20);
@@ -179,17 +189,30 @@ void getTrkR_herWigPYTHIA() {
     
     hTrkR->SetBinContent(ix, peakRatio);
     hTrkR->SetBinError(ix, peakRatioErr);
+
+    Rx[ix-1] = hMeanPt->GetBinContent(ix);
+    RxErr[ix-1] = hMeanPt->GetBinError(ix);
+    Ry[ix-1] = peakRatio;
+    RyErr[ix-1] = peakRatioErr;
+
   }
   c2->SaveAs(Form("pdfsJMS/JMS_ptCut%d_kSample%d_cent%d.pdf",(int)ptCut,kSample,icent));
   TCanvas* c3 = new TCanvas("c3","",500,500);
   hTrkR->SetAxisRange(0.8,1.2,"Y");
   //  TF1* f1 = new TF1("f1","[0] +x*[1]",xBin[0], xBin[nXbins]);
   TF1* f1 = new TF1("f1","[0] +log(x)*[1] + log(x)*log(x)*[2]",xBin[0], xBin[nXbins]);
-  hTrkR->Fit("f1");
+  //  hTrkR->Fit("f1");
+  handsomeTH1(hTrkR,0);
+  hTrkR->SetAxisRange(121,450,"X");
   hTrkR->Draw();
   jumSun(xBin[0],1, xBin[nXbins],1);
-  drawCentrality(kSample, icent, 0.60,0.86,1,24);
+  drawText("R^{trk} of Herwig/PYTHIA", 0.30,0.86,1,20);
 
+  TGraphErrors* gr = new TGraphErrors(nXbins,Rx,Ry,RxErr,RyErr);
+  gr->Fit("f1","","",125,500);
+  //  gr->Fit("f1","O");
+  gr->Draw("same p");
+  
   TF1* f2 = new TF1("f2","2- ([0] +log(x)*[1] + log(x)*log(x)*[2])",xBin[0], xBin[nXbins]);
   f2->SetParameter( 0, f1->GetParameter(0));
   f2->SetParameter( 1, f1->GetParameter(1));
@@ -197,7 +220,7 @@ void getTrkR_herWigPYTHIA() {
   f2->SetLineColor(2);
   f2->SetLineStyle(2);
   //  f2->Draw("same");
-  c3->SaveAs(Form("pdfsJMS/trkR_ptCut%d_kSample%d_cent%d.pdf",(int)ptCut,kSample,icent));
+  c3->SaveAs(Form("pdfsJMS/trkR_ptCut%d_kSample%d_cent%d_pythiaHerwig.pdf",(int)ptCut,kSample,icent));
 }
 
 
@@ -426,3 +449,47 @@ TH1D* getVariedHist(TH1D* hin, double variation)  {
   
   
 }
+
+
+void getMeanPt(int kSample, int icent, TH1D* hMean){
+  TH1::SetDefaultSumw2();
+  TString fname;
+  if ( kSample == kPbPb ) {
+    fname = "jetSubstructure_data_HION9_v50_r4_pbpb_apr11.root";
+  }
+  else if ( kSample == kPP) {
+    fname = "jetSubstructure_data_HION9_v50_r4_pp_apr11.root";
+  }
+
+  TH1D* htempPt = (TH1D*)hMean->Clone("htempPt");
+  TH1D* htempN = (TH1D*)hMean->Clone("htempN");
+  htempPt->Reset();
+  htempN->Reset();
+
+  TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));
+  TTree* tr = (TTree*)fData->Get("tr");
+  jetSubStr myJet;
+  TBranch       *b_myJet;
+  tr->SetBranchAddress("jets", &(myJet.cent), &b_myJet);
+
+  if ( kSample == kPP )  cout << " pp " ;
+  else if ( kSample == kPbPb) cout << " PbPb " ;
+  cout << "data entries = " << tr->GetEntries() << endl;
+
+  for (Int_t i= 0; i<tr->GetEntries() ; i++) {
+    tr->GetEntry(i);
+    if ( i > tr->GetEntries() * statUsed) break;
+    if ( ! passEvent(myJet, icent, false) )       continue;
+
+    double mpt = myJet.recoMass / myJet.recoPt;
+
+    htempPt->Fill(myJet.recoPt, myJet.recoPt);
+    htempN->Fill(myJet.recoPt);
+  }
+
+  htempPt->Divide(htempN);
+  hMean->Reset();
+  hMean->Add(htempPt);
+}
+
+

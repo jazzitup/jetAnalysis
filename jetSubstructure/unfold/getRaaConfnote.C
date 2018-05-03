@@ -58,7 +58,7 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
       
       hPPUnfSq[ipt][ii] = (TH1D*)tempHistYsq->Clone(Form("hPPUnfSq_ipt%d",ipt));
       hPbPbUnfSq[ipt][ii] = (TH1D*)tempHistYsq->Clone(Form("hPbPbUnfSq_ipt%d",ipt));
-      getDATAforRAA(kPP,   0, ipt, nIterPP,   hPPUnfSq[ipt][ii]);
+      getDATAforRAA(kPP,   vCent[ii], ipt, nIterPP,   hPPUnfSq[ipt][ii]);
       getDATAforRAA(kPbPb, vCent[ii], ipt, nIterAA, hPbPbUnfSq[ipt][ii]);
       
       narrowSys( sysPlus[ii].pp[ipt], 0, 0.24);
@@ -165,19 +165,66 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
   // drawErrorBox( 0, 1-lumiUnc, 0.025, 1+lumiUnc, 1);
   
   c1->SaveAs("raaFigure_confNote.pdf");
+
+  TCanvas *c2 = new TCanvas("c2", "",450,450);
+  int theBin = lowPtBin;
+  TH1D* htemp2 = (TH1D*)hRAA[theBin][0]->Clone("htemp2");
+  htemp2->Reset();
+  htemp2->SetAxisRange(0,1.81,"Y");
+  fixedFontHist(htemp2,1.3,1.3,20);
+  //  htemp2->GetXaxis()->SetTitleOffset(1.3);
+  //  htemp2->GetYaxis()->SetTitleOffset(1.3);
+
+  htemp2->SetXTitle("m^{jet}/p_{T}^{jet}");
+  htemp2->SetYTitle("R_{AA}");
+  htemp2->Draw();
+  hRAA[theBin][0]->Draw("same");
+  hRAA[theBin][0]->SetFillColor(kOrange);
+  hRAA[theBin][1]->SetFillColor(kSpring-1);
+  hRAA[theBin][2]->SetFillColor(kAzure-4);
+  drawSysUpDown( hRAA[theBin][0], sysPlus[0].raa[theBin],  sysMinus[0].raa[theBin], kOrange);
+  drawSysUpDown( hRAA[theBin][1], sysPlus[1].raa[theBin],  sysMinus[1].raa[theBin], kSpring-1);
+  drawSysUpDown( hRAA[theBin][2], sysPlus[2].raa[theBin],  sysMinus[2].raa[theBin], kAzure-4);
+  // lumi uncertainty
+  double lumiUnc = getLumiRelErr(vCent[ii]);
+  drawErrorBox( 0.23, 1-0.054, 0.24, 1+0.054, 1);
+  drawErrorBox( 0.22, 1-getTaaRelErr(0), 0.23, 1+getTaaRelErr(0), kOrange);
+  drawErrorBox( 0.21, 1-getTaaRelErr(1), 0.22, 1+getTaaRelErr(1), kGreen+1);
+  drawErrorBox( 0.20, 1-getTaaRelErr(2), 0.21, 1+getTaaRelErr(2), kBlue+1);
+  hRAA[theBin][0]->Draw("same");
+  hRAA[theBin][1]->Draw("same");
+  hRAA[theBin][2]->Draw("same");
+  jumSun(0,1,0.24,1);
+  gPad->RedrawAxis();
+  //  drawBinPt(xBin,theBin,"GeV", 0.55 ,0.88,1,18);
+
+  TLegend *leg1 = new TLegend(0.4397321,0.7035294,0.9397321,0.9082353,NULL,"brNDC");
+  easyLeg(leg1,"126 < p_{T}^{jet} < 158 GeV/c");
+
+  leg1->AddEntry(hRAA[theBin][2], "60% - 80%","pf");
+  leg1->AddEntry(hRAA[theBin][1], "30% - 40%","pf");
+  leg1->AddEntry(hRAA[theBin][0], " 0% - 10%","pf");
+  leg1->Draw();
+  //  ATLASLabel(0.33,0.86,"Internal",0.09,0.25);
+  c2->SaveAs("raa_126-158GeV.pdf");
+
 }
 
 
 
 void getDATAforRAA(int kSample, int icent, int ix, int nIter, TH1D* hdataUnfSq) {
-  if ( icent <=5) { 
+  if ( icent <=4) { 
     TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt1_spectraRwt1.root",kSample));
+    if ( kSample == kPP )
+      icent = 0 ;
     TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnf1d_icent%d_ix%d_iter%d",icent,ix,nIter));
     hdataUnfSq->Reset();
     hdataUnfSq->Add(hUnf);
   }
   else { 
     TFile * fin = new TFile(Form("../unfoldPeriBin/unfSpectra/kSample%d_matrixRwt1_spectraRwt1.root",kSample));
+    if ( kSample == kPP )
+      icent = 0 ;
     TH1D* hUnf = (TH1D*)fin->Get(Form("hdataUnf1d_icent%d_ix%d_iter%d",icent,ix,nIter));
     hdataUnfSq->Reset();
     hdataUnfSq->Add(hUnf);

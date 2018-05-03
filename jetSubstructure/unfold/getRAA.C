@@ -11,10 +11,6 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
   int nIterPP = getRefIter(0,0);
   int nIterAA = getRefIter(1,icent);
   
-  
-  nIterPP = 10 ;
-  nIterAA = 10 ;
-  
   int nXbins;
   double xBin[30];
   getXbin(nXbins, xBin, optX);
@@ -66,6 +62,9 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     narrowSys( sysPlus.pp[ipt], 0, 0.24);
     narrowSys( sysPlus.pbpb[ipt], 0, 0.24);
     narrowSys( sysPlus.raa[ipt], 0, 0.24);
+    narrowSys( sysMinus.pp[ipt], 0, 0.24);
+    narrowSys( sysMinus.pbpb[ipt], 0, 0.24);
+    narrowSys( sysMinus.raa[ipt], 0, 0.24);
 
     if ( optY==1)  hPPUnfSq[ipt]->SetAxisRange(-300,2000,"X");
     else if ( optY==2) hPPUnfSq[ipt]->SetAxisRange(0.001,0.239,"X");
@@ -90,8 +89,8 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     hPbPbUnfSq[ipt]->Draw("same");
     onSun(0,0,0.3,0);
  
-    drawSys( hPbPbUnfSq[ipt], sysPlus.pbpb[ipt], 4, 1);
-    drawSys( hPPUnfSq[ipt], sysPlus.pp[ipt], 1, 1);
+    drawSysUpDown( hPbPbUnfSq[ipt], sysPlus.pbpb[ipt], sysMinus.pbpb[ipt], 4, 1);
+    drawSysUpDown( hPPUnfSq[ipt], sysPlus.pp[ipt], sysMinus.pp[ipt], 1, 1);
     hPPUnfSq[ipt]->SetFillStyle(1);
     hPbPbUnfSq[ipt]->SetFillStyle(1);
     hPPUnfSq[ipt]->Draw("same");
@@ -125,7 +124,7 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
     fixedFontHist(hRAA[ipt],2,2.2,20);
 
     hRAA[ipt]->Draw();
-    drawSys( hRAA[ipt], sysPlus.raa[ipt], kOrange);
+    drawSysUpDown( hRAA[ipt], sysPlus.raa[ipt], sysMinus.raa[ipt], kOrange);
     hRAA[ipt]->Draw("same");
     //    drawText("Ratio of per-jet distribution",0.3,0.78,2,16);
     jumSun(0,1,0.3,1);
@@ -144,8 +143,8 @@ void getRAA(int icent=0, int optX=1, int optY=2 ) {
 
     hPPUnfSq[ipt]->Draw();
     hPbPbUnfSq[ipt]->Draw("same");
-    drawSys( hPbPbUnfSq[ipt], sysPlus.pbpb[ipt], kRed, 1);
-    drawSys( hPPUnfSq[ipt], sysPlus.pp[ipt], 1, 1);
+    drawSysUpDown( hPbPbUnfSq[ipt], sysPlus.pbpb[ipt], sysMinus.pbpb[ipt], kRed, 1);
+    drawSysUpDown( hPPUnfSq[ipt], sysPlus.pp[ipt], sysMinus.pp[ipt], 1, 1);
     if ( ipt == lowPtBin ) {
       //      drawText("#bf{#it{ATLAS}}",0.33,0.85,1,20);
       TLegend *leg1 = new TLegend(0.3543845,0.5860943,1.0497715,0.8491246,NULL,"brNDC");

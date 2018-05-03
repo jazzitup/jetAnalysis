@@ -129,4 +129,6 @@ void compareEmHIjets() {
   f2->SetLineColor(4);
   f1->Draw("same");
   f2->Draw("same");
+
+  c2->SaveAs("jmrEMtopo.pdf");
 }

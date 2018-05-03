@@ -68,6 +68,7 @@ JetSys getSystematicsJES(int icent, int nSys, double theScale) {
     for ( int xx = 1 ; xx<= hSysApbpb[ix]->GetNbinsX() ; xx++) {
       double y1 = hSysApbpb[ix]->GetBinContent(xx);
       double y2 = hSysApp[ix]->GetBinContent(xx);
+      //      if ( nSys == 210)   hSysAraa[ix]->SetBinContent(xx,  sqrt( y1*y1 + y2*y2) ) ;
       hSysAraa[ix]->SetBinContent(xx,  (y1+1.)/(y2+1.)-1);
     }
   }

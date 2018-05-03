@@ -18,6 +18,9 @@ int lowPtBin = 1;  int highPtBin = 13;
 
 int nPtPannels = highPtBin-lowPtBin+1;
 
+void getMeanPt(int kSample=kPP, int icent=0, TH1D* hMean=0);
+
+
 void getMCJmr(int kSample=kPP, int icent=0,  TH2D* hmc=0);
 
 double findPeak(TF1* f, double low =2,double high = 4 ) {
@@ -81,12 +84,19 @@ void getJMR(int kSample = kPbPb, int icent=0) {   // opt1 : mass,   opt2 : m/pT
   TH2D* hTemp = new TH2D("rTemp","", nRbins, -0.5,2.5, nXbins, xBin);
   TH1D* hJms = new TH1D(Form("hJms_kSample%d_icent%d",kSample,icent),";p_{T} (GeV/c);JMS;",nXbins, xBin);
   TH1D* hJmr = new TH1D(Form("hJmr_kSample%d_icent%d",kSample,icent),";p_{T} (GeV/c);JMR;",nXbins, xBin);
+  
   // MC 
   TH2D* hmc = (TH2D*)hTemp->Clone(Form("hmc_kSample%d_icent%d",kSample,icent));
   TH1D* h1mc[20];
 
   getMCJmr   ( kSample, icent, hmc);
   
+
+  //  TCanvas* c1 = new TCanvas("c1","",400,400);
+  //  TH1D* hMeanPt = new TH1D("hmeanpt","",nXbins,xBin);
+  //  getMeanPt(kSample,icent,hMeanPt);
+  //  hMeanPt->DrawCopy();
+
   TCanvas* c2 =  new TCanvas("c2","",1200,400);
   makeMultiPanelCanvas(c2,nPtPannels, 1, 0.0, 0.01, 0.3, 0.2, 0.05);
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++) {
@@ -96,16 +106,18 @@ void getJMR(int kSample = kPbPb, int icent=0) {   // opt1 : mass,   opt2 : m/pT
     handsomeTH1(h1mc[ix],1);
     cleverRange(h1mc[ix],2.);
 
-    TF1 *f1mc = new TF1(Form("fitH1mc_ix%d",ix),"[0] * TMath::Gaus(x,[1],[2])",0.5,1.5);
+    TF1 *f1mc = new TF1(Form("fitH1mc_ix%d",ix),"[0] * TMath::Gaus(x,[1],[2])",0.6,1.3);
     f1mc->SetParameter(0,2);
     f1mc->SetParameter(1,1);
     f1mc->SetParameter(2,0.3);
     
-    h1mc[ix]->Fit(f1mc->GetName(),"","",0.5,1.5);
+    h1mc[ix]->Fit(f1mc->GetName(),"","",0.5,1.3);
     //h1mc[ix]->GetFunction(f1mc->GetName())->SetLineColor(1);
+    h1mc[ix]->SetXTitle("(m/p_{T})^{Reco}/(m/p_{T})^{Truth}");
+    h1mc[ix]->SetTitleSize(0.085);
     h1mc[ix]->Draw();
-
-    if ( ix== lowPtBin)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
+    
+    if ( ix== lowPtBin)    drawCentrality(kSample, icent, 0.40,0.86,1,24);
     drawBin(xBin,ix,"GeV",0.4,0.79,49,16);
     
     hJms->SetBinContent(ix, fabs(f1mc->GetParameter(1)));
@@ -113,6 +125,8 @@ void getJMR(int kSample = kPbPb, int icent=0) {   // opt1 : mass,   opt2 : m/pT
     hJmr->SetBinContent(ix, fabs(f1mc->GetParameter(2)));
     hJmr->SetBinError(ix, f1mc->GetParError(2));
     handsomeTH1(hJmr,4);
+
+    
   }
   c2->SaveAs(Form("pdfsJMR/JMSdist_kSample%d_cent%d.pdf",kSample,icent));
 
@@ -224,5 +238,48 @@ void getMCJmr(int kSample, int icent, TH2D* hmc) {
     }
   }
   
+}
+
+
+
+void getMeanPt(int kSample, int icent, TH1D* hMean){
+  TH1::SetDefaultSumw2();
+  TString fname;
+  if ( kSample == kPbPb ) {
+    fname = "jetSubstructure_data_HION9_v50_r4_pbpb_apr11.root";
+  }
+  else if ( kSample == kPP) {
+    fname = "jetSubstructure_data_HION9_v50_r4_pp_apr11.root";
+  }
+
+  TH1D* htempPt = (TH1D*)hMean->Clone("htempPt");
+  TH1D* htempN = (TH1D*)hMean->Clone("htempN");
+  htempPt->Reset();
+  htempN->Reset();
+
+  TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));
+  TTree* tr = (TTree*)fData->Get("tr");
+  jetSubStr myJet;
+  TBranch       *b_myJet;
+  tr->SetBranchAddress("jets", &(myJet.cent), &b_myJet);
+
+  if ( kSample == kPP )  cout << " pp " ;
+  else if ( kSample == kPbPb) cout << " PbPb " ;
+  cout << "data entries = " << tr->GetEntries() << endl;
+
+  for (Int_t i= 0; i<tr->GetEntries() ; i++) {
+    tr->GetEntry(i);
+    if ( i > tr->GetEntries() * statUsed) break;
+    if ( ! passEvent(myJet, icent, false) )       continue;
+
+    double mpt = myJet.recoMass / myJet.recoPt;
+
+    htempPt->Fill(myJet.recoPt, myJet.recoPt);
+    htempN->Fill(myJet.recoPt);
+  }
+
+  htempPt->Divide(htempN);
+  hMean->Reset();
+  hMean->Add(htempPt);
 }
 
