@@ -39,7 +39,7 @@ int lowPtBin = 1;  int highPtBin = 13;
 int nPtPannels = highPtBin-lowPtBin+1;
 
 void getMCspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH2D* hmcRaw=0, TH2D* hmcTruth=0, double radius=0.4, bool doReweight=true);
-void getDATAspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH2D* hdataRaw=0, double radius=0.4);
+void getDATAspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH2D* hdataRaw=0, double radius=0.4,int nSys=0);
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
@@ -53,7 +53,9 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     cout << "===== HI JES sys mode =====" << endl;
   else if ( (nSys >= 200 ) && ( nSys <= 250 ) )
     cout << "===== JMS/JMR sys mode =====" << endl;
-  else {
+  else if  (nSys == 300 )
+    cout << "===== Jet mass calibration =====" << endl;
+  else { 
     cout << "===== Invald nSys option ===== " << nSys << endl;
     return ;
   }
@@ -105,13 +107,13 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     // MC 
     hmcRaw[i] = (TH2D*)hTemp->Clone(Form("hmcRaw_icent%d",i));
     hmcTruth[i] = (TH2D*)hTemp->Clone(Form("hmcTruth_icent%d",i));
-    getMCspectra(kSample, icent, optX, optY, hmcRaw[i], hmcTruth[i], radius, doReweight) ;
+    //    getMCspectra(kSample, icent, optX, optY, hmcRaw[i], hmcTruth[i], radius, doReweight) ;
 
         
     // Data
     if ( doUnfData )  { 
       hdataRaw[i] =  (TH2D*)hTemp->Clone(Form("hdataRaw_icent%d",i));
-      getDATAspectra(kSample, icent, optX, optY, hdataRaw[i], radius) ;
+      getDATAspectra(kSample, icent, optX, optY, hdataRaw[i], radius, nSys) ;
     }
     
   }
@@ -396,7 +398,7 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 }
 
 
-void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, double radius) {
+void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, double radius, int nSys) {
   TH1::SetDefaultSumw2();
   hdataRaw->Reset();
 
@@ -409,6 +411,20 @@ void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, 
       fname = ppDataString;
     }
   }
+
+  TF1* fjmscal[30];
+  if( nSys == 300) {
+    TFile* fin = new TFile(Form("fJMScalibration_kSample%d_icent%d_num.root",kSample,icent));
+    for ( int ix = 5 ; ix<=11 ; ix++) {
+      fjmscal[ix] = (TF1*)fin->Get(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix));
+    }
+  }
+  int nXbinsCal;
+  double xBinCal[30];
+  getXbin(nXbinsCal, xBinCal, 1);
+  TH1D* xBinTempCal = new TH1D("xBinTempCal","", nXbinsCal, xBinCal);
+
+
   
   TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));
   TTree* tr = (TTree*)fData->Get("tr");
@@ -431,6 +447,22 @@ void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, 
     double recoVarY, truthVarY;
     getYvalues( recoVarY, truthVarY, myJet, optY);
     
+    if (nSys==300) { // JMS calibration
+      int xx = xBinTempCal->FindBin( myJet.recoPt);
+      if ( xx > 11 )  xx = 11;
+      if ( xx < 5 )  xx = 5;
+      float mptVal = recoVarY;
+      if (mptVal <0 )  mptVal = 0;
+      double theFac = 1;
+      if ( recoVarY < 0 )
+	theFac = 1;
+      else if ( recoVarY > 0.25 )
+	theFac = fjmscal[xx]->Eval(0.25);
+      else
+	theFac = fjmscal[xx]->Eval(recoVarY);
+      recoVarY = recoVarY / theFac;
+    }
+
     hdataRaw->Fill ( recoVarX, recoVarY); 
   }
   

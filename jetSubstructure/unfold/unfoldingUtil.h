@@ -14,6 +14,17 @@ bool selectedCent(int icent=0) {
 }
 
 
+
+int findMbin(double mpt=0) {
+  if ( mpt < 0.06 ) return 1;
+  else if ( mpt < 0.1 ) return 2;
+  else if ( mpt < 0.15 ) return 3;
+  else 
+    return 4;
+}
+
+
+
 TH2D* getRewTable(int kSample, int icent)  { 
   TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50.root"); // Default, set in Apr 7
   //  int nSys = 210;  TFile* fReweight = new TFile(Form("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50_nSys%d.root",nSys));   cout << " Using nSys = " << nSys << "table!! " << endl << endl << endl;

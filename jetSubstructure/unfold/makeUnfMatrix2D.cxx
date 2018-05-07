@@ -45,10 +45,16 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
     cout << "HI JES/JMR sys mode" << endl;
   else if ( (nSys >= 200 ) && ( nSys <= 250 ) ) 
     cout << "HI JMS/JMR sys mode" << endl;
+  else if  (nSys == 300 )
+    cout << "Jet mass Calibration" << endl;
   else {
     cout << "Invald nSys option : " << nSys << endl;
     return ;
   }
+  
+  
+  
+  
   
   TH1::SetDefaultSumw2();
   int nXbins;
@@ -56,6 +62,7 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
   getXbin(nXbins, xBin, optX);
   cout << " nXbins = " << nXbins << endl; 
   cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
+
   
   int nYbins ;
   double yBin[30] ;
@@ -146,6 +153,10 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
 RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, TH2D* respX, TH2D* respY, double radius, bool doReweight, int nSys)
 {
   
+  RtrkProvider rtrkProv; 
+  if ( nSys == 210)  
+    rtrkProv.Setup(kSample, icent);
+
   TRandom3 genRandom;
   genRandom.SetSeed(200);
 
@@ -194,6 +205,21 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   if ( doReweight ) {
     hReweight = getRewTable(kSample, icent);
   }
+
+  TF1* fjmscal[30];
+  if( nSys == 300) {
+    TFile* fin = new TFile(Form("fJMScalibration_kSample%d_icent%d_num.root",kSample,icent));
+    for ( int ix = 5 ; ix<=11 ; ix++) {
+      fjmscal[ix] = (TF1*)fin->Get(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix));
+    }
+  }
+  int nXbinsCal;
+  double xBinCal[30];
+  getXbin(nXbinsCal, xBinCal, 1);
+  TH1D* xBinTempCal = new TH1D("xBinTempCal","", nXbinsCal, xBinCal);
+
+
+
   
   TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
   TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
@@ -317,7 +343,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       }	
 
       else if (nSys==210) { // JMS
-	double theRtrk = getRtrk( kSample, icent, myJetMc.recoPt);
+	double theRtrk = rtrkProv.getR( myJetMc);
+	//	cout << "theRtrk = " << theRtrk <<endl;
 	recoVarY = recoVarY * theRtrk;
       }
       else if (nSys==213) { // JMS by Herwig
@@ -331,6 +358,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
         recoVarY = recoVarY * 1.05;
       }
 
+      
       if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
 	continue;
       
@@ -348,9 +376,24 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	int rewBin = hReweight->FindBin(myJetMc.recoPt, myJetMc.recoMass/myJetMc.recoPt);
 	rewFact = hReweight->GetBinContent(rewBin);
       }
-      
-      //	if ( passGenEvent(myJetMc, icent) )
-      //	if ( passRecoEvent(myJetMc, icent) )
+
+      if (nSys==300) { // JMS calibration
+	int xx = xBinTempCal->FindBin( myJetMc.recoPt);
+	if ( xx > 11 )  xx = 11;
+	if ( xx < 5 )  xx = 5;
+	float mptVal = recoVarY;
+	if (mptVal <0 )  mptVal = 0;
+	double theFac = 1;
+        if ( recoVarY < 0 )
+          theFac = 1;
+        else if ( recoVarY > 0.25 )
+          theFac = fjmscal[xx]->Eval(0.25);
+	else
+          theFac = fjmscal[xx]->Eval(recoVarY);
+
+	recoVarY = recoVarY / theFac;
+      }
+
       hTruth->Fill(truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
       hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
       

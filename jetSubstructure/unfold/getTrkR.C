@@ -13,12 +13,12 @@ using std::endl;
 #include <TPaletteAxis.h>
 #include <TGraphErrors.h>
 
-double statUsed = 001;
+double statUsed = 1;
 
 
-void getMCR(int kSample=kPP, int icent=0,  TH2D* hmc=0);
+void getMCR(int kSample=kPP, int icent=0,  int im=0, TH2D* hmc=0);
 
-void getDATAR (int kSample=kPP, int icent=0,  TH2D* hdata=0);
+void getDATAR (int kSample=kPP, int icent=0, int im=0,  TH2D* hdata=0);
 void getMeanPt(int kSample=kPP, int icent=0, TH1D* hMean=0);
 
 TH1D* getVariedHist(TH1D* hin=0, double variation=0);
@@ -56,11 +56,11 @@ double errPeak(TF1* f) {
   return e1; 
 }
 
-void getTrkR(int kSample = kPP, int icent=0) {   // opt1 : mass,   opt2 : m/pT  
+void getTrkR(int kSample = kPbPb, int icent=4, int im=1) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
 
   int optX = 1;    int optY = 2;  
-
+  
   int nXbins = 7;
   double xBin[30] = { 120,140,160,180,210,250,350,800}; 
   int lowPtBin = 1;
@@ -76,8 +76,8 @@ void getTrkR(int kSample = kPP, int icent=0) {   // opt1 : mass,   opt2 : m/pT
 
   int nRbins = 35;
   TH2D* hTemp = new TH2D("rTemp","", nRbins, 0,20, nXbins, xBin);
-  //  TH1D* hTrkR = new TH1D(Form("hTrkR_kSample%d_icent%d",kSample,icent),";p_{T} (GeV/c);R^{trk};",nXbins, xBin);
-  TH1D* hTrkR = new TH1D(Form("hTrkR_kSample%d_icent%d",kSample,icent),";p_{T} (GeV/c);R^{trk};",100,120,500};
+  TH1D* hTrkR = new TH1D(Form("hTrkR_kSample%d_icent%d",kSample,icent),";p_{T} (GeV/c);R^{trk};",nXbins, xBin);
+  //  TH1D* hTrkR = new TH1D(Form("hTrkR_kSample%d_icent%d",kSample,icent),";p_{T} (GeV/c);R^{trk};",100,120,500);
   // MC 
   double Rx[30];
   double Ry[30];
@@ -90,8 +90,8 @@ void getTrkR(int kSample = kPP, int icent=0) {   // opt1 : mass,   opt2 : m/pT
   TH1D* h1mc[20];
   TH1D* h1data[20];
 
-  getMCR   ( kSample, icent, hmc);
-  getDATAR ( kSample, icent, hdata);
+  getMCR   ( kSample, icent, im, hmc);
+  getDATAR ( kSample, icent, im, hdata);
 
   TCanvas* c1 = new TCanvas("c1","",400,400);
   TH1D* hMeanPt = new TH1D("hmeanpt","",nXbins,xBin);
@@ -213,11 +213,17 @@ void getTrkR(int kSample = kPP, int icent=0) {   // opt1 : mass,   opt2 : m/pT
   f2->SetLineColor(2);
   f2->SetLineStyle(2);
   //  f2->Draw("same");
-  c3->SaveAs(Form("pdfsJMS/trkR_kSample%d_cent%d.pdf",kSample,icent));
+  c3->SaveAs(Form("pdfsJMS/trkR_kSample%d_cent%d_massBin%d.pdf",kSample,icent,im));
+
+  TFile* fout = new TFile(Form("R_trk/Rtrk_kSample%d_cent%d.root",kSample,icent),"update");
+  f2->SetName(Form("rtrk_im%d",im));
+  f2->Write("",TObject::kOverwrite);
+  fout->Close();
+  
 }
 
 
-void getMCR(int kSample, int icent, TH2D* hmc) { 
+void getMCR(int kSample, int icent, int im, TH2D* hmc) { 
   
   TH1::SetDefaultSumw2();
   hmc->Reset();
@@ -306,6 +312,8 @@ void getMCR(int kSample, int icent, TH2D* hmc) {
       //      if (!( (recoMass>-100) && (recoMass<21)  ) )
       //	continue;
       
+      if ( im != findMbin(mpt) )  	continue;
+      
       double recoPt = myJetMc.recoPt;
 
       double theR = myJetMc.recoMass / myJetMc.recoChMassRcSubt ; 
@@ -323,7 +331,7 @@ void getMCR(int kSample, int icent, TH2D* hmc) {
   
 }
 
-void getDATAR(int kSample, int icent,  TH2D* hdata) {
+void getDATAR(int kSample, int icent, int im,  TH2D* hdata) {
 
   TH1::SetDefaultSumw2();
   hdata->Reset();
@@ -366,8 +374,9 @@ void getDATAR(int kSample, int icent,  TH2D* hdata) {
     double recoMass = myJet.recoMass ;
     //    if (!( (recoMass>-100) && (recoMass<21)  ) )
     //      continue;
-	
-
+    
+    if ( im != findMbin(mpt) )  	continue;
+    
     
     double recoPt = myJet.recoPt;
     //    double theR = myJet.recoMass / trkJetMass;

@@ -97,6 +97,10 @@ void drawBin(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp
 void drawBinPt(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
   drawText( Form("%d < p_{T}^{jet} < %d %s", (int)(xBin[ix-1]),  (int)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
 }
+void drawBinMpt(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
+  drawText( Form("%.2f < m^{jet}/p_{T}^{jet} < %.2f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
+}
+
 void drawBinPt2(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
   drawText( Form("%d < p_{T}^{jet} < %d %s", (int)(xBin[ix-1]),  (int)(xBin[ix+1]), demen.Data()) , xp,yp,textColor,textSize) ;
 }

@@ -8,7 +8,7 @@
 
 void groomHist(TH1D* h1) {
   h1->SetAxisRange(0.001,0.23,"X");
-  h1->SetAxisRange(-0.15,0.15,"Y");
+  h1->SetAxisRange(-0.55,0.55,"Y");
   h1->SetXTitle("m/p_{T}");
   h1->SetYTitle("Unc.");
   h1->SetNdivisions(505,"X");
@@ -64,24 +64,50 @@ void checkSys(int nSys=200) {
   
   TCanvas* cA;    
   if (savePic) { 
-    cA =  new TCanvas(Form("sysJES"),"",960,900);
-    makeMultiPanelCanvas(cA,nPtPannels,8,.01, .01,0.45,0.45);
+    cA =  new TCanvas(Form("sysJES"),"",1200,300);
+    makeMultiPanelCanvas(cA,nPtPannels,1,.01, .01,0.45,0.45);
   }
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     if (savePic)    cA->cd(ix - lowPtBin + 1);
     handsomeTH1(hSysApp[ix],1);
     groomHist(hSysApp[ix]); 
+
+    hSysApp[ix]->GetXaxis()->SetTitleOffset(1);
+    hSysApp[ix]->GetYaxis()->SetTitleOffset(1);
+    hSysApp[ix]->SetYTitle("Unc.");
+
+    hSysApp[ix]->Draw("hist");
+
+    //    if ( ix == lowPtBin)  ATLASLabel(0.5,0.8,"Internal",0.15,0.2);
+    //    if ( ix == lowPtBin)  drawCentrality(kPP, 0, 0.5,0.8,1,20);
+    if ( ix== lowPtBin) drawBin(xBin,ix,"GeV",0.5,0.85,1,16);
+    else drawBin(xBin,ix,"GeV",0.25 - 0.15,0.85,1,16);
+    jumSun(0,0,0.24,0);
+
+  }
+  if (savePic)  cA->SaveAs(Form("pdfsSystematics/sysJES_nSys%d_ppOnly.pdf",nSys));
+
+
+  TCanvas* cB;
+  if (savePic) {
+    cB =  new TCanvas("cB","",960,900);
+    makeMultiPanelCanvas(cB,nPtPannels,8,.01, .01,0.45,0.45);
+  }
+  for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
+    if (savePic)    cB->cd(ix - lowPtBin + 1);
+    handsomeTH1(hSysApp[ix],1);
+    groomHist(hSysApp[ix]);
     hSysApp[ix]->Draw("hist");
     if ( ix == lowPtBin)  ATLASLabel(0.5,0.8,"Internal",0.15,0.2);
     if ( ix == lowPtBin+1)  drawCentrality(kPP, 0, 0.1,0.8,1,20);
     if ( ix== lowPtBin) drawBin(xBin,ix,"GeV",0.5,0.15,1,16);
     else drawBin(xBin,ix,"GeV",0.25 - 0.15,0.15,1,16);
     jumSun(0,0,0.24,0);
-    
+
     for ( int icent=0; icent<=6 ; icent++) {
-      cA->cd(ix - lowPtBin + 1 + nPtPannels*(7-icent));
+      cB->cd(ix - lowPtBin + 1 + nPtPannels*(7-icent));
       handsomeTH1(hSysApbpb[ix][icent],1);
-      groomHist(hSysApbpb[ix][icent]); 
+      groomHist(hSysApbpb[ix][icent]);
       hSysApbpb[ix][icent]->Draw("hist");
       if ( ix == lowPtBin+1)  drawCentrality(kPbPb, icent, 0.1,0.8,1,20);
       jumSun(0,0,0.24,0);
@@ -96,8 +122,9 @@ void checkSys(int nSys=200) {
     //    }
 
   }
-  if (savePic)  cA->SaveAs(Form("pdfsSystematics/sysJES_nSys%d.pdf",nSys));
-  if (savePic)  cA->SaveAs(Form("pdfsSystematics/sysJES_nSys%d.C",nSys));
+  if (savePic)  cB->SaveAs(Form("pdfsSystematics/sysJES_nSys%d.pdf",nSys));
+  if (savePic)  cB->SaveAs(Form("pdfsSystematics/sysJES_nSys%d.C",nSys));
+
 
   //  return ret;
 }

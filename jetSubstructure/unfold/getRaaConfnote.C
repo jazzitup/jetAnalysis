@@ -14,6 +14,9 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
   int nXbins;
   double xBin[30];
   getXbin(nXbins, xBin, optX);
+  TH1D* tempHistPt = new TH1D("tempHistPt",";p_{T} (GeV/c);",nXbins,xBin);
+  double xBin2[30] = {20,40,63.096, 82., 100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  500.};
+  TH1D* tempHistPt2 = new TH1D("tempHistPt",";p_{T} (GeV/c);",10,xBin2);  
 
   int nYbins ;
   double yBin[30] ;
@@ -27,11 +30,20 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
   int highPtBin = 11;
   int nPtPannels = highPtBin-lowPtBin+1;
 
+  int lowMptBin = 2;
+  int highMptBin = 8;
+  int nMptPannels = highMptBin-lowMptBin+1;
+
+
+  
+
   
   int vCent[3] = {0,3,6};
 
   TH1D* hPPUnfSq[30][4]; // 
   TH1D* hPbPbUnfSq[30][4]; // 
+  
+  TH1D* hRAA[30][4];
   
   JetSys sysPlus[4];
   JetSys sysMinus[4];
@@ -40,9 +52,40 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
     sysPlus[ii] = getFinalSys( vCent[ii] , 1);
     sysMinus[ii] = getFinalSys( vCent[ii] , -1);
   }
+
+  JetSys sysPlusM[4];
+  JetSys sysMinusM[4];
+
+  for ( int ii = 0 ; ii < nCols ; ii++) { 
+    for ( int im = lowMptBin ; im<=highMptBin; im++) {
+
+      TH1D* temphist = tempHistPt;
+      if  ( vCent[ii] >= 5)  temphist = tempHistPt2;
+
+      sysPlusM[ii].pp[im] =  (TH1D*)temphist->Clone(Form("sysPlusM_im%d_ii%d_pp",im,ii));	  
+      sysMinusM[ii].pp[im] =  (TH1D*)temphist->Clone(Form("sysMinusM_im%d_ii%d_pp",im,ii));	  
+      sysPlusM[ii].pbpb[im] =  (TH1D*)temphist->Clone(Form("sysPlusM_im%d_ii%d_pbpb",im,ii));	  
+      sysMinusM[ii].pbpb[im] =  (TH1D*)temphist->Clone(Form("sysMinusM_im%d_ii%d_pbpb",im,ii));	  
+      sysPlusM[ii].raa[im] =  (TH1D*)temphist->Clone(Form("sysPlusM_im%d_ii%d_raa",im,ii));	  
+      sysMinusM[ii].raa[im] =  (TH1D*)temphist->Clone(Form("sysMinusM_im%d_ii%d_raa",im,ii));	  
+      
+      for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
+	if (   (ipt == highPtBin) && ( vCent[ii] >= 5) )  continue;
+	cout << " ipt, ii, im = " << ipt <<", " << ii<<", " << im << endl;
+	sysPlusM[ii].pp[im]->SetBinContent( ipt,   sysPlus[ii].pp[ipt]->GetBinContent(im));
+	sysMinusM[ii].pp[im]->SetBinContent( ipt,   sysMinus[ii].pp[ipt]->GetBinContent(im));
+	sysPlusM[ii].pbpb[im]->SetBinContent( ipt,   sysPlus[ii].pbpb[ipt]->GetBinContent(im));
+	sysMinusM[ii].pbpb[im]->SetBinContent( ipt,   sysMinus[ii].pbpb[ipt]->GetBinContent(im));
+	sysPlusM[ii].raa[im]->SetBinContent( ipt,   sysPlus[ii].raa[ipt]->GetBinContent(im));
+	sysMinusM[ii].raa[im]->SetBinContent( ipt,   sysMinus[ii].raa[ipt]->GetBinContent(im));
+      }
+    }	
+  }
   
-  TH1D* hRAA[30][4]; 
   
+
+  
+
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
   }
   
@@ -186,7 +229,6 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
   drawSysUpDown( hRAA[theBin][1], sysPlus[1].raa[theBin],  sysMinus[1].raa[theBin], kSpring-1);
   drawSysUpDown( hRAA[theBin][2], sysPlus[2].raa[theBin],  sysMinus[2].raa[theBin], kAzure-4);
   // lumi uncertainty
-  double lumiUnc = getLumiRelErr(vCent[ii]);
   drawErrorBox( 0.23, 1-0.054, 0.24, 1+0.054, 1);
   drawErrorBox( 0.22, 1-getTaaRelErr(0), 0.23, 1+getTaaRelErr(0), kOrange);
   drawErrorBox( 0.21, 1-getTaaRelErr(1), 0.22, 1+getTaaRelErr(1), kGreen+1);
@@ -207,6 +249,81 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
   leg1->Draw();
   //  ATLASLabel(0.33,0.86,"Internal",0.09,0.25);
   c2->SaveAs("raa_126-158GeV.pdf");
+
+  TH1D* hRAAmpt[30][4];  // [m/pt bins][centrality]
+  
+  TCanvas *c3 = new TCanvas("c3", "",4,45,900,1200);
+  //  makeMultiPanelCanvas(c3,nPtPannels, nCols, 0.0, 0.01, 0.35, 0.25, 0.05);
+  makeMultiPanelCanvas(c3,nCols, nMptPannels, 0.0, 0.01, 0.2, 0.25, 0.05);
+  //c3->Divide(nPtPannels, 2);
+  
+  for ( int ii = 0 ; ii < nCols ; ii++)   {
+    for ( int im = lowMptBin ; im<=highMptBin; im++) { 
+      TH1D* temphist = tempHistPt;
+      if  ( vCent[ii] >= 5)  temphist = tempHistPt2;
+    
+      hRAAmpt[im][ii] = (TH1D*)temphist->Clone(Form("hRAAmpt_im%d_ii%d",im,ii));
+      hRAAmpt[im][ii]->SetAxisRange(0,2.4,"Y");
+      hRAAmpt[im][ii]->SetAxisRange(126,490,"X");
+      for ( int ipt = lowPtBin ; ipt<= highPtBin ; ipt++)  {
+	if (   (ipt == highPtBin) && ( vCent[ii] >= 5) )  continue;
+	hRAAmpt[im][ii]->SetBinContent(ipt, hRAA[ipt][ii]->GetBinContent(im) );
+	hRAAmpt[im][ii]->SetBinError(ipt, hRAA[ipt][ii]->GetBinError(im) );
+      }    
+      
+      c3->cd(ii+1+ (im-lowMptBin)*nCols);
+      
+      if ( im == lowMptBin)
+	c3->cd(ii+1+ (im-lowMptBin)*nCols)->SetTopMargin(0.02);
+      
+      c3->cd(ii+1+ (im-lowMptBin)*nCols)->SetRightMargin(0.01);
+      if ( ii == 0)
+	c3->cd(ii+1+ (im-lowMptBin)*nCols)->SetLeftMargin(0.32);
+      else
+	c3->cd(ii+1+ (im-lowMptBin)*nCols)->SetLeftMargin(0.15);
+
+
+      fixedFontHist(hRAAmpt[im][ii],2.5,2.5,20);
+      hRAAmpt[im][ii]->SetNdivisions(505,"X");
+      hRAAmpt[im][ii]->SetNdivisions(505,"Y");
+      hRAAmpt[im][ii]->SetYTitle("R_{AA}");
+      hRAAmpt[im][ii]->GetXaxis()->SetTitleOffset(5.5);
+      hRAAmpt[im][ii]->GetYaxis()->SetTitleOffset(3.4);
+      hRAAmpt[im][ii]->SetAxisRange(0.01,2.25,"Y");
+      
+      hRAAmpt[im][ii]->Draw();
+      drawSysUpDown( hRAAmpt[im][ii], sysPlusM[ii].raa[im],  sysMinusM[ii].raa[im], kOrange);
+      hRAAmpt[im][ii]->Draw("same");
+
+      if (im == lowMptBin ) {
+        if ( ii == 0 ) drawCentrality(kPbPb, vCent[ii], 0.39,0.73,1,20);
+        if ( ii == 1 ) drawCentrality(kPbPb, vCent[ii], 0.245,0.73,1,20);
+        if ( ii == 2 ) drawCentrality(kPbPb, vCent[ii], 0.245,0.73,1,20);
+      }
+
+      if ( ii == 0 ) {
+        if (im < highMptBin )
+          drawBinMpt(yBin,im,"", 0.39 ,0.58,1,18);
+        if (im == highMptBin )
+          drawBinMpt(yBin,im,"", 0.39 ,0.68,1,18);
+      }
+      if (im == lowMptBin ) {
+        if ( ii == 0 )
+          ATLASLabel(0.39,0.86,"Internal",0.12,0.20);
+        if ( ii == 1 )
+          ATLASLabel(0.245,0.86,"Internal",0.12,0.25);
+	if ( ii == 2 )
+          ATLASLabel(0.245,0.86,"Internal",0.12,0.24);
+      }
+      double lumiUnc = getLumiRelErr(vCent[ii]);
+      drawErrorBox( 125, 1-lumiUnc, 150, 1+lumiUnc, 1);      
+      jumSun(125,1,500,1);
+      gPad->RedrawAxis();
+    }
+  }
+  
+  //  drawSysUpDown( hRAA[ipt][ii], sysPlus[ii].raa[ipt],  sysMinus[ii].raa[ipt], kOrange);
+  c3->SaveAs("raaFigure_mpt.pdf");
 
 }
 

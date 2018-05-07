@@ -17,7 +17,29 @@ void resetJetSys(JetSys js, int lowX, int highX) {
     js.pbpb[ix]->Reset();
     js.raa[ix]->Reset();
   }
+}
+
+class RtrkProvider {
+ public:
+  TF1* f[6];
+  void Setup(int _ksample, int _icent);
+  double getR(jetSubStr myJet);
+ private:
+  int kSample;
+  int icent;
   
+};
+
+void RtrkProvider::Setup (int _kSample, int _icent) { 
+  TFile* fin = new TFile(Form("R_trk/Rtrk_kSample%d_cent%d.root",_kSample, _icent));
+  for ( int im = 1 ; im<=4 ; im++) { 
+    f[im] = (TF1*)fin->Get(Form("rtrk_im%d",im));
+  }
+}
+
+double RtrkProvider::getR(jetSubStr myJet) {
+  int im =  findMbin(myJet.recoMass / myJet.recoPt );
+  return f[im]->Eval(myJet.recoPt);
 }
 
 JetSys jsDummy;
