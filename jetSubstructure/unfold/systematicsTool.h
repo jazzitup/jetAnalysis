@@ -21,7 +21,8 @@ void resetJetSys(JetSys js, int lowX, int highX) {
 
 class RtrkProvider {
  public:
-  TF1* f[6];
+  TF1* fpp[6];
+  TF1* fpbpbCentral[6];
   void Setup(int _ksample, int _icent);
   double getR(jetSubStr myJet);
  private:
@@ -31,15 +32,28 @@ class RtrkProvider {
 };
 
 void RtrkProvider::Setup (int _kSample, int _icent) { 
-  TFile* fin = new TFile(Form("R_trk/Rtrk_kSample%d_cent%d.root",_kSample, _icent));
+  //  TFile* fpp = new TFile(Form("R_trk/Rtrk_kSample%d_cent%d.root",_kSample, _icent));
+  TFile* filepp = new TFile("R_trk/Rtrk_kSample0_cent0.root");
   for ( int im = 1 ; im<=4 ; im++) { 
-    f[im] = (TF1*)fin->Get(Form("rtrk_im%d",im));
+    fpp[im] = (TF1*)filepp->Get(Form("rtrk_im%d",im));
   }
+  TFile* filepbpbCent = new TFile("R_trk/Rtrk_kSample1_cent0.root");
+  for ( int im = 1 ; im<=4 ; im++) { 
+    fpbpbCentral[im] = (TF1*)filepbpbCent->Get(Form("rtrk_im%d",im));
+  }
+  kSample = _kSample;
+  icent = _icent;
+  
 }
 
 double RtrkProvider::getR(jetSubStr myJet) {
   int im =  findMbin(myJet.recoMass / myJet.recoPt );
-  return f[im]->Eval(myJet.recoPt);
+  double rPP = fpp[im]->Eval(myJet.recoPt);
+  double rPbPbCent = fpbpbCentral[im]->Eval(myJet.recoPt);
+  if ( kSample == kPP)  return rPP;
+  else { 
+    return   ( rPbPbCent* (7-icent) + rPP * (icent) ) / 7; 
+  }
 }
 
 JetSys jsDummy;
