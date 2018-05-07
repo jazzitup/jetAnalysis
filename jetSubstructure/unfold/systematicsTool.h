@@ -5,6 +5,8 @@
 #include "../JssUtils.h"
 #include "unfoldingUtil.h"
 
+int kMergeCancel = 1;
+int kMergeQuad = 2;
 struct JetSys {
   TH1D* pp[20];
   TH1D* pbpb[20];
@@ -62,8 +64,9 @@ void getDATAresults(int kSample=0, int icent=0, int ix=0, TH1D* hdataUnfSq=0, TS
 TString getSysName(int nSys = -1);
 TH1D* getSysA(int kSample= kPP, int icent = 0, int ix=7, TString s1 ="reweight00", TString s2="reweight00varP50percent" ); 
 TH1D* getSysJES(int kSample= kPP, int icent = 0, int ix=7, int nSys=-1);
-JetSys getSystematicsJES(int icent = 0, int nSys=1, double theScale=1);
+JetSys getSystematicsJES(int icent = 0, int nSys=1, double theScale=1, int mergeOpt=kMergeCancel);
 JetSys getSystematicsUnf(int icent = 0, int nSys=1);
+JetSys getSystematicsJMSCal();
 void getInverse(JetSys inputSys=jsDummy, JetSys outputSys=jsDummy,  int lowX=0, int highX=0);
 void addSysInQuad(TH1D* sysTot=0, TH1D* sys1=0);
 void addSysInQuad3(JetSys jstot=jsDummy, JetSys js1=jsDummy, int lowX=0, int highX=0); 
@@ -72,8 +75,65 @@ void mirrorJS(JetSys js1=jsDummy, JetSys js2=jsDummy, int lowX=0, int highX=0);
 void sortPlusMinus(TH1D* hp=0, TH1D* hm=0);
 
 
+JetSys getSystematicsJMSCal() {
+  int nSys=210;
 
-JetSys getSystematicsJES(int icent, int nSys, double theScale) {
+  int optX =1 ;
+  int optY =2 ;
+  
+  int nXbins;
+  double xBin[30];
+  getXbin(nXbins, xBin, optX);
+
+  int nYbins ;
+  double yBin[30] ;
+  getYbin(nYbins, yBin, optY);
+
+  int lowPtBin = 6;
+  int highPtBin = nXbins-1;
+
+  int nPtPannels = highPtBin-lowPtBin+1;
+
+  TH1D* hSysApp[30];
+  TH1D* hSysApbpb[30];
+  TH1D* hSysAraa[30];
+
+  for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
+    hSysApp[ix] = getSysJES(kPP, 0  , ix,  nSys);
+    hSysApbpb[ix] = getSysJES(kPbPb, 0, ix, nSys);
+    hSysAraa[ix] = (TH1D*)hSysApbpb[ix]->Clone(Form("sysRaa_%s",hSysApbpb[ix]->GetName()) );
+
+    hSysAraa[ix]->Reset();
+    hSysApp[ix]->Reset();
+    hSysApbpb[ix]->Reset();
+
+    for ( int xx = 1 ; xx<= hSysApbpb[ix]->GetNbinsX() ; xx++) {
+      double theUnc = 0;
+      if ( xx ==2 ) {
+	if ( ix <= lowPtBin+1 ) theUnc = 0.05;
+	else theUnc = 0.08;
+      }
+      else  {
+	theUnc = 0.01;
+      }
+      
+      hSysApp[ix]->SetBinContent(xx,theUnc);
+      hSysApbpb[ix]->SetBinContent(xx,theUnc);
+      hSysAraa[ix]->SetBinContent(xx, theUnc*sqrt(2));
+    }
+  } 
+  JetSys ret;
+  for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
+    ret.pp[ix]   =  hSysApp[ix];
+    ret.pbpb[ix] =  hSysApbpb[ix];
+    ret.raa[ix]  = hSysAraa[ix];
+  }
+  
+  return ret;
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+JetSys getSystematicsJES(int icent, int nSys, double theScale, int mergeOpt) {
   int optX =1 ;
   int optY =2 ;
 
@@ -105,7 +165,10 @@ JetSys getSystematicsJES(int icent, int nSys, double theScale) {
       double y1 = hSysApbpb[ix]->GetBinContent(xx);
       double y2 = hSysApp[ix]->GetBinContent(xx);
       //      if ( nSys == 210)   hSysAraa[ix]->SetBinContent(xx,  sqrt( y1*y1 + y2*y2) ) ;
-      hSysAraa[ix]->SetBinContent(xx,  (y1+1.)/(y2+1.)-1);
+      if ( mergeOpt == kMergeCancel )  
+	hSysAraa[ix]->SetBinContent(xx,  (y1+1.)/(y2+1.)-1);
+      if ( mergeOpt == kMergeQuad )   
+	hSysAraa[ix]->SetBinContent(xx,  sqrt( y1*y1 + y2*y2));
     }
   }
 

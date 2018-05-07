@@ -35,6 +35,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
   int indexJMS0 = 210;
   int indexJMS1 = 211; // EV
   int indexJMS2 = 213; // herwig 
+  
   // int indexJMS3 = 212; // MV
 
   /*  for ( int i=0 ; i<=21 ; i++)   {
@@ -66,6 +67,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
   JetSys sysJms;
   JetSys sysJms1;
   JetSys sysJms2;
+  JetSys sysJms3; // Difference in Calibrated and un-calibrated JMS results 
 
   JetSys sysJmr;
   JetSys sysJmr1;
@@ -93,11 +95,14 @@ void getSystematics(int icent = 0, bool drawPP = true) {
   sysJer    = getSystematicsJES(icent, indexJER );
   sysJerInv = getSystematicsJES(icent, indexJER, -1 );
 
-  sysJms    = getSystematicsJES(icent, indexJMS0 );
+  sysJms    = getSystematicsJES(icent, indexJMS0,1, kMergeQuad );
   sysJms1    = getSystematicsJES(icent, indexJMS1 );
   sysJms2    = getSystematicsJES(icent, indexJMS2 );
+  sysJms3    = getSystematicsJMSCal();
+
   addSysInQuad3(sysJms, sysJms1, lowPtBin, highPtBin);
   addSysInQuad3(sysJms, sysJms2, lowPtBin, highPtBin);
+  addSysInQuad3(sysJms, sysJms3, lowPtBin, highPtBin);
 
 
   sysJmr     = getSystematicsJES(icent, indexJMR0 );
