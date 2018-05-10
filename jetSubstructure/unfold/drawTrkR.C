@@ -20,9 +20,10 @@ void drawTrkR() {
 
 
   TCanvas* c1 = new TCanvas("c1","",500,500);
-  TH1D* htemp = new TH1D("htemp",";p_{T};R^{trk}",100,0,500);
+  TH1D* htemp = new TH1D("htemp",";p_{T} (GeV/c);R^{trk}",100,0,500);
   handsomeTH1(htemp,1);
   htemp->SetAxisRange(0.85,1.2,"Y");
+  htemp->SetNdivisions(505,"X");
   htemp->Draw();
   TFile* fpp = new TFile("R_trk/Rtrk_kSample0_cent0.root");
   TGraphErrors* gpp1 = (TGraphErrors*)fpp->Get("hRtrk_im2");
@@ -57,4 +58,5 @@ void drawTrkR() {
   leg1->AddEntry(gpbpb2,"PbPb, 0.15 < m/p_{T}","pl");
   leg1->Draw();
 
+  c1->SaveAs("Rtrk_confNote.pdf");
 }

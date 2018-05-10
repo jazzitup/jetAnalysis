@@ -25,8 +25,11 @@ class RtrkProvider {
  public:
   TF1* fpp[6];
   TF1* fpbpbCentral[6];
+  TF1* fHerwig[6];
+
   void Setup(int _ksample, int _icent);
   double getR(jetSubStr myJet);
+  double getRPyHer(jetSubStr myJet);
  private:
   int kSample;
   int icent;
@@ -43,6 +46,11 @@ void RtrkProvider::Setup (int _kSample, int _icent) {
   for ( int im = 1 ; im<=4 ; im++) { 
     fpbpbCentral[im] = (TF1*)filepbpbCent->Get(Form("rtrk_im%d",im));
   }
+  TFile* fileHerwig = new TFile("R_trk/Rtrk_PYTHIA_herwig.root");
+  for ( int im = 1 ; im<=4 ; im++) { 
+    fHerwig[im] = (TF1*)fileHerwig->Get(Form("rtrk_im%d",im));
+  }
+  
   kSample = _kSample;
   icent = _icent;
   
@@ -57,6 +65,13 @@ double RtrkProvider::getR(jetSubStr myJet) {
     return   ( rPbPbCent* (7-icent) + rPP * (icent) ) / 7; 
   }
 }
+
+double RtrkProvider::getRPyHer(jetSubStr myJet) {
+  int im =  findMbin(myJet.recoMass / myJet.recoPt );
+  double theR = fHerwig[im]->Eval(myJet.recoPt);
+  return theR;
+}
+
 
 JetSys jsDummy;
 

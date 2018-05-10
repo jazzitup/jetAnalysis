@@ -18,8 +18,8 @@ int lowPtBin = 1;  int highPtBin = 13;
 
 int nPtPannels = highPtBin-lowPtBin+1;
 
-void getHerwigR(int kSample=kPbPb, int icent=0,  TH2D* hmc=0, int ptCut=6, TString varName="");
-void getPYTHIAR(int kSample=kPbPb, int icent=0,  TH2D* hmc=0, int ptCut=6, TString varName="");
+void getHerwigR(int kSample=kPbPb, int icent=0,  TH2D* hmc=0, int ptCut=6, TString varName="", int im=1 );
+void getPYTHIAR(int kSample=kPbPb, int icent=0,  TH2D* hmc=0, int ptCut=6, TString varName="", int im=1);
 TH1D* getVariedHist(TH1D* hin=0, double variation=0);
 void getMeanPt(int kSample=kPP, int icent=0, TH1D* hMean=0);
 
@@ -56,7 +56,7 @@ double errPeak(TF1* f) {
   return e1; 
 }
 
-void getTrkR_herWigPYTHIA() {
+void getTrkR_herWigPYTHIA(int im=1)  {
   int kSample = kPP;
   int icent=0;
   int ptCut =1;
@@ -72,7 +72,8 @@ void getTrkR_herWigPYTHIA() {
   //  int highPtBin = 11;
   //  int nPtPannels = highPtBin-lowPtBin+1;
   int nXbins = 7;
-  double xBin[30] = { 120,140,160,180,210,250,350,800}; 
+  double xBin[30] = { 120,140,160,180,210,250,350,500}; 
+  //  double xBin[30] = { 120,140,160,180,210,250,350,800}; 
   int lowPtBin = 1;
   int highPtBin = nXbins;
   
@@ -84,8 +85,8 @@ void getTrkR_herWigPYTHIA() {
   double yBin[30] ;
   getYbin(nYbins, yBin, optY);
 
-  int nRbins = 35;
-  TH2D* hTemp = new TH2D("rTemp","", nRbins, 0,20, nXbins, xBin);
+  int nRbins = 15;
+  TH2D* hTemp = new TH2D("rTemp","", nRbins, 0,8, nXbins, xBin);
   TH1D* hTrkR = new TH1D(Form("hTrkR_kSample%d_icent%d",kSample,icent),";p_{T} (GeV/c);R^{trk};",nXbins, xBin);
   // MC 
   TH2D* hHerwig = (TH2D*)hTemp->Clone(Form("hHerwig_kSample%d_icent%d",kSample,icent));
@@ -103,8 +104,8 @@ void getTrkR_herWigPYTHIA() {
   //  getHerwigR   ( kSample, icent, hHerwig, ptCut, "");
   //  getPYTHIAR   ( kSample, icent, hPythia, ptCut,"");
 
-  getHerwigR   ( kSample, icent, hHerwig, ptCut, "");
-  getPYTHIAR   ( kSample, icent, hPythia, ptCut,"");
+  getHerwigR   ( kSample, icent, hHerwig, ptCut, "",im);
+  getPYTHIAR   ( kSample, icent, hPythia, ptCut,"",im);
   
   TH1D* hMeanPt = new TH1D("hmeanpt","",nXbins,xBin);
   getMeanPt(0,0,hMeanPt);
@@ -135,21 +136,21 @@ void getTrkR_herWigPYTHIA() {
     f1pythia->SetParameter(2,2);
     f1pythia->SetParameter(3,1);
     */
-    TF1 *f1Herwig = new TF1(Form("fitH1herwig_ix%d",ix),"[0]*TMath::Landau(x,[1],[2])",0,20);
+    TF1 *f1Herwig = new TF1(Form("fitH1herwig_ix%d",ix),"[0]*TMath::Landau(x,[1],[2])",0,8);
     f1Herwig->SetParameter(0,2);
     f1Herwig->SetParameter(1,2.4);
     f1Herwig->SetParameter(2,0.6);
     //    f1Herwig->SetParameter(3,1);
 
-    TF1 *f1pythia = new TF1(Form("fitH1pythia_ix%d",ix),"[0]*TMath::Landau(x,[1],[2])",0,20);
+    TF1 *f1pythia = new TF1(Form("fitH1pythia_ix%d",ix),"[0]*TMath::Landau(x,[1],[2])",0,8);
     f1pythia->SetParameter(0,2);
     f1pythia->SetParameter(1,2.4);
     f1pythia->SetParameter(2,0.6);
     //    f1pythia->SetParameter(3,1);
 
 
-    h1herwig[ix]->Fit(f1Herwig->GetName(),"","",0,10);
-    h1pythia[ix]->Fit(f1pythia->GetName(),"","",0,10);
+    h1herwig[ix]->Fit(f1Herwig->GetName(),"","",1,5);
+    h1pythia[ix]->Fit(f1pythia->GetName(),"","",1,5);
     h1herwig[ix]->GetFunction(f1Herwig->GetName())->SetLineColor(1);
     h1pythia[ix]->GetFunction(f1pythia->GetName())->SetLineColor(2);
     h1herwig[ix]->Draw();
@@ -196,7 +197,7 @@ void getTrkR_herWigPYTHIA() {
     RyErr[ix-1] = peakRatioErr;
 
   }
-  c2->SaveAs(Form("pdfsJMS/JMS_ptCut%d_kSample%d_cent%d.pdf",(int)ptCut,kSample,icent));
+  c2->SaveAs(Form("pdfsJMS/JMS_ptCut%d_kSample%d_cent%d_im%d.pdf",(int)ptCut,kSample,icent,im));
   TCanvas* c3 = new TCanvas("c3","",500,500);
   hTrkR->SetAxisRange(0.8,1.2,"Y");
   //  TF1* f1 = new TF1("f1","[0] +x*[1]",xBin[0], xBin[nXbins]);
@@ -220,11 +221,17 @@ void getTrkR_herWigPYTHIA() {
   f2->SetLineColor(2);
   f2->SetLineStyle(2);
   //  f2->Draw("same");
-  c3->SaveAs(Form("pdfsJMS/trkR_ptCut%d_kSample%d_cent%d_pythiaHerwig.pdf",(int)ptCut,kSample,icent));
+  c3->SaveAs(Form("pdfsJMS/trkR_ptCut%d_kSample%d_cent%d_pythiaHerwig_im%d.pdf",(int)ptCut,kSample,icent,im));
+
+  TFile* fout = new TFile("R_trk/Rtrk_PYTHIA_herwig-test.root","update");
+  f2->SetName(Form("rtrk_im%d",im));
+  f2->Write("",TObject::kOverwrite);
+  fout->Close();
+
 }
 
 
-void getHerwigR(int kSample, int icent, TH2D* hmc, int ptCut, TString varName) { 
+void getHerwigR(int kSample, int icent, TH2D* hmc, int ptCut, TString varName, int im) { 
   
   TH1::SetDefaultSumw2();
   hmc->Reset();
@@ -306,20 +313,20 @@ void getHerwigR(int kSample, int icent, TH2D* hmc, int ptCut, TString varName) {
 
       tr->GetEntry(i);
 
+
       if ( ! passEvent(myJetMc, icent, true) )        continue;
-      
-      if ( myJetMc.recoChMassRaw < 0.2) continue; 
-      
+
+      double mpt =  myJetMc.recoMass / myJetMc.recoPt ;
       double recoMass = myJetMc.recoMass ;
       //      if (!( (recoMass>-100) && (recoMass<21)  ) )
-      //	continue;
-      
-      double recoPt = myJetMc.recoPt;
-      double theR = myJetMc.recoMass / trkJetMass;
-      if ( varName == "")	theR = myJetMc.recoMass / myJetMc.recoChMassRcSubt;
-      //if ( varName == "")      theR = myJetMc.recoMass / myJetMc.recoChMassRaw;
-      
+      //        continue;
 
+      if ( im != findMbin(mpt) )        continue;
+
+      double recoPt = myJetMc.recoPt;
+      double theR = myJetMc.recoMass / myJetMc.recoChMassRcSubt ;
+
+      if ( varName == "")	theR = myJetMc.recoMass / myJetMc.recoChMassRcSubt;
 
       double fcalWeight = 1.0;
       if ( kSample==kPbPb) {
@@ -335,7 +342,7 @@ void getHerwigR(int kSample, int icent, TH2D* hmc, int ptCut, TString varName) {
   hptmc->Draw();
 }
 
-void getPYTHIAR(int kSample, int icent,  TH2D* hmc, int ptCut, TString varName) {
+void getPYTHIAR(int kSample, int icent,  TH2D* hmc, int ptCut, TString varName, int im) {
 
   TH1::SetDefaultSumw2();
   hmc->Reset();
@@ -414,11 +421,12 @@ void getPYTHIAR(int kSample, int icent,  TH2D* hmc, int ptCut, TString varName) 
       double recoMass = myJetMc.recoMass ;
       //      if (!( (recoMass>-100) && (recoMass<21)  ) )
       //        continue;
+
+      if ( im != findMbin(mpt) )        continue;
       
       double recoPt = myJetMc.recoPt;
       
       double theR = myJetMc.recoMass / myJetMc.recoChMassRcSubt ;
-      
       
       double fcalWeight = 1.0;
       if ( kSample==kPbPb) {
@@ -476,7 +484,7 @@ void getMeanPt(int kSample, int icent, TH1D* hMean){
   else if ( kSample == kPbPb) cout << " PbPb " ;
   cout << "data entries = " << tr->GetEntries() << endl;
 
-  for (Int_t i= 0; i<tr->GetEntries() ; i++) {
+  for (Int_t i= 0; i<tr->GetEntries() *0.1 ; i++) {
     tr->GetEntry(i);
     if ( i > tr->GetEntries() * statUsed) break;
     if ( ! passEvent(myJet, icent, false) )       continue;

@@ -172,14 +172,14 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       
       double normalization = hdataUnfSq[ipt][0]->Integral("w") / hmcTruthSq[ipt][0]->Integral("w"); 
       hmcTruthSq[ipt][0]->Scale(normalization);
-      double maxY = cleverRange(hmcTruthSq[ipt][0],2.,0.000000001);
+      double maxY = cleverRange(hmcTruthSq[ipt][0],2.,0.000001);
       handsomeTH1(hmcTruthSq[ipt][0],1);
       hmcTruthSq[ipt][0]->SetNdivisions(505,"Y");
       fixedFontHist(hmcTruthSq[ipt][0],2.5,2.5,20);
       hmcTruthSq[ipt][0]->SetAxisRange(0,0.239,"X");
       handsomeTH1(hdataUnfSq[ipt][0],1);
-      hmcTruthSq[ipt][0]->GetYaxis()->SetTitleOffset(6);
-      hmcTruthSq[ipt][0]->SetYTitle("#frac{d#sigma}{d(m/p_{T})} (#mub)");
+      hmcTruthSq[ipt][0]->GetYaxis()->SetTitleOffset(4.5);
+      hmcTruthSq[ipt][0]->SetYTitle("#frac{d#sigma}{d(m/p_{T})} (nb)");
       hmcTruthSq[ipt][0]->SetNdivisions(505,"X");
       hmcTruthSq[ipt][0]->SetAxisRange(0.000001, maxY,"Y");
       if ( ipt == lowPtBin ) 
@@ -193,13 +193,13 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       
       drawPatch(0.,0,0.315,0.08);
 
-      if ( ipt < highPtBin) drawBinPt(xBin,ipt,"GeV",0.37, 0.70,1,18);
-      else                  drawBinPt(xBin,ipt,"GeV",0.37, 0.80,1,18);
+      if ( ipt < highPtBin) drawBinPt(xBin,ipt,"GeV",0.37, 0.74,1,18);
+      else                  drawBinPt(xBin,ipt,"GeV",0.37, 0.82,1,18);
       if ( ipt == lowPtBin)  {
-	TLegend* leg = new TLegend(0.37000,0.3817734,0.7211794,0.8097419,NULL,"brNDC");
+	TLegend* leg = new TLegend(0.37000,0.4417734,0.7211794,0.8397419,NULL,"brNDC");
 	easyLeg(leg,"",0.12);
 	leg->AddEntry(hdataUnfSq[ipt][0],"pp data","pl");
-	leg->AddEntry(hmcTruthSq[ipt][0],"PYTHIA+Herwig","l");
+	leg->AddEntry(hmcTruthSq[ipt][0],"Powheg + Pythia8","l");
 	leg->Draw();
 	if ( ipt == lowPtBin ) {
 	  ATLASLabel(0.37,0.86,"Internal",0.14,0.21);
@@ -238,7 +238,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       
       if (ipt == lowPtBin)   {
 	ATLASLabel(0.21,0.86,"Internal",0.14,0.24);
-	drawText("(PYTHIA+Herwig)/data", 0.21, 0.72, 1,18);
+	drawText("(Powheg+Pythia8)/data", 0.21, 0.72, 1,18);
 	//	drawText(Form("reference iter. (%d)",vIter.at(refId)), 0.22, 0.82, 1);
       }
       gPad->RedrawAxis();

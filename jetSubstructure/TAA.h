@@ -42,7 +42,7 @@ void scaleByPtBinWidth(TH1D* hpp, double *xBin, int ix) {
 }
 
 void CsScalePP( TH1D* hpp) {
-  hpp->Scale( 1. / 25300000. );  // 25300 nb-1 =  25.3 pb-1
+  hpp->Scale( 1. / 25300. );  // 25300 nb-1 // =  25.3 pb-1
 }
 
 void CsScalePbPb( TH1D* hpbpb, int icent =-1, double lumi = 0.49) {

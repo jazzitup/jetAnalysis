@@ -25,7 +25,7 @@ using std::endl;
 #include "unfoldingUtil.h"
 #include <TGraphErrors.h>
 
-double fracStst=001;
+double fracStst=0.01;
 
 int lowPtBin = 5;
 
@@ -140,8 +140,8 @@ void getJMS(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doRewe
     f1[ix]->SetParameter(5,-630);
     
 
-    gr[ix]->Fit(f1[ix],"ll");
-    gr[ix]->GetFunction(f1[ix]->GetName())->SetLineColor(vColor[ix-lowPtBin]);
+    //    gr[ix]->Fit(f1[ix],"ll");
+    //    gr[ix]->GetFunction(f1[ix]->GetName())->SetLineColor(vColor[ix-lowPtBin]);
     
   }  
   if ( !doCal)    

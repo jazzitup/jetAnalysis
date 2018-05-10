@@ -387,11 +387,12 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 
   TF1* fjmscal[30];
   if( nSys == 300) {   
-    TFile* fin = new TFile(Form("fJMScalibration_kSample%d_icent%d_num.root",kSample,icent));
+    TFile* fin = new TFile(Form("fJMScalibration_kSample%d_icent%d_mPt2.root",kSample,icent));
     for ( int ix = lowPtBin ; ix<=highPtBin ; ix++) {
       fjmscal[ix] = (TF1*)fin->Get(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix));
     }
   }
+
   int nXbinsCal;
   double xBinCal[30];
   getXbin(nXbinsCal, xBinCal, 1);
@@ -427,8 +428,7 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
   }
   
   RtrkProvider rtrkProv;
-  if ( nSys == 210)
-    rtrkProv.Setup(kSample, icent);
+  rtrkProv.Setup(kSample, icent);
 
 
 
@@ -582,7 +582,7 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 	recoY = recoY * 1.008;
       }
       if (nSys==213) { // JMS by Herwig
-	double theRtrk = getRtrkHerwig( kSample, icent, myJetMc.recoPt);
+	double theRtrk = rtrkProv.getRPyHer(myJetMc);
 	recoY = recoY / theRtrk;
       }
       if (nSys==217) { // JMS by Herwig

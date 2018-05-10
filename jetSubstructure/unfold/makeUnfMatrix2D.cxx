@@ -154,8 +154,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 {
   
   RtrkProvider rtrkProv; 
-  if ( nSys == 210)  
-    rtrkProv.Setup(kSample, icent);
+  rtrkProv.Setup(kSample, icent);
 
   TRandom3 genRandom;
   genRandom.SetSeed(200);
@@ -208,7 +207,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 
   TF1* fjmscal[30];
   if( nSys == 300) {
-    TFile* fin = new TFile(Form("fJMScalibration_kSample%d_icent%d_num.root",kSample,icent));
+    TFile* fin = new TFile(Form("fJMScalibration_kSample%d_icent%d_mPt2.root",kSample,icent));
     for ( int ix = 5 ; ix<=11 ; ix++) {
       fjmscal[ix] = (TF1*)fin->Get(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix));
     }
@@ -348,7 +347,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	recoVarY = recoVarY * theRtrk;
       }
       else if (nSys==213) { // JMS by Herwig
-	double theRtrk = getRtrkHerwig( kSample, icent, myJetMc.recoPt);
+        double theRtrk = rtrkProv.getRPyHer(myJetMc);
+	//	double theRtrk = getRtrkHerwig( kSample, icent, myJetMc.recoPt);
         recoVarY = recoVarY / theRtrk;
       }
       else if (nSys==211) { // JMS

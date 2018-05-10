@@ -12,7 +12,7 @@ using std::endl;
 #include "../JssUtils.h"
 #include <TPaletteAxis.h>
 
-double statUsed = 001;
+double statUsed = 0.01;
 
 int lowPtBin = 1;  int highPtBin = 13;
 

@@ -56,7 +56,7 @@ double errPeak(TF1* f) {
   return e1; 
 }
 
-void getTrkR(int kSample = kPbPb, int icent=4, int im=1) {   // opt1 : mass,   opt2 : m/pT  
+void getTrkR(int kSample = kPbPb, int icent=0, int im=1) {   // opt1 : mass,   opt2 : m/pT  
   TH1::SetDefaultSumw2();
 
   int optX = 1;    int optY = 2;  
@@ -184,7 +184,7 @@ void getTrkR(int kSample = kPbPb, int icent=4, int im=1) {   // opt1 : mass,   o
     Ry[ix-1] = peakRatio;
     RyErr[ix-1] = peakRatioErr;
   }
-  c2->SaveAs(Form("pdfsJMS/JMS_kSample%d_cent%d.pdf",kSample,icent));
+  c2->SaveAs(Form("pdfsJMS/JMS_kSample%d_cent%d_im%d.pdf",kSample,icent,im));
   TCanvas* c3 = new TCanvas("c3","",500,500);
   hTrkR->SetAxisRange(0.8,1.2,"Y");
 
@@ -204,8 +204,12 @@ void getTrkR(int kSample = kPbPb, int icent=4, int im=1) {   // opt1 : mass,   o
   //  gr->Fit("f1","O");
   gr->Draw("same p");
   jumSun(xBin[0],1, xBin[nXbins],1);
-  drawCentrality(kSample, icent, 0.60,0.86,1,24);
-  
+  drawCentrality(kSample, icent, 0.40,0.86,1,24);
+  if ( im==1)  drawText("m/p_{T} < 0.06", 0.40,0.75,1,24);
+  if ( im==2)  drawText("0.06 < m/p_{T} < 0.1", 0.40,0.75,1,24);
+  if ( im==3)  drawText("0.1 < m/p_{T} < 0.15", 0.40,0.75,1,24);
+  if ( im==4)  drawText("0.15 < m/p_{T}", 0.40,0.75,1,24);
+
   TF1* f2 = new TF1("f2","2- ([0] +log(x)*[1] + log(x)*log(x)*[2])",xBin[0], xBin[nXbins]);
   f2->SetParameter( 0, f1->GetParameter(0));  
   f2->SetParameter( 1, f1->GetParameter(1));  
@@ -215,11 +219,12 @@ void getTrkR(int kSample = kPbPb, int icent=4, int im=1) {   // opt1 : mass,   o
   //  f2->Draw("same");
   c3->SaveAs(Form("pdfsJMS/trkR_kSample%d_cent%d_massBin%d.pdf",kSample,icent,im));
 
-  TFile* fout = new TFile(Form("R_trk/Rtrk_kSample%d_cent%d.root",kSample,icent),"update");
+  TFile* fout = new TFile(Form("R_trk/Rtrk_kSample%d_cent%d_temp.root",kSample,icent),"update");
+  gr->SetName(Form("hRtrk_im%d",im));
   f2->SetName(Form("rtrk_im%d",im));
+  gr->Write("",TObject::kOverwrite);
   f2->Write("",TObject::kOverwrite);
   fout->Close();
-  
 }
 
 

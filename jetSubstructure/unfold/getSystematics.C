@@ -4,7 +4,7 @@
 void groomHist(TH1D* h1) {
   h1->SetAxisRange(0.001,0.23,"X");
   h1->SetAxisRange(-0.98,0.98,"Y");
-  h1->SetXTitle("m^{jet}/p_{T}^{jet}");
+  h1->SetXTitle("m/p_{T}");
   h1->SetYTitle("Rel. uncertainty");
   h1->SetNdivisions(505,"X");
   h1->SetNdivisions(505,"Y");
@@ -97,7 +97,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
 
   sysJms    = getSystematicsJES(icent, indexJMS0,1, kMergeQuad );
   sysJms1    = getSystematicsJES(icent, indexJMS1 );
-  sysJms2    = getSystematicsJES(icent, indexJMS2 );
+  sysJms2    = getSystematicsJES(icent, indexJMS2,1, kMergeQuad);
   sysJms3    = getSystematicsJMSCal();
 
   addSysInQuad3(sysJms, sysJms1, lowPtBin, highPtBin);
@@ -503,7 +503,33 @@ void getSystematics(int icent = 0, bool drawPP = true) {
       groomHist(sysJmrInv.pp[ix]);
       groomHist(sysJms.pp[ix]);
       groomHist(sysJmsInv.pp[ix]);
+
+      groomHist(sysFinalPlus.pbpb[ix]);
+      groomHist(sysFinalMinus.pbpb[ix]);
+      groomHist(sysJEStotPlus.pbpb[ix]);
+      groomHist(sysJEStotMinus.pbpb[ix]);
+      groomHist(sysUnfPlus.pbpb[ix]);
+      groomHist(sysUnfMinus.pbpb[ix]);
+      groomHist(sysJer.pbpb[ix]);
+      groomHist(sysJerInv.pbpb[ix]);
+      groomHist(sysJmr.pbpb[ix]);
+      groomHist(sysJmrInv.pbpb[ix]);
+      groomHist(sysJms.pbpb[ix]);
+      groomHist(sysJmsInv.pbpb[ix]);
   
+      groomHist(sysFinalPlus.raa[ix]);
+      groomHist(sysFinalMinus.raa[ix]);
+      groomHist(sysJEStotPlus.raa[ix]);
+      groomHist(sysJEStotMinus.raa[ix]);
+      groomHist(sysUnfPlus.raa[ix]);
+      groomHist(sysUnfMinus.raa[ix]);
+      groomHist(sysJer.raa[ix]);
+      groomHist(sysJerInv.raa[ix]);
+      groomHist(sysJmr.raa[ix]);
+      groomHist(sysJmrInv.raa[ix]);
+      groomHist(sysJms.raa[ix]);
+      groomHist(sysJmsInv.raa[ix]);
+
       
       sysFinalPlus.pp[ix]->Draw("hist");
       sysFinalMinus.pp[ix]->Draw("hist same");

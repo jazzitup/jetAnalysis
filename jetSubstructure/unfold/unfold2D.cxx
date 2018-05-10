@@ -414,7 +414,7 @@ void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, 
 
   TF1* fjmscal[30];
   if( nSys == 300) {
-    TFile* fin = new TFile(Form("fJMScalibration_kSample%d_icent%d_num.root",kSample,icent));
+    TFile* fin = new TFile(Form("fJMScalibration_kSample%d_icent%d_mPt2.root",kSample,icent));
     for ( int ix = 5 ; ix<=11 ; ix++) {
       fjmscal[ix] = (TF1*)fin->Get(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix));
     }

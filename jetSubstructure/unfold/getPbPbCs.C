@@ -21,7 +21,7 @@ void getPbPbCs(int optX=1, int optY=2 ) {
   getYbin(nYbins, yBin, optY);
   TH1D* tempHistYsq;
   if ( optY == 1 ) tempHistYsq = new TH1D("tempHistY",";mass(GeV);",nYbins,yBin);
-  if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m^{jet}/p_{T}^{jet};",nYbins,yBin);
+  if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m/p_{T};",nYbins,yBin);
 
 
   int lowPtBin = 6;

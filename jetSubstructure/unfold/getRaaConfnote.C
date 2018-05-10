@@ -23,7 +23,7 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
   getYbin(nYbins, yBin, optY);
   TH1D* tempHistYsq;
   if ( optY == 1 ) tempHistYsq = new TH1D("tempHistY",";mass(GeV);",nYbins,yBin);
-  if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m^{jet}/p_{T}^{jet};",nYbins,yBin);
+  if ( optY == 2 ) tempHistYsq = new TH1D("tempHistY",";m/p_{T};",nYbins,yBin);
 
 
   int lowPtBin = 6;
@@ -218,7 +218,7 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
   //  htemp2->GetXaxis()->SetTitleOffset(1.3);
   //  htemp2->GetYaxis()->SetTitleOffset(1.3);
 
-  htemp2->SetXTitle("m^{jet}/p_{T}^{jet}");
+  htemp2->SetXTitle("m/p_{T}");
   htemp2->SetYTitle("R_{AA}");
   htemp2->Draw();
   hRAA[theBin][0]->Draw("same");
@@ -241,7 +241,7 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
   //  drawBinPt(xBin,theBin,"GeV", 0.55 ,0.88,1,18);
 
   TLegend *leg1 = new TLegend(0.4397321,0.7035294,0.9397321,0.9082353,NULL,"brNDC");
-  easyLeg(leg1,"126 < p_{T}^{jet} < 158 GeV/c");
+  easyLeg(leg1,"126 < p_{T} < 158 GeV/c");
 
   leg1->AddEntry(hRAA[theBin][2], "60% - 80%","pf");
   leg1->AddEntry(hRAA[theBin][1], "30% - 40%","pf");
