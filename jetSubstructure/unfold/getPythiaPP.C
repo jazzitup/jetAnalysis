@@ -130,10 +130,11 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
 
   
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  { 
+
     for ( int in = 0 ; in< int(vIter.size()) ; in++)  {//    for (int icent = 1 ; icent<=8 ; icent++)  { 
-      hmcUnfSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("mcUnfSq_ix%d_in%d",ix,in));
+      hmcUnfSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("mcUnfSq_ix%d_iter%d",ix,in));
       hmcTruthSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("mcTruthSq_ix%d_in%d",ix,in));
-      hmcRawSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("mcRawSq_ix%d_in%d",ix,in));
+      hmcRawSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("mcRawSq_ix%d_iter%d",ix,in));
       getMCresults(kSample, icent, ix, vIter.at(in), matRwt, specRwtMc , hmcTruthSq[ix][in], hmcRawSq[ix][in], hmcUnfSq[ix][in]);
 
       hdataUnfSq[ix][in] = (TH1D*)tempHistYsq->Clone(Form("dataUnfSq_ix%d_in%d",ix,in));
@@ -193,18 +194,20 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       
       drawPatch(0.,0,0.315,0.08);
 
-      if ( ipt < highPtBin) drawBinPt(xBin,ipt,"GeV",0.37, 0.74,1,18);
-      else                  drawBinPt(xBin,ipt,"GeV",0.37, 0.82,1,18);
+      if ( ipt == lowPtBin) drawBinPt(xBin,ipt,"GeV",0.37, 0.61,1,18);
+      else if ( ipt == lowPtBin+1) drawBinPt(xBin,ipt,"GeV",0.37, 0.6,1,18);
+      else if ( ipt < highPtBin) drawBinPt(xBin,ipt,"GeV",0.37, 0.8,1,18);
+      else                  drawBinPt(xBin,ipt,"GeV",0.37, 0.85,1,18);
       if ( ipt == lowPtBin)  {
-	TLegend* leg = new TLegend(0.37000,0.4417734,0.7211794,0.8397419,NULL,"brNDC");
+	ATLASLabel(0.38,0.86,"Internal",0.12,0.16);
+	drawText("#it{pp} #sqrt{#font[12]{s}} = 5.02 TeV, 25 pb^{-1}", 0.38, 0.73,1,19);
+      }
+      if ( ipt == lowPtBin +1 ) {
+        TLegend* leg = new TLegend(0.37000,0.7017734,0.7211794,1.1097419,NULL,"brNDC");
 	easyLeg(leg,"",0.12);
 	leg->AddEntry(hdataUnfSq[ipt][0],"pp data","pl");
 	leg->AddEntry(hmcTruthSq[ipt][0],"Powheg + Pythia8","l");
 	leg->Draw();
-	if ( ipt == lowPtBin ) {
-	  ATLASLabel(0.37,0.86,"Internal",0.14,0.21);
-	}
-
       }
 
       c2->cd((ipt - lowPtBin+1)*2);
@@ -237,10 +240,14 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       
       
       if (ipt == lowPtBin)   {
-	ATLASLabel(0.21,0.86,"Internal",0.14,0.24);
+	ATLASLabel(0.21,0.86,"Internal",0.12,0.19);
 	drawText("(Powheg+Pythia8)/data", 0.21, 0.72, 1,18);
 	//	drawText(Form("reference iter. (%d)",vIter.at(refId)), 0.22, 0.82, 1);
       }
+      if ( ipt == lowPtBin) drawBinPt(xBin,ipt,"GeV",0.3, 0.61,1,18);
+      else if (ipt< highPtBin)                 drawBinPt(xBin,ipt,"GeV",0.3, 0.8,1,18);
+      else    drawBinPt(xBin,ipt,"GeV",0.3, 0.85,1,18);
+
       gPad->RedrawAxis();
     }
     
@@ -253,7 +260,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
 
 
 void getMCresults(int kSample, int icent, int ix, int nIter, bool matRwt, bool specRwt,  TH1D* hmcTruthSq, TH1D* hmcRawSq, TH1D* hmcUnfSq) {
-  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d.root",kSample, (int)matRwt, (int)specRwt));
+  TFile * fin = new TFile(Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d-old.root",kSample, (int)matRwt, (int)specRwt));
   TH1D* hUnf = (TH1D*)fin->Get(Form("hmcUnf1d_icent%d_ix%d_iter%d",icent,ix,nIter));
   TH1D* hTruth = (TH1D*)fin->Get(Form("hmcTruth1d_icent%d_ix%d",icent,ix));
   TH1D* hRaw = (TH1D*)fin->Get(Form("hmcRaw1d_icent%d_ix%d",icent,ix));

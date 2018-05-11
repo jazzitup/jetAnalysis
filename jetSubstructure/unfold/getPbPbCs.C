@@ -158,6 +158,8 @@ void getPbPbCs(int optX=1, int optY=2 ) {
       double maxY = cleverRange(hPbPbUnfSq[ipt][ii],2,0.000001);
       hPbPbUnfSq[ipt][ii]->SetAxisRange(0, 0.2399,"X");
       hPbPbUnfSq[ipt][ii]->SetAxisRange(0.000000, maxY,"Y");
+      if ( (ipt == lowPtBin) && (ii==0) )
+	hPbPbUnfSq[ipt][ii]->SetAxisRange(0.000000, maxY*1.1,"Y");
       hPbPbUnfSq[ipt][ii]->SetNdivisions(505,"X");
       hPbPbUnfSq[ipt][ii]->SetNdivisions(505,"Y");
       hPbPbUnfSq[ipt][ii]->GetYaxis()->SetDrawOption("G");
@@ -182,8 +184,10 @@ void getPbPbCs(int optX=1, int optY=2 ) {
 
 
       if  (ipt == lowPtBin ) { 
-	if ( ii == 0 ) 
+	if ( ii == 0 ) { 
 	  ATLASLabel(0.31,0.86,"Internal",0.13,0.19);
+	  drawText("Pb+Pb #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}",0.31,0.76);
+	}
 	if ( ii == 1 ) 
 	  ATLASLabel(0.26,0.86,"Internal",0.13,0.223);
 	if ( ii == 2 ) 
@@ -192,16 +196,18 @@ void getPbPbCs(int optX=1, int optY=2 ) {
       }
       if (ipt == lowPtBin ) {
 	if ( ii==0) 
-	  drawCentrality(kPbPb, vCent[ii], 0.31,0.73,1,20);
+	  drawCentrality(kPbPb, vCent[ii], 0.31,0.64,1,20);
 	if ( ii==1) 
 	  drawCentrality(kPbPb, vCent[ii], 0.26,0.73,1,20);
 	if ( ii==2) 
 	  drawCentrality(kPbPb, vCent[ii], 0.29,0.73,1,20);
 
       }
-      if ( ii == 0 ) {
-        if (ipt == lowPtBin )
-          drawBinPt(xBin,ipt,"GeV", 0.31 ,0.58,1,18);
+      if ( ii < 1000 ) {
+        if ( (ipt == lowPtBin) && ( (vCent[ii] ==3)||( vCent[ii]==6) ))  
+          drawBinPt(xBin,ipt,"GeV", 0.31 ,0.6,1,18);
+	else if (ipt == lowPtBin )
+          drawBinPt(xBin,ipt,"GeV", 0.31 ,0.55,1,18);
         else if (ipt != highPtBin )
           drawBinPt(xBin,ipt,"GeV", 0.31 ,0.78,1,18);
         else if (ipt == highPtBin )

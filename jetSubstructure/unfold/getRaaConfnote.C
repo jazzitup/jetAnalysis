@@ -112,6 +112,7 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
       narrowSys( sysMinus[ii].raa[ipt], 0, 0.24);
 
       CsScalePP(hPPUnfSq[ipt][ii]);
+      hPPUnfSq[ipt][ii]->Scale(0.001);
       CsScalePbPb(hPbPbUnfSq[ipt][ii], vCent[ii] );
       
       hRAA[ipt][ii] = (TH1D*)hPbPbUnfSq[ipt][ii]->Clone(Form("hraa_ipt%d_ii%d",ipt,ii));
@@ -179,23 +180,48 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
 	if ( ii == 2 ) 
 	  ATLASLabel(0.245,0.86,"Internal",0.12,0.24);
 
-
+	
       }
       if (ipt == lowPtBin ) {
 	if ( ii == 0 ) drawCentrality(kPbPb, vCent[ii], 0.39,0.73,1,20);
 	if ( ii == 1 ) drawCentrality(kPbPb, vCent[ii], 0.245,0.73,1,20);
 	if ( ii == 2 ) drawCentrality(kPbPb, vCent[ii], 0.245,0.73,1,20);
       }
-      
-      if ( ii == 0 ) {
-	if (ipt < highPtBin )	
-	  drawBinPt(xBin,ipt,"GeV", 0.39 ,0.58,1,18);
-	if (ipt == highPtBin )
-	  drawBinPt(xBin,ipt,"GeV", 0.39 ,0.68,1,18);
+      if ( ipt == lowPtBin+1) {
+        if ( vCent[ii]==0) {
+	  drawText("#it{pp} #sqrt{#font[12]{s}} = 5.02 TeV, 25 pb^{-1}", 0.37, 0.89,1,15);
+	  drawText("Pb+Pb #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}",0.37,.78,1,15);
+	}
       }
-      if ( ii==2 ) { 
+      if ( ii == 0 ) {
+	if (ipt == lowPtBin )
+	  drawBinPt(xBin,ipt,"GeV", 0.39 ,0.58,1,18);
+	else if (ipt == lowPtBin+1 )
+	  drawBinPt(xBin,ipt,"GeV", 0.39 ,0.63,1,18);
+	else if  (ipt == highPtBin )
+	  drawBinPt(xBin,ipt,"GeV", 0.39 ,0.88,1,18);
+	else 
+	  drawBinPt(xBin,ipt,"GeV", 0.39 ,0.85,1,18);
+
+
+      }
+      if ( ii == 1 ) {
+	if  ( ipt == lowPtBin)
+	  drawBinPt(xBin,ipt,"GeV", 0.2 ,0.58,1,18);
+	else if  (ipt == highPtBin )
+	  drawBinPt(xBin,ipt,"GeV", 0.2 ,0.88,1,18);
+	else 
+	  drawBinPt(xBin,ipt,"GeV", 0.2 ,0.85,1,18);
+      }
+      
+if ( ii==2 ) { 
 	if ( ipt == highPtBin-1)
-	  drawBinPt2(xBin,ipt,"GeV", 0.4 ,0.8,1,18);
+	  drawBinPt2(xBin,ipt,"GeV", 0.3 ,0.8,1,18);
+	else if ( ipt == lowPtBin)
+	  drawBinPt(xBin,ipt,"GeV", 0.2 ,0.58,1,18);
+	else 
+	  drawBinPt(xBin,ipt,"GeV", 0.2 ,0.85,1,18);
+
       }
       jumSun(0,1,0.24,1);
       gPad->RedrawAxis();
@@ -301,24 +327,37 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
         if ( ii == 2 ) drawCentrality(kPbPb, vCent[ii], 0.245,0.73,1,20);
       }
 
-      if ( ii == 0 ) {
-        if (im < highMptBin )
-          drawBinMpt(yBin,im,"", 0.39 ,0.58,1,18);
-        if (im == highMptBin )
-          drawBinMpt(yBin,im,"", 0.39 ,0.68,1,18);
+      if ( ii < 10 ) {
+
+	if (im == lowMptBin )
+	  drawBinMpt(yBin,im,"", 0.39 -(ii>0)*0.14,0.58,1,18);
+        else if (im < highMptBin )
+	  drawBinMpt(yBin,im,"", 0.39 -(ii>0)*0.14,0.65,1,18);
+        else if (im == highMptBin )
+          drawBinMpt(yBin,im,"", 0.39  -(ii>0)*0.14,0.78,1,18);
+      }
+
+      if ( im == lowMptBin+1) {
+	if ( vCent[ii] ==0 ){ 
+	  drawText("#it{pp} #sqrt{#font[12]{s}} = 5.02 TeV, 25 pb^{-1}", 0.37, 0.89,1,15);
+	  drawText("Pb+Pb #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}",0.37,.78,1,15);
+	}
       }
       if (im == lowMptBin ) {
         if ( ii == 0 )
-          ATLASLabel(0.39,0.86,"Internal",0.12,0.20);
+          ATLASLabel(0.39,0.86,"Internal",0.12,0.16);
         if ( ii == 1 )
-          ATLASLabel(0.245,0.86,"Internal",0.12,0.25);
+          ATLASLabel(0.245,0.86,"Internal",0.12,0.2);
 	if ( ii == 2 )
-          ATLASLabel(0.245,0.86,"Internal",0.12,0.24);
+          ATLASLabel(0.245,0.86,"Internal",0.12,0.2);
       }
       double lumiUnc = getLumiRelErr(vCent[ii]);
       drawErrorBox( 125, 1-lumiUnc, 150, 1+lumiUnc, 1);      
       jumSun(125,1,500,1);
       gPad->RedrawAxis();
+
+      if (  im == highMptBin ) 
+	drawPatch(0.9,0,1,0.23);
     }
   }
   

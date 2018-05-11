@@ -8,7 +8,7 @@
 
 void groomHist(TH1D* h1) {
   h1->SetAxisRange(0.001,0.23,"X");
-  h1->SetAxisRange(-0.55,0.55,"Y");
+  h1->SetAxisRange(-0.15,0.15,"Y");
   h1->SetXTitle("m/p_{T}");
   h1->SetYTitle("Unc.");
   h1->SetNdivisions(505,"X");
@@ -26,11 +26,11 @@ struct JetSys {
 
 void getDATAresults(int kSample=0, int icent=0, int ix=0, TH1D* hdataUnfSq=0, TString dir="", int nSys=-1);
 TString getSysName(int nSys = -1);
-TH1D* getSysJES(int kSample= kPP, int icent = 0, int ix=7, int nSys=-1);
+TH1D* getSysJES(int kSample= kPP, int icent = 0, int ix=7, int nSys=-1, int nSys2=-1);
 void addSysInQuad(TH1D* sysTot=0, TH1D* sys1=0);
 
 
-void checkSys(int nSys=200) { 
+void checkSys(int nSys=200, int nSys2=0) { 
 
   int optX =1 ;
   int optY =2 ;
@@ -53,9 +53,9 @@ void checkSys(int nSys=200) {
   TH1D* hSysApbpb[30][8]; // pt, centrality
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
-    hSysApp[ix]   = getSysJES(kPP,     0  , ix, nSys);
+    hSysApp[ix]   = getSysJES(kPP,     0  , ix, nSys, nSys2);
     for ( int icent=0; icent<=6 ; icent++) { 
-      hSysApbpb[ix][icent] = getSysJES(kPbPb, icent, ix, nSys);
+      hSysApbpb[ix][icent] = getSysJES(kPbPb, icent, ix, nSys, nSys2);
     }
     
   }
@@ -85,7 +85,7 @@ void checkSys(int nSys=200) {
     jumSun(0,0,0.24,0);
 
   }
-  if (savePic)  cA->SaveAs(Form("pdfsSystematics/sysJES_nSys%d_ppOnly.pdf",nSys));
+  //  if (savePic)  cA->SaveAs(Form("pdfsSystematics/sysJES_nSys%d_ppOnly.pdf",nSys));
 
 
   TCanvas* cB;
@@ -122,8 +122,8 @@ void checkSys(int nSys=200) {
     //    }
 
   }
-  if (savePic)  cB->SaveAs(Form("pdfsSystematics/sysJES_nSys%d.pdf",nSys));
-  if (savePic)  cB->SaveAs(Form("pdfsSystematics/sysJES_nSys%d.C",nSys));
+  //  if (savePic)  cB->SaveAs(Form("pdfsSystematics/sysJES_nSys%d.pdf",nSys));
+  //  if (savePic)  cB->SaveAs(Form("pdfsSystematics/sysJES_nSys%d.C",nSys));
 
 
   //  return ret;
@@ -133,7 +133,7 @@ void checkSys(int nSys=200) {
 
 
 
-TH1D* getSysJES(int kSample, int icent , int ix, int nSys) {
+TH1D* getSysJES(int kSample, int icent , int ix, int nSys, int nSys2) {
   
   TString sRef = "reweight00";
   int optX = 1;
@@ -150,7 +150,11 @@ TH1D* getSysJES(int kSample, int icent , int ix, int nSys) {
   TH1D* hRef = new TH1D("hRef","",nYbins,yBin);
   TH1D* h2 = (TH1D*)hRef->Clone("h2");
 
-  getDATAresults( kSample, icent, ix, hRef, sRef,    -1);
+  if ( nSys2 == 0) 
+    getDATAresults( kSample, icent, ix, hRef, sRef,    -1);
+  else 
+    getDATAresults( kSample, icent, ix, hRef, "sys", nSys2);
+
   getDATAresults( kSample, icent, ix, h2,   "sys", nSys);
   
   TH1D* ret = (TH1D*)h2->Clone(Form("kSample%d_icent%d_ix%d_nSys%d",kSample,icent,ix, nSys));

@@ -25,7 +25,7 @@ using std::endl;
 #include "unfoldingUtil.h"
 #include <TGraphErrors.h>
 
-double fracStst=01;
+double fracStst=0.1;
 
 int lowPtBin = 5;
 
@@ -122,6 +122,7 @@ void getJMS2(int kSample = kPbPb, int icent=0, int optX =1, int optY=2, bool doR
   //  drawText("<m/p_{T}]>", 0.2,0.78,1,25);
   leg1->Draw();
   c2->SaveAs(Form("jms/jms_kSample%d_icent%d-2.pdf",kSample,icent));
+
   
   TCanvas* c4 = new TCanvas("c4","",500,500);
   TH1D* htemp = new TH1D("htemp",";m/p_{T} * R;R",100,0,0.3);
@@ -147,11 +148,11 @@ void getJMS2(int kSample = kPbPb, int icent=0, int optX =1, int optY=2, bool doR
   if ( !doCal)    
     c4->SaveAs(Form("numericalInversion_ksample%d_icent%d-2.pdf",kSample,icent));
   //  if ( !doCal ) {
-  TFile* fout = new TFile(Form("fJMScalibration_kSample%d_icent%d_afterCal.root",kSample,icent), "recreate");
-  for ( int ix = lowPtBin ; ix<=highPtBin ; ix++)  {
-    f1[ix]->Write();
-  }
-  fout->Close();
+  //  TFile* fout = new TFile(Form("fJMScalibration_kSample%d_icent%d_afterCal.root",kSample,icent), "recreate");
+  //  for ( int ix = lowPtBin ; ix<=highPtBin ; ix++)  {
+  //    f1[ix]->Write();
+  //  }
+  //  fout->Close();
   //  }
   
   //  c2->SaveAs(Form("JMS_vs_truthpT_ksample%d_icent%d_doCal%d-2.pdf",kSample,icent,(int)doCal));

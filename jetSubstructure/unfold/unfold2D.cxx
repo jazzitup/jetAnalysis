@@ -55,6 +55,8 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     cout << "===== JMS/JMR sys mode =====" << endl;
   else if  (nSys == 300 )
     cout << "===== Jet mass calibration =====" << endl;
+  else if  (nSys == 401 )
+    cout << "Do both 101 and 300" << endl;
   else { 
     cout << "===== Invald nSys option ===== " << nSys << endl;
     return ;
@@ -413,8 +415,8 @@ void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, 
   }
 
   TF1* fjmscal[30];
-  if( nSys == 300) {
-    TFile* fin = new TFile(Form("fJMScalibration_kSample%d_icent%d_mPt2.root",kSample,icent));
+  if( ( nSys == 300)||( nSys==401) )  {
+    TFile* fin = new TFile(Form("fJMScalibration_kSample%d_icent%d_num.root",kSample,icent));
     for ( int ix = 5 ; ix<=11 ; ix++) {
       fjmscal[ix] = (TF1*)fin->Get(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix));
     }
@@ -447,7 +449,7 @@ void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, 
     double recoVarY, truthVarY;
     getYvalues( recoVarY, truthVarY, myJet, optY);
     
-    if (nSys==300) { // JMS calibration
+    if ( (nSys==300)||(nSys==401) ) { // JMS calibration
       int xx = xBinTempCal->FindBin( myJet.recoPt);
       if ( xx > 11 )  xx = 11;
       if ( xx < 5 )  xx = 5;
@@ -462,7 +464,7 @@ void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, 
 	theFac = fjmscal[xx]->Eval(recoVarY);
       recoVarY = recoVarY / theFac;
     }
-
+    
     hdataRaw->Fill ( recoVarX, recoVarY); 
   }
   

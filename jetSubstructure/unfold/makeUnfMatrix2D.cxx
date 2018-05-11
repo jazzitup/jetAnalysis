@@ -47,6 +47,8 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
     cout << "HI JMS/JMR sys mode" << endl;
   else if  (nSys == 300 )
     cout << "Jet mass Calibration" << endl;
+  else if  (nSys == 401 )
+    cout << "Do both 300 and 101" << endl;
   else {
     cout << "Invald nSys option : " << nSys << endl;
     return ;
@@ -206,8 +208,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   }
 
   TF1* fjmscal[30];
-  if( nSys == 300) {
-    TFile* fin = new TFile(Form("fJMScalibration_kSample%d_icent%d_mPt2.root",kSample,icent));
+  if( (nSys == 300)||( nSys==401)) {
+    TFile* fin = new TFile(Form("fJMScalibration_kSample%d_icent%d_num.root",kSample,icent));
     for ( int ix = 5 ; ix<=11 ; ix++) {
       fjmscal[ix] = (TF1*)fin->Get(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix));
     }
@@ -231,6 +233,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   float ptSys;
   TBranch *b_ptSys;
   TString jetSysName = getPtSysName(nSys);
+  if ( nSys == 401) jetSysName = getPtSysName(101);
   
   cout << " Setting tree branch address..." << endl;
   TFile* fjz2 = new TFile(Form("../ntuples/%s",jz2.Data()));
@@ -238,12 +241,16 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   tr2->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
   if ( (nSys>=0) && (nSys<200) )
     tr2->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
-  
-  
+  else if (nSys==401)
+    tr2->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
+
+
   TFile* fjz3 = new TFile(Form("../ntuples/%s",jz3.Data()));
   TTree* tr3 = (TTree*)fjz3->Get("tr");
   tr3->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
   if ( (nSys>=0) && (nSys<200) )
+    tr3->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
+  else if (nSys==401)
     tr3->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
 
   TFile* fjz4 = new TFile(Form("../ntuples/%s",jz4.Data()));
@@ -251,7 +258,10 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   tr4->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
   if ( (nSys>=0) && (nSys<200) )  
     tr4->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
-
+  else if (nSys==401)
+    tr4->SetBranchAddress(jetSysName.Data(), &ptSys, &b_ptSys);
+  
+  
   int nXbins;
   double xBin[30];
   getXbin(nXbins, xBin, optX);
@@ -321,6 +331,12 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	myJetMc.recoPt = ptSys;  // New pT!!! 
 	myJetMc.recoMass = myJetMc.recoMass * extraPtScale ; // new mass so that m/pT is invariant.  This step is necessary for reweighitng (pT, m/pT)
       }
+      if ( nSys==401) {
+	double extraPtScale = ptSys / myJetMc.recoPt ;
+        recoVarX = recoVarX * extraPtScale ; //pt
+        myJetMc.recoPt = ptSys;  // New pT!!!
+        myJetMc.recoMass = myJetMc.recoMass * extraPtScale ;
+      }
       else if (nSys==200) { // JMR 
 	// smear by 20% the recoY 
 	double theCenter = truthVarY * getJMSscale( kSample, icent, myJetMc.recoPt);
@@ -358,6 +374,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
         recoVarY = recoVarY * 1.05;
       }
 
+
+      
       
       if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
 	continue;
@@ -377,7 +395,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 	rewFact = hReweight->GetBinContent(rewBin);
       }
 
-      if (nSys==300) { // JMS calibration
+      if (  (nSys==300) || (nSys == 401)) { // JMS calibration
 	int xx = xBinTempCal->FindBin( myJetMc.recoPt);
 	if ( xx > 11 )  xx = 11;
 	if ( xx < 5 )  xx = 5;
@@ -393,7 +411,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 
 	recoVarY = recoVarY / theFac;
       }
-
+      
       hTruth->Fill(truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
       hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
       
@@ -406,7 +424,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       int iy = yBinTemp->FindBin(truthVarY);
       if ( (ix >=0) && (ix<=nXbins) && (iy >=0) && (iy<=nYbins) ) 
 	hJES1d[ix][iy]->Fill(recoVarX/truthVarX);
-
+      
       
     }
   }
@@ -419,7 +437,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
     }
   }
   //  cJes2->cd(2)->Update();
-
+  
   TCanvas* cJESJER = new TCanvas("cjesjer","",1000,500);
   cJESJER->Divide(2,1);
   cJESJER->cd(1);
