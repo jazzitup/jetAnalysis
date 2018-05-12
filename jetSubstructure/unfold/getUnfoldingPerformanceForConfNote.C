@@ -102,7 +102,6 @@ void getUnfoldingPerformanceForConfNote(int kSample= kPP, int icent = 0, bool ma
 	hmcTruth1d[ipt][in]->Draw("hist");
 	hmcRaw1d[ipt][in]->Draw("hist same");
       }
-      hmcUnf1d[ipt][in]->Draw("same e");
       
       gPad->SetLogy();
     }
@@ -154,9 +153,12 @@ void getUnfoldingPerformanceForConfNote(int kSample= kPP, int icent = 0, bool ma
       for (int in = 0; in < int(vIter.size()) ; in++)  {
 	hdataRaw1d[ipt][in]->SetAxisRange(0.001,0.2999,"X");
 	hdataRaw1d[ipt][in]->SetXTitle("m/p_{T}");
+	hdataRaw1d[ipt][in]->SetYTitle("dN/d(m/p_{T})");
+	
+	TH1ScaleByWidth(hdataRaw1d[ipt][in]);
+        TH1ScaleByWidth(hdataUnf1d[ipt][in]);
 
 	if ( hdataRaw1d[ipt][in]->Integral()>0) cleverRangeLog(hdataRaw1d[ipt][in],100,0.000001);
-	hdataRaw1d[ipt][in]->SetYTitle("Entries");
 	handsomeTH1(hdataRaw1d[ipt][in],1);
 	handsomeTH1(hdataUnf1d[ipt][in],color[in]);
 
@@ -168,12 +170,13 @@ void getUnfoldingPerformanceForConfNote(int kSample= kPP, int icent = 0, bool ma
 	fixedFontHist(hdataRaw1d[ipt][in],2,2,25);
         hdataRaw1d[ipt][in]->GetXaxis()->SetTitleOffset(1.2);
         hdataRaw1d[ipt][in]->GetYaxis()->SetTitleOffset(1.2);
-	
+
 	if ( in == 0 )  {
 	  hdataRaw1d[ipt][in]->Draw("hist");
+	  hdataRaw1d[ipt][in]->SetMarkerSize(0);
+	  hdataRaw1d[ipt][in]->Draw("same e");
 	}
 	hdataUnf1d[ipt][in]->Draw("same e");
-     
 	//	if ( ipt==lowPtBin+1)  drawText(Form("Iteration: %d"iter), 0.45,0.86,1,24);
 	
       }

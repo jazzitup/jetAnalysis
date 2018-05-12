@@ -118,5 +118,12 @@ TString textBin(double *xBin, int ix, TString demen = "GeV") {
   else  return Form("%.5f - %.5f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data());
 }
 
+TString textBin2(double *xBin, int ix, TString demen = "GeV") {
+  int lowPtBin =  (int)(xBin[ix-1]);
+  if (lowPtBin==125) lowPtBin =126;
+  return Form("%d < p_{T} < %d %s", (int)(xBin[ix-1]),  (int)(xBin[ix]), demen.Data()) ;
+
+}
+
 
 #endif

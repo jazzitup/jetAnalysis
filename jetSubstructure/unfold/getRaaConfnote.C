@@ -406,8 +406,8 @@ JetSys getFinalSys(int icent, int nVar) {
   
   JetSys ret;
   TFile* fsys;
-  if ( icent < 5)   fsys = new TFile(Form("sysSpectra/systematics_icent%d.root",icent));
-  else              fsys = new TFile(Form("../unfoldPeriBin/sysSpectra/systematics_icent%d.root",icent));
+  if ( icent < 5)   fsys = new TFile(Form("sysSpectra/systematics_icent%d_smoothened.root",icent));
+  else              fsys = new TFile(Form("../unfoldPeriBin/sysSpectra/systematics_icent%d_smoothened.root",icent));
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     if ( nVar == 1)  {

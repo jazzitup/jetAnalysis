@@ -185,37 +185,38 @@ void getPbPbCs(int optX=1, int optY=2 ) {
 
       if  (ipt == lowPtBin ) { 
 	if ( ii == 0 ) { 
-	  ATLASLabel(0.31,0.86,"Internal",0.13,0.19);
-	  drawText("Pb+Pb #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}",0.31,0.76);
+	  ATLASLabel(0.31,0.86,"Internal",0.12,0.19);
+	  drawText("Pb+Pb #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}",0.31,0.76,1,14);
 	}
 	if ( ii == 1 ) 
-	  ATLASLabel(0.26,0.86,"Internal",0.13,0.223);
+	  ATLASLabel(0.26,0.86,"Internal",0.12,0.223);
 	if ( ii == 2 ) 
-	  ATLASLabel(0.29,0.86,"Internal",0.13,0.215);
+	  ATLASLabel(0.29,0.86,"Internal",0.12,0.215);
 
       }
       if (ipt == lowPtBin ) {
 	if ( ii==0) 
-	  drawCentrality(kPbPb, vCent[ii], 0.31,0.64,1,20);
+	  drawCentrality(kPbPb, vCent[ii], 0.31,0.64,1,18);
 	if ( ii==1) 
-	  drawCentrality(kPbPb, vCent[ii], 0.26,0.73,1,20);
+	  drawCentrality(kPbPb, vCent[ii], 0.26,0.73,1,18);
 	if ( ii==2) 
-	  drawCentrality(kPbPb, vCent[ii], 0.29,0.73,1,20);
+	  drawCentrality(kPbPb, vCent[ii], 0.29,0.73,1,18);
 
       }
       if ( ii < 1000 ) {
-        if ( (ipt == lowPtBin) && ( (vCent[ii] ==3)||( vCent[ii]==6) ))  
-          drawBinPt(xBin,ipt,"GeV", 0.31 ,0.6,1,18);
+	if ( ( ii==2 ) && ( ipt == highPtBin-1) ) {} 
+	else if ( (ipt == lowPtBin) && ( (vCent[ii] ==3)||( vCent[ii]==6) ))  
+	  drawBinPt(xBin,ipt,"GeV", 0.31 ,0.6,1,16);
 	else if (ipt == lowPtBin )
-          drawBinPt(xBin,ipt,"GeV", 0.31 ,0.55,1,18);
+          drawBinPt(xBin,ipt,"GeV", 0.31 ,0.55,1,16);
         else if (ipt != highPtBin )
-          drawBinPt(xBin,ipt,"GeV", 0.31 ,0.78,1,18);
+          drawBinPt(xBin,ipt,"GeV", 0.31 ,0.78,1,16);
         else if (ipt == highPtBin )
-          drawBinPt(xBin,ipt,"GeV", 0.31 ,0.85,1,18);
+          drawBinPt(xBin,ipt,"GeV", 0.31 ,0.85,1,16);
       }
       if ( ii==2 ) {
         if ( ipt == highPtBin-1)
-          drawBinPt2(xBin,ipt,"GeV", 0.31 ,0.8,1,18);
+          drawBinPt2(xBin,ipt,"GeV", 0.31 ,0.8,1,16);
       }
       gPad->RedrawAxis();
       //      if ( (ii==0) && (ipt > lowPtBin) )
@@ -265,8 +266,8 @@ JetSys getFinalSys(int icent, int nVar) {
   
   JetSys ret;
   TFile* fsys;
-  if ( icent < 5)   fsys = new TFile(Form("sysSpectra/systematics_icent%d.root",icent));
-  else              fsys = new TFile(Form("../unfoldPeriBin/sysSpectra/systematics_icent%d.root",icent));
+  if ( icent < 5)   fsys = new TFile(Form("sysSpectra/systematics_icent%d_smoothened.root",icent));
+  else              fsys = new TFile(Form("../unfoldPeriBin/sysSpectra/systematics_icent%d_smoothened.root",icent));
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     if ( nVar == 1)  {

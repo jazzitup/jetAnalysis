@@ -95,13 +95,13 @@ void getSystematics(int icent = 0, bool drawPP = true) {
   sysJer    = getSystematicsJES(icent, indexJER );
   sysJerInv = getSystematicsJES(icent, indexJER, -1 );
 
-  sysJms    = getSystematicsJES(icent, indexJMS0,1, kMergeQuad );
+  sysJms    = getSystematicsJES(icent, indexJMS0,1, kMergeQuad);
   sysJms1    = getSystematicsJES(icent, indexJMS1 );
-  sysJms2    = getSystematicsJES(icent, indexJMS2,1, kMergeQuad);
+  sysJms2    = getSystematicsJES(icent, indexJMS2,1, kMergeQuad, 1); // do smooth
   sysJms3    = getSystematicsJMSCal();
   
   // smooth!! " "
-    smoothSys3(sysJms2,  lowPtBin, highPtBin);
+  //    smoothSys3(sysJms2,  lowPtBin, highPtBin);
 
 
   addSysInQuad3(sysJms, sysJms1, lowPtBin, highPtBin);

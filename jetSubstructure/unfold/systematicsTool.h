@@ -79,7 +79,7 @@ void getDATAresults(int kSample=0, int icent=0, int ix=0, TH1D* hdataUnfSq=0, TS
 TString getSysName(int nSys = -1);
 TH1D* getSysA(int kSample= kPP, int icent = 0, int ix=7, TString s1 ="reweight00", TString s2="reweight00varP50percent" ); 
 TH1D* getSysJES(int kSample= kPP, int icent = 0, int ix=7, int nSys=-1);
-JetSys getSystematicsJES(int icent = 0, int nSys=1, double theScale=1, int mergeOpt=kMergeCancel);
+JetSys getSystematicsJES(int icent = 0, int nSys=1, double theScale=1, int mergeOpt=kMergeCancel, bool doSmooth=false);
 JetSys getSystematicsUnf(int icent = 0, int nSys=1);
 JetSys getSystematicsJMSCal();
 void getInverse(JetSys inputSys=jsDummy, JetSys outputSys=jsDummy,  int lowX=0, int highX=0);
@@ -149,7 +149,7 @@ JetSys getSystematicsJMSCal() {
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-JetSys getSystematicsJES(int icent, int nSys, double theScale, int mergeOpt) {
+JetSys getSystematicsJES(int icent, int nSys, double theScale, int mergeOpt, bool doSmooth) {
   int optX =1 ;
   int optY =2 ;
 
@@ -174,20 +174,31 @@ JetSys getSystematicsJES(int icent, int nSys, double theScale, int mergeOpt) {
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     hSysApp[ix] = getSysJES(kPP, 0  , ix,  nSys);
     hSysApbpb[ix] = getSysJES(kPbPb, icent, ix, nSys);
-    
+
+    if (doSmooth)  {
+      int theMaxBin = hSysApbpb[ix]->GetNbinsX();
+      hSysApbpb[ix]->SetBinContent(theMaxBin,  hSysApbpb[ix]->GetBinContent( theMaxBin -1 )); 
+      hSysApbpb[ix]->SetBinContent(1,  hSysApbpb[ix]->GetBinContent( 2 ));
+      hSysApp[ix]->SetBinContent(theMaxBin,  hSysApp[ix]->GetBinContent( theMaxBin -1 )); 
+      hSysApp[ix]->SetBinContent(1,  hSysApp[ix]->GetBinContent( 2 ));
+
+      hSysApbpb[ix]->Smooth();
+      hSysApp[ix]->Smooth();
+    }    
     hSysAraa[ix] = (TH1D*)hSysApbpb[ix]->Clone(Form("sysRaa_%s",hSysApbpb[ix]->GetName()) );
     hSysAraa[ix]->Reset();
     for ( int xx = 1 ; xx<= hSysApbpb[ix]->GetNbinsX() ; xx++) {
       double y1 = hSysApbpb[ix]->GetBinContent(xx);
       double y2 = hSysApp[ix]->GetBinContent(xx);
-      //      if ( nSys == 210)   hSysAraa[ix]->SetBinContent(xx,  sqrt( y1*y1 + y2*y2) ) ;
       if ( mergeOpt == kMergeCancel )  
 	hSysAraa[ix]->SetBinContent(xx,  (y1+1.)/(y2+1.)-1);
       if ( mergeOpt == kMergeQuad )   
 	hSysAraa[ix]->SetBinContent(xx,  sqrt( y1*y1 + y2*y2));
     }
+    
   }
-
+  
+  
   bool savePic = 0; 
   
   TCanvas* cA;    
