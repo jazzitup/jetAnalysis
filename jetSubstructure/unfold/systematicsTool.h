@@ -85,6 +85,7 @@ JetSys getSystematicsJMSCal();
 void getInverse(JetSys inputSys=jsDummy, JetSys outputSys=jsDummy,  int lowX=0, int highX=0);
 void addSysInQuad(TH1D* sysTot=0, TH1D* sys1=0);
 void addSysInQuad3(JetSys jstot=jsDummy, JetSys js1=jsDummy, int lowX=0, int highX=0); 
+void smoothSys3(JetSys js=jsDummy, int lowX=0, int highX=0); 
 void mirrorJS(JetSys js1=jsDummy, JetSys js2=jsDummy, int lowX=0, int highX=0);
 
 void sortPlusMinus(TH1D* hp=0, TH1D* hm=0);
@@ -609,6 +610,14 @@ void addSysInQuad3(JetSys jstot, JetSys js1, int lowX, int highX) {
     addSysInQuad(jstot.raa[ix], js1.raa[ix]);
   }
 
+}
+
+void smoothSys3(JetSys js, int lowX, int highX) { 
+  for ( int ix=lowX ; ix<=highX ; ix++) {
+    js.pp[ix]->Smooth();
+    js.pbpb[ix]->Smooth();
+    js.raa[ix]->Smooth();
+  }
 }
 
 void getInverse(JetSys inputSys, JetSys outputSys,  int lowX, int highX) {

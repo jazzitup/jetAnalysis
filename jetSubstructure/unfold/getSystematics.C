@@ -99,11 +99,15 @@ void getSystematics(int icent = 0, bool drawPP = true) {
   sysJms1    = getSystematicsJES(icent, indexJMS1 );
   sysJms2    = getSystematicsJES(icent, indexJMS2,1, kMergeQuad);
   sysJms3    = getSystematicsJMSCal();
+  
+  // smooth!! " "
+    smoothSys3(sysJms2,  lowPtBin, highPtBin);
+
 
   addSysInQuad3(sysJms, sysJms1, lowPtBin, highPtBin);
   addSysInQuad3(sysJms, sysJms2, lowPtBin, highPtBin);
   addSysInQuad3(sysJms, sysJms3, lowPtBin, highPtBin);
-
+  
 
   sysJmr     = getSystematicsJES(icent, indexJMR0 );
   sysJmr1    = getSystematicsJES(icent, indexJMR1 );
@@ -707,7 +711,7 @@ gPad->RedrawAxis();
 
 
   //Save
-  TFile* fout = new TFile(Form("sysSpectra/systematics_icent%d.root",icent), "recreate");
+  TFile* fout = new TFile(Form("sysSpectra/systematics_icent%d_smoothened.root",icent), "recreate");
 
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {
     sysFinalPlus.pp[ix]->Write();

@@ -27,7 +27,7 @@ int mFlag = 0 ;
 #include <TPaletteAxis.h>
 #include "unfoldingUtil.h"
 
-double statFrac = 0.001;
+double statFrac = 1;
 double fracStstData = 001;
 bool doUnfData = true ;
 
@@ -109,7 +109,7 @@ void unfold2D(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bo
     // MC 
     hmcRaw[i] = (TH2D*)hTemp->Clone(Form("hmcRaw_icent%d",i));
     hmcTruth[i] = (TH2D*)hTemp->Clone(Form("hmcTruth_icent%d",i));
-    //    getMCspectra(kSample, icent, optX, optY, hmcRaw[i], hmcTruth[i], radius, doReweight) ;
+    getMCspectra(kSample, icent, optX, optY, hmcRaw[i], hmcTruth[i], radius, doReweight) ;
 
         
     // Data
