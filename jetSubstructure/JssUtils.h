@@ -63,15 +63,15 @@ TH1D* getDataRaw_test4( int kSample = kPP, int ipt=0, int icent=0, int nIter=0, 
 
 
 void drawCentrality( int kSample = kPP, int icent = 0, float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18) {
-  if ( kSample == kPP)  drawText("pp",xp,yp,textColor,textSize) ;
+  if ( kSample == kPP)  drawText("#it{pp}",xp,yp,textColor,textSize) ;
   else {
-    if ( icent==0 )  drawText( "PbPb 0-10%",xp,yp,textColor,textSize) ;
-    if ( icent==1 )  drawText( "PbPb 10-20%",xp,yp,textColor,textSize) ;
-    if ( icent==2 )  drawText( "PbPb 20-30%",xp,yp,textColor,textSize) ;
-    if ( icent==3 )  drawText( "PbPb 30-40%",xp,yp,textColor,textSize) ;
-    if ( icent==4 )  drawText( "PbPb 40-50%",xp,yp,textColor,textSize) ;
-    if ( icent==5 )  drawText( "PbPb 50-60%",xp,yp,textColor,textSize) ;
-    if ( icent==6 )  drawText( "PbPb 60-80%",xp,yp,textColor,textSize) ;
+    if ( icent==0 )  drawText( "Pb+Pb 0-10%",xp,yp,textColor,textSize) ;
+    if ( icent==1 )  drawText( "Pb+Pb 10-20%",xp,yp,textColor,textSize) ;
+    if ( icent==2 )  drawText( "Pb+Pb 20-30%",xp,yp,textColor,textSize) ;
+    if ( icent==3 )  drawText( "Pb+Pb 30-40%",xp,yp,textColor,textSize) ;
+    if ( icent==4 )  drawText( "Pb+Pb 40-50%",xp,yp,textColor,textSize) ;
+    if ( icent==5 )  drawText( "Pb+Pb 50-60%",xp,yp,textColor,textSize) ;
+    if ( icent==6 )  drawText( "Pb+Pb 60-80%",xp,yp,textColor,textSize) ;
   }
 }
 
@@ -100,7 +100,10 @@ void drawBinPt(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float 
   drawText( Form("%d < p_{T} < %d %s", lowPtBin,  (int)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
 }
 void drawBinMpt(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){
-  drawText( Form("%.2f < m/p_{T} < %.2f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
+  if ( (xBin[ix-1]) == 0 )   
+    drawText( Form("       m/p_{T} < %.2f %s",  (float)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
+  else 
+    drawText( Form("%.2f < m/p_{T} < %.2f %s", (float)(xBin[ix-1]),  (float)(xBin[ix]), demen.Data()) , xp,yp,textColor,textSize) ;
 }
 
 void drawBinPt2(double *xBin, int ix, TString demen = "GeV", float xp=0.2, float yp=0.8, int textColor=kBlack, int textSize=18){

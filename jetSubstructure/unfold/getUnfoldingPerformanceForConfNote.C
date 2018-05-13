@@ -109,6 +109,7 @@ void getUnfoldingPerformanceForConfNote(int kSample= kPP, int icent = 0, bool ma
   
     if ( ipt == lowPtBin ) {
       drawCentrality(kSample, icent, 0.20,0.86,1,24);
+
       if ( ipt == lowPtBin ) {
 	TLegend *leg1 = new TLegend(0.6222575,0.7273776,1,0.9378835,NULL,"brNDC");
         easyLeg(leg1,"MC");
@@ -158,7 +159,7 @@ void getUnfoldingPerformanceForConfNote(int kSample= kPP, int icent = 0, bool ma
 	TH1ScaleByWidth(hdataRaw1d[ipt][in]);
         TH1ScaleByWidth(hdataUnf1d[ipt][in]);
 
-	if ( hdataRaw1d[ipt][in]->Integral()>0) cleverRangeLog(hdataRaw1d[ipt][in],100,0.000001);
+	if ( hdataRaw1d[ipt][in]->Integral()>0) cleverRangeLog(hdataRaw1d[ipt][in],150,0.000005);
 	handsomeTH1(hdataRaw1d[ipt][in],1);
 	handsomeTH1(hdataUnf1d[ipt][in],color[in]);
 
@@ -170,6 +171,7 @@ void getUnfoldingPerformanceForConfNote(int kSample= kPP, int icent = 0, bool ma
 	fixedFontHist(hdataRaw1d[ipt][in],2,2,25);
         hdataRaw1d[ipt][in]->GetXaxis()->SetTitleOffset(1.2);
         hdataRaw1d[ipt][in]->GetYaxis()->SetTitleOffset(1.2);
+        hdataRaw1d[ipt][in]->SetAxisRange(0,0.238,"X");
 
 	if ( in == 0 )  {
 	  hdataRaw1d[ipt][in]->Draw("hist");
@@ -183,7 +185,7 @@ void getUnfoldingPerformanceForConfNote(int kSample= kPP, int icent = 0, bool ma
       gPad->SetLogy();
       
       if ( ipt == lowPtBin ) {
-	TLegend *leg1 = new TLegend(0.6222575,0.7273776,1,0.9378835,NULL,"brNDC");
+	TLegend *leg1 = new TLegend(0.6204819,0.6715789,1,0.8821053,NULL,"brNDC");
 	easyLeg(leg1,"");
 	leg1->AddEntry(hmcRaw1d[ipt][0], "Reco","l");
 	leg1->AddEntry(hdataUnf1d[ipt][0], "Unfolded","pl");
@@ -191,10 +193,17 @@ void getUnfoldingPerformanceForConfNote(int kSample= kPP, int icent = 0, bool ma
       }
       
       if ( (nPtPannels ==1 ) || ( ipt == lowPtBin+1 ) ) {
-	ATLASLabel(0.2,0.88,"Internal",0.05,0.16);
-	drawCentrality(kSample, icent, 0.2,0.82,1,24);
-	drawBinPt(xBin,ipt,"GeV",0.20,0.75,1,18);
-	TLegend *leg1 = new TLegend(0.1372267,0.04771138,0.6589362,0.4161378,NULL,"brNDC");
+	ATLASLabel(0.2,0.9,"Internal",0.05,0.16);
+	if ( kSample == 1) {
+	  drawText("Pb+Pb #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}",0.2,0.85,1,22);
+	  drawText("0-10%", 0.20, 0.80, 1, 22);
+	}
+	if ( kSample == 0) {
+	  drawText("#it{pp} #sqrt{#font[12]{s}} = 5.02 TeV, 25 pb^{-1}", 0.2, 0.85,1,24);
+	  //	  drawCentrality(kSample, icent, 0.2,0.81,1,24);
+	}
+	drawBinPt(xBin,ipt,"GeV",0.20,0.75,1,20);
+	TLegend *leg1 = new TLegend(0.6204819,0.6631579,1,0.8736842,NULL,"brNDC");
 	easyLeg(leg1,"Unfolded",0.08);
 	for (int in = 0; in < int(vIter.size()) ; in++)  {
 	  if ( vIter[in] == 1 ) leg1->AddEntry(hmcUnf1d[ipt][in], Form("%dst iter.",vIter[in]));

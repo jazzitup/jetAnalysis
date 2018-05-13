@@ -205,7 +205,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       if ( ipt == lowPtBin +1 ) {
         TLegend* leg = new TLegend(0.37000,0.7017734,0.7211794,1.1097419,NULL,"brNDC");
 	easyLeg(leg,"",0.12);
-	leg->AddEntry(hdataUnfSq[ipt][0],"pp data","pl");
+	leg->AddEntry(hdataUnfSq[ipt][0],"Data","pl");
 	leg->AddEntry(hmcTruthSq[ipt][0],"Powheg + Pythia8","l");
 	leg->Draw();
       }

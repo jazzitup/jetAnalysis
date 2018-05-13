@@ -181,7 +181,10 @@ JetSys getSystematicsJES(int icent, int nSys, double theScale, int mergeOpt, boo
       hSysApbpb[ix]->SetBinContent(1,  hSysApbpb[ix]->GetBinContent( 2 ));
       hSysApp[ix]->SetBinContent(theMaxBin,  hSysApp[ix]->GetBinContent( theMaxBin -1 )); 
       hSysApp[ix]->SetBinContent(1,  hSysApp[ix]->GetBinContent( 2 ));
-
+      
+      cout << "hSysApbpb[ix]->GetBinCenter(1) = "<< hSysApbpb[ix]->GetBinCenter(1) << endl;
+      cout << "hSysApbpb[ix]->GetBinCenter(theMaxBin) = "<< hSysApbpb[ix]->GetBinCenter(theMaxBin) << endl;
+      
       hSysApbpb[ix]->Smooth();
       hSysApp[ix]->Smooth();
     }    

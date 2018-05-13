@@ -121,7 +121,7 @@ void getJMS3(int kSample = kPbPb, int icent=0, int optX =1, int optY=2, bool doR
     leg1->AddEntry(hs, textBin2(xBin,ix,"GeV").Data(),"pl" );
   }
   jumSun(0,1,0.24,1);
-  ATLASLabel(0.23,0.88,"Simulation",0.05,0.16);
+  ATLASLabel(0.23,0.88,"Simulation Preliminary",0.05,0.16);
   drawText("#sqrt{#font[12]{s}} = 5.02 TeV", 0.23, 0.82,1,25);
   drawCentrality(kSample, icent, 0.23,0.76,1,25);
 
@@ -161,7 +161,7 @@ void getJMS3(int kSample = kPbPb, int icent=0, int optX =1, int optY=2, bool doR
   }
 
   //  jumSun(0,0,0.36,0);
-  ATLASLabel(0.23,0.88,"Simulation",0.05,0.16);
+  ATLASLabel(0.23,0.88,"Simulation Preliminary",0.05,0.16);
   drawText("#sqrt{#font[12]{s}} = 5.02 TeV", 0.23, 0.82,1,25);
   drawCentrality(kSample, icent, 0.23,0.76,1,25);
   //  drawText("#sigma[m/p_{T}]", 0.2,0.78,1,25);

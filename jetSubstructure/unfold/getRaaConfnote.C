@@ -174,11 +174,11 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
       
       if (ipt == lowPtBin ) {  
 	if ( ii == 0 ) 
-	  ATLASLabel(0.39,0.86,"Internal",0.12,0.20);
+	  ATLASLabel(0.39,0.86,"Internal",0.12,0.22);
 	if ( ii == 1 ) 
-	  ATLASLabel(0.245,0.86,"Internal",0.12,0.25);
+	  ATLASLabel(0.245,0.86,"Internal",0.12,0.27);
 	if ( ii == 2 ) 
-	  ATLASLabel(0.245,0.86,"Internal",0.12,0.24);
+	  ATLASLabel(0.245,0.86,"Internal",0.12,0.26);
 
 	
       }
@@ -214,13 +214,13 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
 	  drawBinPt(xBin,ipt,"GeV", 0.2 ,0.85,1,18);
       }
       
-if ( ii==2 ) { 
+      if ( ii==2 ) { 
 	if ( ipt == highPtBin-1)
 	  drawBinPt2(xBin,ipt,"GeV", 0.3 ,0.8,1,18);
 	else if ( ipt == lowPtBin)
-	  drawBinPt(xBin,ipt,"GeV", 0.2 ,0.58,1,18);
+	  drawBinPt(xBin,ipt,"GeV", 0.3 ,0.58,1,18);
 	else 
-	  drawBinPt(xBin,ipt,"GeV", 0.2 ,0.85,1,18);
+	  drawBinPt(xBin,ipt,"GeV", 0.3 ,0.85,1,18);
 
       }
       jumSun(0,1,0.24,1);
@@ -324,11 +324,23 @@ if ( ii==2 ) {
       if (im == lowMptBin ) {
         if ( ii == 0 ) drawCentrality(kPbPb, vCent[ii], 0.39,0.73,1,20);
         if ( ii == 1 ) drawCentrality(kPbPb, vCent[ii], 0.245,0.73,1,20);
-        if ( ii == 2 ) drawCentrality(kPbPb, vCent[ii], 0.245,0.73,1,20);
       }
-
-      if ( ii < 10 ) {
-
+      if (im == lowMptBin+1 ) {
+	if ( ii == 2 ) drawCentrality(kPbPb, vCent[ii], 0.245,0.85,1,20);
+      }
+      
+      if  (ii == 2) {
+	if (im == lowMptBin )   {
+	  drawBinMpt(yBin,im,"", 0.55, 0.88,1,17);
+	}	
+	else if (im == lowMptBin+1 ) {        
+	  drawBinMpt(yBin,im,"", 0.3, 0.72,1,17);
+	}
+	else {        
+	  drawBinMpt(yBin,im,"", 0.3, 0.76,1,17);
+	}
+      }
+      else if ( ii < 10 ) {
 	if (im == lowMptBin )
 	  drawBinMpt(yBin,im,"", 0.39 -(ii>0)*0.14,0.58,1,18);
         else if (im < highMptBin )
@@ -345,11 +357,11 @@ if ( ii==2 ) {
       }
       if (im == lowMptBin ) {
         if ( ii == 0 )
-          ATLASLabel(0.39,0.86,"Internal",0.12,0.16);
+          ATLASLabel(0.39,0.86,"Internal",0.12,0.195);
         if ( ii == 1 )
-          ATLASLabel(0.245,0.86,"Internal",0.12,0.2);
+          ATLASLabel(0.245,0.86,"Internal",0.12,0.24);
 	if ( ii == 2 )
-          ATLASLabel(0.245,0.86,"Internal",0.12,0.2);
+          ATLASLabel(0.175,0.86,"Internal",0.12,0.23);
       }
       double lumiUnc = getLumiRelErr(vCent[ii]);
       drawErrorBox( 125, 1-lumiUnc, 150, 1+lumiUnc, 1);      

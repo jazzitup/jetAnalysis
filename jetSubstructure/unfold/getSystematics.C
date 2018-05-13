@@ -190,12 +190,12 @@ void getSystematics(int icent = 0, bool drawPP = true) {
   
   int jumSunStyle = 7;
   for ( int ix = lowPtBin ; ix<= highPtBin ; ix++)  {    
-    handsomeTH1( sysJms.pp[ix], kGreen);
-    handsomeTH1( sysJms.pbpb[ix], kGreen);
-    handsomeTH1( sysJms.raa[ix], kGreen);
-    handsomeTH1( sysJmsInv.pp[ix], kGreen);
-    handsomeTH1( sysJmsInv.pbpb[ix], kGreen);
-    handsomeTH1( sysJmsInv.raa[ix], kGreen);
+    handsomeTH1( sysJms.pp[ix], kOrange+2);
+    handsomeTH1( sysJms.pbpb[ix], kOrange+2);
+    handsomeTH1( sysJms.raa[ix], kOrange+2);
+    handsomeTH1( sysJmsInv.pp[ix], kOrange+2);
+    handsomeTH1( sysJmsInv.pbpb[ix], kOrange+2);
+    handsomeTH1( sysJmsInv.raa[ix], kOrange+2);
     sysJms.pp[ix]->SetLineStyle(jumSunStyle);
     sysJms.pbpb[ix]->SetLineStyle(jumSunStyle);
     sysJms.raa[ix]->SetLineStyle(jumSunStyle);
@@ -243,7 +243,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
  
       if ( ix==lowPtBin) legPlus->AddEntry(sysPlus[ind].pp[ix], getSysName( vIndPlus[ind] ).Data(),"l" );
     } 
-    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.25);
+    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Preliminary",0.075,0.25);
     if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
     if ( ix==lowPtBin)  drawText("Plus variation", 0.37,0.7,1,20);
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
@@ -296,7 +296,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
       if ( ind == 0 )   sysMinus[ind].pp[ix]->Draw("hist");
       else       sysMinus[ind].pp[ix]->Draw("same hist");
     } 
-    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.25);
+    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Preliminary",0.075,0.25);
     if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
     if ( ix==lowPtBin)  drawText("Minus variation", 0.37,0.7,1,20);
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
@@ -336,7 +336,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
     sysJer.pp[ix]->Draw("hist");
     jumSun(0,0,0.24,0);
     
-    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.25);
+    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Preliminary",0.075,0.25);
     if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
     if ( ix==lowPtBin)  drawText("JER variation", 0.37,0.7,1,20);
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
@@ -368,12 +368,12 @@ void getSystematics(int icent = 0, bool drawPP = true) {
     sysJEStotMinus.pbpb[ix]->Scale(-1);
     sysJEStotMinus.raa[ix]->Scale(-1);
 
-    handsomeTH1(sysJEStotPlus.pp[ix],kAzure+1);
-    handsomeTH1(sysJEStotMinus.pp[ix],kAzure+1);
-    handsomeTH1(sysJEStotPlus.pbpb[ix],kAzure+1);
-    handsomeTH1(sysJEStotMinus.pbpb[ix],kAzure+1);
-    handsomeTH1(sysJEStotPlus.raa[ix],kAzure+1);
-    handsomeTH1(sysJEStotMinus.raa[ix],kAzure+1);
+    handsomeTH1(sysJEStotPlus.pp[ix],kGreen+1);
+    handsomeTH1(sysJEStotMinus.pp[ix],kGreen+1);
+    handsomeTH1(sysJEStotPlus.pbpb[ix],kGreen+1);
+    handsomeTH1(sysJEStotMinus.pbpb[ix],kGreen+1);
+    handsomeTH1(sysJEStotPlus.raa[ix],kGreen+1);
+    handsomeTH1(sysJEStotMinus.raa[ix],kGreen+1);
     //    sysJEStotPlus.pp[ix]->SetFillColor(kAzure);
     //    sysJEStotMinus.pp[ix]->SetFillColor(kAzure);
     //    sysJEStotPlus.pbpb[ix]->SetFillColor(kAzure);
@@ -387,7 +387,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
     sysJEStotMinus.pp[ix]->Draw("hist same");
     jumSun(0,0,0.24,0);
     
-    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.25);
+    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Preliminary",0.075,0.25);
     if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
     if ( ix==lowPtBin)  drawText("JES variation", 0.37,0.7,1,20);
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
@@ -436,7 +436,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
     sysUnfMinus.pp[ix]->Draw("hist same");
     jumSun(0,0,0.24,0);
     
-    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Internal",0.075,0.25);
+    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Preliminary",0.075,0.25);
     if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
     if ( ix==lowPtBin)  drawText("Unfolding Uncertainty", 0.37,0.7,1,20);
 
@@ -466,10 +466,10 @@ void getSystematics(int icent = 0, bool drawPP = true) {
 
   TCanvas* cFinal;
   if (drawPP){ 
-    cFinal = new TCanvas("cFinal","",1200,600);
+    cFinal = new TCanvas("cFinal","",1200,900);
     makeMultiPanelCanvas(cFinal,nPtPannels,3, 0.0, 0.01, 0.3, 0.23, 0.05);
   }  else {
-    cFinal = new TCanvas("cFinal","",1200,430);
+    cFinal = new TCanvas("cFinal","",1200,645);
     makeMultiPanelCanvas(cFinal,nPtPannels,2, 0.0, 0.01, 0.3, 0.23, 0.05);
   }
 
@@ -491,6 +491,34 @@ void getSystematics(int icent = 0, bool drawPP = true) {
     sysFinalMinus.pbpb[ix]->SetFillColor(kOrange);
     sysFinalPlus.raa[ix]->SetFillColor(kOrange);
     sysFinalMinus.raa[ix]->SetFillColor(kOrange);  */
+
+
+    groomHist(sysFinalPlus.pbpb[ix]);
+    groomHist(sysFinalMinus.pbpb[ix]);
+    groomHist(sysJEStotPlus.pbpb[ix]);
+    groomHist(sysJEStotMinus.pbpb[ix]);
+    groomHist(sysUnfPlus.pbpb[ix]);
+    groomHist(sysUnfMinus.pbpb[ix]);
+    groomHist(sysJer.pbpb[ix]);
+    groomHist(sysJerInv.pbpb[ix]);
+    groomHist(sysJmr.pbpb[ix]);
+    groomHist(sysJmrInv.pbpb[ix]);
+    groomHist(sysJms.pbpb[ix]);
+    groomHist(sysJmsInv.pbpb[ix]);
+
+
+    groomHist(sysFinalPlus.raa[ix]);
+    groomHist(sysFinalMinus.raa[ix]);
+    groomHist(sysJEStotPlus.raa[ix]);
+    groomHist(sysJEStotMinus.raa[ix]);
+    groomHist(sysUnfPlus.raa[ix]);
+    groomHist(sysUnfMinus.raa[ix]);
+    groomHist(sysJer.raa[ix]);
+    groomHist(sysJerInv.raa[ix]);
+    groomHist(sysJmr.raa[ix]);
+    groomHist(sysJmrInv.raa[ix]);
+    groomHist(sysJms.raa[ix]);
+    groomHist(sysJmsInv.raa[ix]);
 
     if ( drawPP )  {
       
@@ -569,9 +597,10 @@ void getSystematics(int icent = 0, bool drawPP = true) {
 
       jumSun(0,0,0.24,0);
     
-      if ( ix==lowPtBin)         ATLASLabel(0.37,0.86,"Internal",0.105,0.235);
-      if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.75,1,20);
-      
+      if ( ix==lowPtBin) {
+	ATLASLabel(0.32,0.86,"Preliminary",0.09,0.3);
+	drawCentrality(kPP, 0, 0.37,0.8,1,20);
+      }
       drawBinPt(xBin,ix,"GeV",0.12 + (ix==lowPtBin)*0.2,0.1,1,18);
       gPad->RedrawAxis();
       
@@ -619,8 +648,8 @@ void getSystematics(int icent = 0, bool drawPP = true) {
     if ( ix==lowPtBin) {
       if ( drawPP) drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
       else  { 
-	drawCentrality(kPbPb, icent, 0.37,0.73,1,20);
-        ATLASLabel(0.37,0.86,"Internal",0.105,0.235);
+	drawCentrality(kPbPb, icent, 0.37,0.78,1,20);
+        ATLASLabel(0.32,0.86,"Preliminary",0.09,0.3);
       }
     }
 gPad->RedrawAxis();
@@ -632,9 +661,22 @@ gPad->RedrawAxis();
     
     groomHist(sysFinalPlus.raa[ix]);
     groomHist(sysFinalMinus.raa[ix]);
-
+    
     if (!drawPP)          sysFinalPlus.raa[ix]->GetXaxis()->SetTitleOffset(1.9);
     else          sysFinalPlus.raa[ix]->GetXaxis()->SetTitleOffset(2.7);
+    
+    if ( drawPP) {
+      sysFinalPlus.raa[ix]->GetYaxis()->SetTitleOffset(4.5);
+      sysFinalPlus.pp[ix]->GetYaxis()->SetTitleOffset(4.5);
+      sysFinalPlus.pbpb[ix]->GetYaxis()->SetTitleOffset(4.5);
+    }
+    else {
+      sysFinalPlus.raa[ix]->GetYaxis()->SetTitleOffset(3);
+      sysFinalPlus.pp[ix]->GetYaxis()->SetTitleOffset(3);
+      sysFinalPlus.pbpb[ix]->GetYaxis()->SetTitleOffset(3);
+
+    }
+    cout << sysFinalPlus.raa[ix]->GetYaxis()->GetTitleOffset() << endl;
 
     //    sysFinalPlus.raa[ix]->SetYTitle("");
     sysFinalPlus.raa[ix]->Draw("hist");
@@ -663,7 +705,7 @@ gPad->RedrawAxis();
 
 
     jumSun(0,0,0.24,0);
-    if ( ix==lowPtBin)  drawText("R_{AA}", 0.37,0.83,1,20);
+    if ( ix==lowPtBin)  drawText("R_{AA}", 0.37,0.9,1,20);
     gPad->RedrawAxis();
 
     if ( ix > lowPtBin)  drawPatch(0,0, 0.05,0.22);
@@ -685,8 +727,8 @@ gPad->RedrawAxis();
   leg1->Draw();
   cLeg2->SaveAs("pdfsSystematics/cFinal_legend.pdf");
 
-  TCanvas* cLeg3 = new TCanvas("cleg3","",200,430);
-  TLegend* leg2 = new TLegend(0,0.650065,1,0.93,NULL,"brNDC");
+  TCanvas* cLeg3 = new TCanvas("cleg3","",200,645);
+  TLegend* leg2 = new TLegend(0,0.650065,1,1.0,NULL,"brNDC");
   easyLeg(leg2,"Uncertainties",0.1);
   leg2->AddEntry(sysFinalPlus.pp[lowPtBin],"Total","l");
   if (addUnf) leg2->AddEntry(sysUnfPlus.pp[lowPtBin],"Unfolding","l");
