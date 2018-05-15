@@ -156,8 +156,8 @@ void getUnfoldingPerformanceForConfNote(int kSample= kPP, int icent = 0, bool ma
 	hdataRaw1d[ipt][in]->SetXTitle("m/p_{T}");
 	hdataRaw1d[ipt][in]->SetYTitle("dN/d(m/p_{T})");
 	
-	TH1ScaleByWidth(hdataRaw1d[ipt][in]);
-        TH1ScaleByWidth(hdataUnf1d[ipt][in]);
+	//	TH1ScaleByWidth(hdataRaw1d[ipt][in]);
+	//        TH1ScaleByWidth(hdataUnf1d[ipt][in]);
 
 	if ( hdataRaw1d[ipt][in]->Integral()>0) cleverRangeLog(hdataRaw1d[ipt][in],150,0.000005);
 	handsomeTH1(hdataRaw1d[ipt][in],1);
@@ -193,7 +193,7 @@ void getUnfoldingPerformanceForConfNote(int kSample= kPP, int icent = 0, bool ma
       }
       
       if ( (nPtPannels ==1 ) || ( ipt == lowPtBin+1 ) ) {
-	ATLASLabel(0.2,0.9,"Internal",0.05,0.16);
+	ATLASLabel(0.2,0.9,"Preliminary",0.05,0.16);
 	if ( kSample == 1) {
 	  drawText("Pb+Pb #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}",0.2,0.85,1,22);
 	  drawText("0-10%", 0.20, 0.80, 1, 22);

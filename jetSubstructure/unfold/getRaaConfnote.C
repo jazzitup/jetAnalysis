@@ -174,11 +174,11 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
       
       if (ipt == lowPtBin ) {  
 	if ( ii == 0 ) 
-	  ATLASLabel(0.39,0.86,"Internal",0.12,0.22);
+	  ATLASLabel(0.39,0.86,"Preliminary",0.12,0.23);
 	if ( ii == 1 ) 
-	  ATLASLabel(0.245,0.86,"Internal",0.12,0.27);
+	  ATLASLabel(0.245,0.86,"Preliminary",0.12,0.28);
 	if ( ii == 2 ) 
-	  ATLASLabel(0.245,0.86,"Internal",0.12,0.26);
+	  ATLASLabel(0.245,0.86,"Preliminary",0.12,0.27);
 
 	
       }
@@ -273,7 +273,7 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
   leg1->AddEntry(hRAA[theBin][1], "30% - 40%","pf");
   leg1->AddEntry(hRAA[theBin][0], " 0% - 10%","pf");
   leg1->Draw();
-  //  ATLASLabel(0.33,0.86,"Internal",0.09,0.25);
+  //  ATLASLabel(0.33,0.86,"Preliminary",0.09,0.25);
   c2->SaveAs("raa_126-158GeV.pdf");
 
   TH1D* hRAAmpt[30][4];  // [m/pt bins][centrality]
@@ -357,11 +357,11 @@ void getRaaConfnote(int optX=1, int optY=2 ) {
       }
       if (im == lowMptBin ) {
         if ( ii == 0 )
-          ATLASLabel(0.39,0.86,"Internal",0.12,0.195);
+          ATLASLabel(0.39,0.86,"Preliminary",0.1,0.18);
         if ( ii == 1 )
-          ATLASLabel(0.245,0.86,"Internal",0.12,0.24);
+          ATLASLabel(0.245,0.86,"Preliminary",0.1,0.22);
 	if ( ii == 2 )
-          ATLASLabel(0.175,0.86,"Internal",0.12,0.23);
+          ATLASLabel(0.175,0.86,"Preliminary",0.10,0.205);
       }
       double lumiUnc = getLumiRelErr(vCent[ii]);
       drawErrorBox( 125, 1-lumiUnc, 150, 1+lumiUnc, 1);      

@@ -199,7 +199,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       else if ( ipt < highPtBin) drawBinPt(xBin,ipt,"GeV",0.37, 0.8,1,16);
       else                  drawBinPt(xBin,ipt,"GeV",0.37, 0.85,1,16);
       if ( ipt == lowPtBin)  {
-	ATLASLabel(0.38,0.86,"Internal",0.12,0.16);
+	ATLASLabel(0.38,0.86,"Preliminary",0.12,0.18);
 	drawText("#it{pp} #sqrt{#font[12]{s}} = 5.02 TeV, 25 pb^{-1}", 0.38, 0.73,1,19);
       }
       if ( ipt == lowPtBin +1 ) {
@@ -240,7 +240,7 @@ void getPythiaPP(int kSample= kPP, int icent = 0, bool matRwt=1, int optX=1, int
       
       
       if (ipt == lowPtBin)   {
-	ATLASLabel(0.21,0.86,"Internal",0.12,0.19);
+	ATLASLabel(0.21,0.86,"Preliminary",0.12,0.21);
 	drawText("(Powheg+Pythia8)/data", 0.21, 0.72, 1,18);
 	//	drawText(Form("reference iter. (%d)",vIter.at(refId)), 0.22, 0.82, 1);
       }

@@ -243,7 +243,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
  
       if ( ix==lowPtBin) legPlus->AddEntry(sysPlus[ind].pp[ix], getSysName( vIndPlus[ind] ).Data(),"l" );
     } 
-    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Preliminary",0.075,0.25);
+    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Preliminary",0.07,0.25);
     if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
     if ( ix==lowPtBin)  drawText("Plus variation", 0.37,0.7,1,20);
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
@@ -296,7 +296,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
       if ( ind == 0 )   sysMinus[ind].pp[ix]->Draw("hist");
       else       sysMinus[ind].pp[ix]->Draw("same hist");
     } 
-    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Preliminary",0.075,0.25);
+    if ( ix==lowPtBin)  ATLASLabel(0.37,0.87,"Preliminary",0.07,0.25);
     if ( ix==lowPtBin)  drawCentrality(kPP, 0, 0.37,0.8,1,20);
     if ( ix==lowPtBin)  drawText("Minus variation", 0.37,0.7,1,20);
     drawBin(xBin,ix,"GeV",0.3,0.1,1,18);
@@ -598,7 +598,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
       jumSun(0,0,0.24,0);
     
       if ( ix==lowPtBin) {
-	ATLASLabel(0.32,0.86,"Preliminary",0.09,0.3);
+	ATLASLabel(0.32,0.86,"Preliminary",0.077,0.27);
 	drawCentrality(kPP, 0, 0.37,0.8,1,20);
       }
       drawBinPt(xBin,ix,"GeV",0.12 + (ix==lowPtBin)*0.2,0.1,1,18);
@@ -649,7 +649,7 @@ void getSystematics(int icent = 0, bool drawPP = true) {
       if ( drawPP) drawCentrality(kPbPb, icent, 0.37,0.83,1,20);
       else  { 
 	drawCentrality(kPbPb, icent, 0.37,0.78,1,20);
-        ATLASLabel(0.32,0.86,"Preliminary",0.09,0.3);
+        ATLASLabel(0.32,0.86,"Preliminary",0.077,0.27);
       }
     }
 gPad->RedrawAxis();

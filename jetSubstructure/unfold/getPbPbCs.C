@@ -185,13 +185,13 @@ void getPbPbCs(int optX=1, int optY=2 ) {
 
       if  (ipt == lowPtBin ) { 
 	if ( ii == 0 ) { 
-	  ATLASLabel(0.31,0.86,"Internal",0.12,0.19);
+	  ATLASLabel(0.31,0.86,"Preliminary",0.12,0.21);
 	  drawText("Pb+Pb #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}",0.31,0.76,1,14);
 	}
 	if ( ii == 1 ) 
-	  ATLASLabel(0.26,0.86,"Internal",0.12,0.223);
+	  ATLASLabel(0.26,0.86,"Preliminary",0.12,0.243);
 	if ( ii == 2 ) 
-	  ATLASLabel(0.29,0.86,"Internal",0.12,0.215);
+	  ATLASLabel(0.29,0.86,"Preliminary",0.12,0.235);
 
       }
       if (ipt == lowPtBin ) {
