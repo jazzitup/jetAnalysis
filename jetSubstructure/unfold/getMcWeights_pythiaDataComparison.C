@@ -1,0 +1,562 @@
+#include <iostream>
+using std::cout;
+using std::endl;
+
+#include "TRandom.h"
+#include "TH1D.h"
+
+#include "../getSdHists.C"
+#include "../ntupleDefinition.h"
+#include "../commonUtility.h"
+#include "../jzWeight.h"
+#include "unfoldingUtil.h"
+
+#include "../JssUtils.h"
+#include <TPaletteAxis.h>
+
+double statFrac = 0001;
+double fracStstData = 0001;
+bool doUnfData = true ;
+
+int lowPtBin = 1;  int highPtBin = 13;
+//int lowPtBin = 6;   int highPtBin = 11;
+
+int nPtPannels = highPtBin-lowPtBin+1;
+
+bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
+
+void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0, TF1* ptScale=0);
+void getDATAspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hdataRaw=0);
+
+TH1D* getVariedHist(TH1D* hin=0, double variation=0);
+//bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
+
+float flucCut = 0.3;
+//float flucCut = 1.0;
+void removeFluc2(TH2* h) {
+  for ( int i =1 ;  i<=h->GetNbinsX() ; i++) {
+    for ( int j =1 ;  j<=h->GetNbinsY() ; j++) {
+      double val  = h->GetBinContent(i,j);
+      double error  = h->GetBinError(i,j);
+      if ( error > val * flucCut )   {
+	h->SetBinContent(i,j,1);
+	h->SetBinError(i,j, error/val);
+      }
+    }
+  }
+}
+
+void getMcWeights_pythiaDataComparison(int kSample = kPP, int icent=0, float weightCut = 10, int opt=772) {   // opt1 : mass,   opt2 : m/pT  
+  TH1::SetDefaultSumw2();
+  
+  int nXbins;
+  double xBin[30];
+  if ( opt==1 ) getXbin(nXbins, xBin, 77);
+  if ( opt==2 ) getXbin(nXbins, xBin, 77);
+  if ( opt==771 ) getXbin(nXbins, xBin, 77);
+  if ( opt==772 ) getXbin(nXbins, xBin, 77);
+  cout << " nXbins = " << nXbins << endl;
+  cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
+
+
+  int nYbins ;
+  double yBin[200] ;
+  if ( opt==1)  getYbin(nYbins, yBin, 77);
+  else if ( opt==2)  getYbin(nYbins, yBin, 77);
+  else if ( opt==771)  getYbin(nYbins, yBin, 771);
+  //  else if ( opt==772)  getYbin(nYbins, yBin, 2);
+  else if ( opt==772)  getYbin(nYbins, yBin, 772);
+  cout << " nYbins = " << nYbins << endl;
+  cout << " yBin = " << yBin[0] << ",   " << yBin[1] << ",   " <<yBin[2] << ", ..." <<endl;
+  
+  TH2D* hTemp = new TH2D("hptTemp","", nXbins, xBin, nYbins, yBin);
+  
+  int i = icent;
+
+
+  // MC 
+  TH2D* hmcRaw   = (TH2D*)hTemp->Clone(Form("hmcRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
+  TH2D* hmcTruth = (TH2D*)hTemp->Clone(Form("hmcTruth_kSample%d_icent%d_opt%d",kSample,i,opt));
+  TH2D* hdataRaw = (TH2D*)hTemp->Clone(Form("hdataRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
+  //  TH3D* hPtMassGenMass = new TH3D("hPtMassGenMass","",nXbins, xBin, nYbins, yBin,nYbins, yBin);
+  //void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0); 
+  getMCspectra   ( kSample, icent, opt, hmcRaw, hmcTruth);
+  getDATAspectra ( kSample, icent, opt, hdataRaw);
+
+  
+  for ( int ix= 1 ; ix <= nXbins; ix++) {
+    for ( int iy= 1 ; iy <= nYbins; iy++) {
+      //      if ( hmcRaw->GetBinContent(ix,iy) == 0 )  cout << "MC :found a null bin ix, iy = " << ix<<", "<<iy<< endl;
+      //      if ( hdataRaw->GetBinContent(ix,iy) == 0 )  cout << "DATA :found a null bin ix, iy = " << ix<<", "<<iy<< endl;
+    }
+  }
+  
+  //  scaleInt(hmcRaw);
+  //  scaleInt(hdataRaw);
+
+  TH2D* hRatioRaw = (TH2D*)hdataRaw->Clone(Form("hRatioRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
+  hRatioRaw->Divide(hmcRaw);
+  removeFluc2(hRatioRaw);
+  TH2D* hRatioSmooth2 = (TH2D*)hRatioRaw->Clone(Form("hRatioSmooth2_kSample%d_icent%d_opt%d",kSample,i,opt));
+  hRatioSmooth2->Smooth();
+
+  TH2D* hmcRawSmooth = (TH2D*)hmcRaw->Clone(Form("%s_smooth",hmcRaw->GetName()));
+  TH2D* hdataRawSmooth = (TH2D*)hdataRaw->Clone(Form("%s_smooth",hdataRaw->GetName()));
+  
+  //  scaleInt(hmcRawSmooth);
+  //  scaleInt(hdataRawSmooth);
+
+  hmcRawSmooth->Smooth();
+  hdataRawSmooth->Smooth();
+  TH2D* hRatioSmoothRaw = (TH2D*)hdataRawSmooth->Clone(Form("hRatioSmoothRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
+  hRatioSmoothRaw->Divide(hmcRawSmooth);
+  
+  TH2D* hRatioSmooth = (TH2D*)hRatioSmoothRaw->Clone(Form("hRatioSmooth_kSample%d_icent%d_opt%d",kSample,i,opt));
+  
+  for ( int ix= 1 ; ix<= nXbins; ix++) {
+    for ( int iy= 1 ; iy<= nYbins; iy++) {
+      if ( hRatioSmooth->GetBinContent( ix, iy ) > weightCut ) 
+	hRatioSmooth->SetBinContent(ix, iy, weightCut ); 
+      if ( hRatioSmooth->GetBinContent( ix, iy ) < 0.2 ) 
+	hRatioSmooth->SetBinContent(ix, iy, 0.2 ); 
+    }
+  }
+  
+  TCanvas* c1=  new TCanvas("c1","",500,500);
+  makeEfficiencyCanvas(c1,1, 0.05, 0.01, 0.1, 0.3, 0.01);
+  c1->cd(1);
+  TH1D* ptmc = (TH1D*)hmcRaw->ProjectionX("ptmc");
+  TH1D* ptdata = (TH1D*)hdataRaw->ProjectionX("ptdata");
+  handsomeTH1(ptmc,1);
+  handsomeTH1(ptdata,2);
+  ptmc->SetAxisRange(1e-6,1e8,"Y");
+  ptmc->Draw();
+  ptdata->Draw("same");
+  gPad->SetLogy();
+  drawCentrality(kSample, icent, 0.70,0.86,1,24);
+
+  TLegend *leg1 = new TLegend(0.4814838,0.5583593,1,0.7723161,NULL,"brNDC");
+
+  easyLeg(leg1,"Mass integrated");
+  leg1->AddEntry(ptdata, "Data","pl");
+  leg1->AddEntry(ptmc, "MC","pl");
+  leg1->Draw();
+
+  c1->cd(2);
+  TH1D* hptRatio = (TH1D*)ptdata->Clone("hptRatio");
+  hptRatio->Divide(ptmc);
+  if ( kSample == 0) hptRatio->SetAxisRange(0,1e5,"Y");
+
+  hptRatio->SetXTitle("p_{T} (GeV)");
+  hptRatio->SetYTitle("Data/MC");
+  fixedFontHist(hptRatio,3,2,20);
+  hptRatio->SetNdivisions(505,"X");
+  hptRatio->Draw();
+  
+  c1->SaveAs(Form("reweightFactors/pTreweighting_kSample%d_icent%d.pdf",kSample,icent));
+  TF1* fit;
+  
+  if ( kSample == kPP ) {
+    hptRatio->Fit("pol2","","",100,900);
+    fit = new TF1("myFit","[0]+ [1]*x + [2]*x*x",100,900);
+    fit->SetParameter(0, hptRatio->GetFunction("pol2")->GetParameter(0));
+    fit->SetParameter(1, hptRatio->GetFunction("pol2")->GetParameter(1));
+    fit->SetParameter(2, hptRatio->GetFunction("pol2")->GetParameter(2));
+  }
+  else {
+    hptRatio->Fit("pol1","","",100,700);
+    fit = new TF1("myFit","[0]+ [1]*x",100,900);
+    fit->SetParameter(0, hptRatio->GetFunction("pol1")->GetParameter(0));
+    fit->SetParameter(1, hptRatio->GetFunction("pol1")->GetParameter(1));
+  }
+  fit->SetName("fitFunction");
+
+  c1->SaveAs(Form("reweightFactors/pTreweighting_kSample%d_icent%d_fit.pdf",kSample,icent));
+
+  TH2D* hmcPtCorr   = (TH2D*)hTemp->Clone(Form("hmcRawPtCorr_kSample%d_icent%d_opt%d",kSample,i,opt));
+  TH2D* hmcTruthPtCorr = (TH2D*)hTemp->Clone(Form("hmcTruthPtCorr_kSample%d_icent%d_opt%d",kSample,i,opt));
+  //  getMCspectra   ( kSample, icent, opt, hmcPtCorr, hmcTruthPtCorr,fit);
+  getMCspectra   ( kSample, icent, opt, hmcPtCorr, hmcTruthPtCorr);
+
+
+
+  TCanvas* c1ptCorr=  new TCanvas("c1ptCorr","",500,500);
+  makeEfficiencyCanvas(c1ptCorr,1, 0.05, 0.01, 0.1, 0.3, 0.01);
+  c1ptCorr->cd(1);
+  TH1D* ptmcCorr = (TH1D*)hmcPtCorr->ProjectionX("ptmcCorr");
+  handsomeTH1(ptmcCorr,1);
+  cleverRangeLog(ptmcCorr,10,1e-7);
+  ptmcCorr->Draw();
+  ptdata->Draw("same");
+  gPad->SetLogy();
+  c1ptCorr->cd(2);
+  TH1D* hptRatioPtCorr = (TH1D*)ptdata->Clone("hptRatioPtcorr");
+  hptRatioPtCorr->Divide(ptmcCorr);
+  hptRatioPtCorr->Draw();
+
+  
+
+  TCanvas* c15=  new TCanvas("c15","",500,500);
+  makeEfficiencyCanvas(c15,1, 0.05, 0.01, 0.1, 0.3, 0.01);
+  c15->cd(1);
+  TH1D* h1mcAllPt = (TH1D*)hmcPtCorr->ProjectionY("hmcPtCorrAllPt");
+  TH1D* h1dataAllPt = (TH1D*)hdataRaw->ProjectionY("hdataRawAllPt");
+  float tempMax = cleverRange(h1mcAllPt,10,1);
+  //  float tempMax = cleverRange(h1mcAllPt,100,1e-8);
+  //  h1mcAllPt->SetAxisRange(1,tempMax*10,"Y");
+  handsomeTH1(h1mcAllPt,1);
+  handsomeTH1(h1dataAllPt,8);
+  fixedFontHist(h1mcAllPt,2.5,2,20);
+  scaleInt(h1mcAllPt);
+  scaleInt(h1dataAllPt);
+  cleverRange(h1mcAllPt,2);
+  h1mcAllPt->SetAxisRange(-0.01,0.3,"X");
+  h1mcAllPt->Draw("hist");
+  h1dataAllPt->Draw("same");
+  //  gPad->SetLogy();
+  drawCentrality(kSample, icent, 0.70,0.86,1,24);
+  TLegend *leg2 = new TLegend(0.1871854,0.6894175,0.7049639,0.9033743,NULL,"brNDC");
+  easyLeg(leg2,"p_{T} > 126 GeV/c");
+  //  easyLeg(leg2,"After p_{T} weighting");
+  leg2->AddEntry(h1dataAllPt, "Data","pl");
+  leg2->AddEntry(h1mcAllPt, "PYTHIA8+POWHEG","pl");
+  leg2->Draw();
+  c15->cd(2);
+  TH1D* hmptRatioPtAll = (TH1D*)h1dataAllPt->Clone("hmptRatioPtAll");
+  hmptRatioPtAll->Divide(h1mcAllPt);
+  TH1D* hmptRatioPtAllsmooth = (TH1D*)hmptRatioPtAll->Clone("hmptRatioPtAllsmooth");
+
+  hmptRatioPtAllsmooth->Smooth();
+  hmptRatioPtAll->SetAxisRange(0,5,"Y");
+  hmptRatioPtAll->SetXTitle("m/p_{T}^{Reco}");
+  hmptRatioPtAll->SetYTitle("Data/MC");
+  hmptRatioPtAll->SetNdivisions(505,"X");
+  fixedFontHist(hmptRatioPtAll,3,2,20);
+  hmptRatioPtAll->SetAxisRange(-0.01,0.3,"X");
+  hmptRatioPtAll->SetAxisRange(0.5,2.5,"Y");
+  hmptRatioPtAll->SetNdivisions(505,"Y");
+  hmptRatioPtAll->Draw();
+  //  hmptRatioPtAllsmooth->Draw("same hist");
+  jumSun(-.2,1,0.35,1);
+  
+  TH1D* hsmooVarP = getVariedHist(hmptRatioPtAllsmooth,0.5);
+  TH1D* hsmooVarM = getVariedHist(hmptRatioPtAllsmooth,-0.5);
+
+  handsomeTH1( hsmooVarP,4);
+  handsomeTH1( hsmooVarM,kGreen+4);
+
+  hsmooVarP->SetLineWidth(2);
+  hsmooVarP->SetLineWidth(2);
+
+  c15->SaveAs(Form("reweightFactors/MassIntreweighting_kSample%d_icent%d.pdf",kSample,icent));
+
+  TCanvas* c16 = new TCanvas("c16","",400,400);
+
+  cleverRange(hmptRatioPtAllsmooth,3);
+  hmptRatioPtAllsmooth->SetAxisRange(-0.07,0.3,"X");
+  if ( kSample == 1) hmptRatioPtAllsmooth->SetAxisRange(-0.18,0.3,"X");
+  jumSun(-.2,1,0.35,1);
+  hmptRatioPtAllsmooth->SetXTitle("m/p_{T}");
+  hmptRatioPtAllsmooth->SetYTitle("Data/MC");
+  hmptRatioPtAllsmooth->Draw("hist");
+  jumSun(-0.18,1,0.3,1);
+  hmptRatioPtAll->Draw("same");
+  hsmooVarP->Draw("same hist");
+  hsmooVarM->Draw("same hist");
+  drawCentrality(kSample, icent, 0.70,0.86,1,24);
+  
+  TLegend *leg3 = new TLegend(0.4723618,0.6186667,0.959799,0.832,NULL,"brNDC");
+  easyLeg(leg3,"Reweight factor");
+  leg3->AddEntry(hsmooVarP, "Varied by +50%","l");
+  leg3->AddEntry(hmptRatioPtAll, "Nominal","l");
+  leg3->AddEntry(hsmooVarM, "Varied by -50%","l");
+  leg3->Draw();
+
+  c16->SaveAs(Form("reweightFactors/MassIntreweighting_kSample%d_icent%d_ratioOnly.pdf",kSample,icent));
+  
+
+
+  TH1D* hRatio[20];
+  TH1D* hRatioSmoPtBin[20];
+  TCanvas* c2=  new TCanvas("c2","",1200,600);
+  c2->Divide(5,2);
+  for ( int ix = 1 ; ix<= nXbins ; ix++) {
+    c2->cd(ix);
+    TH1D* h1mc = (TH1D*)hmcPtCorr->ProjectionY(Form("hmcPtCorr_%d",ix),ix,ix);
+    TH1D* h1data = (TH1D*)hdataRaw->ProjectionY(Form("hdataRaw_%d",ix),ix,ix);
+    //    scaleInt(h1data);
+    //    scaleInt(h1mc);
+    handsomeTH1(h1mc,1);
+    handsomeTH1(h1data,2);
+    cleverRangeLog(h1mc,10,1e-7);
+    h1mc->Draw();
+    h1data->Draw("same");
+    gPad->SetLogy();
+
+    if ( ix==1)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
+    drawBin(xBin,ix,"GeV",0.4,0.78,49,16);
+    //    drawBin(xBin,ix,"GeV",0.16 + (0.05* (ix==lowPtBin)), 0.78,1,16);
+    
+    hRatio[ix] = (TH1D*)h1data->Clone(Form("hRatio_ix%d",ix));
+    hRatio[ix]->Divide(h1mc);
+    hRatioSmoPtBin[ix] = (TH1D*)hRatio[ix]->Clone(Form("hRatioSmoPtBin_ix%d",ix));
+    hRatioSmoPtBin[ix]->Smooth();
+  }
+  
+  TCanvas* c3=  new TCanvas("c3","",1200,600);
+  c3->Divide(5,2);
+  for ( int ix = 1 ; ix<= nXbins ; ix++) {
+    c3->cd(ix);
+    hRatio[ix]->SetYTitle("Data/MC");
+    //    cleverRangeLog(hRatio[ix],1000,1e-9);
+    hRatio[ix]->SetAxisRange(0,5,"Y");
+    hRatio[ix]->Draw();
+    hRatioSmoPtBin[ix]->Draw("same hist");
+    if ( ix==1)    drawCentrality(kSample, icent, 0.60,0.86,1,24);
+    drawBin(xBin,ix,"GeV",0.4,0.78,49,16);
+    jumSun(-0.5,1,0.5,1);
+    //    drawBin(xBin,ix,"GeV",0.16 + (0.05* (ix==lowPtBin)), 0.78,1,16);
+    //    hRatio[ix]->Fit("gaus");
+    //    gPad->SetLogy();
+  }
+
+
+  TH2D* hFacRatio = new TH2D(Form("factorizedRatio_kSample%d_icent%d",kSample,i),"", nXbins, xBin, nYbins, yBin);
+  TH2D* hFacRatioVarP = new TH2D(Form("factorizedRatioVarP_kSample%d_icent%d",kSample,i),"", nXbins, xBin, nYbins, yBin);
+  TH2D* hFacRatioVarM = new TH2D(Form("factorizedRatioVarM_kSample%d_icent%d",kSample,i),"", nXbins, xBin, nYbins, yBin);
+  TH2D* hFacRatio2 = new TH2D(Form("factorizedRatio2_kSample%d_icent%d",kSample,i),"", nXbins, xBin, nYbins, yBin);
+  TH1D* hTemp1x  = (TH1D*)hFacRatio->ProjectionX("htemp1x");
+  TH1D* hTemp1y  = (TH1D*)hFacRatio->ProjectionY("htemp1y");
+  for ( int ii = 1 ; ii<=hFacRatio->GetNbinsX() ; ii++) {
+    for ( int jj = 1 ; jj<=hFacRatio->GetNbinsY() ; jj++) {
+      double recoPt = hTemp1x->GetBinCenter(ii);
+      double ptWeight = fit->Eval(recoPt);
+
+      double recoM  = hTemp1y->GetBinCenter(jj);
+
+      int theYBin = hmptRatioPtAll->FindBin( recoM);
+      double mWeight = hmptRatioPtAll->GetBinContent(theYBin);
+      hFacRatio->SetBinContent(ii,jj, ptWeight * mWeight);
+
+      double mWeightVarP = hsmooVarP->GetBinContent(theYBin);
+      hFacRatioVarP->SetBinContent(ii,jj, ptWeight * mWeightVarP);
+
+      double mWeightVarM = hsmooVarM->GetBinContent(theYBin);
+      hFacRatioVarM->SetBinContent(ii,jj, ptWeight * mWeightVarM);
+
+      int theYBin2 = hRatioSmoPtBin[ii]->FindBin(recoM);
+      double mWeight2 = hRatioSmoPtBin[ii]->GetBinContent(theYBin2);
+      hFacRatio2->SetBinContent(ii,jj, ptWeight * mWeight2);
+    }
+  }
+  
+}
+
+
+void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth, TF1* ptScale) {
+  
+  TH1::SetDefaultSumw2();
+  hmcRaw->Reset();
+  hmcTruth->Reset();
+
+  TString jz2;
+  TString jz3;
+  TString jz4;
+  if ( kSample == kPbPb ) {
+    jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+    jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+    jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+  }
+  else if ( kSample == kPP ) {
+    jz2 = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+    jz3 = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+    jz4 = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+  }
+  
+  
+  TH1D* hFcalReweight;
+  if ( kSample == kPbPb ) {
+    TFile* fcal = new TFile("reweightFactors/FCal_HP_v_MB_weights.root");
+    hFcalReweight = (TH1D*)fcal->Get("FCal_HP_v_MBOV_weights");
+  }
+
+  jetSubStr  myJetMc;
+  TBranch  *b_myJetSubMc;
+
+  TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX1_optY2.root",kSample,icent));
+  TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
+  TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
+  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
+  TH2D* hRecoEntries;
+
+  cout << " Setting tree branch address..." << endl;
+  TFile* fjz2 = new TFile(Form("../ntuples/%s",jz2.Data()));
+  TTree* tr2 = (TTree*)fjz2->Get("tr");
+  tr2->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+
+  TFile* fjz3 = new TFile(Form("../ntuples/%s",jz3.Data()));
+  TTree* tr3 = (TTree*)fjz3->Get("tr");
+  tr3->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+
+  TFile* fjz4 = new TFile(Form("../ntuples/%s",jz4.Data()));
+  TTree* tr4 = (TTree*)fjz4->Get("tr");
+  tr4->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
+
+
+  for ( int ijz =2 ; ijz<=4 ; ijz++) {
+    TTree* tr;
+    //    TH2D* hRecoEntries;
+    double jzNorm=0;
+    if ( ijz==2)  {
+      tr = tr2;
+      jzNorm = hi9EvtWgtJZ2;
+      hRecoEntries = recoEntries_jz2;
+    }
+    else if ( ijz==3)  {
+      tr = tr3;
+      jzNorm = hi9EvtWgtJZ3;
+      hRecoEntries = recoEntries_jz3;
+    }
+    else if ( ijz==4)  {
+      tr = tr4;
+      jzNorm = hi9EvtWgtJZ4;
+      hRecoEntries = recoEntries_jz4;
+    }
+    
+    cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
+    for (Int_t i= 0; i<tr->GetEntries() ; i++) {
+      if ( i > tr->GetEntries() * statFrac ) break;
+      if (i%2==0)  continue;
+
+      tr->GetEntry(i);
+
+      if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
+        continue;
+      
+      double genX;
+      double genY;
+      double recoX  = -10000; 
+      double recoY  = -10000; 
+
+      if ( opt ==1 ) {
+	genX = myJetMc.genPt; 
+	genY = myJetMc.genMass;
+      }
+      else  if ( (opt ==2) || (opt==771) ) {
+	genX = myJetMc.genPt;
+	genY = myJetMc.genMass;
+      }
+
+      
+      
+      if ( opt == 1 ) {
+	recoX = myJetMc.recoPt;
+	recoY = myJetMc.recoMass ;
+      }
+      else  if ( (opt ==2) || (opt==771) ) {
+	recoX = myJetMc.recoPt;
+	recoY = myJetMc.recoMass;
+      }
+
+      if (opt==772)  {
+	genX = myJetMc.genPt;
+	genY = myJetMc.genMass /  myJetMc.genPt;
+	recoX = myJetMc.recoPt;
+	recoY = myJetMc.recoMass / myJetMc.recoPt;
+      }
+
+
+      
+      double fcalWeight = 1.0;
+      if ( kSample==kPbPb) {
+	//        fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
+        //      cout <<" fcal, weight = "<<myJetMc.fcalet<<", "<<fcalWeight<<endl;
+      }
+      
+      double ptWeight = 1;
+      if ( ptScale != 0) {
+	ptWeight = ptScale->Eval(recoX);
+      }
+      if ( myJetMc.recoPt < 126 ) continue;
+
+      hmcRaw->Fill( recoX, recoY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);
+      hmcTruth->Fill( genX, genY, myJetMc.weight * jzNorm * fcalWeight * ptWeight);
+    }
+  }
+  
+}
+
+void getDATAspectra(int kSample, int icent, int opt, TH2D* hdataRaw) { 
+
+  TH1::SetDefaultSumw2();
+  hdataRaw->Reset();
+  TString fname;
+  if ( kSample == kPbPb ) {
+    fname = "jetSubstructure_Data_HION9_v4.7_r4_pbpb_Jan23_ptCut90Eta2.1.root"; }
+  else if ( kSample == kPP) {
+    fname = "jetSubstructure_data_HION9_v4.7_r4_pp_Feb26_ptCut90Eta2.1_fullLumi.root"; }
+  
+  TFile* fData = new TFile(Form("../ntuples/%s",fname.Data()));
+  TTree* tr = (TTree*)fData->Get("tr");
+  jetSubStr myJet;
+  TBranch       *b_myJet;
+  tr->SetBranchAddress("jets", &(myJet.cent), &b_myJet);
+  if ( kSample == kPP )  cout << " pp " ;
+  else if ( kSample == kPbPb) cout << " PbPb " ;
+  cout << "data entries = " << tr->GetEntries() << endl;
+  
+  for (Int_t i= 0; i<tr->GetEntries() ; i++) {
+    tr->GetEntry(i);
+    if ( i > tr->GetEntries() * fracStstData) break;
+
+    if ( ! passEvent(myJet, icent, false) ) // isMC = false
+      continue;
+
+    double recoX  = -10000;
+    double recoY  = -10000;
+    if ( opt == 1 ) {
+      recoX = myJet.recoPt;
+      recoY = myJet.recoMass;
+    }
+    else if ( (opt == 2) || (opt==771) ) {
+      recoX = myJet.recoPt;
+      recoY = myJet.recoMass;
+    }
+    
+    if (opt==772)  {
+      recoX = myJet.recoPt;
+      recoY = myJet.recoMass / myJet.recoPt;
+    }
+
+    if ( myJet.recoPt < 126 ) continue;
+
+    hdataRaw->Fill ( recoX, recoY);
+  }
+  
+}
+
+
+bool isTooSmall(TH2D* hEntries, int recoVarX, int recoVarY, int minEntries) {
+  int theBin = hEntries->FindBin(recoVarX, recoVarY);
+  if (  hEntries->GetBinContent(theBin) < minEntries )
+    return true;
+  
+  return false;
+
+}
+
+
+TH1D* getVariedHist(TH1D* hin, double variation)  {
+  
+  TH1D* hout = (TH1D*)hin->Clone(Form("%s_var%.2f",hin->GetName(),variation));
+  hout->Reset();
+  for ( int i = 1 ; i<= hin->GetNbinsX() ; i++) {
+    double yin = hin->GetBinContent(i);
+    double newY = (yin - 1 ) * (1+variation) + 1; 
+    hout->SetBinContent(i, newY);
+  }
+  
+  return hout;
+  
+  
+}
