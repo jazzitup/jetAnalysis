@@ -1,4 +1,4 @@
-double fracStst=0.1;
+double fracStst=1;
 bool doCal=0;
 
 #if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
@@ -36,6 +36,7 @@ struct valErr {
 };
 
 int lowPtBin = 1;
+int highPtBin = 7;
 
 valErr getMeanValue(TH1D* h1, double x1, double x2) {
   valErr ret;
@@ -70,7 +71,7 @@ bool selectedPt(int ipt = 0) {
 
 void getDist( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hJMS=0, TH2D* hJMR=0, TH2D* hJES=0, TH2D* hJER=0, TH2D* hFineMpt=0, bool doReweight = true);
 
-void getJmsCalibration(int kSample = kPP, int icent=0, int optX =79, int optY=79, bool doReweight=false) {
+void test(int kSample = kPP, int icent=0, int optX =80, int optY=80, bool doReweight=false) {
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -78,7 +79,6 @@ void getJmsCalibration(int kSample = kPP, int icent=0, int optX =79, int optY=79
   cout << " nXbins = " << nXbins << endl; 
   cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
   
-  int highPtBin = nXbins-1;
   
   int vColor[20] =   {1,20, 2, 38,40,41,4,44,46,6,4};
   int vStyle[20] =   {20,21,25,23,29,33,28,47,43};
@@ -192,8 +192,8 @@ void getJmsCalibration(int kSample = kPP, int icent=0, int optX =79, int optY=79
   TCanvas* c4 = new TCanvas("c4","",1000,500);
   c4->Divide(2,1);
   c4->cd(1);
-  TH1D* htemp = new TH1D("htemp",";[m/p_{T}]^{2} * R;R",1000,1,1.1);
-  htemp->SetAxisRange(0.98,1.015,"Y");
+  TH1D* htemp = new TH1D("htemp",";[m/p_{T}]^{2} * R;R",1000,0.99,1.2);
+  htemp->SetAxisRange(0.97,1.01,"Y");
   htemp->DrawCopy();
   //  gPad->SetLogy();
   for ( int ix = lowPtBin ; ix<=highPtBin ; ix++) {
@@ -209,12 +209,29 @@ void getJmsCalibration(int kSample = kPP, int icent=0, int optX =79, int optY=79
     //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*x + [2]*x*x + [3]*x*x*x + [4]*x*x*x*x",0.9,1.1);
     //f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*x");
 
-    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*exp(x) + [2]*exp(x)*exp(x) + [3]*pow(exp(x),3) + [4]*pow(exp(x),4) +  [5]*pow(exp(x),5)",1,1.1);
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*exp(x) + [2]*exp(x)*exp(x) + [3]*pow(exp(x),3) + [4]*pow(exp(x),4) +  [5]*pow(exp(x),5)",1,1.1);
+    
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*log(x-0.5) + [2]*TMath::Power(log(x-0.5),2) + [3]*TMath::Power(log(x-0.5),3) + [4]*TMath::Power(log(x-0.5),4)",0.1,2);
+    //    f1[ix-0.5] = new TF1(Form("f1_kSample%d_icent%d_ix-0.5%d",kSample,icent,ix-0.5),"[0] + [1]*log(x+0.1) + [2]*log(x+0.1)*log(x+0.1) + [3]*pow(log(x+0.1),3)",0.1,2);
+
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*((x-1)*100) + [2]*((x-1)*100)*((x-1)*100) + [3]*((x-1)*100)*((x-1)*100)*((x-1)*100) + [4]*((x-1)*100)*((x-1)*100)*((x-1)*100)*((x-1)*100) + [5]*((x-1)*100)*((x-1)*100)*((x-1)*100)*((x-1)*100)*((x-1)*100)",0.1,2);
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*((x-1)*100) + [2]*pow((x-1)*100,2) + [3]*pow((x-1)*100,3) + [4]*pow((x-1)*100,4) + [5]*pow((x-1)*100,5)",0.1,2);
+    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*((x-1)*100) + [2]*pow((x-1)*100,2) + [3]*pow((x-1)*100,3) + [4]*pow((x-1)*100,4) + [5]*pow((x-1)*100,5) + [6]*pow((x-1)*100,6)",0.1,2);
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*((x-1)*100) + [2]*pow((x-1)*100,2) + [3]*pow((x-1)*100,3) + [4]*pow((x-1)*100,4)",0.1,2);
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*(log( (x-0.9)*100)) + [2]*pow(log( (x-0.9)*100),2) + [3]*pow(log( (x-0.9)*100),3) + [4]*pow(log( (x-0.9)*100),4)",0.1,2);
+    f1[ix]->SetParameter(0,1);
+    f1[ix]->SetParameter(1,0);
+    f1[ix]->SetParameter(2,0);
+    f1[ix]->SetParameter(3,0);
+    f1[ix]->SetParameter(4,0);
+    f1[ix]->SetParameter(5,0);
+    f1[ix]->SetParameter(6,0);
 
     if ( !doCal) { 
-      //      f1[ix]->SetParameter(0,1);
+      
 
-      gr[ix]->Fit(f1[ix]);
+      gr[ix]->Fit(f1[ix],"M");
+      //      gr[ix]->Fit(f1[ix]);
       gr[ix]->GetFunction(f1[ix]->GetName())->SetLineColor(vColor[ix-lowPtBin]);
     }
     
