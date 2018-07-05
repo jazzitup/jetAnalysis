@@ -216,16 +216,16 @@ void test(int kSample = kPP, int icent=0, int optX =80, int optY=80, bool doRewe
 
     //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*((x-1)*100) + [2]*((x-1)*100)*((x-1)*100) + [3]*((x-1)*100)*((x-1)*100)*((x-1)*100) + [4]*((x-1)*100)*((x-1)*100)*((x-1)*100)*((x-1)*100) + [5]*((x-1)*100)*((x-1)*100)*((x-1)*100)*((x-1)*100)*((x-1)*100)",0.1,2);
     //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*((x-1)*100) + [2]*pow((x-1)*100,2) + [3]*pow((x-1)*100,3) + [4]*pow((x-1)*100,4) + [5]*pow((x-1)*100,5)",0.1,2);
-    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*((x-1)*100) + [2]*pow((x-1)*100,2) + [3]*pow((x-1)*100,3) + [4]*pow((x-1)*100,4) + [5]*pow((x-1)*100,5) + [6]*pow((x-1)*100,6)",0.1,2);
+    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*((x-1)*100) + [2]*pow((x-1)*100,2) + [3]*pow((x-1)*100,3) + [4]*pow((x-1)*100,4) + [5]*pow((x-1)*100,5)",0.1,2);
     //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*((x-1)*100) + [2]*pow((x-1)*100,2) + [3]*pow((x-1)*100,3) + [4]*pow((x-1)*100,4)",0.1,2);
     //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*(log( (x-0.9)*100)) + [2]*pow(log( (x-0.9)*100),2) + [3]*pow(log( (x-0.9)*100),3) + [4]*pow(log( (x-0.9)*100),4)",0.1,2);
     f1[ix]->SetParameter(0,1);
-    f1[ix]->SetParameter(1,0);
-    f1[ix]->SetParameter(2,0);
-    f1[ix]->SetParameter(3,0);
-    f1[ix]->SetParameter(4,0);
-    f1[ix]->SetParameter(5,0);
-    f1[ix]->SetParameter(6,0);
+    f1[ix]->SetParameter(1,-1.11701e-02);
+    f1[ix]->SetParameter(2,9.14425e-03);
+    f1[ix]->SetParameter(3,-3.64883e-03);
+    f1[ix]->SetParameter(4,6.89351e-04);
+    f1[ix]->SetParameter(5,-5.01971e-05);
+    //    f1[ix]->SetParameter(6,0);
 
     if ( !doCal) { 
       
