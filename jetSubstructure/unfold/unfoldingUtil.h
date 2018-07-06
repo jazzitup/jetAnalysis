@@ -3,12 +3,12 @@
 
 bool selectedCent(int icent=0) {
   if ( icent ==0 )  return true;
-  if ( icent ==1 )  return true;
-  if ( icent ==2 )  return true;
-  if ( icent ==3 )  return true;
+  //  if ( icent ==1 )  return true;
+  //  if ( icent ==2 )  return true;
+  //  if ( icent ==3 )  return true;
   if ( icent ==4 )  return true;
-  if ( icent ==5 )  return true;
-  if ( icent ==6 )  return true;
+  //  if ( icent ==5 )  return true;
+  //  if ( icent ==6 )  return true;
   else return false; 
   return 0;
 }
@@ -55,13 +55,13 @@ TString jz2PPStringSys = "jetSubstructure_ppMC_HION9_jz2sys_v50_april14.root";  
 TString jz3PPStringSys = "jetSubstructure_ppMC_HION9_jz3sys_v50_april14.root";     // _april14 is added only for pp as ptSysHI is fixed
 TString jz4PPStringSys = "jetSubstructure_ppMC_HION9_jz4sys_v50_april14.root";     // _april14 is added only for pp as ptSysHI is fixed
 
-TString jz2PbPbString = jz2PbPbStringSys;
-TString jz3PbPbString = jz3PbPbStringSys;
-TString jz4PbPbString = jz4PbPbStringSys;
+TString jz2PbPbString = "jetSubstructure_pbpbMC_HION9_jz2_v51_april124.root";
+TString jz3PbPbString = "jetSubstructure_pbpbMC_HION9_jz3_v51_april124.root";
+TString jz4PbPbString = "jetSubstructure_pbpbMC_HION9_jz4_v51_april124.root";
 
-TString jz2PPString = jz2PPStringSys;
-TString jz3PPString = jz3PPStringSys;
-TString jz4PPString = jz4PPStringSys;
+TString jz2PPString = "jetSubstructure_ppMC_HION9_jz2_v52_april124.root";
+TString jz3PPString = "jetSubstructure_ppMC_HION9_jz3_v52_april124.root";
+TString jz4PPString = "jetSubstructure_ppMC_HION9_jz4_v52_april124.root";
 
 TString ppDataString = "jetSubstructure_data_HION9_v50_r4_pp.root";
 TString pbpbDataString = "jetSubstructure_data_HION9_v50_r4_pbpb.root";
@@ -114,6 +114,7 @@ void getXbin(int &nBins, double* xBin, int optX) {
       xBin[i] = -10 + ( 35 + 10 ) * float(i)/nBins;
     }
   }
+  
 
   else if ( optX == 77) {// reweighting 
     nBins = 9;  // default
@@ -129,9 +130,15 @@ void getXbin(int &nBins, double* xBin, int optX) {
       xBin[i] = ptBin[i] ;
     }
   }
-
+  else if ( (optX == 79) || ( optX==80) )  {
+    nBins = 9;
+    double ptBin[10]={100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944, 999.970};
+    for ( int i=0 ; i<= nBins ; i++) {
+      xBin[i] = ptBin[i] ;
+    }
+  }
+  
 }
-
 
 void getXvalues( double &recoVarX, double &truthVarX, jetSubStr myJetMc, int optX) {
   if ( optX == 1 ) {
@@ -142,6 +149,15 @@ void getXvalues( double &recoVarX, double &truthVarX, jetSubStr myJetMc, int opt
     recoVarX = myJetMc.nTrkRaw - myJetMc.nTrkBkg;
     truthVarX = myJetMc.genNch;
   }
+  if ( optX == 79 )  {
+    recoVarX =  myJetMc.genPt;
+    truthVarX = myJetMc.recoPt;
+  }
+  if ( optX == 80 )  {
+    recoVarX =  myJetMc.genPt;
+    truthVarX = myJetMc.recoPt;
+  }
+
 }
 
 void getYbin(int &nBins, double* yBin, int optY) {
@@ -211,15 +227,6 @@ void getYbin(int &nBins, double* yBin, int optY) {
       massBin[i] = lowY + (highY-lowY)*i/nBins;
       yBin[i] = massBin[i];
     }
-    //  */
-
-    /*
-      nBins = 8;
-      double massBin[9] = { -0.2, -0.1, 0, 0.05,0.1,0.15,0.2,0.25,0.35};
-      for ( int i=0 ; i<= nBins ; i++) {
-      yBin[i] = massBin[i];
-      }
-    */
   }
   
   else if ( optY == 78) {
@@ -227,6 +234,35 @@ void getYbin(int &nBins, double* yBin, int optY) {
     double massBin[7] = { -0.5,0,0.1,0.13,0.16,0.2,0.5};
     for ( int i=0 ; i<= nBins ; i++) {
       yBin[i] = massBin[i];
+    }
+  }
+
+  else if ( optY == 79) {
+    nBins = 10;
+    //    double massBin[11] = { -0.2,0,0.015,0.03,0.06,0.09,0.12,0.15,0.18,0.24,0.3};
+    double massBin[11] = { -0.2,0,0.01, 0.02, 0.04, 0.06, 0.08, 0.12, 0.16, 0.24, 0.32};
+    for ( int i=0 ; i<= nBins ; i++) {
+      if ( massBin[i] > 0 )
+	yBin[i] = massBin[i] * massBin[i];
+      else
+	yBin[i] = - massBin[i] * massBin[i];
+
+      yBin[i] = yBin[i] + 1 ;
+    }
+  }
+  else if ( optY == 80) {
+    nBins = 8;
+    //    double massBin[11] = { -0.2,0,0.015,0.03,0.06,0.09,0.12,0.15,0.18,0.24,0.3};
+    //    double massBin[10] = { -0.1, 0 , 0.03, 0.06, 0.09, 0.12, 0.16, 0.2, 0.25, 0.3};
+    //    double massBin[8] = { -0.1, 0 , 0.05, 0.10, 0.15, 0.2, 0.25, 0.3};
+    double massBin[9] = { -0.05, 0.05, 0.08, 0.12, 0.15, 0.18, 0.24, 0.3,0.5};
+    for ( int i=0 ; i<= nBins ; i++) {
+      if ( massBin[i] > 0 )
+	yBin[i] = massBin[i] * massBin[i];
+      else
+	yBin[i] = - massBin[i] * massBin[i];
+
+      yBin[i] = sqrt(yBin[i] + 1) ;
     }
   }
   
@@ -282,6 +318,29 @@ void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int opt
   else if ( optY == 8) { // charge assisted mass
     truthVarY = genMoverPt;
     recoVarY = myJetMc.recoChMassRcSubt / myJetMc.recoChPtRcSubt ;
+  }
+  else if ( optY == 79) { 
+    truthVarY = genMoverPt * genMoverPt;
+    if ( recoMoverPt > 0 )
+      recoVarY = recoMoverPt * recoMoverPt;
+    else 
+      recoVarY = - recoVarY;
+    
+    recoVarY = recoVarY + 1;
+    truthVarY = truthVarY + 1;
+  }
+  else if ( optY == 80) { 
+    truthVarY = genMoverPt * genMoverPt;
+    if ( recoMoverPt > 0 )
+      recoVarY = recoMoverPt * recoMoverPt;
+    else 
+      recoVarY = - recoVarY;
+    
+    recoVarY = recoVarY + 1;
+    truthVarY = truthVarY + 1;
+  }
+  else { 
+    cout << " Error in unfoldingUtil::getYvalues! " << endl << " optY  = " << optY << " option is not defined in this function" << endl;
   }
   
 }
@@ -347,7 +406,18 @@ bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
   
 } 
 
+bool passEtaCut( jetSubStr myJetMc, int etaBin) {
+  int absEta = fabs(myJetMc.recoEta);
+  if (  (absEta < 0.4) && (etaBin == 0) )
+    return true;
+  if (  (absEta > 0.4) &&  (absEta < 1.2) && (etaBin == 1) )
+    return true;
+  if (  (absEta > 1.2) &&  (absEta < 2.1) && (etaBin == 2) )
+    return true;
+  
+  return false;
 
+}
 
 bool passJesEvent( jetSubStr myJetMc, int icent)  {
 
