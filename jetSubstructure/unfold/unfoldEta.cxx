@@ -1,3 +1,6 @@
+double statFrac = 1;
+
+
 #if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include <iostream>
 using std::cout;
@@ -27,8 +30,7 @@ int mFlag = 0 ;
 #include <TPaletteAxis.h>
 #include "unfoldingUtil.h"
 
-double statFrac = 1;
-double fracStstData = 001;
+double fracStstData = statFrac;
 bool doUnfData = true ;
 
 bool useFullMC = false;
@@ -38,12 +40,12 @@ int lowPtBin = 1;  int highPtBin = 13;
 
 int nPtPannels = highPtBin-lowPtBin+1;
 
-void getMCspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH2D* hmcRaw=0, TH2D* hmcTruth=0, double radius=0.4, bool doReweight=true);
-void getDATAspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH2D* hdataRaw=0, double radius=0.4,int nSys=0);
+void getMCspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH2D* hmcRaw=0, TH2D* hmcTruth=0, int etaBin=0, bool doReweight=true);
+void getDATAspectra(int kSample=kPP, int icent=0, int optX=1, int optY=2, TH2D* hdataRaw=0, int etaBin=0,int nSys=0);
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
-void unfoldEta(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, bool doReweight=false, int nSys=-1) {
+void unfoldEta(int kSample = kPP, int optX =1, int optY=2, int etaBin=0, bool doReweight=false, int nSys=-1) {
 
   if ( nSys < 0 )
     cout << "===== Nominal mode =====" << endl;
@@ -90,11 +92,11 @@ void unfoldEta(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, b
 
   int matrixWeight = 1;
   
-  TString matrixName = Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",
-			    kSample,optX,optY,(float)radius,(int)matrixWeight);
+  TString matrixName = Form("spectraFilesEta/unfoldingMatrix2D_coll%d_optX%d_optY%d_etaBin%d_doReweight%d.root",
+			    kSample,optX,optY, etaBin, (int)matrixWeight);
   if ( nSys>= 0) {
-    matrixName =       Form("spectraFiles/sys/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d_sys%d.root",
-		            kSample,optX,optY,(float)radius,(int)matrixWeight,nSys);
+    matrixName =       Form("spectraFilesEta/sys/unfoldingMatrix2D_coll%d_optX%d_optY%d_etaBin%d_doReweight%d_sys%d.root",
+		            kSample,optX,optY, etaBin ,(int)matrixWeight,nSys);
   }
   
   TFile* fmatrix = new TFile(matrixName.Data());
@@ -109,13 +111,13 @@ void unfoldEta(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, b
     // MC 
     hmcRaw[i] = (TH2D*)hTemp->Clone(Form("hmcRaw_icent%d",i));
     hmcTruth[i] = (TH2D*)hTemp->Clone(Form("hmcTruth_icent%d",i));
-    getMCspectra(kSample, icent, optX, optY, hmcRaw[i], hmcTruth[i], radius, doReweight) ;
+    getMCspectra(kSample, icent, optX, optY, hmcRaw[i], hmcTruth[i], etaBin, doReweight) ;
 
         
     // Data
     if ( doUnfData )  { 
       hdataRaw[i] =  (TH2D*)hTemp->Clone(Form("hdataRaw_icent%d",i));
-      getDATAspectra(kSample, icent, optX, optY, hdataRaw[i], radius, nSys) ;
+      getDATAspectra(kSample, icent, optX, optY, hdataRaw[i], etaBin, nSys) ;
     }
     
   }
@@ -124,30 +126,13 @@ void unfoldEta(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, b
     int icent = i;
     if ( !selectedCent(i) )  continue;
     if ( (kSample == kPP) && ( i != 0 ) )      continue;
-    //    res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
-    //    TH2D* h2ResMatrix = (TH2D*)fmatrix->Get(Form("hReco_icent%d_hTruth_icent%d",icent,icent)); //
-    //    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
-    //    TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
-    //    TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
-    //    RooUnfoldResponse* tempRes  = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); //
-    //    TH2D* h2ResMatrix = (TH2D*)tempRes->Hresponse(); 
-    //    res[i] = new RooUnfoldResponse(hmcRaw[i], hmcTruth[i], h2ResMatrix);
-    //    res[i] = new RooUnfoldResponse(0,0, h2ResMatrix);
-    //    TH2D* h2Reco  = (TH2D*)fmatrix->Get(Form("hReco_icent%d",icent)); //
-    //    TH2D* h2Truth = (TH2D*)fmatrix->Get(Form("hTruth_icent%d",icent)); //
-    //    TH2D* h2RecoTemp = (TH2D*)h2Reco->Clone("h2RecoTemp");
-    //    TH2D* h2TruthTemp = (TH2D*)h2Truth->Clone("h2TruthTemp");
-    //    h2RecoTemp->Reset();
-    //    h2TruthTemp->Reset();
-    //    res[i] = new RooUnfoldResponse(h2RecoTemp, h2TruthTemp, h2ResMatrix);
-    //    res[i] = new RooUnfoldResponse(h2Reco, h2Truth, h2ResMatrix);
     res[i] = (RooUnfoldResponse*)fmatrix->Get(Form("responseMatrix_icent%d",icent)); 
   }
   
   
   
   vector<int> nIter;
-  for ( int it = 1 ; it<=50 ; it++) { 
+  for ( int it = 1 ; it<=20 ; it++) { 
     nIter.push_back(it);
     if ( it > maxIter -1 )   cout << " The size of array is not enough! " << endl;
   }
@@ -225,9 +210,9 @@ void unfoldEta(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, b
     }
   }
   
-  TString foutName = Form("unfSpectra/kSample%d_matrixRwt%d_spectraRwt%d.root",kSample,matrixWeight,doReweight); 
+  TString foutName = Form("unfSpectraEta/kSample%d_etaBin%d_matrixRwt%d_spectraRwt%d.root",kSample,etaBin,matrixWeight,doReweight); 
   if ( nSys >=0 ) { 
-    foutName = Form("unfSpectra/sys/kSample%d_matrixRwt%d_spectraRwt%d_sys%d.root",kSample,matrixWeight,doReweight,nSys);
+    foutName = Form("unfSpectraEta/sys/kSample%d_etaBin%d_matrixRwt%d_spectraRwt%d_sys%d.root",kSample,etaBin,matrixWeight,doReweight,nSys);
   }
     
 
@@ -261,7 +246,7 @@ void unfoldEta(int kSample = kPP, int optX =1, int optY=2, double radius= 0.4, b
 }
 
 
-void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D* hmcTruth, double radius, bool doReweight) {
+void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D* hmcTruth, int etaBin, bool doReweight) {
   
   TH1::SetDefaultSumw2();
   hmcRaw->Reset();
@@ -278,28 +263,24 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
   TString jz3;
   TString jz4;
   if ( kSample == kPbPb ) {
-    if ( radius==0.4 ) {
-      // v50
-      //      jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2.root";
-      //      jz3 = "jetSubstructure_MC_HION9_pbpb_v50_jz3.root";
-      //      jz4 = "jetSubstructure_MC_HION9_pbpb_v50_jz4.root";
-      jz2 = jz2PbPbString;
-      jz3 = jz3PbPbString;
-      jz4 = jz4PbPbString;
-    }
+    // v50
+    //      jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2.root";
+    //      jz3 = "jetSubstructure_MC_HION9_pbpb_v50_jz3.root";
+    //      jz4 = "jetSubstructure_MC_HION9_pbpb_v50_jz4.root";
+    jz2 = jz2PbPbString;
+    jz3 = jz3PbPbString;
+    jz4 = jz4PbPbString;
   }
   else if ( kSample == kPP ) {
-    if ( radius==0.4 ) {
-      //  jz2 = "jetSubstructure_MC_HION9_pp_v50_jz2.root";
-      //      jz3 = "jetSubstructure_MC_HION9_pp_v50_jz3.root";
-      //      jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4.root";
-      jz2 = jz2PPString;
-      jz3 = jz3PPString;
-      jz4 = jz4PPString;
-    }
+    //  jz2 = "jetSubstructure_MC_HION9_pp_v50_jz2.root";
+    //      jz3 = "jetSubstructure_MC_HION9_pp_v50_jz3.root";
+    //      jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4.root";
+    jz2 = jz2PPString;
+    jz3 = jz3PPString;
+    jz4 = jz4PPString;
   }
-
-
+  
+  
   TH1D* hFcalReweight;
   if ( kSample == kPbPb ) {
     //    TFile* fcal = new TFile("reweightFactors/FCal_HP_v_MB_weights.root");
@@ -347,7 +328,7 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 
     TH2D* hReweight;
     if ( doReweight ) {
-      hReweight = getRewTable(kSample, icent);
+      hReweight = getRewTableEta(kSample, icent,etaBin);
     }
   
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
@@ -361,6 +342,10 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 
       if ( passEvent(myJetMc, icent, true) == false )
 	continue;
+
+      if ( !passEtaCut(myJetMc, etaBin) )
+        continue;
+
       
       double recoVarX, truthVarX;
       getXvalues( recoVarX, truthVarX, myJetMc, optX);
@@ -400,19 +385,18 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
 }
 
 
-void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, double radius, int nSys) {
+void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, int etaBin, int nSys) {
   TH1::SetDefaultSumw2();
   hdataRaw->Reset();
 
   TString fname;
-  if ( radius == 0.4 ) {
     if ( kSample == kPbPb ) {
       fname = pbpbDataString; 
     }
     else if ( kSample == kPP) {
       fname = ppDataString;
     }
-  }
+
 
   TF1* fjmscal[30];
   if( ( nSys == 300)||( nSys==401) )  {
@@ -442,6 +426,9 @@ void getDATAspectra(int kSample, int icent, int optX, int optY, TH2D* hdataRaw, 
     if ( i > tr->GetEntries() * fracStstData) continue;
 
     if ( passEvent(myJet, icent, false) == false ) // isMC = false
+      continue;
+    
+    if ( !passEtaCut(myJet, etaBin) )
       continue;
     
     double recoVarX, truthVarX;
