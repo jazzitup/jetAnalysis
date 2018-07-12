@@ -16,7 +16,7 @@ using std::endl;
 
 #include "../getSdHists.C"
 //#include "../ntupleDefinition.h"
-#include "../ntupleDefinition_v50.h"   
+#include "../ntupleDefinition.h"   
 #include "../commonUtility.h"
 #include "../jzWeight.h"
 #endif
@@ -201,7 +201,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   
   TH2D* hReweight;
   if ( doReweight ) {
-    hReweight = getRewTable(kSample, icent);
+    hReweight = getRewTableEta(kSample, icent, etaBin);
   }
 
   TF1* fjmscal[30];
