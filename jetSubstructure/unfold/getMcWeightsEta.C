@@ -32,27 +32,21 @@ TH1D* getVariedHist(TH1D* hin=0, double variation=0);
 float flucCut = 0.3;
 void removeFluc2(TH2* h=0);
 
-void getMcWeightsEta(int kSample = kPP, int icent=0, int etaBin=0, float weightCut = 10, int nSys=-1) {   // opt1 : mass,   opt2 : m/pT  
-  int opt = 772;
+void getMcWeightsEta(int kSample = kPP, int icent=0, int etaBin=2, float weightCut = 10, int nSys=-1) {   // opt1 : mass,   opt2 : m/pT  
+  //  int opt = 772;
   TH1::SetDefaultSumw2();
   
   int nXbins;
   double xBin[30];
-  if ( opt==1 ) getXbin(nXbins, xBin, 77);
-  if ( opt==2 ) getXbin(nXbins, xBin, 77);
-  if ( opt==771 ) getXbin(nXbins, xBin, 77);
-  if ( opt==772 ) getXbin(nXbins, xBin, 77);
+  getXbin(nXbins, xBin, 77);
   cout << " nXbins = " << nXbins << endl;
   cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
 
 
   int nYbins ;
   double yBin[200] ;
-  if ( opt==1)  getYbin(nYbins, yBin, 77);
-  else if ( opt==2)  getYbin(nYbins, yBin, 77);
-  else if ( opt==771)  getYbin(nYbins, yBin, 771);
-  //  else if ( opt==772)  getYbin(nYbins, yBin, 2);
-  else if ( opt==772)  getYbin(nYbins, yBin, 772);
+
+  getYbin(nYbins, yBin, 772);
   cout << " nYbins = " << nYbins << endl;
   cout << " yBin = " << yBin[0] << ",   " << yBin[1] << ",   " <<yBin[2] << ", ..." <<endl;
   
