@@ -31,20 +31,25 @@ TH2D* getRewTable(int kSample, int icent)  {
 
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized.root"); // Mar 28
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_fcalWeighted.root");
-  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent));  // 00 default
+  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio2_kSample%d_icent%d",kSample,icent));  // 00 default
   //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatioVarP_kSample%d_icent%d",kSample,icent));  // plus50%
   //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatioVarM_kSample%d_icent%d",kSample,icent));  // minus50%
-  //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio2_kSample%d_icent%d",kSample,icent)); // 01
+  //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent)); // 01
   return hTemp;
 }
 
+TH2D* getRewTableEta(int kSample, int icent, int etaBin)  { 
+  TFile* fReweight = new TFile(Form("reweightFactorsEta/reweightingFactor_etaBin%d_weightCut10_opt772_flucCut0.3_factorized_v60.root",etaBin)); // Default, set in Apr 7
+  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio2_kSample%d_icent%d",kSample,icent));  // 00 default
+  return hTemp;
+}
 /*
-TString jz2PbPbString = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-TString jz3PbPbString = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-TString jz4PbPbString = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
-TString   jz2PPString = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-TString   jz3PPString = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
-TString   jz4PPString = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+  TString jz2PbPbString = "jetSubstructure_MC_HION9_jz2_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+  TString jz3PbPbString = "jetSubstructure_MC_HION9_jz3_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+  TString jz4PbPbString = "jetSubstructure_MC_HION9_jz4_v4.7_v4_Jan23_ptCut90Eta2.1.root";
+  TString   jz2PPString = "jetSubstructure_MC_HION9_jz2_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+  TString   jz3PPString = "jetSubstructure_MC_HION9_jz3_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
+  TString   jz4PPString = "jetSubstructure_MC_HION9_jz4_v4.7_r4_pp_Jan23_ptCut90Eta2.1.root";
 */
 // systematics
 TString jz2PbPbStringSys = "jetSubstructure_MC_HION9_jz2sys_v50.root";
@@ -109,20 +114,32 @@ void getXbin(int &nBins, double* xBin, int optX) {
     }
   }
   else if ( optX == 2) {
-    nBins = 6;
-    for ( int i=0 ; i<= nBins ; i++) {
-      xBin[i] = -10 + ( 35 + 10 ) * float(i)/nBins;
-    }
-  }
-  
-
-  else if ( optX == 77) {// reweighting 
-    nBins = 9;  // default
-    double ptBin[10]={100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944, 999.970};
+    nBins = 8;  // default
+    double ptBin[9]={100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  1000};
     for ( int i=0 ; i<= nBins ; i++) {
       xBin[i] = ptBin[i] ;
     }
   }
+
+  else if ( optX == 3) {
+    nBins = 8;  // default
+    double ptBin[9]={100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  1000};
+    for ( int i=0 ; i<= nBins ; i++) {
+      xBin[i] = ptBin[i] ;
+    }
+  }
+  
+  
+  
+
+  else if ( optX == 77) {// reweighting 
+    nBins = 8;  // default
+    double ptBin[10]={100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500., 999.970};
+    for ( int i=0 ; i<= nBins ; i++) {
+      xBin[i] = ptBin[i] ;
+    }
+  }
+  
   else if ( optX == 78) {// reweighting 
     nBins = 9;  // default
     double ptBin[10]={100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944, 999.970};
@@ -131,8 +148,9 @@ void getXbin(int &nBins, double* xBin, int optX) {
     }
   }
   else if ( (optX == 79) || ( optX==80) )  {
-    nBins = 9;
-    double ptBin[10]={100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944, 999.970};
+    nBins = 4;
+    //    double ptBin[10]={100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500.,  630.944, 999.970};
+    double ptBin[5]={100.000, 125.892, 199.525,  500.,  999.970};
     for ( int i=0 ; i<= nBins ; i++) {
       xBin[i] = ptBin[i] ;
     }
@@ -141,13 +159,9 @@ void getXbin(int &nBins, double* xBin, int optX) {
 }
 
 void getXvalues( double &recoVarX, double &truthVarX, jetSubStr myJetMc, int optX) {
-  if ( optX == 1 ) {
+  if ( (optX == 1) || ( optX==2) ) {
     truthVarX = myJetMc.genPt;
     recoVarX = myJetMc.recoPt;
-  }
-  if ( optX == 2 )  {
-    recoVarX = myJetMc.nTrkRaw - myJetMc.nTrkBkg;
-    truthVarX = myJetMc.genNch;
   }
   if ( optX == 79 )  {
     recoVarX =  myJetMc.genPt;
@@ -171,13 +185,12 @@ void getYbin(int &nBins, double* yBin, int optY) {
       yBin[i] = massBin[i];
     }
   }
-  else if ( (optY==2) || (optY==8) ) {
+  else if ( (optY==2) || (optY==8) ) { // m/pT 
     nBins = 9;
-    double massBin[10] = { -0.2,0,0.03,0.06,0.09,0.12,0.15,0.18,0.24,0.3};
-    //    nBins = 9;
-    //    double massBin[10] = { -0.5,0,0.03,0.06,0.09,0.12,0.15,0.18,0.24,0.5};
-    for ( int i=0 ; i<= nBins ; i++) {
-      yBin[i] = massBin[i];
+    double massBinLog[10] = { -10000, -2.8, -2.6, -2.4, -2.2, -2, -1.8, -1.6, -1.2, -.8};
+    yBin[0] = -.5;
+    for ( int i=1 ; i<= nBins ; i++) {
+      yBin[i] = pow(10, massBinLog[i]/2);
     }
   }
   else if ( optY == 3) {
@@ -219,8 +232,8 @@ void getYbin(int &nBins, double* yBin, int optY) {
   }
   else if ( optY == 772) {
     // /*
-    nBins = 50;
-    double highY = 0.35;
+    nBins = 30;
+    double highY = 0.4;
     double lowY = -0.2;
     double massBin[101];
     for ( int i=0 ; i<= nBins ; i++) {
@@ -408,11 +421,11 @@ bool passEvent( jetSubStr myJetMc, int icent, bool isMC)  {
 
 bool passEtaCut( jetSubStr myJetMc, int etaBin) {
   int absEta = fabs(myJetMc.recoEta);
-  if (  (absEta < 0.4) && (etaBin == 0) )
+  if (  (absEta < 0.3) && (etaBin == 0) )
     return true;
-  if (  (absEta > 0.4) &&  (absEta < 1.2) && (etaBin == 1) )
+  if (  (absEta >= 0.3) &&  (absEta < 1.2) && (etaBin == 1) )
     return true;
-  if (  (absEta > 1.2) &&  (absEta < 2.1) && (etaBin == 2) )
+  if (  (absEta >= 1.2) &&  (absEta < 2.1) && (etaBin == 2) )
     return true;
   
   return false;
