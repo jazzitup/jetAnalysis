@@ -204,7 +204,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   
   TH2D* hReweight;
   if ( doReweight ) {
-    hReweight = getRewTable(kSample, icent);
+    hReweight = getRewTableEta(kSample, icent,etaBin);
   }
 
   TF1* fjmscal[30];
@@ -223,9 +223,9 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 
   
   TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
-  TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
-  TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
-  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
+  //  TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
+  //  TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
+  //s  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
   
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
@@ -293,22 +293,22 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   
   for ( int ijz =2 ; ijz<=4 ; ijz++) { 
     TTree* tr;
-    TH2D* hRecoEntries;
+    //    TH2D* hRecoEntries;
     double jzNorm=0;
     if ( ijz==2)  {
       tr = tr2;   
       jzNorm = hi9EvtWgtJZ2; 
-      hRecoEntries = recoEntries_jz2;
+      //      hRecoEntries = recoEntries_jz2;
     }
     else if ( ijz==3)  {
       tr = tr3;   
       jzNorm = hi9EvtWgtJZ3; 
-      hRecoEntries = recoEntries_jz3;
+      //      hRecoEntries = recoEntries_jz3;
     }
     else if ( ijz==4)  {
       tr = tr4;   
       jzNorm = hi9EvtWgtJZ4; 
-      hRecoEntries = recoEntries_jz4;
+      //      hRecoEntries = recoEntries_jz4;
     }
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
     

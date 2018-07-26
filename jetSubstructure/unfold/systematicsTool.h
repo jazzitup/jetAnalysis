@@ -1,5 +1,5 @@
 #include "../getSdHists.C"
-#include "../ntupleDefinition_v50.h"
+#include "../ntupleDefinition.h"
 #include "../commonUtility.h"
 #include "../jzWeight.h"
 #include "../JssUtils.h"

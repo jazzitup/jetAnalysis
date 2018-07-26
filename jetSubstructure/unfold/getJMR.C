@@ -161,14 +161,22 @@ void getMCJmr(int kSample, int icent, TH2D* hmc) {
   TString jz3;
   TString jz4;
   if ( kSample == kPbPb ) {
-    jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2_april11.root";
+    /*    jz2 = "jetSubstructure_MC_HION9_pbpb_v50_jz2_april11.root";
     jz3 = "jetSubstructure_MC_HION9_pbpb_v50_jz3_april11.root";
     jz4 = "jetSubstructure_MC_HION9_pbpb_v50_jz4_april11.root";
+    */
+    jz2 = "jetSubstructure_pbpbMC_HION9_jz2_v51_april124.root";
+    jz3 = "jetSubstructure_pbpbMC_HION9_jz3_v51_april124.root";
+    jz4 = "jetSubstructure_pbpbMC_HION9_jz4_v51_april124.root";
+
   }
   else if ( kSample == kPP ) {
-    jz2 = "jetSubstructure_MC_HION9_pp_v50_jz2_april11.root";
+    /*    jz2 = "jetSubstructure_MC_HION9_pp_v50_jz2_april11.root";
     jz3 = "jetSubstructure_MC_HION9_pp_v50_jz3_april11.root";
-    jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4_april11.root";
+    jz4 = "jetSubstructure_MC_HION9_pp_v50_jz4_april11.root";*/
+    jz2 = "jetSubstructure_ppMC_HION9_jz2_v52ppPYTHIA_may28.root";
+    jz3 = "jetSubstructure_ppMC_HION9_jz3_v52ppPYTHIA_may28.root";
+    jz4 = "jetSubstructure_ppMC_HION9_jz4_v52ppPYTHIA_may28.root";
   }
   
   

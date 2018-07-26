@@ -1,8 +1,12 @@
+double fracStst=1;
+bool doCal=1;
 
 #if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include <iostream>
 using std::cout;
 using std::endl;
+
+
 
 #include "TRandom.h"
 #include "TH1D.h"
@@ -25,7 +29,35 @@ using std::endl;
 #include "unfoldingUtil.h"
 #include <TGraphErrors.h>
 
-int lowPtBin = 5;
+
+struct valErr {
+  double val;
+  double err;
+};
+
+int lowPtBin = 1;
+int highPtBin = 7;
+
+valErr getMeanValue(TH1D* h1, double x1, double x2) {
+  valErr ret;
+  
+  TH1D* htemp = (TH1D*)h1->Clone("htemp");
+
+  int ix1 = htemp->FindBin(x1);
+  int ix2 = htemp->FindBin(x2);
+  
+  for ( int ix = 1 ; ix<= htemp->GetNbinsX() ; ix++) { 
+    
+    if ( (ix >= ix1) && ( ix<ix2) )  continue;
+    
+    htemp->SetBinContent(ix,0);
+    htemp->SetBinError(ix,0);
+  }
+  ret.val = htemp->GetMean();
+  ret.err = htemp->GetMeanError();
+
+  return ret;
+}
 
 bool selectedPt(int ipt = 0) {
   if ( ipt == lowPtBin ) return true;
@@ -34,14 +66,12 @@ bool selectedPt(int ipt = 0) {
   return false;
 }
 
-double fracStst=.1;
 
 
-bool doCal=false;  // NEVER turn this on!!
 
-void getDist( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hJMS=0, TH2D* hJMR=0, TH2D* hJES=0, TH2D* hJER=0, TH2D* hFineMpt=0, bool doReweight = true);
+void getDist( int kSample = kPbPb, int icent = 0, int optX=1, int optY=2, TH2D* hJMS=0, TH2D* hJMR=0, TH2D* hJMS2=0, TH2D* hJER=0, TH2D* hFineMpt=0, bool doReweight = true);
 
-void test(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doReweight=false) {
+void test(int kSample = kPbPb, int icent=0, int optX =80, int optY=80, bool doReweight=false) {
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -49,7 +79,6 @@ void test(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doReweig
   cout << " nXbins = " << nXbins << endl; 
   cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
   
-  int highPtBin = nXbins-1;
   
   int vColor[20] =   {1,20, 2, 38,40,41,4,44,46,6,4};
   int vStyle[20] =   {20,21,25,23,29,33,28,47,43};
@@ -73,12 +102,12 @@ void test(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doReweig
 
   TH2D* hJMS = new TH2D("hJMS",";p_{T} (GeV) ; m/p_{T}", nXbins, xBin, nYbins, yBin);
   TH2D* hJMR = (TH2D*)hJMS->Clone("hJMR");
-  TH2D* hJES = (TH2D*)hJMS->Clone("hJES");
+  TH2D* hJMS2 = (TH2D*)hJMS->Clone("hJMS2");
   TH2D* hJER = (TH2D*)hJMS->Clone("hJER");
-  TH2D* hFineMpt = new TH2D("hFineMpt",";p_{T} (GeV); m/p_{T}",nXbins, xBin, 500,0,0.3);
+  TH2D* hFineMpt = new TH2D("hFineMpt",";p_{T} (GeV); m/p_{T}",nXbins, xBin, 1000,0.9,1.1);
   
 
-  getDist(kSample, icent, optX, optY, hJMS, hJMR, hJES, hJER, hFineMpt, doReweight);
+  getDist(kSample, icent, optX, optY, hJMS, hJMR, hJMS2, hJER, hFineMpt, doReweight);
 
   
   TCanvas* c01 = new TCanvas("c01", "",800,400);
@@ -97,37 +126,48 @@ void test(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doReweig
   
   TF1* f1[20];
   TGraphErrors* gr[30];
+  TGraphErrors* grInv[30];
   double Rx[20];
   double Ry[20];
   double RxErr[20];
   double RyErr[20];
 
-  for ( int ix = lowPtBin+1 ; ix<=highPtBin ; ix++) { 
-    TH1D* hs = (TH1D*)hJES->ProjectionY(Form("hs_ix%d",ix),ix,ix);
+  double RyInv[20];
+  double RyInvErr[20];
+
+  for ( int ix = lowPtBin ; ix<=highPtBin ; ix++) { 
+    TH1D* hs = (TH1D*)hJMS->ProjectionY(Form("hs_ix%d",ix),ix,ix);
     handsomeTH1(hs,vColor[ix-lowPtBin]);
-    hs->SetXTitle("(m/p_{T})^{Truth}");
-    hs->SetYTitle("JES");
+    hs->SetXTitle("[m/p_{T}]^{2}_{Truth}");
+    hs->SetYTitle("JMS^2");
     hs->SetAxisRange(0.001,0.239,"X");
-    hs->SetAxisRange(0.,15,"Y");
+    hs->SetAxisRange(0.8,1.2,"Y");
     hs->SetNdivisions(505,"X");
     hs->SetNdivisions(505,"Y");
-    if ( ix == lowPtBin+1) hs->Draw();
+    if ( ix == lowPtBin) hs->Draw();
     else hs->Draw("same");
 
-    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]/sqrt(x) + [2]/x + [3]/sqrt(x*x*x) + [4]/(x*x)",0.01,0.24);
-    //    f1[ix]->SetParameter(0,8.5);
-    //    f1[ix]->SetParameter(1,-170);
-    hs->Fit(f1[ix]);//,"ll");
-    hs->GetFunction(f1[ix]->GetName())->SetLineColor(vColor[ix-lowPtBin]);
-    //    leg1s->AddEntry(hs, textBin(xBin,ix,"GeV").Data(),"pl" );
-
     TH1D* hFineMpt1d = (TH1D*)hFineMpt->ProjectionY(Form("_%d",ix),ix,ix);
-    for ( int im = 1 ; im <= hs->GetNbinsX() ; im++) {
-      Rx[im-1] = hs->GetBinCenter(im) * hs->GetBinContent(im);
-      RxErr[im-1] = 0.0001;
-      Ry[im-1] = hs->GetBinContent(im);
-      RyErr[im-1] = hs->GetBinError(im);
+    int nPoints=0;
+    for ( int im = 2 ; im <= hs->GetNbinsX() ; im++) {
+      valErr meanPair = getMeanValue(hFineMpt1d, hs->GetBinLowEdge(im), hs->GetBinLowEdge(im+1));
+      cout << " Range = " <<  hs->GetBinLowEdge(im) <<" - " << hs->GetBinLowEdge(im+1) << endl;
+      cout << "mean = " << meanPair.val << endl;
+
+      Rx[nPoints] = meanPair.val * hs->GetBinContent(im);
+      RxErr[nPoints] = meanPair.err * hs->GetBinContent(im);
+      Ry[nPoints] = hs->GetBinContent(im);
+      RyErr[nPoints] = hs->GetBinError(im);
+
+      RyInv[nPoints] = 1./Ry[nPoints];
+      RyInvErr[nPoints] = RyInv[nPoints] * ( RyErr[nPoints] / Ry[nPoints] ) ;
+      
+      nPoints++;
     }
+    gr[ix] = new TGraphErrors(nPoints, Rx,Ry,RxErr,RyErr);
+    grInv[ix] = new TGraphErrors(nPoints, Rx,RyInv,RxErr,RyInvErr);
+    handsomeTG1(gr[ix],vColor[ix-lowPtBin]);
+    handsomeTG1(grInv[ix],vColor[ix-lowPtBin]);
     
   }
   jumSun(0,1,0.36,1);
@@ -140,21 +180,118 @@ void test(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doReweig
 
 
 
+  ///////ys
+  
+  TCanvas* c3s = new TCanvas("c3s", "",500,500);
 
+  for ( int ix = lowPtBin ; ix<=highPtBin ; ix++) { 
+    TH1D* hs = (TH1D*)hJMS2->ProjectionY(Form("hs3_ix%d",ix),ix,ix);
+    handsomeTH1(hs,vColor[ix-lowPtBin]);
+    hs->SetXTitle("[m/p_{T}]^{2}_{Truth}");
+    hs->SetYTitle("JMS^2");
+    hs->SetAxisRange(0.001,0.239,"X");
+    hs->SetAxisRange(0,3,"Y");
+    hs->SetNdivisions(505,"X");
+    hs->SetNdivisions(505,"Y");
+    if ( ix == lowPtBin) hs->Draw();
+    else hs->Draw("same");
+  }
+  jumSun(0,1,0.36,1);
+  drawCentrality(kSample, icent, 0.2,0.85,1,25);
+  //  drawText("<p_{T}^{Reco}/p_{T}^{Truth}>", 0.2,0.78,1,25);
+  leg1s->Draw();
+ 
+  c3s->SaveAs(Form("jmsCalib/jms2_kSample%d_icent%d-3.pdf",kSample,icent));
+
+  //////ys
+
+
+
+  
+  
+  TLegend *leg2 = new TLegend(0.4673663,0.5040816,0.8668024,0.9040816,NULL,"brNDC");
+  easyLeg(leg2,"Jet p^{Reco}_{T}");
+
+  TCanvas* c4 = new TCanvas("c4","",1000,500);
+  c4->Divide(2,1);
+  c4->cd(1);
+  TH1D* htemp = new TH1D("htemp",";[m/p_{T}]^{2} * R;R",1000,0.99,1.2);
+  htemp->SetAxisRange(0.97,1.01,"Y");
+  htemp->DrawCopy();
+  //  gPad->SetLogy();
+  for ( int ix = lowPtBin ; ix<=highPtBin ; ix++) {
+    gr[ix]->Draw("same p");
+    leg2->AddEntry(gr[ix], textBin2(xBin,ix,"GeV").Data(),"pl" );
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]/sqrt(x) + [2]/x + [3]/sqrt(x*x*x)",0.01,0.24);
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + TMath::Exp(-x/[1])",0.01,0.24);
+    //  f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*log(x+1) + [2]*log(x+1)*log(x+1) + [3]*pow(log(x+1),3)",1,1.1);
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*log(x+0.05) + [2]*log(x+0.05)*log(x+0.05) + [3]*pow(log(x+0.05),3) + [4]*pow(log(x+0.05),4)",1,1.1);
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*log(x+0.1) + [2]*log(x+0.1)*log(x+0.1) + [3]*pow(log(x+0.1),3)",1,1.1);
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*log(x+0.1) + [2]*log(x+0.1)*log(x+0.1) + [3]*pow(log(x+0.1),3) + [4]*pow(log(x+0.1),4) +  [5]*pow(log(x+0.1),5)",1,1.1);
+    //f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*log(x+1) + [2]*log(x+1)*log(x+1) + [3]*pow(log(x+1),3) + [4]*pow(log(x+1),4) + [5]*pow(log(x+1),5) + [6]*pow(log(x+1),6)",1,1.1);
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*x + [2]*x*x + [3]*x*x*x + [4]*x*x*x*x",0.9,1.1);
+    //f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*x");
+
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*exp(x) + [2]*exp(x)*exp(x) + [3]*pow(exp(x),3) + [4]*pow(exp(x),4) +  [5]*pow(exp(x),5)",1,1.1);
+    
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*log(x-0.5) + [2]*TMath::Power(log(x-0.5),2) + [3]*TMath::Power(log(x-0.5),3) + [4]*TMath::Power(log(x-0.5),4)",0.1,2);
+    //    f1[ix-0.5] = new TF1(Form("f1_kSample%d_icent%d_ix-0.5%d",kSample,icent,ix-0.5),"[0] + [1]*log(x+0.1) + [2]*log(x+0.1)*log(x+0.1) + [3]*pow(log(x+0.1),3)",0.1,2);
+
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*((x-1)*100) + [2]*((x-1)*100)*((x-1)*100) + [3]*((x-1)*100)*((x-1)*100)*((x-1)*100) + [4]*((x-1)*100)*((x-1)*100)*((x-1)*100)*((x-1)*100) + [5]*((x-1)*100)*((x-1)*100)*((x-1)*100)*((x-1)*100)*((x-1)*100)",0.1,2);
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*((x-1)*100) + [2]*pow((x-1)*100,2) + [3]*pow((x-1)*100,3) + [4]*pow((x-1)*100,4) + [5]*pow((x-1)*100,5)",0.1,2);
+    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*((x-1)*100) + [2]*pow((x-1)*100,2) + [3]*pow((x-1)*100,3) + [4]*pow((x-1)*100,4) + [5]*pow((x-1)*100,5)",0.1,2);
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*((x-1)*100) + [2]*pow((x-1)*100,2) + [3]*pow((x-1)*100,3) + [4]*pow((x-1)*100,4)",0.1,2);
+    //    f1[ix] = new TF1(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix),"[0] + [1]*(log( (x-0.9)*100)) + [2]*pow(log( (x-0.9)*100),2) + [3]*pow(log( (x-0.9)*100),3) + [4]*pow(log( (x-0.9)*100),4)",0.1,2);
+    f1[ix]->SetParameter(0,1);
+    f1[ix]->SetParameter(1,-1.11701e-02);
+    f1[ix]->SetParameter(2,9.14425e-03);
+    f1[ix]->SetParameter(3,-3.64883e-03);
+    f1[ix]->SetParameter(4,6.89351e-04);
+    f1[ix]->SetParameter(5,-5.01971e-05);
+    //    f1[ix]->SetParameter(6,0);
+
+    if ( !doCal) { 
+      
+
+      gr[ix]->Fit(f1[ix],"M");
+      //      gr[ix]->Fit(f1[ix]);
+      gr[ix]->GetFunction(f1[ix]->GetName())->SetLineColor(vColor[ix-lowPtBin]);
+    }
+    
+  }
+  //  leg2->Draw();
+
+  c4->cd(2);
+  htemp->SetAxisRange(0,3.2,"Y");
+  htemp->SetYTitle("1/R");
+  htemp->DrawCopy();
+  for ( int ix = lowPtBin ; ix<=highPtBin ; ix++) {
+    grInv[ix]->Draw("same p");
+  }
+  leg2->Draw();
+
+  if ( !doCal) {
+    TFile* foutJMS = new TFile(Form("jmsCalib/jmsCorrectionFactor_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY),"recreate");
+    for ( int ix = lowPtBin ; ix<=highPtBin ; ix++) {
+      gr[ix]->GetFunction(f1[ix]->GetName())->Write();
+    }
+    foutJMS->Close();
+  }
+  
   // resolution 
 
   TCanvas* c3a = new TCanvas("c3a", "",500,500);
 
-  for ( int ix = lowPtBin+1 ; ix<=highPtBin ; ix++) { 
-    TH1D* hr = (TH1D*)hJER->ProjectionY(Form("hr_ix%d",ix),ix,ix);
+  for ( int ix = lowPtBin ; ix<=highPtBin ; ix++) { 
+    TH1D* hr = (TH1D*)hJMR->ProjectionY(Form("hr_ix%d",ix),ix,ix);
     handsomeTH1(hr,vColor[ix-lowPtBin]);
     hr->SetXTitle("(m/p_{T})^{Truth}");
-    hr->SetYTitle("JER");
+    hr->SetYTitle("JMR");
     hr->SetAxisRange(0.001,0.239,"X");
-    hr->SetAxisRange(0,8,"Y");
+    hr->SetAxisRange(0,0.01,"Y");
     hr->SetNdivisions(505,"X");
     hr->SetNdivisions(505,"Y");
-    if ( ix == lowPtBin+1) hr->Draw();
+    if ( ix == lowPtBin) hr->Draw();
     else hr->Draw("same");
   }
   drawCentrality(kSample, icent, 0.2,0.85,1,25);
@@ -197,11 +334,11 @@ void test(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doReweig
   ATLASLabel(0.23,0.88,"Simulation Preliminary",0.05,0.16);
   drawText("#sqrt{#font[12]{s}} = 5.02 TeV", 0.23, 0.82,1,25);
   drawCentrality(kSample, icent, 0.23,0.76,1,25);
-
-  //  if ( !doCal )
-    //    drawText("Before Calibration",0.2,0.77,4,22);
-    //  else 
-    //    drawText("After mass Calibration",0.2,0.77,4,22);
+  
+  if ( !doCal )
+    drawText("Before Calibration",0.2,0.77,4,22);
+  else 
+    drawText("After mass Calibration",0.2,0.77,4,22);
   
   
   //  drawText("<m/p_{T}]>", 0.2,0.78,1,25);
@@ -211,15 +348,12 @@ void test(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doReweig
 
   TCanvas* c3 = new TCanvas("c3", "",500,500);
 
-  TLegend *leg2 = new TLegend(0.2108434,0.56,0.6084337,0.7347368,NULL,"brNDC");
-  easyLeg(leg2,"Jet p_{T}");
-  
   for ( int ix = lowPtBin ; ix<=highPtBin ; ix++) { 
     if ( !selectedPt(ix) ) continue;
 
     TH1D* hr = (TH1D*)hJMR->ProjectionY(Form("hr_ix%d",ix),ix,ix);
     handsomeTH1(hr,vColor[ix-lowPtBin],1,vStyle[ix-lowPtBin]);
-    
+
     handsomeTH1(hr,vColor[ix-lowPtBin],1,vStyle[ix-lowPtBin]);
     hr->SetXTitle("(m/p_{T})_{Truth}");
     hr->SetYTitle("#sigma[(m/p_{T})^{2}_{Reco}]");
@@ -230,7 +364,6 @@ void test(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doReweig
     hr->SetNdivisions(505,"Y");
     if ( ix == lowPtBin) hr->Draw();
     else hr->Draw("same");
-    leg2->AddEntry(hr, textBin2(xBin,ix,"GeV").Data(),"pl" );
   }
 
   //  jumSun(0,0,0.36,0);
@@ -238,13 +371,12 @@ void test(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doReweig
   drawText("#sqrt{#font[12]{s}} = 5.02 TeV", 0.23, 0.82,1,25);
   drawCentrality(kSample, icent, 0.23,0.76,1,25);
   //  drawText("#sigma[m/p_{T}]", 0.2,0.78,1,25);
-  leg2->Draw();
   c3->SaveAs(Form("jmsCalib/jmr_kSample%d_icent%d-3.pdf",kSample,icent));
 
 
 }
 
-void getDist( int kSample, int icent, int optX, int optY, TH2D* hJMS, TH2D* hJMR, TH2D* hJES, TH2D* hJER, TH2D* hFineMpt, bool doReweight ) { 
+void getDist( int kSample, int icent, int optX, int optY, TH2D* hJMS, TH2D* hJMR, TH2D* hJMS2, TH2D* hJER, TH2D* hFineMpt, bool doReweight ) { 
   
   double radius = 0.4;
   
@@ -309,7 +441,6 @@ void getDist( int kSample, int icent, int optX, int optY, TH2D* hJMS, TH2D* hJMR
   double xBin[30];
   getXbin(nXbins, xBin, optX);
 
-  int highPtBin = nXbins-1;
 
   int nYbins ;
   double yBin[30] ;
@@ -323,23 +454,45 @@ void getDist( int kSample, int icent, int optX, int optY, TH2D* hJMS, TH2D* hJMR
   //  TH1D* hDist[20][20]; // gen pT  // gen m/pT
   //  TH1D* hDistReco[20][20]; // gen pT  // gen m/pT
   TH1D* hDistJms[20][20]; // gen pT  // gen m/pT
+  TH1D* hDistJms2[20][20]; // gen pT  // gen m/pT
+  TH1D* hDistMpt2[20][20]; // gen pT  // gen m/pT
   for ( int ix = 0 ; ix <= nXbins+1   ;  ix++) {
     for ( int iy = 0 ; iy <= nYbins+1 ; iy++) {
       //      hDist[ix][iy] = new TH1D(Form("hDist_ix%d_iy%d",ix,iy),";(m/p_{T})^{Reco} - (m/p_{T})^{Truth};", 100,-3,10);
       //      hDistJms[ix][iy] = new TH1D(Form("hDistJms_ix%d_iy%d",ix,iy),";p_{T}^{Reco}/p_{T}^{Truth};", 100,0,2);
       //      hDist[ix][iy] = new TH1D(Form("hDist_ix%d_iy%d",ix,iy),";(m/p_{T})^{Reco} - (m/p_{T})^{Truth};", 100,-0.05,0.15);
       //      hDistReco[ix][iy] = new TH1D(Form("hDistReco_ix%d_iy%d",ix,iy),";(m/p_{T})^{Reco} - (m/p_{T})^{Truth};", 200,-0.2,0.4);
-      if ( iy >= 6)  hDistJms[ix][iy] = new TH1D(Form("hDistJms_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco} / [m/p_{T}]^2_{Truth};", 50,-0.5,2);
-      else if ( iy >= 4)  hDistJms[ix][iy] = new TH1D(Form("hDistJms_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco} / [m/p_{T}]^2_{Truth};", 40,-1,5);
-      else if ( iy >= 3)  hDistJms[ix][iy] = new TH1D(Form("hDistJms_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco} / [m/p_{T}]^2_{Truth};", 30,-5,20);
-      else hDistJms[ix][iy] = new TH1D(Form("hDistJms_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco} / [m/p_{T}]^2_{Truth};", 30,-20,50);
+
+      /*      m/pT^2
+	      
+	      if ( iy >= 6)  hDistJms[ix][iy] = new TH1D(Form("hDistJms_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco} / [m/p_{T}]^2_{Truth};", 50,-0.5,3);
+	      else if ( iy >= 4)  hDistJms[ix][iy] = new TH1D(Form("hDistJms_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco} / [m/p_{T}]^2_{Truth};", 40,-1,10);
+	      else if ( iy >= 3)  hDistJms[ix][iy] = new TH1D(Form("hDistJms_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco} / [m/p_{T}]^2_{Truth};", 30,-5,40);
+	      else hDistJms[ix][iy] = new TH1D(Form("hDistJms_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco} / [m/p_{T}]^2_{Truth};", 30,-20,100);
+      */
+      
+      int theNbins = 120;  float t1 = 0.98;  float t2 = 1.02;
+      if ( iy<=2 ) 	  theNbins = 120; 
+      else if ( iy<=4 )   theNbins = 60;  
+      else    	          theNbins = 30;  
+      
+      hDistJms[ix][iy] = new TH1D(Form("hDistJms_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco} / [m/p_{T}]^2_{Truth};", theNbins, t1, t2);
+
+      if ( iy<=2 )   hDistJms2[ix][iy] = new TH1D(Form("hDistJms2_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco} / [m/p_{T}]^2_{Truth};", 60, -3,8);
+      else if ( iy<=5 )   hDistJms2[ix][iy] = new TH1D(Form("hDistJms2_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco} / [m/p_{T}]^2_{Truth};", 100, -1,4);
+      else if ( iy<=7)  hDistJms2[ix][iy] = new TH1D(Form("hDistJms2_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco} / [m/p_{T}]^2_{Truth};", 100, 0,2);
+      else   hDistJms2[ix][iy] = new TH1D(Form("hDistJms2_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco} / [m/p_{T}]^2_{Truth};", 50, 0,2);
+
+      hDistMpt2[ix][iy] = new TH1D(Form("hDistMpt2_ix%d_iy%d",ix,iy),";[m/p_{T}]^2_{Reco};", 100,0.9,1.1);
+
     }
   }
 
-  TFile* fin = new TFile(Form("fJMScalibration_kSample%d_icent%d_num.root",0,0));
   TF1* fjmscal[30];
   if ( doCal) {  
-    for ( int ix = lowPtBin ; ix<=highPtBin ; ix++) { 
+    
+    TFile* fin = new TFile(Form("jmsCalib/jmsCorrectionFactor_kSample0_icent%d_optX%d_optY%d.root", icent,optX,optY));
+    for ( int ix = lowPtBin  ; ix<=highPtBin ; ix++) { 
       //      fjmscal[ix] = (TF1*)fin->Get(Form("f1_kSample%d_icent%d_ix%d",kSample,icent,ix));
       fjmscal[ix] = (TF1*)fin->Get(Form("f1_kSample0_icent0_ix%d",ix));
     }
@@ -389,37 +542,32 @@ void getDist( int kSample, int icent, int optX, int optY, TH2D* hJMS, TH2D* hJMR
 	rewFact = hReweight->GetBinContent(rewBin);
       }
       
-      int xx = xBinTemp->FindBin( truthVarX);
+      int xx = xBinTemp->FindBin( recoVarX);
+      //      int xx = xBinTemp->FindBin( truthVarX);
       
       int yy = yBinTemp->FindBin( truthVarY);
       //int yy = yBinTemp->FindBin( recoVarY);
       
-      /*      double calFac = 1;
+      double calFac = 1;
       if (  ( xx <= highPtBin  ) && ( xx>=lowPtBin) ) { 
 	if ( doCal) {
-	  if ( recoVarY < 0 ) 
-	    calFac = fjmscal[xx]->Eval(0);
-	  else if ( recoVarY > 0.25 ) 
-	    calFac = fjmscal[xx]->Eval(0.25);
-	  else 
-	    calFac = fjmscal[xx]->Eval(recoVarY);
-
+	  //	  if ( recoVarY < 0 ) 
+	  //	    calFac = fjmscal[xx]->Eval(0.000001);
+	  //	  else if ( recoVarY > 0.25 ) 
+	  //	    calFac = fjmscal[xx]->Eval(0.25);
+	  //	  else 
+	  calFac = fjmscal[xx]->Eval(recoVarY);
 	  recoVarY = recoVarY / calFac;
 	}
-	}
-      */
-      double signFlipM2 = recoVarY*recoVarY;
-      if ( recoVarY < 0) signFlipM2 = - signFlipM2;
-      double truthM2 = truthVarY*truthVarY;
-      
+      }
+      //      cout << " calFac = " << calFac << endl;
       float theWeight = myJetMc.weight * rewFact * jzNorm;
+      hDistJms[xx][yy]->Fill( recoVarY / truthVarY, theWeight );
+      hDistJms2[xx][yy]->Fill( (recoVarY-1) / (truthVarY-1), theWeight );
+      hDistMpt2[xx][yy]->Fill( recoVarY, theWeight );
 
-      //      hDist[xx][yy]->Fill(  signFlipM2 - truthM2, theWeight)  ;
-      //      hDistReco[xx][yy]->Fill(signFlipM2, theWeight );
-      hDistJms[xx][yy]->Fill( signFlipM2 / truthM2, theWeight );
-      
       hFineMpt->Fill( truthVarX, truthVarY, theWeight);
-
+      
     }
     
   }
@@ -428,8 +576,13 @@ void getDist( int kSample, int icent, int optX, int optY, TH2D* hJMS, TH2D* hJMR
     for ( int iy = 1 ; iy <= nYbins ; iy++)  {
       //      hDist[ix][iy]->Fit("gaus");
       //      hDistReco[ix][iy]->Fit("gaus");
-      hDistJms[ix][iy]->Fit("gaus");
-
+      int peakBin  = hDistJms[ix][iy]->GetMaximumBin();
+      double peak =  hDistJms[ix][iy]->GetBinCenter(peakBin);
+      double sigma = hDistJms[ix][iy]->GetRMS();
+      cout << " peak = " << peak << endl;
+      cout << " sigma = " << sigma << endl;;
+      hDistJms[ix][iy]->Fit("gaus","","",peak-sigma,peak+sigma);
+      //      hDistJms[ix][iy]->Fit("gaus");
       if ( hDistJms[ix][iy]->GetFunction("gaus") == NULL ) {
 	hJMS->SetBinContent(ix,iy,-100);
 	hJMS->SetBinError(ix,iy,-100);
@@ -443,54 +596,86 @@ void getDist( int kSample, int icent, int optX, int optY, TH2D* hJMS, TH2D* hJMR
 	float theJMSerr = hDistJms[ix][iy]->GetFunction("gaus")->GetParError(1);
 	float theJMR = hDistJms[ix][iy]->GetFunction("gaus")->GetParameter(2);
 	float theJMRerr = hDistJms[ix][iy]->GetFunction("gaus")->GetParError(2);
+	// fill square root of it. 
+
 	hJMS->SetBinContent(ix,iy,theReco);
 	hJMS->SetBinError(ix,iy,theRecoErr);
 	hJMR->SetBinContent(ix,iy,theJMR);
 	hJMR->SetBinError(ix,iy,theJMRerr);
       }
-    }
-  }
-  
-  for ( int ix = 1 ; ix <= nXbins ; ix++) {
-    for ( int iy = 1 ; iy <= nYbins ; iy++)  {
-      hDistJms[ix][iy]->Fit("gaus");
-      if ( hDistJms[ix][iy]->GetFunction("gaus") == NULL ) {
-        hJES->SetBinContent(ix,iy,-100);
-        hJES->SetBinError(ix,iy,-100);
-        hJER->SetBinContent(ix,iy,-100);
-        hJER->SetBinError(ix,iy,-100);
+
+
+      int peakBin2  = hDistJms2[ix][iy]->GetMaximumBin();
+      double peak2 =  hDistJms2[ix][iy]->GetBinCenter(peakBin2);
+      double sigma2 = hDistJms2[ix][iy]->GetRMS();
+      hDistJms2[ix][iy]->Fit("gaus","","",peak2-sigma2,peak2+sigma2);
+
+      if ( hDistJms2[ix][iy]->GetFunction("gaus") == NULL ) {
       }
       else {
-        float theJMS = hDistJms[ix][iy]->GetFunction("gaus")->GetParameter(1);
-        float theJMSerr = hDistJms[ix][iy]->GetFunction("gaus")->GetParError(1);
-        float theJMR = hDistJms[ix][iy]->GetFunction("gaus")->GetParameter(2);
-        float theJMRerr = hDistJms[ix][iy]->GetFunction("gaus")->GetParError(2);
-        hJES->SetBinContent(ix,iy,theJMS);
-        hJES->SetBinError(ix,iy,theJMSerr);
-        hJER->SetBinContent(ix,iy,theJMR);
-        hJER->SetBinError(ix,iy,theJMRerr);
+	float theJMS =   hDistJms2[ix][iy]->GetFunction("gaus")->GetParameter(1);
+	float theJMSerr = hDistJms2[ix][iy]->GetFunction("gaus")->GetParError(1);
+	float theJMR = hDistJms2[ix][iy]->GetFunction("gaus")->GetParameter(2);
+	float theJMRerr = hDistJms2[ix][iy]->GetFunction("gaus")->GetParError(2);
+	// fill square root of it. 
+
+	hJMS2->SetBinContent(ix,iy,theJMS);
+	hJMS2->SetBinError(ix,iy,theJMSerr);
+	//	hJMR2->SetBinContent(ix,iy,theJMR);
+	//	hJMR2->SetBinError(ix,iy,theJMRerr);
       }
+
+
     }
   }
   
+  TCanvas* cDist = new TCanvas("cDist","",1200,500);
+  cDist->Divide(5,2);
   for ( int ix = 1 ; ix <= nXbins ; ix++) {
-    TCanvas* cDist = new TCanvas("cDist","",1200,500);
-    cDist->Divide(5,2);
-    for ( int iy = 1 ; iy <= nYbins ; iy++)  {
-      cDist->cd(iy);
-      cleverRange(hDistJms[ix][iy],1.5);
+    for ( int iy = 2 ; iy <= nYbins ; iy++)  {
+      cDist->cd(iy-1);
+      cleverRange(hDistJms[ix][iy],1.5,0.00000001);
       hDistJms[ix][iy]->Draw();
-      drawBinPt(xBin,ix,"GeV", 0.35 ,0.88,1,18);
-      drawBinMpt(yBin,iy,"", 0.35 ,0.8,1,18);
+      drawBinPt(xBin,ix,"GeV", 0.25 ,0.88,1,18);
+      drawBinMpt2(yBin,iy,"", 0.25 ,0.8,1,18);
     }
     cDist->SaveAs(Form("jmsCalib/m2scale_pt%d_kSample%d.png",ix,kSample));
   }
+  
+  TCanvas* cDist2 = new TCanvas("cDist2","",1200,500);
+  cDist2->Divide(5,2);
+  for ( int ix = 1 ; ix <= nXbins ; ix++) {
+    for ( int iy = 2 ; iy <= nYbins ; iy++)  {
+      cDist2->cd(iy-1);
+      cleverRange(hDistJms[ix][iy],1.5,0.00000001);
+      hDistJms2[ix][iy]->Draw();
+      drawBinPt(xBin,ix,"GeV", 0.25 ,0.88,1,18);
+      drawBinMpt2(yBin,iy,"", 0.25 ,0.8,1,18);
+    }
+    cDist2->SaveAs(Form("jmsCalib/m2scale2_pt%d_kSample%d.png",ix,kSample));
+  }
 
+
+  TCanvas* cDistMpt = new TCanvas("cDistMpt","",1200,500);
+  cDistMpt->Divide(5,2);
+  for ( int ix = 1 ; ix <= nXbins ; ix++) {
+    for ( int iy = 2 ; iy <= nYbins ; iy++)  {
+      cDistMpt->cd(iy-1);
+      cleverRange(hDistMpt2[ix][iy],1.5,0.00000001);
+      hDistMpt2[ix][iy]->Draw();
+      drawBinPt(xBin,ix,"GeV", 0.25 ,0.88,1,18);
+      drawBinMpt2(yBin,iy,"", 0.25 ,0.8,1,18);
+    }
+    cDist->SaveAs(Form("jmsCalib/mpt2reco_pt%d_kSample%d.png",ix,kSample));
+  }
+  
+  
   TFile* foutJMS = new TFile(Form("jmsCalib/jms_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY),"recreate");
   for ( int ix = 1 ; ix <= nXbins ; ix++) {
-    for ( int iy = 1 ; iy <= nYbins ; iy++)  {
+    for ( int iy = 2 ; iy <= nYbins ; iy++)  {
       //      hDist[ix][iy]->Write();
       hDistJms[ix][iy]->Write();
+      hDistMpt2[ix][iy]->Write();
     }
   }
   hFineMpt->Write();

@@ -25,15 +25,15 @@ using std::endl;
 #include "unfoldingUtil.h"
 #include <TGraphErrors.h>
 
-double fracStst=0.01;
+double fracStst=0.05;
 
 int lowPtBin = 5;
 
-bool doCal=true;
+bool doCal=false;
 
 void getDist( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hJMS=0, TH2D* hJMR=0, TH2D* hJES=0, TH2D* hJER=0, bool doReweight = true);
 
-void getJMS(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doReweight=false) {
+void getJMS(int kSample = kPP, int icent=0, int optX =1, int optY=79, bool doReweight=false) {
   TH1::SetDefaultSumw2();
   int nXbins;
   double xBin[30];
@@ -121,8 +121,11 @@ void getJMS(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doRewe
 
   //  drawText("<m/p_{T}]>", 0.2,0.78,1,25);
   leg1->Draw();
-  c2->SaveAs(Form("jms/jms_kSample%d_icent%d.pdf",kSample,icent));
-  
+  //  c2->SaveAs(Form("jms/jms_kSample%d_icent%d.pdf",kSample,icent));
+  c2->SaveAs(Form("JMS_vs_truthpT_ksample%d_icent%d_doCal%d.pdf",kSample,icent,(int)doCal));
+
+  return;
+
   TCanvas* c4 = new TCanvas("c4","",500,500);
   TH1D* htemp = new TH1D("htemp",";m/p_{T} * R;R",100,0,0.3);
   htemp->SetAxisRange(0,5.2,"Y");
@@ -140,8 +143,8 @@ void getJMS(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doRewe
     f1[ix]->SetParameter(5,-630);
     
 
-    //    gr[ix]->Fit(f1[ix],"ll");
-    //    gr[ix]->GetFunction(f1[ix]->GetName())->SetLineColor(vColor[ix-lowPtBin]);
+    gr[ix]->Fit(f1[ix],"ll");
+    gr[ix]->GetFunction(f1[ix]->GetName())->SetLineColor(vColor[ix-lowPtBin]);
     
   }  
   if ( !doCal)    
@@ -154,9 +157,8 @@ void getJMS(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doRewe
   fout->Close();
   //  }
   
-  c2->SaveAs(Form("JMS_vs_truthpT_ksample%d_icent%d_doCal%d.pdf",kSample,icent,(int)doCal));
   
-  return;
+  
   
   TCanvas* c3 = new TCanvas("c3", "",500,500);
   TLegend *leg2 = new TLegend(0.5061446,0.6142105,0.9599598,0.915789,NULL,"brNDC");
@@ -182,9 +184,9 @@ void getJMS(int kSample = kPP, int icent=0, int optX =1, int optY=2, bool doRewe
   drawText("#sigma[m/p_{T}]", 0.2,0.78,1,25);
   leg2->Draw();
   c3->SaveAs(Form("jms/jmr_kSample%d_icent%d.pdf",kSample,icent));
-
-
-
+  
+  
+  
   TCanvas* c2s = new TCanvas("c2s", "",500,500);
   TLegend *leg1s = new TLegend(0.5061446,0.6142105,0.9599598,0.915789,NULL,"brNDC");
   easyLeg(leg1s,"Jet p_{T}");

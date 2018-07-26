@@ -26,7 +26,7 @@ int findMbin(double mpt=0) {
 
 
 TH2D* getRewTable(int kSample, int icent)  { 
-  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50.root"); // Default, set in Apr 7
+  TFile* fReweight = new TFile("reweightFactorsEta/reweightingFactor_weightCut10_flucCut0.3_factorized_v60.root"); // Default, set in Apr 7
   // int nSys = 210;  TFile* fReweight = new TFile(Form("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50_nSys%d.root",nSys));   cout << " Using nSys = " << nSys << "table!! " << endl << endl << endl;
 
   //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized.root"); // Mar 28
@@ -39,7 +39,7 @@ TH2D* getRewTable(int kSample, int icent)  {
 }
 
 TH2D* getRewTableEta(int kSample, int icent, int etaBin)  { 
-  TFile* fReweight = new TFile(Form("reweightFactorsEta/reweightingFactor_etaBin%d_weightCut10_opt772_flucCut0.3_factorized_v60.root",etaBin)); // Default, set in Apr 7
+  TFile* fReweight = new TFile(Form("reweightFactorsEta/reweightingFactor_etaBin%d_weightCut10_flucCut0.3_factorized_v60.root",etaBin)); // Default, set in Apr 7
   TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio2_kSample%d_icent%d",kSample,icent));  // 00 default
   return hTemp;
 }
@@ -128,10 +128,35 @@ void getXbin(int &nBins, double* xBin, int optX) {
       xBin[i] = ptBin[i] ;
     }
   }
-  
-  
-  
 
+  else if ( optX == 21) { //  21 is reserved for calibration 
+    nBins = 6;  // default
+    double ptBin[7]={100.000, 126, 158, 200,  251,  316.224,  500};
+    for ( int i=0 ; i<= nBins ; i++) {
+      xBin[i] = ptBin[i] ;
+    }
+  }
+  else if ( optX == 210) { //  21, etabin =2 
+    nBins = 6;  // default
+    double ptBin[7]={100.000, 126, 158, 200,  251,  316.224, 500};
+    for ( int i=0 ; i<= nBins ; i++) {
+      xBin[i] = ptBin[i] ;
+    }
+  }
+  else if ( optX == 211) { //  21, etabin =2 
+    nBins = 6;  // default
+    double ptBin[7]={100.000, 126, 158, 200,  251,  316.224, 500};
+    for ( int i=0 ; i<= nBins ; i++) {
+      xBin[i] = ptBin[i] ;
+    }
+  }
+  else if ( optX == 212) { //  21, etabin =2 
+    nBins = 5;  // default
+    double ptBin[6]={100.000, 126, 158, 200,  251,  316.224};
+    for ( int i=0 ; i<= nBins ; i++) {
+      xBin[i] = ptBin[i] ;
+    }
+  }
   else if ( optX == 77) {// reweighting 
     nBins = 8;  // default
     double ptBin[10]={100.000, 125.892,  158.488,  199.525,  251.186,  316.224,  398.101,  500., 999.970};
@@ -159,7 +184,7 @@ void getXbin(int &nBins, double* xBin, int optX) {
 }
 
 void getXvalues( double &recoVarX, double &truthVarX, jetSubStr myJetMc, int optX) {
-  if ( (optX == 1) || ( optX==2) ) {
+  if ( (optX == 1) || ( optX==2) || ( optX==3) ) {
     truthVarX = myJetMc.genPt;
     recoVarX = myJetMc.recoPt;
   }
@@ -193,6 +218,16 @@ void getYbin(int &nBins, double* yBin, int optY) {
       yBin[i] = pow(10, massBinLog[i]/2);
     }
   }
+  else if ( optY == 21) { //  21 is reserved for calibration.  Used only for Truth m/pT 
+    nBins = 9;
+    double massBinLog[20] = { -10000, -2.8, -2.6, -2.4, -2.2, -2, -1.8, -1.6, -1.2, -.8}; 
+    yBin[0] = 0;  
+    for ( int i=1 ; i<= nBins ; i++) {
+      yBin[i] = pow(10, massBinLog[i]/2);
+    }
+  }
+  
+  
   else if ( optY == 3) {
     nBins = 10;
     double massBin[11] = { -0.5,-0.05,0,0.05,0.1,0.13,0.16,0.2,0.24,0.3,0.5};
@@ -361,7 +396,7 @@ void getYvalues( double &recoVarY, double &truthVarY, jetSubStr myJetMc, int opt
 
 bool passGenEvent( jetSubStr myJetMc, int icent)  {
 
-  double ptCutGen = 20;
+  double ptCutGen = 60;
   double ptCutUpGen = 1000;
   
   if ( myJetMc.cent != icent )
@@ -373,11 +408,6 @@ bool passGenEvent( jetSubStr myJetMc, int icent)  {
   if ( myJetMc.genPt > ptCutUpGen ) 
     return false;
 
-  if ( (myJetMc.recoMass / myJetMc.recoPt) > 0.3  )
-    return false;
-  if ( (myJetMc.recoMass / myJetMc.recoPt) < -0.2 )
-    return false;
-  
   return true;
   
 }
@@ -396,13 +426,6 @@ bool passRecoEvent( jetSubStr myJetMc, int icent)  {
 
   if ( myJetMc.recoPt > ptCutUp )
     return false;
-
-  if ( (myJetMc.recoMass / myJetMc.recoPt) > 0.3  )
-    return false;
-  if ( (myJetMc.recoMass / myJetMc.recoPt) < -0.2 )
-    return false;
-  
-  
   
   return true;
 
@@ -449,11 +472,6 @@ bool passJesEvent( jetSubStr myJetMc, int icent)  {
   if ( myJetMc.recoPt > ptCutUp )
     return false;
 
-  if ( (myJetMc.recoMass / myJetMc.recoPt) > 0.3  )
-    return false;
-  if ( (myJetMc.recoMass / myJetMc.recoPt) < -0.2 )
-    return false;
-  
   return true;
 
 }

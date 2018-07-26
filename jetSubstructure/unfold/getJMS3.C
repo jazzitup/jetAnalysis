@@ -34,7 +34,7 @@ bool selectedPt(int ipt = 0) {
   return false;
 }
 
-double fracStst=1;
+double fracStst=0.1;
 
 
 bool doCal=false;  // NEVER turn this on!!

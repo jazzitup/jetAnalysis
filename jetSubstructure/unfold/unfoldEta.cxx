@@ -210,9 +210,9 @@ void unfoldEta(int kSample = kPP, int optX =1, int optY=2, int etaBin=0, bool do
     }
   }
   
-  TString foutName = Form("unfSpectraEta/kSample%d_etaBin%d_matrixRwt%d_spectraRwt%d.root",kSample,etaBin,matrixWeight,doReweight); 
+  TString foutName = Form("unfSpectraEta/kSample%d_etaBin%d_matrixRwt%d_spectraRwt%d_optX%d_optY%d.root",kSample,etaBin,matrixWeight,doReweight,optX,optY); 
   if ( nSys >=0 ) { 
-    foutName = Form("unfSpectraEta/sys/kSample%d_etaBin%d_matrixRwt%d_spectraRwt%d_sys%d.root",kSample,etaBin,matrixWeight,doReweight,nSys);
+    foutName = Form("unfSpectraEta/sys/kSample%d_etaBin%d_matrixRwt%d_spectraRwt%d_sys%d_optX%d_optY%d.root",kSample,etaBin,matrixWeight,doReweight,nSys,optX,optY);
   }
     
 
@@ -305,7 +305,8 @@ void getMCspectra(int kSample, int icent, int optX, int optY, TH2D* hmcRaw, TH2D
   TTree* tr4 = (TTree*)fjz4->Get("tr");
   tr4->SetBranchAddress("jets", &(myJetMc.cent), &b_myJetSubMc);
 
-  for ( int ijz =2 ; ijz<=4 ; ijz++) {
+  for ( int ijz =2 ; ijz<=2 ; ijz++) {
+    //for ( int ijz =2 ; ijz<=4 ; ijz++) {
     TTree* tr;
     //    TH2D* hRecoEntries;
     double jzNorm=0;

@@ -16,7 +16,7 @@ double statUsed = 0001;
 
 
 
-void compareJmsInPPPbPb(  int icent = 0,   int kOpt=1, int optX = 1,   int optY =2 ) { 
+void compareJmsInPPPbPb(  int icent = 0,   int kOpt=1, int optX = 2,   int optY =2 ) { 
 
   
   int nXbins;
@@ -42,36 +42,42 @@ void compareJmsInPPPbPb(  int icent = 0,   int kOpt=1, int optX = 1,   int optY 
   TH1D* hJMR1[20];
 
   
-  TFile* fmc0 = new TFile(Form("jmsCalib/jms_kSample0_icent%d_optX%d_optY%d.root",icent,optX,optY));
+  TFile* fmc0 = new TFile(Form("jmsCalib/jms_kSample0_icent%d_etaBin0_optX%d_optY%d.root",icent,optX,optY));
   for ( int ix = 1 ; ix <= nXbins ; ix++) {
-    for ( int iy = 1 ; iy <= nYbins ; iy++)  {
-      hDistJes0[ix][iy] = (TH1D*)fmc0->Get(Form("hDistJes_ix%d_iy%d",ix,iy));
+    for ( int iy = 2 ; iy <= nYbins ; iy++)  {
+      hDistJes0[ix][iy] = (TH1D*)fmc0->Get(Form("hDistJms_ix%d_iy%d",ix,iy));
       hDistJes0[ix][iy]->SetXTitle("[m/p_{T}]_{Reco}^{2} / [m/p_{T}]_{Truth}^{2}");
       scaleInt(hDistJes0[ix][iy]);
     }
   }
 
-  TFile* fmc1 = new TFile(Form("jmsCalib/jms_kSample1_icent%d_optX%d_optY%d.root",icent,optX,optY));
+  TFile* fmc1 = new TFile(Form("jmsCalib/jms_kSample1_icent%d_etaBin0_optX%d_optY%d.root",icent,optX,optY));
   for ( int ix = 1 ; ix <= nXbins ; ix++) {
-    for ( int iy = 1 ; iy <= nYbins ; iy++)  {
-      hDistJes1[ix][iy] = (TH1D*)fmc1->Get(Form("hDistJes_ix%d_iy%d",ix,iy));
+    for ( int iy = 2 ; iy <= nYbins ; iy++)  {
+      hDistJes1[ix][iy] = (TH1D*)fmc1->Get(Form("hDistJms_ix%d_iy%d",ix,iy));
       hDistJes1[ix][iy]->SetXTitle("[m/p_{T}]_{Reco}^{2} / [m/p_{T}]_{Truth}^{2}");
       scaleInt(hDistJes1[ix][iy]);
     }
   }
   
-  for ( int ix = 5 ; ix <= nXbins ; ix++) {
+  cout << "here 1 "<<endl;
+  for ( int ix = 1 ; ix <= nXbins ; ix++) {
     TCanvas* cDist = new TCanvas("cDist","",1200,500);
     cDist->Divide(4,2);
 
     hJMS0[ix] = new TH1D(Form("hJMS0_ix%d",ix),";[m/p_{T}]_{Truth}; < [m/p_{T}]_{Reco}^{2} / [m/p_{T}]_{Truth}^{2} >",nYbins, yBin);
     hJMS1[ix] = (TH1D*)hJMS0[ix]->Clone(Form("hJMS1_ix%d",ix));
 
+
     for ( int iy = 2 ; iy <= nYbins ; iy++)  {
       cDist->cd(iy-1);
       if (kOpt==1) {
-	hDistJes0[ix][iy]->GetFunction("gaus")->SetBit(TF1::kNotDraw);
-	hDistJes1[ix][iy]->GetFunction("gaus")->SetBit(TF1::kNotDraw);
+	cout << "here 2 "<<endl;
+	//	hDistJes0[ix][iy]->GetFunction("gaus")->SetBit(TF1::kNotDraw);
+	cout << "here 3 "<<endl;
+	cout << "ix, iy = " << ix <<", "<<iy<<endl;
+	//	hDistJes1[ix][iy]->GetFunction("gaus")->SetBit(TF1::kNotDraw);
+	cout << "here 4 "<<endl;
 	
 	float mean =  hDistJes0[ix][iy]->GetFunction("gaus")->GetParameter(1) ;
 	float meanErr = hDistJes0[ix][iy]->GetFunction("gaus")->GetParError(1);

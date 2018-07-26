@@ -219,10 +219,10 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 
 
   
-  TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
-  TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
-  TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
-  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
+  //  TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
+  //  TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
+  //  TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
+  //  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
   
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
@@ -275,8 +275,8 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TH2D* hJER; // centrailty // gen pT // 
   hJES = new TH2D("hJES",";Truth p_{T} (GeV/c); Truth m/p_{T}", nXbins,xBin,nYbins,yBin);
   hJER = new TH2D("hJER",";Truth p_{T} (GeV/c); Truth m/p_{T}", nXbins,xBin,nYbins,yBin);
-  for ( int ix = 1 ; ix<= nXbins; ix++) { 
-    for ( int iy = 1 ; iy<= nYbins; iy++) { 
+  for ( int ix = 0 ; ix<= nXbins; ix++) { 
+    for ( int iy = 0 ; iy<= nYbins; iy++) { 
       if ( (kSample == kPP) && ( icent != 0 ) )      continue;
 
       hJES1d[ix][iy] = new TH1D(Form("hjes1d_%d_%d",ix,iy),"",100,0,2);
@@ -291,22 +291,22 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   
   for ( int ijz =2 ; ijz<=4 ; ijz++) { 
     TTree* tr;
-    TH2D* hRecoEntries;
+    //    TH2D* hRecoEntries;
     double jzNorm=0;
     if ( ijz==2)  {
       tr = tr2;   
       jzNorm = hi9EvtWgtJZ2; 
-      hRecoEntries = recoEntries_jz2;
+      //      hRecoEntries = recoEntries_jz2;
     }
     else if ( ijz==3)  {
       tr = tr3;   
       jzNorm = hi9EvtWgtJZ3; 
-      hRecoEntries = recoEntries_jz3;
+      //      hRecoEntries = recoEntries_jz3;
     }
     else if ( ijz==4)  {
       tr = tr4;   
       jzNorm = hi9EvtWgtJZ4; 
-      hRecoEntries = recoEntries_jz4;
+      //      hRecoEntries = recoEntries_jz4;
     }
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
     
@@ -373,19 +373,16 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       }
 
 
-      
+
       
       if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
 	continue;
       if ( !passEtaCut(myJetMc, etaBin) )
 	continue;
       
-      //	recoVarY = recoVarY * 0.96;  // systematics!!
-      //	recoVarY = recoVarY * ( 0.99 - 0.05 * (recoVarX-125)/250) ;
       
       double fcalWeight = 1.0; 
       if ( kSample==kPbPb) {
-	//	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
       }
       
       // Data/MC reweighting factors 
@@ -416,16 +413,18 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
       
       res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-      
+
       respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
       respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+
       
       int ix = xBinTemp->FindBin(truthVarX);
       int iy = yBinTemp->FindBin(truthVarY);
-      if ( (ix >=0) && (ix<=nXbins) && (iy >=0) && (iy<=nYbins) ) 
+      if ( (ix >=0) && (ix<=nXbins) && (iy >=0) && (iy<=nYbins) )   {
 	hJES1d[ix][iy]->Fill(recoVarX/truthVarX);
-      
-      
+	
+      }
+
     }
   }
   
