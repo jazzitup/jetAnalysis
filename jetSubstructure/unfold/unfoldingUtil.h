@@ -25,20 +25,7 @@ int findMbin(double mpt=0) {
 
 
 
-TH2D* getRewTable(int kSample, int icent)  { 
-  TFile* fReweight = new TFile("reweightFactorsEta/reweightingFactor_weightCut10_flucCut0.3_factorized_v60.root"); // Default, set in Apr 7
-  // int nSys = 210;  TFile* fReweight = new TFile(Form("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized_v50_nSys%d.root",nSys));   cout << " Using nSys = " << nSys << "table!! " << endl << endl << endl;
-
-  //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt772_flucCut0.3_factorized.root"); // Mar 28
-  //  TFile* fReweight = new TFile("reweightFactors/reweightingFactor_weightCut10_opt771_flucCut0.3_fcalWeighted.root");
-  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio2_kSample%d_icent%d",kSample,icent));  // 00 default
-  //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatioVarP_kSample%d_icent%d",kSample,icent));  // plus50%
-  //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatioVarM_kSample%d_icent%d",kSample,icent));  // minus50%
-  //  TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio_kSample%d_icent%d",kSample,icent)); // 01
-  return hTemp;
-}
-
-TH2D* getRewTableEta(int kSample, int icent, int etaBin)  { 
+TH2D* getRewTable(int kSample, int icent, int etaBin)  { 
   TFile* fReweight = new TFile(Form("reweightFactorsEta/reweightingFactor_etaBin%d_weightCut10_flucCut0.3_factorized_v60.root",etaBin)); // Default, set in Apr 7
   TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio2_kSample%d_icent%d",kSample,icent));  // 00 default
   return hTemp;
