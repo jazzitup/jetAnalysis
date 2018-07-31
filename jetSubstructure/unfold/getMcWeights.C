@@ -32,7 +32,7 @@ TH1D* getVariedHist(TH1D* hin=0, double variation=0);
 float flucCut = 0.3;
 void removeFluc2(TH2* h=0);
 
-void getMcWeights(int kSample = kPP, int icent=0, int etaBin=2, float weightCut = 10, int nSys=-1) { 
+void getMcWeights(int kSample = kPP, int icent=0, int etaBin=2, int nSys=-1) { 
   
   TH1::SetDefaultSumw2();
   
@@ -92,15 +92,6 @@ void getMcWeights(int kSample = kPP, int icent=0, int etaBin=2, float weightCut 
   hRatioSmoothRaw->Divide(hmcRawSmooth);
   
   TH2D* hRatioSmooth = (TH2D*)hRatioSmoothRaw->Clone(Form("hRatioSmooth_kSample%d_icent%d",kSample,i));
-  
-  for ( int ix= 1 ; ix<= nXbins; ix++) {
-    for ( int iy= 1 ; iy<= nYbins; iy++) {
-      if ( hRatioSmooth->GetBinContent( ix, iy ) > weightCut ) 
-	hRatioSmooth->SetBinContent(ix, iy, weightCut ); 
-      if ( hRatioSmooth->GetBinContent( ix, iy ) < 0.2 ) 
-	hRatioSmooth->SetBinContent(ix, iy, 0.2 ); 
-    }
-  }
   
   TCanvas* c1=  new TCanvas("c1","",500,500);
   makeEfficiencyCanvas(c1,1, 0.0, 0.01, 0.2, 0.25, 0.01);
@@ -331,9 +322,9 @@ void getMcWeights(int kSample = kPP, int icent=0, int etaBin=2, float weightCut 
   
   TFile * fout;
   if ( nSys < 0 ) 
-    fout = new TFile(Form("reweightFactors/reweightingFactor_etaBin%d_weightCut%d_flucCut%.1f_factorized_v60.root",etaBin, (int)weightCut,(float)flucCut),"update");
+    fout = new TFile(Form("reweightFactors/reweightingFactor_etaBin%d_flucCut%.1f_factorized_v60.root",etaBin, (float)flucCut),"update");
   else
-    fout = new TFile(Form("reweightFactors/reweightingFactor_etaBin%d_weightCut%d_flucCut%.1f_factorized_v60_nSys%d.root",etaBin, (int)weightCut,(float)flucCut,nSys),"update");
+    fout = new TFile(Form("reweightFactors/reweightingFactor_etaBin%d_flucCut%.1f_factorized_v60_nSys%d.root",etaBin, (float)flucCut,nSys),"update");
   
   hmcPtCorr->Write("",TObject::kOverwrite);
   hmcTruth->Write("",TObject::kOverwrite);
@@ -420,11 +411,6 @@ void getMCspectra(int kSample, int icent, int etaBin,  TH2D* hmcRaw,  TH2D* hmcT
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
 
-  TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX1_optY2.root",kSample,icent));
-  TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
-  TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
-  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
-  TH2D* hRecoEntries;
 
   float ptSys;
   TBranch *b_ptSys;
@@ -453,22 +439,18 @@ void getMCspectra(int kSample, int icent, int etaBin,  TH2D* hmcRaw,  TH2D* hmcT
 
   for ( int ijz =2 ; ijz<=4 ; ijz++) {
     TTree* tr;
-    //    TH2D* hRecoEntries;
     double jzNorm=0;
     if ( ijz==2)  {
       tr = tr2;
       jzNorm = hi9EvtWgtJZ2;
-      hRecoEntries = recoEntries_jz2;
     }
     else if ( ijz==3)  {
       tr = tr3;
       jzNorm = hi9EvtWgtJZ3;
-      hRecoEntries = recoEntries_jz3;
     }
     else if ( ijz==4)  {
       tr = tr4;
       jzNorm = hi9EvtWgtJZ4;
-      hRecoEntries = recoEntries_jz4;
     }
     
     cout << "Scanning JZ"<<ijz<<" file.  Total events = " << tr->GetEntries() << endl;
