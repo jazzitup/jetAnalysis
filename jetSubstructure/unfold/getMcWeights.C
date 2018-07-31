@@ -32,7 +32,7 @@ TH1D* getVariedHist(TH1D* hin=0, double variation=0);
 float flucCut = 0.3;
 void removeFluc2(TH2* h=0);
 
-void getMcWeightsEta(int kSample = kPP, int icent=0, int etaBin=2, float weightCut = 10, int nSys=-1) { 
+void getMcWeights(int kSample = kPP, int icent=0, int etaBin=2, float weightCut = 10, int nSys=-1) { 
   
   TH1::SetDefaultSumw2();
   
@@ -135,7 +135,7 @@ void getMcWeightsEta(int kSample = kPP, int icent=0, int etaBin=2, float weightC
   hptRatio->SetNdivisions(505,"X");
   hptRatio->Draw();
   
-  c1->SaveAs(Form("reweightFactorsEta/pTreweighting_kSample%d_icent%d_etaBin%d.pdf",kSample,icent,etaBin));
+  c1->SaveAs(Form("reweightFactors/pTreweighting_kSample%d_icent%d_etaBin%d.pdf",kSample,icent,etaBin));
   TF1* fit;
   
   if ( kSample == kPP ) {
@@ -153,7 +153,7 @@ void getMcWeightsEta(int kSample = kPP, int icent=0, int etaBin=2, float weightC
   }
   fit->SetName("fitFunction");
 
-  c1->SaveAs(Form("reweightFactorsEta/pTreweighting_kSample%d_icent%d_etaBin%d_fit.pdf",kSample,icent,etaBin));
+  c1->SaveAs(Form("reweightFactors/pTreweighting_kSample%d_icent%d_etaBin%d_fit.pdf",kSample,icent,etaBin));
 
   TH2D* hmcPtCorr   = (TH2D*)hTemp->Clone(Form("hmcRawPtCorr_kSample%d_icent%d",kSample,i));
   TH2D* hmcTruthPtCorr = (TH2D*)hTemp->Clone(Form("hmcTruthPtCorr_kSample%d_icent%d",kSample,i));
@@ -224,7 +224,7 @@ void getMcWeightsEta(int kSample = kPP, int icent=0, int etaBin=2, float weightC
   hsmooVarP->SetLineStyle(9);
   hsmooVarM->SetLineStyle(6);
 
-  c15->SaveAs(Form("reweightFactorsEta/MassIntreweighting_etaBin%d_kSample%d_icent%d.pdf",etaBin,kSample,icent));
+  c15->SaveAs(Form("reweightFactors/MassIntreweighting_etaBin%d_kSample%d_icent%d.pdf",etaBin,kSample,icent));
 
   TCanvas* c16 = new TCanvas("c16","",500,500);
 
@@ -250,7 +250,7 @@ void getMcWeightsEta(int kSample = kPP, int icent=0, int etaBin=2, float weightC
 
   ATLASLabel(0.18, 0.88, "Internal",0.05);//, "Pb+Pb  #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}", kBlack);
 
-  c16->SaveAs(Form("reweightFactorsEta/MassIntreweighting_etaBin%d_kSample%d_icent%d_ratioOnly.pdf",etaBin,kSample,icent));
+  c16->SaveAs(Form("reweightFactors/MassIntreweighting_etaBin%d_kSample%d_icent%d_ratioOnly.pdf",etaBin,kSample,icent));
   
 
 
@@ -331,9 +331,9 @@ void getMcWeightsEta(int kSample = kPP, int icent=0, int etaBin=2, float weightC
   
   TFile * fout;
   if ( nSys < 0 ) 
-    fout = new TFile(Form("reweightFactorsEta/reweightingFactor_etaBin%d_weightCut%d_flucCut%.1f_factorized_v60.root",etaBin, (int)weightCut,(float)flucCut),"update");
+    fout = new TFile(Form("reweightFactors/reweightingFactor_etaBin%d_weightCut%d_flucCut%.1f_factorized_v60.root",etaBin, (int)weightCut,(float)flucCut),"update");
   else
-    fout = new TFile(Form("reweightFactorsEta/reweightingFactor_etaBin%d_weightCut%d_flucCut%.1f_factorized_v60_nSys%d.root",etaBin, (int)weightCut,(float)flucCut,nSys),"update");
+    fout = new TFile(Form("reweightFactors/reweightingFactor_etaBin%d_weightCut%d_flucCut%.1f_factorized_v60_nSys%d.root",etaBin, (int)weightCut,(float)flucCut,nSys),"update");
   
   hmcPtCorr->Write("",TObject::kOverwrite);
   hmcTruth->Write("",TObject::kOverwrite);
