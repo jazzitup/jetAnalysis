@@ -1,3 +1,4 @@
+double fracStst=1;
 
 #if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include <iostream>
@@ -15,7 +16,7 @@ using std::endl;
 
 #include "../getSdHists.C"
 //#include "../ntupleDefinition.h"
-#include "../ntupleDefinition_v50.h"   
+#include "../ntupleDefinition.h"   
 #include "../commonUtility.h"
 #include "../jzWeight.h"
 #endif
@@ -29,13 +30,13 @@ using std::endl;
 #include "unfoldingUtil.h"
 #include "systematicsTool.h"
 
-double fracStst=0001;
+
 
 bool useFullMC = false;
 
-RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, TH2D* respX=0, TH2D* respY=0, double radius =0.4,bool doReweight = true, int nSys = -1);
+RooUnfoldResponse* getResponse( int kSample = kPP, int icent = 0, int optX=1, int optY=2, TH2D* hTruth=0, TH2D* hReco=0, TH2D* respX=0, TH2D* respY=0, int etaBin =1,  bool doReweight = true, int nSys = -1);
 
-void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius= 0.4, bool doReweight=true, int nSys=-1) {
+void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2,int etaBin =1 , bool doReweight=true, int nSys=-1) {
   
   if ( nSys < 0 )  
     cout << "Nominal mode " << endl;
@@ -99,7 +100,7 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
     hResX[i] = new TH2D(Form("hResPt_icent%d",icent), ";Truth p_{T} (GeV/c);Reco p_{T} (GeV/c)",nXbins,xBin,nXbins,xBin);
     hResY[i] = new TH2D(Form("hResM_icent%d",icent), ";Truth m/p_{T};Reco m/p_{T}",nYbins,yBin,nYbins,yBin);
 
-    res[i] = getResponse(kSample, i, optX, optY, hTruth[i], hReco[i], hResX[i], hResY[i], radius,doReweight, nSys);
+    res[i] = getResponse(kSample, i, optX, optY, hTruth[i], hReco[i], hResX[i], hResY[i], etaBin,doReweight, nSys);
 
     TCanvas* c01 = new TCanvas("c01", "",600,500);
     hMatrix[i] = (TH2D*)res[i]->Hresponse();
@@ -110,7 +111,7 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
     hMatrix[i]->Draw("colz");
     ATLASLabel(0.2,0.9,"Internal",0.05,0.14);
 
-    c01->SaveAs(Form("pdfs/correlation_2dUnf_coll%d_cent%d_radius0%d_doReweight%d.pdf",kSample,i,(int)(radius*10.),doReweight));
+    c01->SaveAs(Form("pdfs/correlation_2dUnf_coll%d_cent%d_etaBin%d_doReweight%d.pdf",kSample,i,etaBin,doReweight));
     TCanvas* c02 = new TCanvas("c02","",1000,500);
     c02->Divide(2,1);
     c02->cd(1);
@@ -128,15 +129,15 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
     gPad->SetLogz();
     ATLASLabel(0.18,0.9,"Internal",0.05,0.17);
 
-    c02->SaveAs(Form("pdfs/PtMassResp_coll%d_cent%d_radius%.1f_doReweight%d.pdf",kSample,i,(float)radius,doReweight));
+    c02->SaveAs(Form("pdfs/PtMassResp_coll%d_cent%d_etaBin%d_doReweight%d.pdf",kSample,i,etaBin,doReweight));
     
   }
   
   TString foutname ;
   if ( nSys < 0 )   
-    foutname = Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d.root",kSample,optX,optY,(float)radius,(int)doReweight);
+    foutname = Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_etaBin%d_doReweight%d.root",kSample,optX,optY,etaBin,(int)doReweight);
   else 
-    foutname = Form("spectraFiles/sys/unfoldingMatrix2D_coll%d_optX%d_optY%d_radius%.1f_doReweight%d_sys%d.root",kSample,optX,optY,(float)radius,(int)doReweight,nSys);
+    foutname = Form("spectraFiles/sys/unfoldingMatrix2D_coll%d_optX%d_optY%d_etaBin%d_doReweight%d_sys%d.root",kSample,optX,optY,etaBin,(int)doReweight,nSys);
 
   TFile* fout = new TFile(foutname.Data(),"update");
   for ( int i=0 ; i<=6; i++) {
@@ -152,7 +153,7 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2, double radius
   fout->Close();
 }
 
-RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, TH2D* respX, TH2D* respY, double radius, bool doReweight, int nSys)
+RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2D* hTruth, TH2D* hReco, TH2D* respX, TH2D* respY, int etaBin, bool doReweight, int nSys)
 {
   
   RtrkProvider rtrkProv; 
@@ -167,31 +168,27 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TString jz3;
   TString jz4;
   if ( kSample == kPbPb ) {
-    if ( radius==0.4 ) {
-      if ( (nSys>=0) && (nSys<200) ) {
-	jz2 = jz2PbPbStringSys;
-        jz3 = jz3PbPbStringSys;
-        jz4 = jz4PbPbStringSys;
-      }
-      else { 
-	jz2 = jz2PbPbString;
-	jz3 = jz3PbPbString;
-	jz4 = jz4PbPbString;
-      }
+    if ( (nSys>=0) && (nSys<200) ) {
+      jz2 = jz2PbPbStringSys;
+      jz3 = jz3PbPbStringSys;
+      jz4 = jz4PbPbStringSys;
+    }
+    else { 
+      jz2 = jz2PbPbString;
+      jz3 = jz3PbPbString;
+      jz4 = jz4PbPbString;
     }
   }
   else if ( kSample == kPP ) {
-    if ( radius==0.4 ) {
-      if ( (nSys>=0) && (nSys<200) ) {
-	jz2 = jz2PPStringSys;
-        jz3 = jz3PPStringSys;
-        jz4 = jz4PPStringSys;
-      }
-      else {
-        jz2 = jz2PPString;
-        jz3 = jz3PPString;
-        jz4 = jz4PPString;
-      }
+    if ( (nSys>=0) && (nSys<200) ) {
+      jz2 = jz2PPStringSys;
+      jz3 = jz3PPStringSys;
+      jz4 = jz4PPStringSys;
+    }
+    else {
+      jz2 = jz2PPString;
+      jz3 = jz3PPString;
+      jz4 = jz4PPString;
     }
   }
   
@@ -204,7 +201,7 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   
   TH2D* hReweight;
   if ( doReweight ) {
-    hReweight = getRewTable(kSample, icent,etaBin);
+    hReweight = getRewTable(kSample, icent, etaBin);
   }
 
   TF1* fjmscal[30];
@@ -222,10 +219,10 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
 
 
   
-  TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
+  //  TFile* checkEntries = new TFile(Form("checkEntry/entries_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY));
   //  TH2D* recoEntries_jz2 = (TH2D*)checkEntries->Get("reco_jz2");
   //  TH2D* recoEntries_jz3 = (TH2D*)checkEntries->Get("reco_jz3");
-  //s  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
+  //  TH2D* recoEntries_jz4 = (TH2D*)checkEntries->Get("reco_jz4");
   
   jetSubStr  myJetMc;
   TBranch  *b_myJetSubMc;
@@ -278,9 +275,10 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
   TH2D* hJER; // centrailty // gen pT // 
   hJES = new TH2D("hJES",";Truth p_{T} (GeV/c); Truth m/p_{T}", nXbins,xBin,nYbins,yBin);
   hJER = new TH2D("hJER",";Truth p_{T} (GeV/c); Truth m/p_{T}", nXbins,xBin,nYbins,yBin);
-  for ( int ix = 1 ; ix<= nXbins; ix++) { 
-    for ( int iy = 1 ; iy<= nYbins; iy++) { 
+  for ( int ix = 0 ; ix<= nXbins; ix++) { 
+    for ( int iy = 0 ; iy<= nYbins; iy++) { 
       if ( (kSample == kPP) && ( icent != 0 ) )      continue;
+
       hJES1d[ix][iy] = new TH1D(Form("hjes1d_%d_%d",ix,iy),"",100,0,2);
     }
   }
@@ -375,17 +373,16 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       }
 
 
-      
+
       
       if ( passEvent(myJetMc, icent, true) == false ) // true = isMC
 	continue;
+      if ( !passEtaCut(myJetMc, etaBin) )
+	continue;
       
-      //	recoVarY = recoVarY * 0.96;  // systematics!!
-      //	recoVarY = recoVarY * ( 0.99 - 0.05 * (recoVarX-125)/250) ;
       
       double fcalWeight = 1.0; 
       if ( kSample==kPbPb) {
-	//	fcalWeight = hFcalReweight->GetBinContent(hFcalReweight->GetXaxis()->FindBin(myJetMc.fcalet));
       }
       
       // Data/MC reweighting factors 
@@ -416,16 +413,18 @@ RooUnfoldResponse* getResponse(int kSample,  int icent,  int optX, int optY, TH2
       hReco->Fill(recoVarX, recoVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
       
       res->Fill(  recoVarX, recoVarY, truthVarX, truthVarY, myJetMc.weight * rewFact * jzNorm * fcalWeight);
-      
+
       respX->Fill( truthVarX, recoVarX,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
       respY->Fill( truthVarY, recoVarY,  myJetMc.weight * rewFact * jzNorm* fcalWeight);
+
       
       int ix = xBinTemp->FindBin(truthVarX);
       int iy = yBinTemp->FindBin(truthVarY);
-      if ( (ix >=0) && (ix<=nXbins) && (iy >=0) && (iy<=nYbins) ) 
+      if ( (ix >=0) && (ix<=nXbins) && (iy >=0) && (iy<=nYbins) )   {
 	hJES1d[ix][iy]->Fill(recoVarX/truthVarX);
-      
-      
+	
+      }
+
     }
   }
   
