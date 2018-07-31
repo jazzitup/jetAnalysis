@@ -7,7 +7,7 @@ using std::endl;
 
 #include "../getSdHists.C"
 //#include "../ntupleDefinition.h"
-#include "../ntupleDefinition_v50.h"
+#include "../ntupleDefinition.h"
 #include "../commonUtility.h"
 #include "../jzWeight.h"
 #include "unfoldingUtil.h"
@@ -20,54 +20,33 @@ double statFrac = 001;
 bool doUnfData = true ;
 
 int lowPtBin = 1;  int highPtBin = 13;
-//int lowPtBin = 6;   int highPtBin = 11;
-
 int nPtPannels = highPtBin-lowPtBin+1;
 
 bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
-
-void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0, TF1* ptScale=0, int nSys=-1);
-void getDATAspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hdataRaw=0, int nSys=0);
+void getMCspectra(int kSample=kPP, int icent=0, int etaBin=0, TH2D* hmcRaw=0,  TH2D* hmcTruth=0, TF1* ptScale=0, int nSys=-1);
+void getDATAspectra(int kSample=kPP, int icent=0, int etaBin=0, TH2D* hdataRaw=0, int nSys=0);
 
 TH1D* getVariedHist(TH1D* hin=0, double variation=0);
 //bool isTooSmall(TH2D* hEntries=0, int recoVarX=0, int recoVarY=0, int minEntries=10);
 
 float flucCut = 0.3;
-//float flucCut = 1.0;
-void removeFluc2(TH2* h) {
-  for ( int i =1 ;  i<=h->GetNbinsX() ; i++) {
-    for ( int j =1 ;  j<=h->GetNbinsY() ; j++) {
-      double val  = h->GetBinContent(i,j);
-      double error  = h->GetBinError(i,j);
-      if ( error > val * flucCut )   {
-	h->SetBinContent(i,j,1);
-	h->SetBinError(i,j, error/val);
-      }
-    }
-  }
-}
+void removeFluc2(TH2* h=0);
 
-void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys=-1) {   // opt1 : mass,   opt2 : m/pT  
-  int opt = 772;
+void getMcWeightsEta(int kSample = kPP, int icent=0, int etaBin=2, float weightCut = 10, int nSys=-1) { 
+  
   TH1::SetDefaultSumw2();
   
   int nXbins;
   double xBin[30];
-  if ( opt==1 ) getXbin(nXbins, xBin, 77);
-  if ( opt==2 ) getXbin(nXbins, xBin, 77);
-  if ( opt==771 ) getXbin(nXbins, xBin, 77);
-  if ( opt==772 ) getXbin(nXbins, xBin, 77);
+  getXbin(nXbins, xBin, 77);
   cout << " nXbins = " << nXbins << endl;
   cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
 
 
   int nYbins ;
   double yBin[200] ;
-  if ( opt==1)  getYbin(nYbins, yBin, 77);
-  else if ( opt==2)  getYbin(nYbins, yBin, 77);
-  else if ( opt==771)  getYbin(nYbins, yBin, 771);
-  //  else if ( opt==772)  getYbin(nYbins, yBin, 2);
-  else if ( opt==772)  getYbin(nYbins, yBin, 772);
+
+  getYbin(nYbins, yBin, 772);
   cout << " nYbins = " << nYbins << endl;
   cout << " yBin = " << yBin[0] << ",   " << yBin[1] << ",   " <<yBin[2] << ", ..." <<endl;
   
@@ -77,13 +56,12 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
 
 
   // MC 
-  TH2D* hmcRaw   = (TH2D*)hTemp->Clone(Form("hmcRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
-  TH2D* hmcTruth = (TH2D*)hTemp->Clone(Form("hmcTruth_kSample%d_icent%d_opt%d",kSample,i,opt));
-  TH2D* hdataRaw = (TH2D*)hTemp->Clone(Form("hdataRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
-  //  TH3D* hPtMassGenMass = new TH3D("hPtMassGenMass","",nXbins, xBin, nYbins, yBin,nYbins, yBin);
-  //void getMCspectra(int kSample=kPP, int icent=0, int opt=1, TH2D* hmcRaw=0,  TH2D* hmcTruth=0); 
-  getMCspectra   ( kSample, icent, opt, hmcRaw, hmcTruth, 0, nSys);
-  getDATAspectra ( kSample, icent, opt, hdataRaw, nSys);
+  TH2D* hmcRaw   = (TH2D*)hTemp->Clone(Form("hmcRaw_kSample%d_icent%d",kSample,i));
+  TH2D* hmcTruth = (TH2D*)hTemp->Clone(Form("hmcTruth_kSample%d_icent%d",kSample,i));
+  TH2D* hdataRaw = (TH2D*)hTemp->Clone(Form("hdataRaw_kSample%d_icent%d",kSample,i));
+
+  getMCspectra   ( kSample, icent, etaBin, hmcRaw, hmcTruth, 0, nSys);
+  getDATAspectra ( kSample, icent, etaBin, hdataRaw, nSys);
 
   
   for ( int ix= 1 ; ix <= nXbins; ix++) {
@@ -96,10 +74,10 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
   //  scaleInt(hmcRaw);
   //  scaleInt(hdataRaw);
 
-  TH2D* hRatioRaw = (TH2D*)hdataRaw->Clone(Form("hRatioRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
+  TH2D* hRatioRaw = (TH2D*)hdataRaw->Clone(Form("hRatioRaw_kSample%d_icent%d",kSample,i));
   hRatioRaw->Divide(hmcRaw);
   removeFluc2(hRatioRaw);
-  TH2D* hRatioSmooth2 = (TH2D*)hRatioRaw->Clone(Form("hRatioSmooth2_kSample%d_icent%d_opt%d",kSample,i,opt));
+  TH2D* hRatioSmooth2 = (TH2D*)hRatioRaw->Clone(Form("hRatioSmooth2_kSample%d_icent%d",kSample,i));
   hRatioSmooth2->Smooth();
 
   TH2D* hmcRawSmooth = (TH2D*)hmcRaw->Clone(Form("%s_smooth",hmcRaw->GetName()));
@@ -110,10 +88,10 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
 
   hmcRawSmooth->Smooth();
   hdataRawSmooth->Smooth();
-  TH2D* hRatioSmoothRaw = (TH2D*)hdataRawSmooth->Clone(Form("hRatioSmoothRaw_kSample%d_icent%d_opt%d",kSample,i,opt));
+  TH2D* hRatioSmoothRaw = (TH2D*)hdataRawSmooth->Clone(Form("hRatioSmoothRaw_kSample%d_icent%d",kSample,i));
   hRatioSmoothRaw->Divide(hmcRawSmooth);
   
-  TH2D* hRatioSmooth = (TH2D*)hRatioSmoothRaw->Clone(Form("hRatioSmooth_kSample%d_icent%d_opt%d",kSample,i,opt));
+  TH2D* hRatioSmooth = (TH2D*)hRatioSmoothRaw->Clone(Form("hRatioSmooth_kSample%d_icent%d",kSample,i));
   
   for ( int ix= 1 ; ix<= nXbins; ix++) {
     for ( int iy= 1 ; iy<= nYbins; iy++) {
@@ -157,7 +135,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
   hptRatio->SetNdivisions(505,"X");
   hptRatio->Draw();
   
-  c1->SaveAs(Form("reweightFactors/pTreweighting_kSample%d_icent%d.pdf",kSample,icent));
+  c1->SaveAs(Form("reweightFactorsEta/pTreweighting_kSample%d_icent%d_etaBin%d.pdf",kSample,icent,etaBin));
   TF1* fit;
   
   if ( kSample == kPP ) {
@@ -175,11 +153,12 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
   }
   fit->SetName("fitFunction");
 
-  c1->SaveAs(Form("reweightFactors/pTreweighting_kSample%d_icent%d_fit.pdf",kSample,icent));
+  c1->SaveAs(Form("reweightFactorsEta/pTreweighting_kSample%d_icent%d_etaBin%d_fit.pdf",kSample,icent,etaBin));
 
-  TH2D* hmcPtCorr   = (TH2D*)hTemp->Clone(Form("hmcRawPtCorr_kSample%d_icent%d_opt%d",kSample,i,opt));
-  TH2D* hmcTruthPtCorr = (TH2D*)hTemp->Clone(Form("hmcTruthPtCorr_kSample%d_icent%d_opt%d",kSample,i,opt));
-  getMCspectra   ( kSample, icent, opt, hmcPtCorr, hmcTruthPtCorr,fit, nSys);
+  TH2D* hmcPtCorr   = (TH2D*)hTemp->Clone(Form("hmcRawPtCorr_kSample%d_icent%d",kSample,i));
+  TH2D* hmcTruthPtCorr = (TH2D*)hTemp->Clone(Form("hmcTruthPtCorr_kSample%d_icent%d",kSample,i));
+
+  getMCspectra   ( kSample, icent, etaBin,  hmcPtCorr, hmcTruthPtCorr,fit, nSys);
 
 
 
@@ -245,7 +224,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
   hsmooVarP->SetLineStyle(9);
   hsmooVarM->SetLineStyle(6);
 
-  c15->SaveAs(Form("reweightFactors/MassIntreweighting_kSample%d_icent%d.pdf",kSample,icent));
+  c15->SaveAs(Form("reweightFactorsEta/MassIntreweighting_etaBin%d_kSample%d_icent%d.pdf",etaBin,kSample,icent));
 
   TCanvas* c16 = new TCanvas("c16","",500,500);
 
@@ -271,7 +250,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
 
   ATLASLabel(0.18, 0.88, "Internal",0.05);//, "Pb+Pb  #sqrt{#font[12]{s_{NN}}} = 5.02 TeV, 0.49 nb^{-1}", kBlack);
 
-  c16->SaveAs(Form("reweightFactors/MassIntreweighting_kSample%d_icent%d_ratioOnly.pdf",kSample,icent));
+  c16->SaveAs(Form("reweightFactorsEta/MassIntreweighting_etaBin%d_kSample%d_icent%d_ratioOnly.pdf",etaBin,kSample,icent));
   
 
 
@@ -352,9 +331,9 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
   
   TFile * fout;
   if ( nSys < 0 ) 
-    fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50_canBeRemoved.root",(int)weightCut,opt,(float)flucCut),"update");
+    fout = new TFile(Form("reweightFactorsEta/reweightingFactor_etaBin%d_weightCut%d_flucCut%.1f_factorized_v60.root",etaBin, (int)weightCut,(float)flucCut),"update");
   else
-    fout = new TFile(Form("reweightFactors/reweightingFactor_weightCut%d_opt%d_flucCut%.1f_factorized_v50_nSys%d.root",(int)weightCut,opt,(float)flucCut,nSys),"update");
+    fout = new TFile(Form("reweightFactorsEta/reweightingFactor_etaBin%d_weightCut%d_flucCut%.1f_factorized_v60_nSys%d.root",etaBin, (int)weightCut,(float)flucCut,nSys),"update");
   
   hmcPtCorr->Write("",TObject::kOverwrite);
   hmcTruth->Write("",TObject::kOverwrite);
@@ -376,7 +355,7 @@ void getMcWeights(int kSample = kPP, int icent=0, float weightCut = 10, int nSys
 }
 
 
-void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth, TF1* ptScale, int nSys) {
+void getMCspectra(int kSample, int icent, int etaBin,  TH2D* hmcRaw,  TH2D* hmcTruth, TF1* ptScale, int nSys) {
   
   TRandom3 genRandom;
   genRandom.SetSeed(200);
@@ -501,38 +480,18 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
 
       if ( ! passEvent(myJetMc, icent, true) ) // isMC = true
         continue;
+      if ( !passEtaCut(myJetMc, etaBin) )
+        continue;
       
       double genX;
       double genY;
       double recoX  = -10000; 
       double recoY  = -10000; 
 
-      if ( opt ==1 ) {
-	genX = myJetMc.genPt; 
-	genY = myJetMc.genMass;
-      }
-      else  if ( (opt ==2) || (opt==771) ) {
-	genX = myJetMc.genPt;
-	genY = myJetMc.genMass;
-      }
-
-      
-      
-      if ( opt == 1 ) {
-	recoX = myJetMc.recoPt;
-	recoY = myJetMc.recoMass ;
-      }
-      else  if ( (opt ==2) || (opt==771) ) {
-	recoX = myJetMc.recoPt;
-	recoY = myJetMc.recoMass;
-      }
-
-      if (opt==772)  {
-	genX = myJetMc.genPt;
-	genY = myJetMc.genMass /  myJetMc.genPt;
-	recoX = myJetMc.recoPt;
-	recoY = myJetMc.recoMass / myJetMc.recoPt;
-      }
+      genX = myJetMc.genPt;
+      genY = myJetMc.genMass /  myJetMc.genPt;
+      recoX = myJetMc.recoPt;
+      recoY = myJetMc.recoMass / myJetMc.recoPt;
 
       if ( genY < 0 ) genY = 0.000001;
       
@@ -614,7 +573,7 @@ void getMCspectra(int kSample, int icent, int opt, TH2D* hmcRaw,  TH2D* hmcTruth
   
 }
 
-void getDATAspectra(int kSample, int icent, int opt, TH2D* hdataRaw, int nSys) { 
+void getDATAspectra(int kSample, int icent, int etaBin, TH2D* hdataRaw, int nSys) { 
 
   TH1::SetDefaultSumw2();
   hdataRaw->Reset();
@@ -654,23 +613,14 @@ void getDATAspectra(int kSample, int icent, int opt, TH2D* hdataRaw, int nSys) {
 
     if ( ! passEvent(myJet, icent, false) ) // isMC = false
       continue;
-
+    if ( !passEtaCut(myJet, etaBin) )
+      continue;
+    
+    
     double recoX  = -10000;
     double recoY  = -10000;
-    if ( opt == 1 ) {
-      recoX = myJet.recoPt;
-      recoY = myJet.recoMass;
-    }
-    else if ( (opt == 2) || (opt==771) ) {
-      recoX = myJet.recoPt;
-      recoY = myJet.recoMass;
-    }
-    
-    if (opt==772)  {
-      recoX = myJet.recoPt;
-      recoY = myJet.recoMass / myJet.recoPt;
-    }
-    
+    recoX = myJet.recoPt;
+    recoY = myJet.recoMass / myJet.recoPt;
     
     if (nSys==300) { // JMS calibration
       int xx = xBinTemp->FindBin( myJet.recoPt);
@@ -718,4 +668,17 @@ TH1D* getVariedHist(TH1D* hin, double variation)  {
   return hout;
   
   
+}
+
+void removeFluc2(TH2* h) {
+  for ( int i =1 ;  i<=h->GetNbinsX() ; i++) {
+    for ( int j =1 ;  j<=h->GetNbinsY() ; j++) {
+      double val  = h->GetBinContent(i,j);
+      double error  = h->GetBinError(i,j);
+      if ( error > val * flucCut )   {
+	h->SetBinContent(i,j,1);
+	h->SetBinError(i,j, error/val);
+      }
+    }
+  }
 }
