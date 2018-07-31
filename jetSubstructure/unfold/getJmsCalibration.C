@@ -1,12 +1,10 @@
-double fracStst=.1;
+double fracStst=1;
 bool doCal=0;
 
 #if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include <iostream>
 using std::cout;
 using std::endl;
-
-
 
 #include "TRandom.h"
 #include "TH1D.h"
@@ -85,6 +83,8 @@ void getJmsCalibration(int kSample = kPP, int icent=0, int etaBin=1) {
   getXbin(nXbins, xBin, optX);
   cout << " nXbins = " << nXbins << endl; 
   cout << " xBin = " << xBin[0] << ",   " << xBin[1] << ",   " <<xBin[2] << ", ..." <<endl;
+
+  TH1D* xBinTemp = new TH1D("xBinTemp","", nXbins, xBin);
 
   int lowPtBin = 1;
   int highPtBin = nXbins;
@@ -243,9 +243,11 @@ void getJmsCalibration(int kSample = kPP, int icent=0, int etaBin=1) {
   }
   leg2->Draw();
   
+  
   if ( !doCal) {
-    TFile* foutJMS = new TFile(Form("jmsCalib/jmsCorrectionFactor_kSample%d_icent%d_optX%d_optY%d.root",kSample,icent,optX,optY),"recreate");
-    for ( int ix = lowPtBin ; ix<=highPtBin ; ix++) {
+
+    TFile* foutJMS = new TFile(Form("jmsCalib/jmsCorrectionFactor_kSample%d_icent%d_etaBin%d.root",kSample,icent,etaBin),"recreate");
+    for ( int ix = 1 ; ix<=nXbins ; ix++) {
       if ( gr[ix]->GetFunction(f1[ix]->GetName()) != NULL) 
 	gr[ix]->GetFunction(f1[ix]->GetName())->Write();
 
@@ -253,7 +255,8 @@ void getJmsCalibration(int kSample = kPP, int icent=0, int etaBin=1) {
 	grInv[ix]->GetFunction(f1Inv[ix]->GetName())->Write();
 
     }
-    
+    xBinTemp->Write();
+
     foutJMS->Close();
   }
   
@@ -377,10 +380,11 @@ void getDist( int kSample, int icent, int etaBin, int optX, int optY, TH2D* hJMS
   }
 
   TF1* fjmscal[30];
+  TF1* fjmscalInv[30];
   if ( doCal) {  
-    TFile* fin = new TFile(Form("jmsCalib/jmsCorrectionFactor_kSample0_icent%d_optX%d_optY%d.root", icent,optX,optY));
+    TFile* fin = new TFile(Form("jmsCalib/jmsCorrectionFactor_kSample0_icent%d_etaBin%d.root", icent,etaBin));
     for ( int ix = 1  ; ix<=nXbins ; ix++) { 
-      fjmscal[ix] = (TF1*)fin->Get(Form("f1_kSample0_icent0_ix%d",ix));
+      fjmscalInv[ix] = (TF1*)fin->Get(Form("fInv_kSample0_icent0_ix%d",ix));
     }
   }
   
@@ -417,7 +421,7 @@ void getDist( int kSample, int icent, int etaBin, int optX, int optY, TH2D* hJMS
       if ( myJetMc.recoMass < 0) recoMpt2 = -recoMpt2;
       
       double calVal = recoMpt2/genMpt2;
-      
+   
       int xx = xBinTemp->FindBin( recoPt);
       int yy = yBinTemp->FindBin( myJetMc.genMass / myJetMc.genPt);
       
