@@ -3,20 +3,15 @@ gSystem->Load("libRooUnfold");
 .L makeUnfMatrix2D.cxx++
 EOF
 
+optX=1
+optY=2
+doReweight=1
 for kSample in 1 0 # 0 = pp,  1 = pbpb
 do
-    for doReweight in 1 
+    for etaBin in 0 1 2
     do
-	for optX in 1  # 1
-	do
-	    for optY in 2 # 1
-	    do
-		for radius in 0.4
-		do
-		    root -l -b -q  'makeUnfMatrix2D.cxx+('$kSample','$optX','$optY','$radius','$doReweight')'
-		done
-	    done
-	done
+	root -l -b -q  'makeUnfMatrix2D.cxx+('$kSample','$optX','$optY','$etaBin','$doReweight')'
     done
 done
+
 

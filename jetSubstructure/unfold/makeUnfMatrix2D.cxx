@@ -135,9 +135,9 @@ void makeUnfMatrix2D(int kSample = kPbPb, int optX =1, int optY=2,int etaBin =1 
   
   TString foutname ;
   if ( nSys < 0 )   
-    foutname = Form("spectraFilesEta/unfoldingMatrix2D_coll%d_optX%d_optY%d_etaBin%d_doReweight%d.root",kSample,optX,optY,etaBin,(int)doReweight);
+    foutname = Form("spectraFiles/unfoldingMatrix2D_coll%d_optX%d_optY%d_etaBin%d_doReweight%d.root",kSample,optX,optY,etaBin,(int)doReweight);
   else 
-    foutname = Form("spectraFilesEta/sys/unfoldingMatrix2D_coll%d_optX%d_optY%d_etaBin%d_doReweight%d_sys%d.root",kSample,optX,optY,etaBin,(int)doReweight,nSys);
+    foutname = Form("spectraFiles/sys/unfoldingMatrix2D_coll%d_optX%d_optY%d_etaBin%d_doReweight%d_sys%d.root",kSample,optX,optY,etaBin,(int)doReweight,nSys);
 
   TFile* fout = new TFile(foutname.Data(),"update");
   for ( int i=0 ; i<=6; i++) {
