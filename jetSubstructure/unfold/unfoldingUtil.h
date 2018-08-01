@@ -26,7 +26,7 @@ int findMbin(double mpt=0) {
 
 
 TH2D* getRewTable(int kSample, int icent, int etaBin)  { 
-  TFile* fReweight = new TFile(Form("reweightFactorsEta/reweightingFactor_etaBin%d_weightCut10_flucCut0.3_factorized_v60.root",etaBin)); // Default, set in Apr 7
+  TFile* fReweight = new TFile(Form("reweightFactors/reweightingFactor_etaBin%d_factorized_v60.root",etaBin)); // reweightingFactor_etaBin1_factorized_v60.root
   TH2D* hTemp = (TH2D*)fReweight->Get(Form("factorizedRatio2_kSample%d_icent%d",kSample,icent));  // 00 default
   return hTemp;
 }

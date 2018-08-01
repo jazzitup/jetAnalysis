@@ -63,17 +63,6 @@ void getMcWeights(int kSample = kPP, int icent=0, int etaBin=2, int nSys=-1) {
   getMCspectra   ( kSample, icent, etaBin, hmcRaw, hmcTruth, 0, nSys);
   getDATAspectra ( kSample, icent, etaBin, hdataRaw, nSys);
 
-  
-  for ( int ix= 1 ; ix <= nXbins; ix++) {
-    for ( int iy= 1 ; iy <= nYbins; iy++) {
-      //      if ( hmcRaw->GetBinContent(ix,iy) == 0 )  cout << "MC :found a null bin ix, iy = " << ix<<", "<<iy<< endl;
-      //      if ( hdataRaw->GetBinContent(ix,iy) == 0 )  cout << "DATA :found a null bin ix, iy = " << ix<<", "<<iy<< endl;
-    }
-  }
-  
-  //  scaleInt(hmcRaw);
-  //  scaleInt(hdataRaw);
-
   TH2D* hRatioRaw = (TH2D*)hdataRaw->Clone(Form("hRatioRaw_kSample%d_icent%d",kSample,i));
   hRatioRaw->Divide(hmcRaw);
   removeFluc2(hRatioRaw);
@@ -83,9 +72,6 @@ void getMcWeights(int kSample = kPP, int icent=0, int etaBin=2, int nSys=-1) {
   TH2D* hmcRawSmooth = (TH2D*)hmcRaw->Clone(Form("%s_smooth",hmcRaw->GetName()));
   TH2D* hdataRawSmooth = (TH2D*)hdataRaw->Clone(Form("%s_smooth",hdataRaw->GetName()));
   
-  //  scaleInt(hmcRawSmooth);
-  //  scaleInt(hdataRawSmooth);
-
   hmcRawSmooth->Smooth();
   hdataRawSmooth->Smooth();
   TH2D* hRatioSmoothRaw = (TH2D*)hdataRawSmooth->Clone(Form("hRatioSmoothRaw_kSample%d_icent%d",kSample,i));
@@ -322,9 +308,9 @@ void getMcWeights(int kSample = kPP, int icent=0, int etaBin=2, int nSys=-1) {
   
   TFile * fout;
   if ( nSys < 0 ) 
-    fout = new TFile(Form("reweightFactors/reweightingFactor_etaBin%d_flucCut%.1f_factorized_v60.root",etaBin, (float)flucCut),"update");
+    fout = new TFile(Form("reweightFactors/reweightingFactor_etaBin%d_factorized_v60.root",etaBin, (float)flucCut),"update");
   else
-    fout = new TFile(Form("reweightFactors/reweightingFactor_etaBin%d_flucCut%.1f_factorized_v60_nSys%d.root",etaBin, (float)flucCut,nSys),"update");
+    fout = new TFile(Form("reweightFactors/reweightingFactor_etaBin%d_factorized_v60_nSys%d.root",etaBin, (float)flucCut,nSys),"update");
   
   hmcPtCorr->Write("",TObject::kOverwrite);
   hmcTruth->Write("",TObject::kOverwrite);
