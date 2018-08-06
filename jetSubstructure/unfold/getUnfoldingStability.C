@@ -11,7 +11,7 @@
 void getMCresults(int kSample=0, int icent=0,  int etaBin = 0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, int optX=3, int optY=2,  TH1D* hmcTruthSq=0, TH1D* hmcRawSq=0, TH1D* hmcUnfSq=0);
 void getDATAresults(int kSample=0, int icent=0,  int etaBin = 0, int ix=0, int nIter=0,  bool matRwt=1, bool specRwt=0, int optX=3, int optY=2, TH1D* hdataRawSq=0, TH1D* hdataUnfSq=0);
 
-void getUnfoldingStability(int kSample= kPP, int icent = 0, int etaBin = 0, bool matRwt=1, bool specRwt=0, int optX=3, int optY=2, bool applyMDJ=false) {
+void getUnfoldingStability(int kSample= kPP, int icent = 0, int etaBin = 0, bool matRwt=1, bool specRwt=1, int optX=3, int optY=2, bool applyMDJ=false) {
   
   bool doDATA = true; 
   
